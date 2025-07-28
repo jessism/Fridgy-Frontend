@@ -5,8 +5,12 @@ import LoadingScreen from './components/LoadingScreen';
 import ConfirmationPage from './components/ConfirmationPage';
 import SuccessPage from './components/SuccessPage';
 
-// Backend API configuration
-const API_BASE_URL = 'https://fridgy-backend-production.up.railway.app';
+// Backend API configuration - automatic environment detection
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://fridgy-backend-production.up.railway.app' 
+  : 'http://localhost:5000';
+
+console.log(`🚀 Using API: ${API_BASE_URL} (Environment: ${process.env.NODE_ENV})`);
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState('home');
