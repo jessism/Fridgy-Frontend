@@ -5,6 +5,9 @@ import LoadingScreen from './components/LoadingScreen';
 import ConfirmationPage from './components/ConfirmationPage';
 import SuccessPage from './components/SuccessPage';
 
+// Backend API configuration
+const API_BASE_URL = 'https://fridgy-backend-production.up.railway.app';
+
 function App() {
   const [currentScreen, setCurrentScreen] = useState('home');
   const [selectedImages, setSelectedImages] = useState([]);
@@ -18,7 +21,7 @@ function App() {
 
     try {
       // Send images to backend for AI analysis
-      const response = await fetch('https://fridgy-production.up.railway.app/api/analyze-images', {
+      const response = await fetch(`${API_BASE_URL}/api/analyze-images`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,7 +51,7 @@ function App() {
 
   const handleConfirmItems = async (confirmedItems) => {
     try {
-      const response = await fetch('https://fridgy-production.up.railway.app/api/save-items', {
+      const response = await fetch(`${API_BASE_URL}/api/save-items`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
