@@ -97,6 +97,10 @@
 
 /* RESPONSIVE STYLES */
 @media (max-width: 768px) {
+  .navbar {
+    display: none; /* Hide entire navbar on mobile - replaced by bottom nav */
+  }
+  
   .navbar .container {
     padding: 0.5rem 1rem;
     max-width: none;
@@ -109,5 +113,12 @@
   
   .nav-actions .btn {
     display: none;
+  }
+}
+
+/* Show navbar only on desktop */
+@media (min-width: 769px) {
+  .navbar {
+    display: block;
   }
 } 

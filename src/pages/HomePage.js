@@ -1,8 +1,12 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
+import MobileBottomNav from '../components/MobileBottomNav';
+import { useAuth } from '../features/auth/context/AuthContext';
 import './HomePage.css';
 
 const HomePage = () => {
+  const { user } = useAuth();
+  
   return (
     <div className="homepage">
       <Navbar />
@@ -13,7 +17,7 @@ const HomePage = () => {
           <div className="hero-content">
             <div className="hero-text">
                               <h1 className="hero-title">
-                  Hello, Jessie!
+                  Hello, {user?.firstName || 'User'}!
                 </h1>
                 <p className="hero-subtitle">
                   Relax please, we've got you <br />
@@ -430,6 +434,8 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+      
+      <MobileBottomNav />
     </div>
   );
 };

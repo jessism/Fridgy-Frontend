@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import MobileBottomNav from '../components/MobileBottomNav';
 import { EditIcon, DeleteIcon } from '../components/icons';
 import './HomePage.css'; // Now in the same directory
 
@@ -489,6 +490,8 @@ const InventoryPage = () => {
           </div>
         </div>
       </div>
+      
+      <MobileBottomNav />
     </div>
   );
 };

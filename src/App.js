@@ -8,6 +8,7 @@ import SignUpPage from './pages/SignUpPage';
 import HomePage from './pages/HomePage';
 import InventoryPage from './pages/InventoryPage';
 import MealPlansPage from './pages/MealPlansPage';
+import ShoppingListPage from './pages/ShoppingListPage';
 import ProfilesPage from './pages/ProfilesPage';
 
 function App() {
@@ -31,6 +32,11 @@ function App() {
           <Route path="/meal-plans" element={
             <AuthGuard>
               <MealPlansPage />
+            </AuthGuard>
+          } />
+          <Route path="/shopping-list" element={
+            <AuthGuard>
+              <ShoppingListPage />
             </AuthGuard>
           } />
           <Route path="/profiles" element={

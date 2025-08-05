@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import MobileBottomNav from '../components/MobileBottomNav';
 import './HomePage.css'; // Now in the same directory
 
 const ProfilesPage = () => {
@@ -35,6 +36,8 @@ const ProfilesPage = () => {
           </div>
         </div>
       </div>
+      
+      <MobileBottomNav />
     </div>
   );
 };

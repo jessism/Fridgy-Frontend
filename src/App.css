@@ -33,6 +33,20 @@ body {
   .App {
     padding: 0;
   }
+  
+  /* Global mobile bottom nav spacing for authenticated pages */
+  .homepage,
+  .inventory-page,
+  .meal-plans-page,
+  .shopping-list-page,
+  .profiles-page {
+    padding-bottom: 80px !important;
+  }
+  
+  /* Adjust content areas that have fixed top padding for navbar */
+  [style*="paddingTop: 100px"] {
+    padding-top: 2rem !important;
+  }
 }
 
 /* TABLET STYLES */

@@ -5,6 +5,18 @@
   position: relative;
 }
 
+/* Mobile bottom nav spacing */
+@media (max-width: 768px) {
+  .homepage {
+    padding-bottom: 80px; /* Space for mobile bottom nav */
+  }
+  
+  /* Adjust hero section padding on mobile */
+  .hero {
+    padding-top: 2rem; /* Remove top navbar spacing on mobile */
+  }
+}
+
 /* LANDING HEADER */
 .landing-header {
   padding: 0.5rem 0;
@@ -543,7 +555,7 @@
   }
   
   .categories-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
   }
 
