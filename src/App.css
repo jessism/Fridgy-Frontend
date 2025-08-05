@@ -11,44 +11,63 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: white;
   min-height: 100vh;
-  color: #333;
+  color: var(--black);
+  overflow-x: hidden;
 }
 
 .App {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  position: relative;
+  width: 100%;
+  overflow-x: hidden;
 }
 
-/* Mobile-first approach */
+/* MOBILE STYLES (Default - Mobile First) */
 @media (max-width: 768px) {
   body {
     font-size: 16px;
     line-height: 1.5;
   }
+  
+  .App {
+    padding: 0;
+  }
 }
 
-/* Tablet and larger screens */
-@media (min-width: 769px) {
+/* TABLET STYLES */
+@media (min-width: 769px) and (max-width: 1023px) {
+  body {
+    font-size: 17px;
+    line-height: 1.6;
+  }
+  
+  .App {
+    padding: 0;
+    max-width: none;
+    margin: 0;
+  }
+}
+
+/* DESKTOP STYLES - Full Screen */
+@media (min-width: 1024px) {
   body {
     font-size: 18px;
     line-height: 1.6;
   }
   
   .App {
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
+    max-width: none;
+    margin: 0;
+    padding: 0;
   }
 }
 
-/* Desktop screens */
-@media (min-width: 1024px) {
+/* LARGE DESKTOP STYLES */
+@media (min-width: 1440px) {
   .App {
-    padding: 40px;
+    max-width: none;
+    padding: 0;
   }
 }
 
@@ -63,6 +82,80 @@ body {
   }
 }
 
+/* App Header - Responsive Design */
+.app-header {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  border-radius: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.app-title {
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  margin-bottom: 8px;
+}
+
+.app-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 300;
+  margin: 0;
+}
+
+/* MOBILE Header */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 20px 15px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .app-title {
+    font-size: 2rem;
+  }
+  
+  .app-subtitle {
+    font-size: 0.95rem;
+  }
+}
+
+/* TABLET Header */
+@media (min-width: 769px) and (max-width: 1023px) {
+  .app-header {
+    padding: 30px 25px;
+    border-radius: 18px;
+  }
+  
+  .app-title {
+    font-size: 2.8rem;
+  }
+  
+  .app-subtitle {
+    font-size: 1.1rem;
+  }
+}
+
+/* DESKTOP Header */
+@media (min-width: 1024px) {
+  .app-header {
+    padding: 40px 50px;
+    border-radius: 25px;
+    margin-bottom: 40px;
+  }
+  
+  .app-title {
+    font-size: 3.5rem;
+  }
+  
+  .app-subtitle {
+    font-size: 1.3rem;
+  }
+}
+
+/* Original App-header (kept for backward compatibility) */
 .App-header {
   background-color: #282c34;
   min-height: 100vh;

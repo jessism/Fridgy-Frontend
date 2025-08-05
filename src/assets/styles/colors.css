@@ -1,0 +1,57 @@
+/* COLOR SYSTEM */
+:root {
+  /* Primary Colors */
+  --primary-green: #8BC34A;
+  --primary-green-light: #AED581;
+  --primary-green-dark: #689F38;
+  
+  /* Neutral Colors */
+  --white: #FFFFFF;
+  --beige: #F8F6F0;
+  --beige-light: #FEFCF7;
+  --black: #2C2C2C;
+  --black-light: #4A4A4A;
+  --gray: #666666;
+  --gray-light: #E0E0E0;
+  
+  /* Accent Colors */
+  --accent-orange: #FF8A65;
+  --accent-red: #E57373;
+  
+  /* Gradients */
+  --gradient-green: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+  --gradient-hero: linear-gradient(135deg, #e8f5e8 0%, var(--primary-green-light) 50%, var(--primary-green) 100%);
+}
+
+/* COLOR UTILITY CLASSES */
+.text-primary {
+  color: var(--primary-green);
+}
+
+.text-secondary {
+  color: var(--gray);
+}
+
+.text-white {
+  color: var(--white);
+}
+
+.text-black {
+  color: var(--black);
+}
+
+.bg-primary {
+  background-color: var(--primary-green);
+}
+
+.bg-secondary {
+  background-color: var(--beige);
+}
+
+.bg-white {
+  background-color: var(--white);
+}
+
+.bg-black {
+  background-color: var(--black);
+}
