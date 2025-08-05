@@ -3,6 +3,9 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 // Create the authentication context
 const AuthContext = createContext();
 
+// API base URL - adjust for your backend
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 // Custom hook to use the auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -27,6 +30,44 @@ const validateName = (name) => {
   return nameRegex.test(name.trim());
 };
 
+// Token management functions
+const getToken = () => {
+  return localStorage.getItem('fridgy_token');
+};
+
+const setToken = (token) => {
+  localStorage.setItem('fridgy_token', token);
+};
+
+const removeToken = () => {
+  localStorage.removeItem('fridgy_token');
+  localStorage.removeItem('fridgy_user');
+};
+
+// API request helper
+const apiRequest = async (endpoint, options = {}) => {
+  const url = `${API_BASE_URL}${endpoint}`;
+  const token = getToken();
+  
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers,
+    },
+    ...options,
+  };
+
+  const response = await fetch(url, config);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || `HTTP error! status: ${response.status}`);
+  }
+
+  return data;
+};
+
 // AuthProvider component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -34,23 +75,34 @@ export const AuthProvider = ({ children }) => {
 
   // Check for existing user session on app load
   useEffect(() => {
-    const savedUser = localStorage.getItem('fridgy_user');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (error) {
-        console.error('Error parsing saved user:', error);
-        localStorage.removeItem('fridgy_user');
+    const initializeAuth = async () => {
+      const token = getToken();
+      if (token) {
+        try {
+          // Verify token with backend and get user data
+          const response = await apiRequest('/auth/me');
+          if (response.success) {
+            setUser(response.user);
+            localStorage.setItem('fridgy_user', JSON.stringify(response.user));
+          } else {
+            removeToken();
+          }
+        } catch (error) {
+          console.error('Auth initialization error:', error);
+          removeToken();
+        }
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
   // Sign up function
   const signUp = async (userData) => {
     const { firstName, email, password } = userData;
 
-    // Validation
+    // Client-side validation (server will also validate)
     if (!validateName(firstName)) {
       throw new Error('Name must be at least 2 characters long and contain only letters and spaces');
     }
@@ -63,24 +115,35 @@ export const AuthProvider = ({ children }) => {
       throw new Error('Password must be at least 8 characters long');
     }
 
-    // Mock signup - in real app, this would call an API
-    const newUser = {
-      id: Date.now().toString(),
-      firstName: firstName.trim(),
-      email: email.toLowerCase(),
-      createdAt: new Date().toISOString()
-    };
+    try {
+      // Call backend signup endpoint
+      const response = await apiRequest('/auth/signup', {
+        method: 'POST',
+        body: JSON.stringify({
+          firstName: firstName.trim(),
+          email: email.toLowerCase(),
+          password,
+        }),
+      });
 
-    // Save user to localStorage
-    localStorage.setItem('fridgy_user', JSON.stringify(newUser));
-    setUser(newUser);
-
-    return newUser;
+      if (response.success) {
+        // Store token and user data
+        setToken(response.token);
+        setUser(response.user);
+        localStorage.setItem('fridgy_user', JSON.stringify(response.user));
+        return response.user;
+      } else {
+        throw new Error(response.error || 'Signup failed');
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      throw error;
+    }
   };
 
   // Sign in function
   const signIn = async (email, password) => {
-    // Validation
+    // Client-side validation
     if (!validateEmail(email)) {
       throw new Error('Please enter a valid email address');
     }
@@ -89,36 +152,34 @@ export const AuthProvider = ({ children }) => {
       throw new Error('Password must be at least 8 characters long');
     }
 
-    // Mock signin - in real app, this would call an API
-    // For now, we'll create a user if they don't exist
-    const savedUser = localStorage.getItem('fridgy_user');
-    let user;
+    try {
+      // Call backend signin endpoint
+      const response = await apiRequest('/auth/signin', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: email.toLowerCase(),
+          password,
+        }),
+      });
 
-    if (savedUser) {
-      user = JSON.parse(savedUser);
-      if (user.email.toLowerCase() === email.toLowerCase()) {
-        setUser(user);
-        return user;
+      if (response.success) {
+        // Store token and user data
+        setToken(response.token);
+        setUser(response.user);
+        localStorage.setItem('fridgy_user', JSON.stringify(response.user));
+        return response.user;
+      } else {
+        throw new Error(response.error || 'Login failed');
       }
+    } catch (error) {
+      console.error('Signin error:', error);
+      throw error;
     }
-
-    // If no user exists or email doesn't match, create a new one
-    const newUser = {
-      id: Date.now().toString(),
-      firstName: 'User', // Default name for signin
-      email: email.toLowerCase(),
-      createdAt: new Date().toISOString()
-    };
-
-    localStorage.setItem('fridgy_user', JSON.stringify(newUser));
-    setUser(newUser);
-
-    return newUser;
   };
 
   // Sign out function
   const signOut = () => {
-    localStorage.removeItem('fridgy_user');
+    removeToken();
     setUser(null);
   };
 
