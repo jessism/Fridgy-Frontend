@@ -375,7 +375,7 @@ const HomePage = () => {
             </div>
             <div className="expiring-item shopping-item">
               <div className="item-checkbox">
-                <input type="checkbox" id="parmesan" checked />
+                <input type="checkbox" id="parmesan" defaultChecked readOnly />
                 <label htmlFor="parmesan"></label>
               </div>
               <div className="item-info">
@@ -388,7 +388,7 @@ const HomePage = () => {
             </div>
             <div className="expiring-item shopping-item">
               <div className="item-checkbox">
-                <input type="checkbox" id="eggs" checked />
+                <input type="checkbox" id="eggs" defaultChecked readOnly />
                 <label htmlFor="eggs"></label>
               </div>
               <div className="item-info">
@@ -414,7 +414,7 @@ const HomePage = () => {
             </div>
             <div className="expiring-item shopping-item">
               <div className="item-checkbox">
-                <input type="checkbox" id="muffins" checked />
+                <input type="checkbox" id="muffins" defaultChecked readOnly />
                 <label htmlFor="muffins"></label>
               </div>
               <div className="item-info">

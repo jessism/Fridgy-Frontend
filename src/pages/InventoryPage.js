@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
+import BatchCamera from '../features/batchcamera/components/BatchCamera';
 import { EditIcon, DeleteIcon } from '../components/icons';
 import './HomePage.css'; // Now in the same directory
 
@@ -59,6 +60,7 @@ const InventoryPage = () => {
 
   const [showAddDropdown, setShowAddDropdown] = useState(false);
   const [dropdownTimeout, setDropdownTimeout] = useState(null);
+  const [showCameraModal, setShowCameraModal] = useState(false);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -237,7 +239,7 @@ const InventoryPage = () => {
                       e.target.style.background = 'none';
                     }}
                     onClick={() => {
-                      console.log('Scan items clicked');
+                      setShowCameraModal(true);
                       setShowAddDropdown(false);
                     }}>
                       📷 Scan Items
@@ -300,7 +302,7 @@ const InventoryPage = () => {
                       color: '#333',
                       borderBottom: '1px solid #e0e0e0'
                     }}>
-                      <input type="checkbox" style={{marginRight: '0.5rem'}} />
+                      <input type="checkbox" readOnly style={{marginRight: '0.5rem'}} />
                     </th>
                     <th style={{
                       padding: '1rem',
@@ -371,7 +373,7 @@ const InventoryPage = () => {
                         e.target.closest('tr').style.backgroundColor = 'transparent';
                       }}>
                         <td style={{padding: '1rem'}}>
-                          <input type="checkbox" />
+                          <input type="checkbox" readOnly />
                         </td>
                         <td style={{padding: '1rem'}}>
                           <span style={{
@@ -490,6 +492,24 @@ const InventoryPage = () => {
           </div>
         </div>
       </div>
+      
+      {/* Camera Modal */}
+      {showCameraModal && (
+        <div className="camera-modal-overlay">
+          <div className="camera-modal">
+            <div className="camera-modal-header">
+              <h2>Scan Items</h2>
+              <button 
+                className="close-modal-btn"
+                onClick={() => setShowCameraModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <BatchCamera onComplete={() => setShowCameraModal(false)} />
+          </div>
+        </div>
+      )}
       
       <MobileBottomNav />
     </div>

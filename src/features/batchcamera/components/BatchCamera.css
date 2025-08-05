@@ -528,4 +528,93 @@
   }
 }
 
+/* EDITABLE RESULTS STYLES */
+.results-subtitle {
+  color: #6c757d;
+  font-style: italic;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+.editable-input, .editable-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+  background: white;
+}
+
+.editable-input:focus, .editable-select:focus {
+  outline: none;
+  border-color: #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
+}
+
+.quantity-input {
+  text-align: center;
+  max-width: 80px;
+}
+
+.date-input {
+  min-width: 140px;
+}
+
+.remove-item-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.remove-item-btn:hover {
+  background: #c82333;
+}
+
+.results-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding: 15px 0;
+  border-top: 1px solid #e9ecef;
+}
+
+.items-count {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+/* Mobile responsive for editable elements */
+@media (max-width: 768px) {
+  .editable-input, .editable-select {
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+  
+  .quantity-input {
+    max-width: 60px;
+  }
+  
+  .date-input {
+    min-width: 120px;
+  }
+  
+  .remove-item-btn {
+    padding: 4px 6px;
+    font-size: 11px;
+  }
+  
+  .results-actions {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+}
+
  
