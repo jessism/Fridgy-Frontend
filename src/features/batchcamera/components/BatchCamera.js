@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../auth/context/AuthContext';
+import SuccessModal from '../../../components/modals/SuccessModal';
 import './BatchCamera.css';
 
 const BatchCamera = ({ onComplete }) => {
@@ -9,6 +10,8 @@ const BatchCamera = ({ onComplete }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editableResults, setEditableResults] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successData, setSuccessData] = useState({ items: [], count: 0 });
 
   const handleFileChange = (event) => {
     const newFiles = Array.from(event.target.files);
@@ -37,6 +40,21 @@ const BatchCamera = ({ onComplete }) => {
 
   const removeEditableItem = (indexToRemove) => {
     setEditableResults(prev => prev.filter((_, index) => index !== indexToRemove));
+  };
+
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    
+    // Reset for next batch
+    setAccumulatedFiles([]);
+    setResults(null);
+    setEditableResults(null);
+    setSuccessData({ items: [], count: 0 });
+    
+    // Close the parent modal
+    if (onComplete) {
+      onComplete();
+    }
   };
 
   const handleSubmitBatch = async () => {
@@ -139,17 +157,12 @@ const BatchCamera = ({ onComplete }) => {
         const itemCount = data.savedItems ? data.savedItems.length : editableResults.length;
         console.log('✅ Save successful! Items saved:', itemCount);
         
-        alert(`🎉 Successfully saved ${itemCount} items to your inventory!\n\nItems saved:\n${editableResults.map(item => `• ${item.name} (${item.quantity})`).join('\n')}`);
-        
-        // Reset for next batch
-        setAccumulatedFiles([]);
-        setResults(null);
-        setEditableResults(null);
-        
-        // Close the modal
-        if (onComplete) {
-          onComplete();
-        }
+        // Show custom success modal instead of alert
+        setSuccessData({
+          items: editableResults,
+          count: itemCount
+        });
+        setShowSuccessModal(true);
       } else {
         console.error('❌ Save failed:', data.error);
         alert(`❌ Failed to save items: ${data.error}\n\nPlease try again.`);
@@ -311,6 +324,14 @@ const BatchCamera = ({ onComplete }) => {
           </div>
         </div>
       )}
+
+      {/* Success Modal */}
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={handleSuccessModalClose}
+        savedItems={successData.items}
+        itemCount={successData.count}
+      />
     </div>
   );
 };

@@ -17,14 +17,12 @@ const AuthGuard = ({ children }) => {
     );
   }
 
-  // If not authenticated, redirect to signup with message
+  // If not authenticated, redirect to landing page
   if (!user) {
-    // Store the intended destination for after signup
-    sessionStorage.setItem('redirectAfterSignup', location.pathname);
-    // Store the message to show on signup page
-    sessionStorage.setItem('signupMessage', 'We can\'t find your account. Please sign up');
+    // Store the intended destination for after login
+    sessionStorage.setItem('redirectAfterSignin', location.pathname);
     
-    return <Navigate to="/signup" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // If authenticated, show the protected content
