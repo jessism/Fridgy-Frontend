@@ -5,6 +5,7 @@ import { AuthProvider } from './features/auth/context/AuthContext';
 import AuthGuard from './features/auth/components/AuthGuard';
 import LandingPage from './pages/LandingPage';
 import SignUpPage from './pages/SignUpPage';
+import SignInPage from './pages/SignInPage';
 import HomePage from './pages/HomePage';
 import InventoryPage from './pages/InventoryPage';
 import MealPlansPage from './pages/MealPlansPage';
@@ -19,6 +20,7 @@ function App() {
                   <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/signin" element={<SignInPage />} />
           <Route path="/home" element={
             <AuthGuard>
               <HomePage />

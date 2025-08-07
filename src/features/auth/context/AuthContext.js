@@ -178,7 +178,21 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Sign out function
-  const signOut = () => {
+  const signOut = async () => {
+    try {
+      // Call backend logout endpoint
+      const token = getToken();
+      if (token) {
+        await apiRequest('/auth/logout', {
+          method: 'POST'
+        });
+      }
+    } catch (error) {
+      // Log error but don't prevent logout from completing
+      console.error('Backend logout error:', error);
+    }
+    
+    // Always clear local storage and state regardless of backend response
     removeToken();
     setUser(null);
   };
@@ -194,6 +208,7 @@ export const AuthProvider = ({ children }) => {
     signUp,
     signIn,
     signOut,
+    logout: signOut, // Alias for backward compatibility
     isAuthenticated
   };
 
