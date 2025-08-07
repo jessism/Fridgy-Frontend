@@ -17,73 +17,6 @@
   }
 }
 
-/* LANDING HEADER */
-.landing-header {
-  padding: 0.5rem 0;
-  background: transparent;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  width: 100%;
-  transition: all 0.3s ease;
-}
-
-.landing-header .container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: none;
-  margin: 0;
-  padding: 0.5rem calc(2vw + 2rem);
-  width: 100%;
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.logo h2 {
-  font-family: var(--header-font);
-  color: var(--primary-green);
-  margin: 0;
-  font-size: 1.8rem;
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.logo h2:hover {
-  color: var(--primary-green-dark);
-  transform: scale(1.02);
-}
-
-.auth-actions {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.signup-btn {
-  background: var(--primary-green);
-  color: var(--white);
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 1rem;
-}
-
-.signup-btn:hover {
-  background: var(--primary-green-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.3);
-}
 
 /* NAVIGATION */
 .navbar {
@@ -476,11 +409,6 @@
 }
 
 @media (max-width: 768px) {
-  .landing-header .container {
-    padding: 0.5rem 1rem;
-    max-width: none;
-    width: 100%;
-  }
 
   .navbar .container {
     padding: 0.5rem 1rem;

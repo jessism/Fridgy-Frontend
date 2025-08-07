@@ -1,25 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './HomePage.css';
+import { PublicNavBar } from '../components/Navbar';
+import './LandingPage.css';
 
 const LandingPage = () => {
   return (
     <div className="homepage">
-      {/* Simple Header with Sign Up Button */}
-      <header className="landing-header">
-        <div className="container">
-          <div className="header-content">
-            <div className="logo">
-              <h2>Fridgy</h2>
-            </div>
-            <div className="auth-actions">
-              <Link to="/signup" className="btn btn-primary signup-btn">
-                Sign Up
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <PublicNavBar />
 
       {/* Hero Section */}
       <section className="hero">

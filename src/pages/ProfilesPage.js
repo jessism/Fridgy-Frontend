@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
+import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import './HomePage.css'; // Now in the same directory
 
 const ProfilesPage = () => {
   return (
     <div className="homepage">
-      <Navbar />
+      <AppNavBar />
 
       {/* Profiles Content */}
       <div style={{paddingTop: '100px', minHeight: '100vh', background: 'white'}}>

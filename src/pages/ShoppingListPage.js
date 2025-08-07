@@ -1,12 +1,12 @@
 import React from 'react';
-import Navbar from '../components/Navbar';
+import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import './ShoppingListPage.css';
 
 const ShoppingListPage = () => {
   return (
     <div className="shopping-list-page">
-      <Navbar />
+      <AppNavBar />
       
       <main className="main-content">
         <div className="container">

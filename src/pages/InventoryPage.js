@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
+import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import BatchCamera from '../features/batchcamera/components/BatchCamera';
 import { EditIcon, DeleteIcon } from '../components/icons';
@@ -96,7 +96,7 @@ const InventoryPage = () => {
 
   return (
     <div className="homepage">
-      <Navbar />
+      <AppNavBar />
 
       {/* Inventory Content */}
       <div style={{paddingTop: '100px', minHeight: '100vh', background: 'white'}}>

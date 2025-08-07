@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import './Navbar.css';
+import './AppNavBar.css';
 
-const Navbar = () => {
+const AppNavBar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -67,4 +67,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar; 
+export default AppNavBar; 

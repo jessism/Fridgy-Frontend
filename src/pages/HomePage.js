@@ -1,5 +1,5 @@
 import React from 'react';
-import Navbar from '../components/Navbar';
+import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import { useAuth } from '../features/auth/context/AuthContext';
 import './HomePage.css';
@@ -9,7 +9,7 @@ const HomePage = () => {
   
   return (
     <div className="homepage">
-      <Navbar />
+      <AppNavBar />
 
       {/* Hero Section */}
       <section className="hero">
