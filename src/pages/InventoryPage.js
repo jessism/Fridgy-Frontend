@@ -4,63 +4,17 @@ import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import BatchCamera from '../features/batchcamera/components/BatchCamera';
 import { EditIcon, DeleteIcon } from '../components/icons';
+import useInventory from '../hooks/useInventory';
 import './HomePage.css'; // Now in the same directory
 
 const InventoryPage = () => {
-  const [inventoryItems] = useState([
-    {
-      id: 1,
-      category: 'Vegetables',
-      itemName: 'Tomatoes',
-      quantity: '2 kg',
-      expiryDate: '2024-08-20',
-      status: 'Good'
-    },
-    {
-      id: 2,
-      category: 'Protein',
-      itemName: 'Chicken Breast',
-      quantity: '500g',
-      expiryDate: '2024-08-18',
-      status: 'Low Stock'
-    },
-    {
-      id: 3,
-      category: 'Dairy',
-      itemName: 'Milk',
-      quantity: '1L',
-      expiryDate: '2024-08-16',
-      status: 'Expiring Soon'
-    },
-    {
-      id: 4,
-      category: 'Fruits',
-      itemName: 'Apples',
-      quantity: '6 pieces',
-      expiryDate: '2024-08-25',
-      status: 'Good'
-    },
-    {
-      id: 5,
-      category: 'Grains',
-      itemName: 'Rice',
-      quantity: '2kg',
-      expiryDate: '2025-01-15',
-      status: 'Good'
-    },
-    {
-      id: 6,
-      category: 'Dairy',
-      itemName: 'Cheese',
-      quantity: '200g',
-      expiryDate: '2024-08-14',
-      status: 'Expired'
-    }
-  ]);
+  const { items: inventoryItems, loading, error, refreshInventory, deleteItem } = useInventory();
 
   const [showAddDropdown, setShowAddDropdown] = useState(false);
   const [dropdownTimeout, setDropdownTimeout] = useState(null);
   const [showCameraModal, setShowCameraModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -92,6 +46,40 @@ const InventoryPage = () => {
     const diffTime = expiryDate - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
+  };
+
+  const handleCameraModalClose = () => {
+    setShowCameraModal(false);
+    // Refresh inventory to show newly added items
+    refreshInventory();
+  };
+
+  const handleDeleteItem = (item) => {
+    console.log('Delete button clicked for item:', item);
+    setItemToDelete(item);
+    setShowDeleteModal(true);
+    console.log('Modal should now be shown');
+  };
+
+  const handleDeleteConfirm = async (reason) => {
+    if (!itemToDelete) return;
+    
+    try {
+      // Pass the delete reason to the backend for analytics
+      await deleteItem(itemToDelete.id, reason);
+      console.log(`Item deleted with reason: ${reason}`);
+    } catch (error) {
+      console.error('Failed to delete item:', error);
+      alert('Failed to delete item. Please try again.');
+    } finally {
+      setShowDeleteModal(false);
+      setItemToDelete(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setItemToDelete(null);
   };
 
   return (
@@ -275,21 +263,104 @@ const InventoryPage = () => {
             </div>
           </div>
 
-          {/* Inventory Table */}
-          <div style={{
-            background: 'white',
-            borderRadius: '12px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            overflow: 'hidden'
-          }}>
+          {/* Loading State */}
+          {loading && (
             <div style={{
-              overflowX: 'auto'
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              padding: '3rem',
+              background: 'white',
+              borderRadius: '12px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
             }}>
-              <table style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                fontSize: '0.9rem'
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ 
+                  border: '3px solid #f3f3f3',
+                  borderTop: '3px solid var(--primary-green)',
+                  borderRadius: '50%',
+                  width: '40px',
+                  height: '40px',
+                  animation: 'spin 2s linear infinite',
+                  margin: '0 auto 1rem'
+                }}></div>
+                <p style={{ color: '#666', margin: 0 }}>Loading your inventory...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && !loading && (
+            <div style={{
+              background: '#ffe6e6',
+              border: '1px solid #ff9999',
+              borderRadius: '8px',
+              padding: '1rem',
+              margin: '1rem 0',
+              color: '#cc0000'
+            }}>
+              <strong>Error loading inventory:</strong> {error}
+              <button 
+                onClick={refreshInventory}
+                style={{
+                  marginLeft: '1rem',
+                  padding: '0.5rem 1rem',
+                  background: 'var(--primary-green)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                Try Again
+              </button>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && !error && inventoryItems.length === 0 && (
+            <div style={{
+              background: 'white',
+              borderRadius: '12px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              padding: '3rem',
+              textAlign: 'center'
+            }}>
+              <h3 style={{ color: '#666', marginBottom: '1rem' }}>No items in your inventory yet</h3>
+              <p style={{ color: '#999', marginBottom: '2rem' }}>Start by scanning some food items with your camera!</p>
+              <button 
+                style={{
+                  padding: '0.75rem 2rem',
+                  background: 'var(--primary-green)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  cursor: 'pointer'
+                }}
+                onClick={() => setShowCameraModal(true)}
+              >
+                📷 Scan Items
+              </button>
+            </div>
+          )}
+
+          {/* Inventory Table */}
+          {!loading && !error && inventoryItems.length > 0 && (
+            <div style={{
+              background: 'white',
+              borderRadius: '12px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                overflowX: 'auto'
               }}>
+                <table style={{
+                  width: '100%',
+                  borderCollapse: 'collapse',
+                  fontSize: '0.9rem'
+                }}>
                 <thead>
                   <tr style={{
                     background: '#f8f9fa',
@@ -478,6 +549,7 @@ const InventoryPage = () => {
                               e.target.style.background = '#f8f9fa';
                               e.target.style.borderColor = '#e0e0e0';
                             }}
+                            onClick={() => handleDeleteItem(item)}
                             title="Delete">
                               <DeleteIcon />
                             </button>
@@ -490,6 +562,7 @@ const InventoryPage = () => {
               </table>
             </div>
           </div>
+          )}
         </div>
       </div>
       
@@ -506,7 +579,168 @@ const InventoryPage = () => {
                 ✕
               </button>
             </div>
-            <BatchCamera onComplete={() => setShowCameraModal(false)} />
+            <BatchCamera onComplete={handleCameraModalClose} />
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && itemToDelete && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '2rem',
+            maxWidth: '400px',
+            width: '90%',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+          }}>
+            <h3 style={{
+              margin: '0 0 1rem 0',
+              fontSize: '1.25rem',
+              fontWeight: '600',
+              color: '#333'
+            }}>
+              Delete {itemToDelete.itemName}?
+            </h3>
+            <p style={{
+              margin: '0 0 2rem 0',
+              color: '#666',
+              fontSize: '0.95rem'
+            }}>
+              What happened to this item?
+            </p>
+            
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.75rem'
+            }}>
+              <button
+                onClick={() => handleDeleteConfirm('mistake')}
+                style={{
+                  padding: '0.75rem 1rem',
+                  backgroundColor: '#fff3cd',
+                  border: '1px solid #ffeaa7',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '0.95rem',
+                  fontWeight: '500',
+                  color: '#856404',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#ffeaa7';
+                  e.target.style.borderColor = '#fdcb6e';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = '#fff3cd';
+                  e.target.style.borderColor = '#ffeaa7';
+                }}
+              >
+                I didn't mean to log this
+              </button>
+              
+              <button
+                onClick={() => handleDeleteConfirm('used_up')}
+                style={{
+                  padding: '0.75rem 1rem',
+                  backgroundColor: '#d4edda',
+                  border: '1px solid #c3e6cb',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '0.95rem',
+                  fontWeight: '500',
+                  color: '#155724',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#c3e6cb';
+                  e.target.style.borderColor = '#b8dabd';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = '#d4edda';
+                  e.target.style.borderColor = '#c3e6cb';
+                }}
+              >
+                I used it up
+              </button>
+              
+              <button
+                onClick={() => handleDeleteConfirm('thrown_away')}
+                style={{
+                  padding: '0.75rem 1rem',
+                  backgroundColor: '#f8d7da',
+                  border: '1px solid #f5c6cb',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '0.95rem',
+                  fontWeight: '500',
+                  color: '#721c24',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#f5c6cb';
+                  e.target.style.borderColor = '#f1b0b7';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = '#f8d7da';
+                  e.target.style.borderColor = '#f5c6cb';
+                }}
+              >
+                I'm throwing it away
+              </button>
+            </div>
+            
+            <div style={{
+              marginTop: '1.5rem',
+              paddingTop: '1rem',
+              borderTop: '1px solid #e9ecef',
+              display: 'flex',
+              justifyContent: 'flex-end'
+            }}>
+              <button
+                onClick={handleDeleteCancel}
+                style={{
+                  padding: '0.5rem 1rem',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  color: '#6c757d',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#f8f9fa';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'transparent';
+                }}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
