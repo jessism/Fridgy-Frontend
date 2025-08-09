@@ -1,10 +1,157 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
+import useRecipes from '../hooks/useRecipes';
+import RecipeDetailModal from '../components/modals/RecipeDetailModal';
 import './HomePage.css'; // Now in the same directory
 
 const MealPlansPage = () => {
+  const {
+    suggestions,
+    loading,
+    error,
+    fetchSuggestions,
+    fetchRecipeDetails,
+    getHighMatchRecipes,
+    markRecipeCooked,
+    clearError
+  } = useRecipes();
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
+  const [recipeError, setRecipeError] = useState(null);
+
+  useEffect(() => {
+    // Fetch recipe suggestions when component mounts
+    fetchSuggestions({
+      limit: 8, // Reduced total recipes
+      ranking: 1 // Maximize used ingredients
+    });
+  }, [fetchSuggestions]);
+
+
+  // Get high-match recipes for "Cook what you have" section
+  const cookWhatYouHaveRecipes = getHighMatchRecipes(30); // Lowered threshold
+  
+  // Get remaining recipes for "Inspired by your preference" section  
+  const preferenceRecipes = suggestions.filter(recipe => recipe.matchPercentage < 30);
+
+  const handleCookNow = async (recipe) => {
+    try {
+      console.log('🍳 Opening recipe details for:', recipe.title);
+      setIsModalOpen(true);
+      setIsLoadingRecipe(true);
+      setRecipeError(null);
+      
+      // Fetch detailed recipe information
+      const detailedRecipe = await fetchRecipeDetails(recipe.id);
+      setSelectedRecipe(detailedRecipe);
+      setIsLoadingRecipe(false);
+    } catch (error) {
+      console.error('Failed to fetch recipe details:', error);
+      setRecipeError(error.message);
+      setIsLoadingRecipe(false);
+      // Keep modal open to show error
+    }
+  };
+
+  const handleActuallyCook = async (recipe) => {
+    try {
+      await markRecipeCooked(recipe.id, recipe.extendedIngredients || []);
+      console.log(`✅ Marked ${recipe.title} as cooked`);
+      // TODO: Show success message and refresh suggestions
+      fetchSuggestions(); // Refresh recipes after cooking
+    } catch (error) {
+      console.error('Failed to mark recipe as cooked:', error);
+      // TODO: Show error message
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedRecipe(null);
+    setIsLoadingRecipe(false);
+    setRecipeError(null);
+  };
+
+  const renderRecipeCard = (recipe, isPreference = false) => (
+    <div key={recipe.id} className="meal-card">
+      <div className="meal-image">
+        <span className={`stock-badge ${recipe.inStock ? '' : 'out-of-stock'}`}>
+          • {recipe.inStock ? 'In stock' : 'Missing items'}
+        </span>
+        <img 
+          src={recipe.image || 'https://via.placeholder.com/400x300?text=No+Image'} 
+          alt={recipe.title}
+          onError={(e) => {
+            e.target.src = 'https://via.placeholder.com/400x300?text=No+Image';
+          }}
+        />
+      </div>
+      <div className="meal-info">
+        <h3 className="meal-title">{recipe.title}</h3>
+        <button 
+          className={`cook-btn ${isPreference ? 'outlined' : ''}`}
+          onClick={() => handleCookNow(recipe)}
+        >
+          Cook Now
+        </button>
+        <div className="meal-stats">
+          <div className="stat-item">
+            <span className="stat-icon">🥘</span>
+            <span className="stat-text">Ingredients match: {recipe.matchPercentage}%</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-icon">⏱️</span>
+            <span className="stat-text">
+              {recipe.cookingTime ? `Cook time: ${recipe.cookingTime} minutes` : 'Cook time: varies'}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderLoadingCards = (count = 4) => {
+    return Array.from({ length: count }, (_, index) => (
+      <div key={`loading-${index}`} className="meal-card loading">
+        <div className="meal-image">
+          <div className="loading-placeholder" style={{ height: '200px' }}></div>
+        </div>
+        <div className="meal-info">
+          <div className="loading-placeholder" style={{ height: '24px', marginBottom: '12px' }}></div>
+          <div className="loading-placeholder" style={{ height: '36px', marginBottom: '12px' }}></div>
+          <div className="loading-placeholder" style={{ height: '20px' }}></div>
+        </div>
+      </div>
+    ));
+  };
+
+  const renderErrorState = () => (
+    <div className="error-state" style={{ textAlign: 'center', padding: '2rem' }}>
+      <h3>Unable to load recipes</h3>
+      <p>{error}</p>
+      <button 
+        onClick={() => {
+          clearError();
+          fetchSuggestions();
+        }}
+        style={{ 
+          padding: '0.5rem 1rem', 
+          backgroundColor: 'var(--primary-color)', 
+          color: 'white', 
+          border: 'none', 
+          borderRadius: '4px',
+          cursor: 'pointer'
+        }}
+      >
+        Try Again
+      </button>
+    </div>
+  );
   return (
     <div className="homepage">
       <AppNavBar />
@@ -23,191 +170,56 @@ const MealPlansPage = () => {
           <div className="cook-what-you-have" style={{marginBottom: '4rem'}}>
             <div className="section-header-with-arrow">
               <h2 className="section-title">Cook what you have</h2>
-              <button className="slider-arrow">
+              <button className="slider-arrow" onClick={() => fetchSuggestions({ limit: 12 })}>
                 <span className="arrow-text">More recipes</span>
                 <span className="arrow-icon">→</span>
               </button>
             </div>
             <div className="meals-slider">
-              <div className="meal-card">
-                <div className="meal-image">
-                  <span className="stock-badge">• In stock</span>
-                  <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop&crop=center" alt="Vegetable Stir Fry" />
+              {loading && renderLoadingCards(4)}
+              {error && !loading && renderErrorState()}
+              {!loading && !error && cookWhatYouHaveRecipes.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+                  <p>No recipes found with your current ingredients.</p>
+                  <p>Try adding more items to your inventory!</p>
                 </div>
-                <div className="meal-info">
-                  <h3 className="meal-title">Fresh Vegetable Stir Fry</h3>
-                  <button className="cook-btn">Cook Now</button>
-                  <div className="meal-stats">
-                    <div className="stat-item">
-                      <span className="stat-icon">🥘</span>
-                      <span className="stat-text">Ingredients match: 85%</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-icon">⏱️</span>
-                      <span className="stat-text">Cook time: 35 minutes</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="meal-card">
-                <div className="meal-image">
-                  <span className="stock-badge">• In stock</span>
-                  <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&h=300&fit=crop&crop=center" alt="Garden Salad Bowl" />
-                </div>
-                <div className="meal-info">
-                  <h3 className="meal-title">Garden Salad Bowl</h3>
-                  <button className="cook-btn outlined">Cook Now</button>
-                  <div className="meal-stats">
-                    <div className="stat-item">
-                      <span className="stat-icon">🥘</span>
-                      <span className="stat-text">Ingredients match: 92%</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-icon">⏱️</span>
-                      <span className="stat-text">Cook time: 32 minutes</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="meal-card">
-                <div className="meal-image">
-                  <span className="stock-badge">• In stock</span>
-                  <img src="https://images.unsplash.com/photo-1546554137-f86b9593a222?w=400&h=300&fit=crop&crop=center" alt="Protein Power Bowl" />
-                </div>
-                <div className="meal-info">
-                  <h3 className="meal-title">Protein Power Bowl</h3>
-                  <button className="cook-btn outlined">Cook Now</button>
-                  <div className="meal-stats">
-                    <div className="stat-item">
-                      <span className="stat-icon">🥘</span>
-                      <span className="stat-text">Ingredients match: 78%</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-icon">⏱️</span>
-                      <span className="stat-text">Cook time: 40 minutes</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="meal-card">
-                <div className="meal-image">
-                  <span className="stock-badge">• In stock</span>
-                  <img src="https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=400&h=300&fit=crop&crop=center" alt="Quick Pasta Dish" />
-                </div>
-                <div className="meal-info">
-                  <h3 className="meal-title">Quick Pasta Dish</h3>
-                  <button className="cook-btn outlined">Cook Now</button>
-                  <div className="meal-stats">
-                    <div className="stat-item">
-                      <span className="stat-icon">🥘</span>
-                      <span className="stat-text">Ingredients match: 88%</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-icon">⏱️</span>
-                      <span className="stat-text">Cook time: 30 minutes</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              )}
+              {!loading && !error && cookWhatYouHaveRecipes.slice(0, 3).map(recipe => 
+                renderRecipeCard(recipe, false)
+              )}
             </div>
           </div>
           
           {/* Inspired by Your Preference Section */}
-          <div className="cook-what-you-have" style={{marginBottom: '4rem'}}>
-            <div className="section-header-with-arrow">
-              <h2 className="section-title">Inspired by your preference</h2>
-              <button className="slider-arrow">
-                <span className="arrow-text">More recipes</span>
-                <span className="arrow-icon">→</span>
-              </button>
-            </div>
-            <div className="meals-slider">
-              <div className="meal-card">
-                <div className="meal-image">
-                  <span className="stock-badge">• In stock</span>
-                  <img src="https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=400&h=300&fit=crop&crop=center" alt="Margherita Pizza" />
-                </div>
-                <div className="meal-info">
-                  <h3 className="meal-title">Margherita Pizza</h3>
-                  <button className="cook-btn">Cook Now</button>
-                  <div className="meal-stats">
-                    <div className="stat-item">
-                      <span className="stat-icon">🥘</span>
-                      <span className="stat-text">Ingredients match: 82%</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-icon">⏱️</span>
-                      <span className="stat-text">Cook time: 45 minutes</span>
-                    </div>
-                  </div>
-                </div>
+          {preferenceRecipes.length > 0 && (
+            <div className="cook-what-you-have" style={{marginBottom: '4rem'}}>
+              <div className="section-header-with-arrow">
+                <h2 className="section-title">Inspired by your preference</h2>
+                <button className="slider-arrow" onClick={() => fetchSuggestions({ limit: 20, ranking: 2 })}>
+                  <span className="arrow-text">More recipes</span>
+                  <span className="arrow-icon">→</span>
+                </button>
               </div>
-              <div className="meal-card">
-                <div className="meal-image">
-                  <span className="stock-badge">• In stock</span>
-                  <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&h=300&fit=crop&crop=center" alt="Grilled Salmon" />
-                </div>
-                <div className="meal-info">
-                  <h3 className="meal-title">Grilled Salmon</h3>
-                  <button className="cook-btn outlined">Cook Now</button>
-                  <div className="meal-stats">
-                    <div className="stat-item">
-                      <span className="stat-icon">🥘</span>
-                      <span className="stat-text">Ingredients match: 75%</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-icon">⏱️</span>
-                      <span className="stat-text">Cook time: 25 minutes</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="meal-card">
-                <div className="meal-image">
-                  <span className="stock-badge">• In stock</span>
-                  <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop&crop=center" alt="Chocolate Cake" />
-                </div>
-                <div className="meal-info">
-                  <h3 className="meal-title">Chocolate Cake</h3>
-                  <button className="cook-btn outlined">Cook Now</button>
-                  <div className="meal-stats">
-                    <div className="stat-item">
-                      <span className="stat-icon">🥘</span>
-                      <span className="stat-text">Ingredients match: 68%</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-icon">⏱️</span>
-                      <span className="stat-text">Cook time: 60 minutes</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="meal-card">
-                <div className="meal-image">
-                  <span className="stock-badge">• In stock</span>
-                  <img src="https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=400&h=300&fit=crop&crop=center" alt="Beef Tacos" />
-                </div>
-                <div className="meal-info">
-                  <h3 className="meal-title">Beef Tacos</h3>
-                  <button className="cook-btn outlined">Cook Now</button>
-                  <div className="meal-stats">
-                    <div className="stat-item">
-                      <span className="stat-icon">🥘</span>
-                      <span className="stat-text">Ingredients match: 90%</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-icon">⏱️</span>
-                      <span className="stat-text">Cook time: 20 minutes</span>
-                    </div>
-                  </div>
-                </div>
+              <div className="meals-slider">
+                {preferenceRecipes.slice(0, 4).map(recipe => 
+                  renderRecipeCard(recipe, true)
+                )}
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
       
       <MobileBottomNav />
+      
+      {/* Recipe Detail Modal */}
+      <RecipeDetailModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        recipe={selectedRecipe}
+        isLoading={isLoadingRecipe}
+        onCookNow={handleActuallyCook}
+      />
     </div>
   );
 };
