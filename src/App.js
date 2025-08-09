@@ -10,7 +10,7 @@ import HomePage from './pages/HomePage';
 import InventoryPage from './pages/InventoryPage';
 import MealPlansPage from './pages/MealPlansPage';
 import ShoppingListPage from './pages/ShoppingListPage';
-import ProfilesPage from './pages/ProfilesPage';
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
   return (
@@ -43,7 +43,7 @@ function App() {
           } />
           <Route path="/profiles" element={
             <AuthGuard>
-              <ProfilesPage />
+              <ProfilePage />
             </AuthGuard>
           } />
         </Routes>
