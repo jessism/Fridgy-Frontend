@@ -41,7 +41,7 @@ function App() {
               <ShoppingListPage />
             </AuthGuard>
           } />
-          <Route path="/profiles" element={
+          <Route path="/profile" element={
             <AuthGuard>
               <ProfilePage />
             </AuthGuard>

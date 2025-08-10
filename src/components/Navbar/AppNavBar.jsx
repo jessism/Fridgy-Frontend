@@ -57,7 +57,7 @@ const AppNavBar = () => {
 
   const handleAccountSettings = () => {
     setIsProfileDropdownOpen(false);
-    navigate('/profiles'); // Navigate to existing profiles page
+    navigate('/profile'); // Navigate to existing profile page
   };
 
   const handleLogout = async () => {
@@ -139,21 +139,6 @@ const AppNavBar = () => {
 
             {isProfileDropdownOpen && (
               <div className="profile-dropdown-menu">
-                <div className="profile-dropdown-header">
-                  <div className="profile-dropdown-avatar">
-                    {getUserInitials()}
-                  </div>
-                  <div className="profile-dropdown-info">
-                    <div className="profile-dropdown-name">
-                      {user?.firstName && user?.lastName 
-                        ? `${user.firstName} ${user.lastName}` 
-                        : user?.firstName || 'User'}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="profile-dropdown-divider"></div>
-                
                 <div className="profile-dropdown-options">
                   <button 
                     className="profile-dropdown-option"

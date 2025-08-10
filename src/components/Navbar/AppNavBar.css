@@ -93,8 +93,6 @@
   align-items: center;
 }
 
-/* Removed search and cart button styles since they're not used */
-
 /* RESPONSIVE STYLES */
 @media (max-width: 768px) {
   .navbar {
@@ -305,4 +303,4 @@
     padding: 0.8rem 1rem;
     font-size: 0.9rem;
   }
-} 
+}

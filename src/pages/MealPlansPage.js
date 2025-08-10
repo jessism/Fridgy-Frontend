@@ -4,6 +4,7 @@ import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import useRecipes from '../hooks/useRecipes';
 import RecipeDetailModal from '../components/modals/RecipeDetailModal';
+import AIRecipeSection from '../components/AIRecipeSection';
 import './HomePage.css'; // Now in the same directory
 
 const MealPlansPage = () => {
@@ -207,6 +208,9 @@ const MealPlansPage = () => {
               </div>
             </div>
           )}
+          
+          {/* AI Recipe Section */}
+          <AIRecipeSection />
         </div>
       </div>
       

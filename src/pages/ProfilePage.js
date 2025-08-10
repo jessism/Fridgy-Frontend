@@ -5,6 +5,7 @@ import MobileBottomNav from '../components/MobileBottomNav';
 import { useAuth } from '../features/auth/context/AuthContext';
 import useUserPreferences from '../hooks/useUserPreferences';
 import './HomePage.css'; // Now in the same directory
+import './ProfilePage.css';
 
 const ProfilePage = () => {
   const { user } = useAuth();
@@ -91,7 +92,8 @@ const ProfilePage = () => {
       <div className="account-info-cards">
         <div className="info-card">
           <div className="info-card-header">
-            <h3>Profile Details</h3>
+            <h3>Personal Info</h3>
+            <button className="edit-button">Edit</button>
           </div>
           <div className="info-card-content">
             <div className="info-item">
@@ -288,29 +290,19 @@ const ProfilePage = () => {
             {/* Left Sidebar (30%) */}
             <div className="profile-sidebar">
               <div className="sidebar-content">
-                <div className="user-profile-summary">
-                  <div className="user-avatar">
-                    {user?.firstName ? user.firstName.charAt(0).toUpperCase() : 'U'}
-                  </div>
-                  <div className="user-info">
-                    <h3>{user?.firstName || 'User'}</h3>
-                    <p>{user?.email}</p>
-                  </div>
-                </div>
-                
                 <nav className="sidebar-nav">
                   <div 
                     className={`nav-item ${activeSection === 'account' ? 'active' : ''}`}
                     onClick={() => setActiveSection('account')}
                   >
-                    <span className="nav-icon">👤</span>
+                    <span className="nav-icon">○</span>
                     <span>Account Info</span>
                   </div>
                   <div 
                     className={`nav-item ${activeSection === 'preferences' ? 'active' : ''}`}
                     onClick={() => setActiveSection('preferences')}
                   >
-                    <span className="nav-icon">🍽️</span>
+                    <span className="nav-icon">◐</span>
                     <span>Dietary Preferences</span>
                   </div>
                 </nav>
