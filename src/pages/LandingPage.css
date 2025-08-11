@@ -162,10 +162,10 @@
 }
 
 .featured-categories .container {
-  width: 100%;
-  max-width: 1200px;
+  width: 96vw;
+  max-width: none;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 3rem 2rem;
 }
 
 .section-header {
@@ -219,7 +219,7 @@
 
 .category-card:hover .category-image {
   background: var(--primary-green);
-  box-shadow: 0 6px 20px rgba(139, 195, 74, 0.3);
+  box-shadow: 0 6px 20px rgba(79, 207, 97, 0.3);
   transform: scale(1.05);
 }
 
@@ -237,7 +237,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(139, 195, 74, 0.4);
+  box-shadow: 0 2px 8px rgba(79, 207, 97, 0.4);
   z-index: 10;
   transition: all 0.3s ease;
 }
@@ -245,7 +245,7 @@
 .category-card:hover .category-count {
   background: var(--primary-green-dark);
   transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.6);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.6);
 }
 
 .category-image {
@@ -257,7 +257,7 @@
   justify-content: center;
   align-items: center;
   margin: 0 auto 0.8rem;
-  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.2);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.2);
   transition: all 0.3s ease;
 }
 
@@ -290,7 +290,7 @@
   max-width: none;
   margin: 0 auto;
   padding: 3rem 2rem;
-  background: rgba(139, 195, 74, 0.1);
+  background: rgba(79, 207, 97, 0.1);
   border-radius: 24px;
   position: relative;
 }
@@ -395,7 +395,7 @@
   max-width: none;
   margin: 0 auto;
   padding: 3rem 2rem;
-  background: rgba(139, 195, 74, 0.1);
+  background: rgba(79, 207, 97, 0.1);
   border-radius: 24px;
   position: relative;
 }
@@ -435,13 +435,13 @@
   font-size: 1rem;
   font-weight: 600;
   text-align: center;
-  box-shadow: 0 4px 15px rgba(139, 195, 74, 0.3);
+  box-shadow: 0 4px 15px rgba(79, 207, 97, 0.3);
 }
 
 .add-item-btn:hover {
   background: var(--primary-green-dark);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(139, 195, 74, 0.4);
+  box-shadow: 0 6px 20px rgba(79, 207, 97, 0.4);
 }
 
 /* SHOPPING LIST STYLES */
@@ -565,6 +565,15 @@
   margin: 0;
 }
 
+/* Left align section headers that don't have buttons */
+.featured-categories .section-header-with-arrow {
+  justify-content: flex-start !important;
+}
+
+.featured-categories .section-header-with-arrow .section-title {
+  text-align: left !important;
+}
+
 .slider-arrow {
   display: flex;
   align-items: center;
@@ -581,7 +590,7 @@
 
 .slider-arrow:hover {
   color: var(--primary-green);
-  background: rgba(139, 195, 74, 0.1);
+  background: rgba(79, 207, 97, 0.1);
 }
 
 .arrow-text {
@@ -663,7 +672,7 @@
   padding: 8px 16px;
   border-radius: 25px;
   font-size: 0.8rem;
-  color: #4caf50;
+  color: var(--primary-green);
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -717,7 +726,7 @@
   border-color: var(--primary-green);
   color: var(--primary-green);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.2);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.2);
 }
 
 .meal-stats {

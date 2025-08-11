@@ -283,7 +283,7 @@ const ProfilePage = () => {
         <div className="profile-container">
           <div className="profile-header">
             <h1>Account Settings</h1>
-            <p>Manage your account and personalize your Fridgy experience</p>
+            <p>Manage your account and personalize your Trackabite experience</p>
           </div>
           
           <div className="profile-layout">

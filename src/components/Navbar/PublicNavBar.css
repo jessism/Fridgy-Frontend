@@ -34,6 +34,24 @@
   width: 100%;
 }
 
+.logo .brand-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  transition: transform 0.3s ease;
+}
+
+.logo .brand-link:hover {
+  transform: scale(1.02);
+}
+
+.logo .brand-logo {
+  width: 40px;
+  height: 40px;
+  transition: transform 0.3s ease;
+}
+
 .logo h2 {
   font-family: var(--header-font);
   color: var(--primary-green);
@@ -43,13 +61,8 @@
   transition: color 0.3s ease;
 }
 
-.logo h2:hover {
+.logo .brand-link:hover h2 {
   color: var(--primary-green-dark);
-  transform: scale(1.02);
-}
-
-.logo a {
-  text-decoration: none;
 }
 
 .auth-actions {
@@ -75,7 +88,7 @@
 .signup-btn:hover {
   background: var(--primary-green-dark);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.3);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3);
   text-decoration: none;
   color: var(--white);
 }
@@ -98,7 +111,7 @@
   background: var(--primary-green);
   color: var(--white);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.3);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3);
   text-decoration: none;
 }
 

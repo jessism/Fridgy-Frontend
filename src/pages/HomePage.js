@@ -2,6 +2,7 @@ import React from 'react';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import { useAuth } from '../features/auth/context/AuthContext';
+import trackaBiteLogo from '../assets/images/Trackabite-logo.png';
 import './HomePage.css';
 
 const HomePage = () => {
@@ -11,23 +12,25 @@ const HomePage = () => {
     <div className="homepage">
       <AppNavBar />
 
+      {/* Mobile Header - Only visible on mobile */}
+      <div className="mobile-header">
+        <div className="mobile-header-content">
+          <img src={trackaBiteLogo} alt="Trackabite logo" className="mobile-logo"/>
+          <h2 className="mobile-brand-name">Trackabite</h2>
+        </div>
+      </div>
+
       {/* Hero Section */}
       <section className="hero">
         <div className="container">
           <div className="hero-content">
             <div className="hero-text">
                               <h1 className="hero-title">
-                  Hello, {user?.firstName || 'User'}!
+                  Hello {user?.firstName || 'User'}!
                 </h1>
                 <p className="hero-subtitle">
-                  Relax please, we've got you <br />
-                  covered every day of the week
+                  What are you cooking today?
                 </p>
-                              <div className="hero-actions">
-                  <button className="btn btn-secondary hero-btn">
-                    Discover menu
-                  </button>
-                </div>
             </div>
             <div className="hero-image">
               <div className="food-bowl">
@@ -41,9 +44,8 @@ const HomePage = () => {
       {/* Featured Categories */}
       <section className="featured-categories">
         <div className="container">
-          <div className="section-header">
+          <div className="section-header-with-arrow">
             <h2 className="section-title">What's in Your Fridge</h2>
-            <p className="section-subtitle">Choose from our organized food categories to start tracking your inventory</p>
           </div>
           <div className="categories-grid">
             <div className="category-card">

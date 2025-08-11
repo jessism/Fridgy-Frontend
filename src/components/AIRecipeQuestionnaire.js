@@ -194,7 +194,7 @@ const AIRecipeQuestionnaire = ({ onSubmit, loading = false }) => {
           <div className="question-header">
             <h3 className="question-title">
               <span className="question-icon">💭</span>
-              Tell Fridgy anything else
+              Tell Trackabite anything else
             </h3>
             <p className="question-subtitle">
               e.g. cravings, ingredients to use up, flavor notes...

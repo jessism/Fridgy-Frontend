@@ -44,12 +44,12 @@ body {
 .btn-primary {
   background: var(--gradient-green);
   color: var(--white);
-  box-shadow: 0 4px 15px rgba(139, 195, 74, 0.3);
+  box-shadow: 0 4px 15px rgba(79, 207, 97, 0.3);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(139, 195, 74, 0.4);
+  box-shadow: 0 6px 20px rgba(79, 207, 97, 0.4);
 }
 
 .btn-secondary {

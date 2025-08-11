@@ -244,12 +244,12 @@
 
 .view-recipe-btn {
   flex: 1;
-  background: #22c55e;
+  background: #4fcf61;
   color: white;
 }
 
 .view-recipe-btn:hover {
-  background: #16a34a;
+  background: #3ba54a;
   transform: translateY(-1px);
 }
 

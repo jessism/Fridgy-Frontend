@@ -167,7 +167,8 @@ const MealPlansPage = () => {
             Plan your meals and discover recipes based on your available ingredients
           </p>
           
-          {/* Cook What You Have Section */}
+          {/* Cook What You Have Section - TEMPORARILY HIDDEN */}
+          {/* 
           <div className="cook-what-you-have" style={{marginBottom: '4rem'}}>
             <div className="section-header-with-arrow">
               <h2 className="section-title">Cook what you have</h2>
@@ -190,6 +191,7 @@ const MealPlansPage = () => {
               )}
             </div>
           </div>
+          */}
           
           {/* Inspired by Your Preference Section */}
           {preferenceRecipes.length > 0 && (

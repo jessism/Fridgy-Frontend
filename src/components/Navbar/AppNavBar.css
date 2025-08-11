@@ -27,6 +27,24 @@
   width: 100%;
 }
 
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  transition: transform 0.3s ease;
+}
+
+.brand-link:hover {
+  transform: scale(1.02);
+}
+
+.brand-logo {
+  width: 40px;
+  height: 40px;
+  transition: transform 0.3s ease;
+}
+
 .nav-brand h2 {
   font-family: var(--header-font);
   color: var(--primary-green);
@@ -36,13 +54,8 @@
   transition: color 0.3s ease;
 }
 
-.nav-brand h2:hover {
+.brand-link:hover h2 {
   color: var(--primary-green-dark);
-  transform: scale(1.02);
-}
-
-.nav-brand a {
-  text-decoration: none;
 }
 
 .nav-menu {
@@ -221,7 +234,7 @@
   right: 2px;
   width: 12px;
   height: 12px;
-  background: #4caf50;
+  background: var(--primary-green);
   border: 2px solid white;
   border-radius: 50%;
 }

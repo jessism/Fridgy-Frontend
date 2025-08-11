@@ -5,15 +5,50 @@
   position: relative;
 }
 
+/* MOBILE HEADER - Only visible on mobile */
+.mobile-header {
+  display: none;
+  padding: 1rem;
+  background: white;
+}
+
+.mobile-header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 8px; /* Minimal top spacing */
+}
+
+.mobile-logo {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.mobile-brand-name {
+  font-family: var(--header-font);
+  color: var(--primary-green);
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
 /* Mobile bottom nav spacing */
 @media (max-width: 768px) {
   .homepage {
     padding-bottom: 80px; /* Space for mobile bottom nav */
   }
   
+  /* Show mobile header on mobile only */
+  .mobile-header {
+    display: block;
+  }
+  
   /* Adjust hero section padding on mobile */
   .hero {
-    padding-top: 2rem; /* Remove top navbar spacing on mobile */
+    padding: 1rem 0; /* Much smaller padding instead of 8rem 0 6rem */
+    min-height: auto; /* Remove 60vh constraint */
   }
 }
 
@@ -261,10 +296,10 @@
 }
 
 .featured-categories .container {
-  width: 100%;
-  max-width: 1200px;
+  width: 96vw;
+  max-width: none;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 3rem 2rem;
 }
 
 .section-header {
@@ -318,7 +353,7 @@
 
 .category-card:hover .category-image {
   background: var(--primary-green);
-  box-shadow: 0 6px 20px rgba(139, 195, 74, 0.3);
+  box-shadow: 0 6px 20px rgba(79, 207, 97, 0.3);
   transform: scale(1.05);
 }
 
@@ -336,7 +371,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(139, 195, 74, 0.4);
+  box-shadow: 0 2px 8px rgba(79, 207, 97, 0.4);
   z-index: 10;
   transition: all 0.3s ease;
 }
@@ -344,7 +379,7 @@
 .category-card:hover .category-count {
   background: var(--primary-green-dark);
   transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.6);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.6);
 }
 
 .category-image {
@@ -356,7 +391,7 @@
   justify-content: center;
   align-items: center;
   margin: 0 auto 0.8rem;
-  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.2);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.2);
   transition: all 0.3s ease;
 }
 
@@ -434,21 +469,25 @@
   }
   
   .hero-content {
-    flex-direction: column;
-    text-align: center;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
     width: 96vw;
-    padding: 4rem 2rem;
-    border-radius: 30px;
-    height: auto;
-    min-height: 400px;
+    padding: 0.25rem 1.5rem;
+    border-radius: 10px;
+    height: 15px;
+    min-height: 15px;
+    position: relative;
+    overflow: visible;
   }
 
   .hero-text {
-    max-width: 100%;
-    margin-bottom: 2rem;
+    flex: 1;
+    margin-bottom: 0;
     padding-left: 0;
     position: relative !important;
-    left: 1rem !important;
+    left: 0 !important;
     top: auto !important;
     transform: none !important;
     text-align: left !important;
@@ -456,30 +495,39 @@
 
   .hero-image {
     position: relative;
-    right: 0;
+    right: -10px;
     top: 0;
     transform: none;
-    width: 300px;
-    height: 300px;
-    margin: 0 auto;
+    width: 170px;
+    height: 170px;
+    margin: 0;
+    flex-shrink: 0;
+    z-index: 10;
   }
 
   .hero {
-    margin-bottom: 30px;
-  }
-
-  .hero-image {
-    width: 250px;
-    height: 250px;
+    margin-bottom: 20px;
+    padding: 1rem 0; /* Ensure small padding is applied */
+    min-height: auto; /* Ensure 60vh constraint is removed */
   }
   
   .hero-actions {
-    justify-content: center;
+    display: none; /* Hide button on mobile to save space */
   }
   
-  .hero-btn {
-    padding: 14px 28px;
-    font-size: 1rem;
+  .hero-title {
+    font-size: 1.2rem;
+    margin-bottom: 0;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  
+  .hero-subtitle {
+    display: block;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    line-height: 1.2;
   }
   
   .categories-grid {
@@ -587,11 +635,16 @@
 
 @media (max-width: 480px) {
   .hero-title {
-    font-size: 2rem;
+    font-size: 2.4rem;
+    line-height: 1.2;
   }
   
   .hero-subtitle {
     font-size: 1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    line-height: 1.2;
+    display: block;
   }
   
   .hero-actions {
@@ -607,12 +660,12 @@
     padding: 3rem 1.5rem;
     border-radius: 25px;
     height: auto;
-    min-height: 350px;
+    min-height: 175px;
   }
 
   .hero-image {
-    width: 260px;
-    height: 260px;
+    width: 140px;
+    height: 140px;
   }
 
   .category-count {
@@ -639,7 +692,7 @@
   max-width: none;
   margin: 0 auto;
   padding: 3rem 2rem;
-  background: rgba(139, 195, 74, 0.1);
+  background: rgba(79, 207, 97, 0.1);
   border-radius: 24px;
   position: relative;
 }
@@ -744,7 +797,7 @@
   max-width: none;
   margin: 0 auto;
   padding: 3rem 2rem;
-  background: rgba(139, 195, 74, 0.1);
+  background: rgba(79, 207, 97, 0.1);
   border-radius: 24px;
   position: relative;
 }
@@ -784,13 +837,13 @@
   font-size: 1rem;
   font-weight: 600;
   text-align: center;
-  box-shadow: 0 4px 15px rgba(139, 195, 74, 0.3);
+  box-shadow: 0 4px 15px rgba(79, 207, 97, 0.3);
 }
 
 .add-item-btn:hover {
   background: var(--primary-green-dark);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(139, 195, 74, 0.4);
+  box-shadow: 0 6px 20px rgba(79, 207, 97, 0.4);
 }
 
 /* SHOPPING LIST STYLES */
@@ -901,12 +954,12 @@
   font-size: 1rem;
   font-weight: 600;
   text-align: center;
-  box-shadow: 0 4px 15px rgba(139, 195, 74, 0.3);
+  box-shadow: 0 4px 15px rgba(79, 207, 97, 0.3);
 }
 
 .add-items-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(139, 195, 74, 0.4);
+  box-shadow: 0 6px 20px rgba(79, 207, 97, 0.4);
 }
 
 .add-icon {
@@ -1029,6 +1082,34 @@
   margin: 0;
 }
 
+/* Left align section headers that don't have buttons */
+.featured-categories .section-header-with-arrow {
+  justify-content: flex-start !important;
+}
+
+.featured-categories .section-header-with-arrow .section-title {
+  text-align: left !important;
+}
+
+/* Remove green underlines from all section titles */
+.section-title, 
+.section-title::before, 
+.section-title::after,
+h2.section-title,
+h2.section-title::before,
+h2.section-title::after {
+  border-bottom: none !important;
+  border: none !important;
+  background-image: none !important;
+  background: none !important;
+  text-decoration: none !important;
+}
+
+.section-title::after,
+h2.section-title::after {
+  display: none !important;
+}
+
 .slider-arrow {
   display: flex;
   align-items: center;
@@ -1045,7 +1126,7 @@
 
 .slider-arrow:hover {
   color: var(--primary-green);
-  background: rgba(139, 195, 74, 0.1);
+  background: rgba(79, 207, 97, 0.1);
 }
 
 .arrow-text {
@@ -1129,7 +1210,7 @@
   padding: 8px 16px;
   border-radius: 25px;
   font-size: 0.8rem;
-  color: #4caf50;
+  color: var(--primary-green);
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -1183,7 +1264,7 @@
   border-color: var(--primary-green);
   color: var(--primary-green);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.2);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.2);
 }
 
 .meal-stats {
@@ -1756,9 +1837,9 @@
 }
 
 .cook-time-pill {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
   color: white;
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3);
 }
 
 .special-pill {
@@ -1819,7 +1900,6 @@
   color: var(--header-color);
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--primary-green);
 }
 
 /* Ingredients List */
@@ -1944,20 +2024,20 @@
 .recipe-cook-button {
   padding: 0.875rem 1.75rem;
   border: none;
-  background: linear-gradient(135deg, var(--primary-green), #16a34a);
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
   color: white;
   border-radius: 12px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+  box-shadow: 0 4px 16px rgba(79, 207, 97, 0.3);
   font-size: 0.95rem;
 }
 
 .recipe-cook-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.4);
-  background: linear-gradient(135deg, #16a34a, #15803d);
+  box-shadow: 0 8px 24px rgba(79, 207, 97, 0.4);
+  background: linear-gradient(135deg, var(--primary-green-dark), #2a8a3a);
 }
 
 .recipe-cook-button:active {
@@ -2192,7 +2272,7 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary-color), #16a34a);
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2239,9 +2319,9 @@
 }
 
 .nav-item.active {
-  background: linear-gradient(135deg, var(--primary-color), #16a34a) !important;
+  background: linear-gradient(135deg, var(--primary-color), #3ba54a) !important;
   color: #000000 !important;
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3) !important;
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3) !important;
   font-weight: 600 !important;
 }
 
@@ -2291,7 +2371,7 @@
   position: absolute;
   top: 0;
   right: 0;
-  background: #22c55e;
+  background: var(--primary-green);
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 8px;
@@ -2449,14 +2529,14 @@
 .preference-option:hover {
   border-color: var(--primary-color);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.15);
 }
 
 .preference-option.selected {
   border-color: var(--primary-color);
-  background: linear-gradient(135deg, var(--primary-color), #16a34a);
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
   color: white;
-  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+  box-shadow: 0 4px 16px rgba(79, 207, 97, 0.3);
 }
 
 .option-icon {
@@ -2591,7 +2671,7 @@
 .custom-text-input:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+  box-shadow: 0 0 0 3px rgba(79, 207, 97, 0.1);
 }
 
 /* Cooking Time Options */
@@ -2616,14 +2696,14 @@
 .cooking-time-option:hover {
   border-color: var(--primary-color);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.15);
 }
 
 .cooking-time-option.selected {
   border-color: var(--primary-color);
-  background: linear-gradient(135deg, var(--primary-color), #16a34a);
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
   color: white;
-  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+  box-shadow: 0 4px 16px rgba(79, 207, 97, 0.3);
 }
 
 .cooking-time-option .option-icon {

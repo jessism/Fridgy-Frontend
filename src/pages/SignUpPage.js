@@ -93,7 +93,7 @@ const SignUpPage = () => {
           </div>
           
           <div className="signup-form-wrapper">
-            <h2 className="signup-title">Sign up to Fridgy</h2>
+            <h2 className="signup-title">Sign up to Trackabite</h2>
             
             <form className="signup-form" onSubmit={handleSubmit}>
               {redirectMessage && (
