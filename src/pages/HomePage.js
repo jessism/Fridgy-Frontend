@@ -1,8 +1,10 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import { useAuth } from '../features/auth/context/AuthContext';
 import trackaBiteLogo from '../assets/images/Trackabite-logo.png';
+import { ReactComponent as ArrowUpRight } from '../assets/images/arrow-up-right.svg';
 import './HomePage.css';
 
 const HomePage = () => {
@@ -45,7 +47,7 @@ const HomePage = () => {
       <section className="featured-categories">
         <div className="container">
           <div className="section-header-with-arrow">
-            <h2 className="section-title">What's in Your Fridge</h2>
+            <h2 className="section-title">In Your Fridge</h2>
           </div>
           <div className="categories-grid">
             <div className="category-card">
@@ -104,7 +106,6 @@ const HomePage = () => {
         <div className="container">
           <div className="section-header">
             <h2 className="section-title">
-              <span className="warning-icon">⚠️</span>
               Expiring Soon
             </h2>
           </div>
@@ -127,7 +128,7 @@ const HomePage = () => {
                 <span className="days-left urgent">1 day</span>
               </div>
             </div>
-            <div className="expiring-item">
+            <div className="expiring-item mobile-hide-item">
               <div className="item-info">
                 <h4 className="item-name">Bread</h4>
                 <p className="item-category">Pantry</p>
@@ -136,7 +137,7 @@ const HomePage = () => {
                 <span className="days-left">3 days</span>
               </div>
             </div>
-            <div className="expiring-item">
+            <div className="expiring-item mobile-hide-item">
               <div className="item-info">
                 <h4 className="item-name">Milk</h4>
                 <p className="item-category">Fridge</p>
@@ -146,10 +147,13 @@ const HomePage = () => {
               </div>
             </div>
           </div>
+          <Link to="/inventory" className="expiring-nav-arrow">
+            <ArrowUpRight />
+          </Link>
         </div>
       </section>
 
-      {/* Cook What You Have Section */}
+      {/* Cook What You Have Section - COMMENTED OUT
       <section className="cook-what-you-have">
         <div className="container">
           <div className="section-header-with-arrow">
@@ -243,8 +247,30 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+      */}
 
-      {/* Inspired by Your Preference Section */}
+      {/* Cook What You Already Have Section - Hero Style */}
+      <section className="hero">
+        <div className="container">
+          <div className="hero-content">
+            <div className="hero-text">
+              <h1 className="hero-title">
+                Cook What You Already Have
+              </h1>
+              <p className="hero-subtitle">
+                Discover delicious recipes using ingredients from your fridge
+              </p>
+            </div>
+            <div className="hero-image">
+              <div className="food-bowl">
+                <img src="/hero-bowl.jpg" alt="Fresh healthy bowl" className="bowl-image" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Inspired by Your Preference Section - COMMENTED OUT
       <section className="cook-what-you-have">
         <div className="container">
           <div className="section-header-with-arrow">
@@ -338,13 +364,35 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+      */}
+
+      {/* Additional Hello Section - COMMENTED OUT
+      <section className="hero">
+        <div className="container">
+          <div className="hero-content">
+            <div className="hero-text">
+              <h1 className="hero-title">
+                Hello {user?.firstName || 'User'}!
+              </h1>
+              <p className="hero-subtitle">
+                What are you cooking today?
+              </p>
+            </div>
+            <div className="hero-image">
+              <div className="food-bowl">
+                <img src="/hero-bowl.jpg" alt="Fresh healthy bowl" className="bowl-image" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      */}
 
       {/* Your Shopping List Section */}
       <section className="expiring-soon">
         <div className="container">
           <div className="section-header">
             <h2 className="section-title">
-              <span className="shopping-icon">🛒</span>
               Your shopping list
             </h2>
           </div>
@@ -375,7 +423,7 @@ const HomePage = () => {
                 <span className="quantity-text">1 ct</span>
               </div>
             </div>
-            <div className="expiring-item shopping-item">
+            <div className="expiring-item shopping-item mobile-hide-item">
               <div className="item-checkbox">
                 <input type="checkbox" id="parmesan" defaultChecked readOnly />
                 <label htmlFor="parmesan"></label>
@@ -388,7 +436,7 @@ const HomePage = () => {
                 <span className="quantity-text">1 ct</span>
               </div>
             </div>
-            <div className="expiring-item shopping-item">
+            <div className="expiring-item shopping-item mobile-hide-item">
               <div className="item-checkbox">
                 <input type="checkbox" id="eggs" defaultChecked readOnly />
                 <label htmlFor="eggs"></label>
@@ -401,7 +449,7 @@ const HomePage = () => {
                 <span className="quantity-text">4 ct</span>
               </div>
             </div>
-            <div className="expiring-item shopping-item">
+            <div className="expiring-item shopping-item mobile-hide-item">
               <div className="item-checkbox">
                 <input type="checkbox" id="bread" />
                 <label htmlFor="bread"></label>
@@ -414,7 +462,7 @@ const HomePage = () => {
                 <span className="quantity-text">1 ct</span>
               </div>
             </div>
-            <div className="expiring-item shopping-item">
+            <div className="expiring-item shopping-item mobile-hide-item">
               <div className="item-checkbox">
                 <input type="checkbox" id="muffins" defaultChecked readOnly />
                 <label htmlFor="muffins"></label>
@@ -434,6 +482,9 @@ const HomePage = () => {
               Add more items
             </button>
           </div>
+          <Link to="/shopping-list" className="shopping-nav-arrow">
+            <ArrowUpRight />
+          </Link>
         </div>
       </section>
       
