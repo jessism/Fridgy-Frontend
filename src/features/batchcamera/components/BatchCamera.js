@@ -71,12 +71,10 @@ const BatchCamera = ({ onComplete }) => {
         formData.append('images', file);
       });
 
-      // Use the same API_BASE_URL logic as your App.js
-      const API_BASE_URL = process.env.NODE_ENV === 'production' 
-        ? 'https://fridgy-backend-production.up.railway.app' 
-        : 'http://localhost:5000';
+      // Use the same API_BASE_URL logic as other components
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-      const response = await fetch(`${API_BASE_URL}/api/process-images`, {
+      const response = await fetch(`${API_BASE_URL}/process-images`, {
         method: 'POST',
         body: formData,
       });
@@ -123,14 +121,12 @@ const BatchCamera = ({ onComplete }) => {
     setIsSaving(true);
     
     try {
-      // Use the same API_BASE_URL logic
-      const API_BASE_URL = process.env.NODE_ENV === 'production' 
-        ? 'https://fridgy-backend-production.up.railway.app' 
-        : 'http://localhost:5000';
+      // Use the same API_BASE_URL logic as other components
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
       console.log('💾 Saving items with userId:', user.id);
 
-      const response = await fetch(`${API_BASE_URL}/api/save-items`, {
+      const response = await fetch(`${API_BASE_URL}/save-items`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
