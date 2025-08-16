@@ -1,0 +1,116 @@
+/* BASE BUTTON STYLES */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  font-weight: 500;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 25px;
+  text-align: center;
+  outline: none;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.button:focus {
+  outline: 2px solid rgba(79, 207, 97, 0.5);
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* BUTTON SIZES */
+.button--small {
+  padding: 8px 16px;
+  font-size: 12px;
+  border-radius: 20px;
+}
+
+.button--medium {
+  padding: 12px 24px;
+  font-size: 14px;
+  border-radius: 25px;
+}
+
+.button--large {
+  padding: 16px 32px;
+  font-size: 16px;
+  border-radius: 30px;
+}
+
+/* BUTTON VARIANTS */
+
+/* Primary - Green background, white text */
+.button--primary {
+  background: #4fcf61;
+  color: white;
+  box-shadow: 0 4px 15px rgba(79, 207, 97, 0.3);
+}
+
+.button--primary:hover:not(:disabled) {
+  background: #3ba54a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79, 207, 97, 0.4);
+}
+
+/* Secondary - Black background, white text (like your Download App button) */
+.button--secondary {
+  background: #000;
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.button--secondary:hover:not(:disabled) {
+  background: #333;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Outline - Transparent background, border */
+.button--outline {
+  background: transparent;
+  color: #4fcf61;
+  border: 1px solid #4fcf61;
+  box-shadow: none;
+}
+
+.button--outline:hover:not(:disabled) {
+  background: #4fcf61;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(79, 207, 97, 0.3);
+}
+
+/* Ghost - Transparent background, no border */
+.button--ghost {
+  background: transparent;
+  color: #333;
+  box-shadow: none;
+}
+
+.button--ghost:hover:not(:disabled) {
+  background: #f5f5f5;
+  transform: translateY(-2px);
+}
+
+/* Light - White background, dark text */
+.button--light {
+  background: white;
+  color: #333;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+}
+
+.button--light:hover:not(:disabled) {
+  background: #f9f9f9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}

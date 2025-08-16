@@ -20,7 +20,6 @@
   
   /* Gradients */
   --gradient-green: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
-  --gradient-hero: linear-gradient(135deg, #e8f5e8 0%, var(--primary-green-light) 50%, var(--primary-green) 100%);
 }
 
 /* COLOR UTILITY CLASSES */

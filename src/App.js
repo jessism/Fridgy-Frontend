@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import { AuthProvider } from './features/auth/context/AuthContext';
 import AuthGuard from './features/auth/components/AuthGuard';
-import LandingPage from './pages/LandingPage';
+import NewLandingPage from './pages/NewLandingPage';
 import SignUpPage from './pages/SignUpPage';
 import SignInPage from './pages/SignInPage';
 import HomePage from './pages/HomePage';
@@ -18,7 +18,7 @@ function App() {
       <AuthProvider>
         <Router>
                   <Routes>
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<NewLandingPage />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/signin" element={<SignInPage />} />
           <Route path="/home" element={
