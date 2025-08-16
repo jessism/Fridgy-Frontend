@@ -16,8 +16,6 @@
   overflow: hidden;
 }
 
-
-
 .branding-content {
   max-width: 500px;
   color: white;
@@ -219,44 +217,52 @@
   text-decoration: underline;
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
+/* MOBILE-FIRST RESPONSIVE DESIGN */
+
+/* Mobile: Hide left section completely and center form */
+@media (max-width: 768px) {
   .signup-page {
-    flex-direction: column;
+    display: block !important;
+    min-height: 100vh;
+    background: white;
+    padding: 0;
   }
   
   .signup-left {
-    padding: 3rem 2rem;
-    min-height: 40vh;
-  }
-  
-  .branding-title {
-    font-size: 2.5rem;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
   }
   
   .signup-right {
-    padding: 2rem 1rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .signup-left {
-    padding: 2rem 1rem;
-    min-height: 35vh;
+    display: flex !important;
+    flex: none !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    padding: 2rem 1rem !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background: white !important;
   }
   
-  .branding-title {
-    font-size: 2rem;
+  .signup-form-container {
+    width: 100%;
+    max-width: 400px;
   }
   
   .signup-header {
     flex-direction: column;
     gap: 1rem;
     align-items: flex-start;
+    justify-content: flex-start;
   }
   
   .signup-form-wrapper {
     padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
   
   .signup-title {
@@ -265,8 +271,8 @@
 }
 
 @media (max-width: 480px) {
-  .branding-title {
-    font-size: 1.75rem;
+  .signup-right {
+    padding: 1rem !important;
   }
   
   .signup-form-wrapper {
@@ -284,4 +290,21 @@
   .signup-button {
     padding: 0.75rem 1.25rem;
   }
-} 
+}
+
+/* Tablet and Desktop: Original split layout */
+@media (min-width: 769px) {
+  .signup-page {
+    display: flex;
+  }
+  
+  .signup-left {
+    display: flex;
+    flex: 1;
+  }
+  
+  .signup-right {
+    display: flex;
+    flex: 1;
+  }
+}
