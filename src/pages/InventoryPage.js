@@ -5,7 +5,7 @@ import MobileBottomNav from '../components/MobileBottomNav';
 import BatchCamera from '../features/batchcamera/components/BatchCamera';
 import { EditIcon, DeleteIcon } from '../components/icons';
 import useInventory from '../hooks/useInventory';
-import { getItemIcon, getExpiryStatus, formatQuantity } from '../assets/inventory_emojis/iconHelpers.js';
+import { getItemIconIcons8, getExpiryStatus, formatQuantity } from '../assets/inventory_emojis/iconHelpers.js';
 import './InventoryPage.css';
 
 const InventoryPage = () => {
@@ -634,7 +634,9 @@ const InventoryPage = () => {
               {inventoryItems.map((item) => {
                 const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
                 const { status, urgency } = getExpiryStatus(daysUntilExpiry);
-                const itemIcon = getItemIcon(item.category, item.itemName);
+                const itemIcon = getItemIconIcons8(item.category, item.itemName, { 
+                  size: 28
+                });
                 const formattedQuantity = formatQuantity(item.quantity);
                 
                 const getStatusPillClass = (urgency) => {

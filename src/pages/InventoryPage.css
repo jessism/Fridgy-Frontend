@@ -78,7 +78,7 @@
     background: rgba(248, 249, 250, 0.5);
   }
   
-  /* Left: Large emoji icon in rounded square background */
+  /* Left: Modern SVG icon in rounded square background */
   .inventory-page__card-icon {
     width: 60px;
     height: 60px;
@@ -87,9 +87,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
     flex-shrink: 0;
     border: 2px solid #e9ecef;
+  }
+  
+  /* SVG icon styling */
+  .inventory-page__card-icon svg {
+    width: 28px;
+    height: 28px;
+    color: #64748b;
+    stroke-width: 1.5;
   }
   
   /* Right: Content area with item name and pills */
