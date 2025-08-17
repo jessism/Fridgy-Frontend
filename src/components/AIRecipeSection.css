@@ -174,7 +174,7 @@
 }
 
 .btn-generate-primary {
-  background: linear-gradient(135deg, #4fcf61, #3ba54a);
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
   color: white;
   border: none;
   border-radius: 12px;
@@ -220,7 +220,7 @@
   width: 60px;
   height: 60px;
   border: 3px solid #e5e7eb;
-  border-top: 3px solid #4fcf61;
+  border-top: 3px solid var(--primary-green);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto;
@@ -277,7 +277,7 @@
 }
 
 .step.active {
-  color: #4fcf61;
+  color: var(--primary-green);
 }
 
 .step-icon {
@@ -324,7 +324,7 @@
 .info-link {
   background: none;
   border: none;
-  color: #4fcf61;
+  color: var(--primary-green);
   font-weight: 600;
   text-decoration: underline;
   cursor: pointer;
@@ -332,7 +332,7 @@
 }
 
 .info-link:hover {
-  color: #3ba54a;
+  color: var(--primary-green-dark);
 }
 
 /* Responsive Design */

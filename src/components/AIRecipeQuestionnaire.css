@@ -120,14 +120,14 @@
 }
 
 .chip.selected {
-  background: linear-gradient(135deg, #4fcf61, #3ba54a);
-  border-color: #3ba54a;
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+  border-color: var(--primary-green-dark);
   color: white;
-  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3);
+  box-shadow: 0 4px 12px rgba(129, 224, 83, 0.3);
 }
 
 .chip.selected:hover {
-  background: linear-gradient(135deg, #3ba54a, #2d8f3c);
+  background: linear-gradient(135deg, var(--primary-green-dark), #5eb849);
   transform: translateY(-1px);
 }
 
@@ -159,7 +159,7 @@
 
 .additional-notes:focus {
   outline: none;
-  border-color: #4fcf61;
+  border-color: var(--primary-green);
   box-shadow: 0 0 0 3px rgba(79, 207, 97, 0.1);
 }
 
@@ -180,7 +180,7 @@
 }
 
 .btn-generate-recipes {
-  background: linear-gradient(135deg, #4fcf61, #3ba54a);
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
   color: white;
   border: none;
   border-radius: 12px;
@@ -192,7 +192,7 @@
   align-items: center;
   gap: 0.5rem;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3);
+  box-shadow: 0 4px 12px rgba(129, 224, 83, 0.3);
   min-width: 200px;
   justify-content: center;
 }
@@ -200,7 +200,7 @@
 .btn-generate-recipes:hover:not(.disabled) {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(79, 207, 97, 0.4);
-  background: linear-gradient(135deg, #3ba54a, #2d8f3c);
+  background: linear-gradient(135deg, var(--primary-green-dark), #5eb849);
 }
 
 .btn-generate-recipes.disabled {
@@ -352,7 +352,7 @@
 .chip:focus,
 .additional-notes:focus,
 .btn-generate-recipes:focus {
-  outline: 2px solid #4fcf61;
+  outline: 2px solid var(--primary-green);
   outline-offset: 2px;
 }
 

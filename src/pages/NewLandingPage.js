@@ -103,7 +103,7 @@ const NewLandingPage = () => {
               {/* Highlight 1 */}
               <div className="landing-page-v2__highlight-card landing-page-v2__highlight-card--track">
                 <div className="landing-page-v2__highlight-icon">
-                  <FridgeIcon size={40} color="#4fcf61" />
+                  <FridgeIcon size={40} color="#81e053" />
                 </div>
                 <h3 className="landing-page-v2__highlight-title">Know what's in your fridge. Anytime, anywhere.</h3>
                 <p className="landing-page-v2__highlight-description">
@@ -114,7 +114,7 @@ const NewLandingPage = () => {
               {/* Highlight 2 */}
               <div className="landing-page-v2__highlight-card landing-page-v2__highlight-card--know">
                 <div className="landing-page-v2__highlight-icon">
-                  <ChefIcon size={40} color="#4fcf61" />
+                  <ChefIcon size={40} color="#81e053" />
                 </div>
                 <h3 className="landing-page-v2__highlight-title">Brain off. Chef on.</h3>
                 <p className="landing-page-v2__highlight-description">
@@ -125,7 +125,7 @@ const NewLandingPage = () => {
               {/* Highlight 3 */}
               <div className="landing-page-v2__highlight-card landing-page-v2__highlight-card--reduce">
                 <div className="landing-page-v2__highlight-icon">
-                  <SaveIcon size={40} color="#4fcf61" />
+                  <SaveIcon size={40} color="#81e053" />
                 </div>
                 <h3 className="landing-page-v2__highlight-title">Waste less. Save more.</h3>
                 <p className="landing-page-v2__highlight-description">

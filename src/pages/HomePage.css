@@ -360,7 +360,7 @@
 
 .category-card:hover .category-image {
   background: var(--primary-green);
-  box-shadow: 0 6px 20px rgba(79, 207, 97, 0.3);
+  box-shadow: 0 6px 20px rgba(129, 224, 83, 0.3);
   transform: scale(1.05);
 }
 
@@ -378,7 +378,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(79, 207, 97, 0.4);
+  box-shadow: 0 2px 8px rgba(129, 224, 83, 0.4);
   z-index: 10;
   transition: all 0.3s ease;
 }
@@ -861,13 +861,13 @@
   font-size: 1rem;
   font-weight: 600;
   text-align: center;
-  box-shadow: 0 4px 15px rgba(79, 207, 97, 0.3);
+  box-shadow: 0 4px 15px rgba(129, 224, 83, 0.3);
 }
 
 .add-item-btn:hover {
   background: var(--primary-green-dark);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(79, 207, 97, 0.4);
+  box-shadow: 0 6px 20px rgba(129, 224, 83, 0.4);
 }
 
 /* SHOPPING LIST STYLES */
@@ -978,12 +978,12 @@
   font-size: 1rem;
   font-weight: 600;
   text-align: center;
-  box-shadow: 0 4px 15px rgba(79, 207, 97, 0.3);
+  box-shadow: 0 4px 15px rgba(129, 224, 83, 0.3);
 }
 
 .add-items-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(79, 207, 97, 0.4);
+  box-shadow: 0 6px 20px rgba(129, 224, 83, 0.4);
 }
 
 .add-icon {
@@ -1958,7 +1958,7 @@ h2.section-title::after {
 .cook-time-pill {
   background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
   color: white;
-  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3);
+  box-shadow: 0 4px 12px rgba(129, 224, 83, 0.3);
 }
 
 .special-pill {
@@ -2149,14 +2149,14 @@ h2.section-title::after {
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 16px rgba(79, 207, 97, 0.3);
+  box-shadow: 0 4px 16px rgba(129, 224, 83, 0.3);
   font-size: 0.95rem;
 }
 
 .recipe-cook-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(79, 207, 97, 0.4);
-  background: linear-gradient(135deg, var(--primary-green-dark), #2a8a3a);
+  box-shadow: 0 8px 24px rgba(129, 224, 83, 0.4);
+  background: linear-gradient(135deg, var(--primary-green-dark), #5eb849);
 }
 
 .recipe-cook-button:active {
@@ -2438,9 +2438,9 @@ h2.section-title::after {
 }
 
 .nav-item.active {
-  background: linear-gradient(135deg, var(--primary-color), #3ba54a) !important;
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark)) !important;
   color: #000000 !important;
-  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3) !important;
+  box-shadow: 0 4px 12px rgba(129, 224, 83, 0.3) !important;
   font-weight: 600 !important;
 }
 
@@ -2590,7 +2590,7 @@ h2.section-title::after {
   width: 40px;
   height: 40px;
   border: 3px solid #e2e8f0;
-  border-top: 3px solid var(--primary-color);
+  border-top: 3px solid var(--primary-green);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -2646,16 +2646,16 @@ h2.section-title::after {
 }
 
 .preference-option:hover {
-  border-color: var(--primary-color);
+  border-color: var(--primary-green);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(79, 207, 97, 0.15);
 }
 
 .preference-option.selected {
-  border-color: var(--primary-color);
+  border-color: var(--primary-green);
   background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
   color: white;
-  box-shadow: 0 4px 16px rgba(79, 207, 97, 0.3);
+  box-shadow: 0 4px 16px rgba(129, 224, 83, 0.3);
 }
 
 .option-icon {
@@ -2682,7 +2682,7 @@ h2.section-title::after {
 }
 
 .section-header:hover {
-  border-color: var(--primary-color);
+  border-color: var(--primary-green);
   background: #f8fffe;
 }
 
@@ -2694,7 +2694,7 @@ h2.section-title::after {
 
 .dropdown-arrow {
   font-size: 0.8rem;
-  color: var(--primary-color);
+  color: var(--primary-green);
   transition: transform 0.2s ease;
 }
 
@@ -2743,7 +2743,7 @@ h2.section-title::after {
 
 .preference-checkbox-item:hover,
 .preference-radio-item:hover {
-  border-color: var(--primary-color);
+  border-color: var(--primary-green);
   background: #f8fffe;
 }
 
@@ -2752,7 +2752,7 @@ h2.section-title::after {
   width: 16px;
   height: 16px;
   cursor: pointer;
-  accent-color: var(--primary-color);
+  accent-color: var(--primary-green);
 }
 
 .checkbox-label,
@@ -2789,7 +2789,7 @@ h2.section-title::after {
 
 .custom-text-input:focus {
   outline: none;
-  border-color: var(--primary-color);
+  border-color: var(--primary-green);
   box-shadow: 0 0 0 3px rgba(79, 207, 97, 0.1);
 }
 
@@ -2813,16 +2813,16 @@ h2.section-title::after {
 }
 
 .cooking-time-option:hover {
-  border-color: var(--primary-color);
+  border-color: var(--primary-green);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(79, 207, 97, 0.15);
 }
 
 .cooking-time-option.selected {
-  border-color: var(--primary-color);
+  border-color: var(--primary-green);
   background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
   color: white;
-  box-shadow: 0 4px 16px rgba(79, 207, 97, 0.3);
+  box-shadow: 0 4px 16px rgba(129, 224, 83, 0.3);
 }
 
 .cooking-time-option .option-icon {

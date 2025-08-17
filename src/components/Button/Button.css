@@ -50,15 +50,15 @@
 
 /* Primary - Green background, white text */
 .button--primary {
-  background: #4fcf61;
+  background: var(--primary-green);
   color: white;
-  box-shadow: 0 4px 15px rgba(79, 207, 97, 0.3);
+  box-shadow: 0 4px 15px rgba(129, 224, 83, 0.3);
 }
 
 .button--primary:hover:not(:disabled) {
-  background: #3ba54a;
+  background: var(--primary-green-dark);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(79, 207, 97, 0.4);
+  box-shadow: 0 6px 20px rgba(129, 224, 83, 0.4);
 }
 
 /* Secondary - Black background, white text (like your Download App button) */
@@ -77,16 +77,16 @@
 /* Outline - Transparent background, border */
 .button--outline {
   background: transparent;
-  color: #4fcf61;
-  border: 1px solid #4fcf61;
+  color: var(--primary-green);
+  border: 1px solid var(--primary-green);
   box-shadow: none;
 }
 
 .button--outline:hover:not(:disabled) {
-  background: #4fcf61;
+  background: var(--primary-green);
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(79, 207, 97, 0.3);
+  box-shadow: 0 4px 15px rgba(129, 224, 83, 0.3);
 }
 
 /* Ghost - Transparent background, no border */

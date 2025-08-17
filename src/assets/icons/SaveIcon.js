@@ -1,6 +1,6 @@
 import React from 'react';
 
-const SaveIcon = ({ size = 32, color = "#4fcf61" }) => (
+const SaveIcon = ({ size = 32, color = "#81e053" }) => (
   <svg
     width={size}
     height={size}

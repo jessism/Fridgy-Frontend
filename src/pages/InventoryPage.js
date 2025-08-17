@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
-import BatchCamera from '../features/batchcamera/components/BatchCamera';
+import StreamlinedCamera from '../features/batchcamera/components/StreamlinedCamera';
 import { EditIcon, DeleteIcon } from '../components/icons';
 import useInventory from '../hooks/useInventory';
 import { getItemIconIcons8, getExpiryStatus, formatQuantity } from '../assets/inventory_emojis/iconHelpers.js';
@@ -11,14 +11,13 @@ import './InventoryPage.css';
 const InventoryPage = () => {
   const { items: inventoryItems, loading, error, refreshInventory, deleteItem, updateItem } = useInventory();
 
-  const [showAddDropdown, setShowAddDropdown] = useState(false);
-  const [dropdownTimeout, setDropdownTimeout] = useState(null);
   const [showCameraModal, setShowCameraModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [itemToEdit, setItemToEdit] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('all');
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -146,6 +145,56 @@ const InventoryPage = () => {
     };
   }, [openDropdownId]);
 
+  // Filter items based on active filter
+  const getFilteredItems = () => {
+    if (!inventoryItems) return [];
+    
+    switch (activeFilter) {
+      case 'expiring-soon':
+        return inventoryItems.filter(item => {
+          const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
+          return daysUntilExpiry >= 0 && daysUntilExpiry <= 3;
+        });
+      case 'expired':
+        return inventoryItems.filter(item => {
+          const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
+          return daysUntilExpiry < 0;
+        });
+      case 'by-category':
+      case 'all':
+      default:
+        return inventoryItems;
+    }
+  };
+
+  // Group items by category when "By Category" filter is active
+  const getGroupedItems = () => {
+    const filtered = getFilteredItems();
+    if (activeFilter !== 'by-category') {
+      return { ungrouped: filtered };
+    }
+    
+    const grouped = {};
+    filtered.forEach(item => {
+      const category = item.category || 'Uncategorized';
+      if (!grouped[category]) {
+        grouped[category] = [];
+      }
+      grouped[category].push(item);
+    });
+    
+    // Sort categories alphabetically
+    const sortedGrouped = {};
+    Object.keys(grouped).sort().forEach(category => {
+      sortedGrouped[category] = grouped[category];
+    });
+    
+    return sortedGrouped;
+  };
+
+  const filteredItems = getFilteredItems();
+  const groupedItems = getGroupedItems();
+
   return (
     <div className="inventory-page">
       <AppNavBar />
@@ -157,7 +206,7 @@ const InventoryPage = () => {
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             marginBottom: '2rem',
             flexWrap: 'wrap',
             gap: '1rem'
@@ -185,7 +234,8 @@ const InventoryPage = () => {
               display: 'flex',
               gap: '1rem',
               alignItems: 'center',
-              flexWrap: 'wrap'
+              flexWrap: 'wrap',
+              justifyContent: 'flex-end'
             }}>
               <div style={{
                 position: 'relative',
@@ -204,128 +254,126 @@ const InventoryPage = () => {
                     outline: 'none'
                   }}
                 />
-                <span style={{
+                <svg style={{
                   position: 'absolute',
                   left: '0.75rem',
-                  color: '#666'
-                }}>🔍</span>
+                  top: '50%',
+                  transform: 'translateY(-50%)'
+                }} width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="11" cy="11" r="8" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="m21 21-4.35-4.35" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
               </div>
               
               <div style={{
-                position: 'relative',
-                display: 'inline-block'
-              }}
-              onMouseEnter={() => {
-                if (dropdownTimeout) {
-                  clearTimeout(dropdownTimeout);
-                  setDropdownTimeout(null);
-                }
-                setShowAddDropdown(true);
-              }}
-              onMouseLeave={() => {
-                const timeout = setTimeout(() => {
-                  setShowAddDropdown(false);
-                }, 300); // 300ms delay before closing
-                setDropdownTimeout(timeout);
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem'
               }}>
-                <button style={{
-                  padding: '0.75rem 1.5rem',
-                  background: 'var(--primary-green)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '0.9rem',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}>
-                  + Add Item
+                {/* Main Add Item Button - Opens Camera Directly */}
+                <button 
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    background: 'var(--primary-green)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '0.9rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                  onClick={() => setShowCameraModal(true)}
+                >
+                  📷 Add Item
                 </button>
                 
-                {/* Dropdown Menu */}
-                {showAddDropdown && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '100%',
-                    right: '0',
-                    marginTop: '0.5rem',
-                    background: 'white',
+                {/* Manual Entry Toggle */}
+                <button
+                  style={{
+                    padding: '0.5rem 1rem',
+                    background: 'transparent',
+                    color: '#666',
                     border: '1px solid #e0e0e0',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                    zIndex: 1000,
-                    minWidth: '160px'
+                    borderRadius: '6px',
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
                   }}
-                  onMouseEnter={() => {
-                    if (dropdownTimeout) {
-                      clearTimeout(dropdownTimeout);
-                      setDropdownTimeout(null);
-                    }
+                  onMouseEnter={(e) => {
+                    e.target.style.background = '#f8f9fa';
+                    e.target.style.borderColor = '#c0c0c0';
                   }}
-                  onMouseLeave={() => {
-                    const timeout = setTimeout(() => {
-                      setShowAddDropdown(false);
-                    }, 300); // 300ms delay before closing
-                    setDropdownTimeout(timeout);
-                  }}>
-                    <button style={{
-                      width: '100%',
-                      padding: '0.75rem 1rem',
-                      background: 'none',
-                      border: 'none',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      fontSize: '0.9rem',
-                      color: '#333',
-                      borderBottom: '1px solid #f0f0f0',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.background = '#f8f9fa';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.background = 'none';
-                    }}
-                    onClick={() => {
-                      setShowCameraModal(true);
-                      setShowAddDropdown(false);
-                    }}>
-                      📷 Scan Items
-                    </button>
-                    <button style={{
-                      width: '100%',
-                      padding: '0.75rem 1rem',
-                      background: 'none',
-                      border: 'none',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      fontSize: '0.9rem',
-                      color: '#333',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.background = '#f8f9fa';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.background = 'none';
-                    }}
-                    onClick={() => {
-                      console.log('Add manually clicked');
-                      setShowAddDropdown(false);
-                    }}>
-                      ✏️ Add Manually
-                    </button>
-                  </div>
-                )}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'transparent';
+                    e.target.style.borderColor = '#e0e0e0';
+                  }}
+                  onClick={() => {
+                    console.log('Manual entry clicked');
+                    // TODO: Implement manual entry modal
+                  }}
+                >
+                  ✏️ Manual
+                </button>
               </div>
             </div>
           </div>
+
+          {/* Filter Pills */}
+          {!loading && !error && inventoryItems.length > 0 && (
+            <div style={{
+              display: 'flex',
+              gap: '0.5rem',
+              marginBottom: '1.5rem',
+              overflowX: 'auto',
+              paddingBottom: '0.25rem',
+              alignItems: 'center',
+              WebkitOverflowScrolling: 'touch'
+            }}>
+              {[
+                { key: 'all', label: 'All' },
+                { key: 'by-category', label: 'Category' },
+                { key: 'expiring-soon', label: 'Expiring' },
+                { key: 'expired', label: 'Expired' }
+              ].map((filter) => (
+                <button
+                  key={filter.key}
+                  onClick={() => setActiveFilter(filter.key)}
+                  style={{
+                    padding: '0.4rem 0.8rem',
+                    borderRadius: '18px',
+                    border: activeFilter === filter.key ? '1px solid var(--primary-green)' : '1px solid #e0e0e0',
+                    background: activeFilter === filter.key ? 'var(--primary-green)' : 'white',
+                    color: activeFilter === filter.key ? 'white' : '#666',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    fontWeight: activeFilter === filter.key ? '600' : '400',
+                    transition: 'all 0.2s ease',
+                    outline: 'none',
+                    whiteSpace: 'nowrap',
+                    minWidth: 'fit-content',
+                    flexShrink: 0
+                  }}
+                  onMouseEnter={(e) => {
+                    if (activeFilter !== filter.key) {
+                      e.target.style.borderColor = '#c0c0c0';
+                      e.target.style.background = '#f8f9fa';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (activeFilter !== filter.key) {
+                      e.target.style.borderColor = '#e0e0e0';
+                      e.target.style.background = 'white';
+                    }
+                  }}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Loading State */}
           {loading && (
@@ -409,8 +457,36 @@ const InventoryPage = () => {
             </div>
           )}
 
+          {/* No Results State */}
+          {!loading && !error && inventoryItems.length > 0 && filteredItems.length === 0 && (
+            <div style={{
+              background: 'white',
+              borderRadius: '12px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              padding: '3rem',
+              textAlign: 'center'
+            }}>
+              <h3 style={{ color: '#666', marginBottom: '1rem' }}>No items match your filter</h3>
+              <p style={{ color: '#999', marginBottom: '2rem' }}>Try selecting a different filter or add more items to your inventory.</p>
+              <button 
+                style={{
+                  padding: '0.5rem 1.5rem',
+                  background: 'var(--primary-green)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '0.9rem',
+                  cursor: 'pointer'
+                }}
+                onClick={() => setActiveFilter('all')}
+              >
+                Show All Items
+              </button>
+            </div>
+          )}
+
           {/* Inventory Table - Desktop */}
-          {!loading && !error && inventoryItems.length > 0 && (
+          {!loading && !error && inventoryItems.length > 0 && filteredItems.length > 0 && (
             <div className="inventory-page__table-container" style={{
               background: 'white',
               borderRadius: '12px',
@@ -496,132 +572,286 @@ const InventoryPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {inventoryItems.map((item) => {
-                    const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
-                    return (
-                      <tr key={item.id} style={{
-                        borderBottom: '1px solid #f0f0f0',
-                        transition: 'background-color 0.2s'
-                      }} onMouseEnter={(e) => {
-                        e.target.closest('tr').style.backgroundColor = '#f8f9fa';
-                      }} onMouseLeave={(e) => {
-                        e.target.closest('tr').style.backgroundColor = 'transparent';
-                      }}>
-                        <td style={{padding: '1rem'}}>
-                          <input type="checkbox" readOnly />
-                        </td>
-                        <td style={{padding: '1rem'}}>
-                          <span style={{
-                            padding: '0.25rem 0.75rem',
-                            background: '#f8f9fa',
-                            color: '#333',
-                            borderRadius: '20px',
-                            fontSize: '0.8rem',
-                            fontWeight: '500',
-                            border: '1px solid #e0e0e0'
+                  {activeFilter === 'by-category' ? (
+                    // Grouped by category
+                    Object.entries(groupedItems).map(([category, items]) => (
+                      <React.Fragment key={category}>
+                        {/* Category header row */}
+                        <tr style={{
+                          backgroundColor: '#f8f9fa',
+                          borderTop: '2px solid #e9ecef'
+                        }}>
+                          <td colSpan="7" style={{
+                            padding: '0.75rem 1rem',
+                            fontWeight: '600',
+                            fontSize: '1rem',
+                            color: '#495057',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px'
                           }}>
-                            {item.category}
-                          </span>
-                        </td>
-                        <td style={{padding: '1rem', fontWeight: '500'}}>
-                          {item.itemName}
-                        </td>
-                        <td style={{padding: '1rem', color: '#666'}}>
-                          {item.quantity}
-                        </td>
-                        <td style={{padding: '1rem'}}>
-                          <div>
-                            <div style={{fontWeight: '500'}}>
-                              {formatDate(item.expiryDate)}
-                            </div>
-                            <div style={{
-                              fontSize: '0.8rem',
-                              color: daysUntilExpiry < 0 ? '#F44336' : 
-                                     daysUntilExpiry <= 3 ? '#FF5722' : '#666'
+                            {category}
+                          </td>
+                        </tr>
+                        {/* Category items */}
+                        {items.map((item) => {
+                          const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
+                          return (
+                            <tr key={item.id} style={{
+                              borderBottom: '1px solid #f0f0f0',
+                              transition: 'background-color 0.2s'
+                            }} onMouseEnter={(e) => {
+                              e.target.closest('tr').style.backgroundColor = '#f8f9fa';
+                            }} onMouseLeave={(e) => {
+                              e.target.closest('tr').style.backgroundColor = 'transparent';
                             }}>
-                              {daysUntilExpiry < 0 ? `${Math.abs(daysUntilExpiry)} days ago` :
-                               daysUntilExpiry === 0 ? 'Today' :
-                               daysUntilExpiry === 1 ? 'Tomorrow' :
-                               `${daysUntilExpiry} days left`}
+                              <td style={{padding: '1rem'}}>
+                                <input type="checkbox" readOnly />
+                              </td>
+                              <td style={{padding: '1rem'}}>
+                                <span style={{
+                                  padding: '0.25rem 0.75rem',
+                                  background: '#f8f9fa',
+                                  color: '#333',
+                                  borderRadius: '20px',
+                                  fontSize: '0.8rem',
+                                  fontWeight: '500',
+                                  border: '1px solid #e0e0e0'
+                                }}>
+                                  {item.category}
+                                </span>
+                              </td>
+                              <td style={{padding: '1rem', fontWeight: '500'}}>
+                                {item.itemName}
+                              </td>
+                              <td style={{padding: '1rem', color: '#666'}}>
+                                {item.quantity}
+                              </td>
+                              <td style={{padding: '1rem'}}>
+                                <div>
+                                  <div style={{fontWeight: '500'}}>
+                                    {formatDate(item.expiryDate)}
+                                  </div>
+                                  <div style={{
+                                    fontSize: '0.8rem',
+                                    color: daysUntilExpiry < 0 ? '#F44336' : 
+                                           daysUntilExpiry <= 3 ? '#FF5722' : '#666'
+                                  }}>
+                                    {daysUntilExpiry < 0 ? `${Math.abs(daysUntilExpiry)} days ago` :
+                                     daysUntilExpiry === 0 ? 'Today' :
+                                     daysUntilExpiry === 1 ? 'Tomorrow' :
+                                     `${daysUntilExpiry} days left`}
+                                  </div>
+                                </div>
+                              </td>
+                              <td style={{padding: '1rem'}}>
+                                <span style={{
+                                  padding: '0.25rem 0.75rem',
+                                  background: `${getStatusColor(item.status)}20`,
+                                  color: getStatusColor(item.status),
+                                  borderRadius: '20px',
+                                  fontSize: '0.8rem',
+                                  fontWeight: '500'
+                                }}>
+                                  {item.status}
+                                </span>
+                              </td>
+                              <td style={{padding: '1rem'}}>
+                                <div style={{
+                                  display: 'flex',
+                                  gap: '0.5rem',
+                                  alignItems: 'center'
+                                }}>
+                                  <button style={{
+                                    background: '#f8f9fa',
+                                    border: '1px solid #e0e0e0',
+                                    cursor: 'pointer',
+                                    padding: '0.5rem',
+                                    borderRadius: '6px',
+                                    color: '#666',
+                                    fontSize: '1rem',
+                                    width: '32px',
+                                    height: '32px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    transition: 'all 0.2s ease'
+                                  }} 
+                                  onMouseEnter={(e) => {
+                                    e.target.style.background = '#e9ecef';
+                                    e.target.style.borderColor = '#adb5bd';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.target.style.background = '#f8f9fa';
+                                    e.target.style.borderColor = '#e0e0e0';
+                                  }}
+                                  onClick={() => handleEditItem(item)}
+                                  title="Edit">
+                                    <EditIcon />
+                                  </button>
+                                  <button style={{
+                                    background: '#f8f9fa',
+                                    border: '1px solid #e0e0e0',
+                                    cursor: 'pointer',
+                                    padding: '0.5rem',
+                                    borderRadius: '6px',
+                                    color: '#666',
+                                    fontSize: '1rem',
+                                    width: '32px',
+                                    height: '32px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    transition: 'all 0.2s ease'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.target.style.background = '#e9ecef';
+                                    e.target.style.borderColor = '#adb5bd';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.target.style.background = '#f8f9fa';
+                                    e.target.style.borderColor = '#e0e0e0';
+                                  }}
+                                  onClick={() => handleDeleteItem(item)}
+                                  title="Delete">
+                                    <DeleteIcon />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </React.Fragment>
+                    ))
+                  ) : (
+                    // Regular list view
+                    filteredItems.map((item) => {
+                      const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
+                      return (
+                        <tr key={item.id} style={{
+                          borderBottom: '1px solid #f0f0f0',
+                          transition: 'background-color 0.2s'
+                        }} onMouseEnter={(e) => {
+                          e.target.closest('tr').style.backgroundColor = '#f8f9fa';
+                        }} onMouseLeave={(e) => {
+                          e.target.closest('tr').style.backgroundColor = 'transparent';
+                        }}>
+                          <td style={{padding: '1rem'}}>
+                            <input type="checkbox" readOnly />
+                          </td>
+                          <td style={{padding: '1rem'}}>
+                            <span style={{
+                              padding: '0.25rem 0.75rem',
+                              background: '#f8f9fa',
+                              color: '#333',
+                              borderRadius: '20px',
+                              fontSize: '0.8rem',
+                              fontWeight: '500',
+                              border: '1px solid #e0e0e0'
+                            }}>
+                              {item.category}
+                            </span>
+                          </td>
+                          <td style={{padding: '1rem', fontWeight: '500'}}>
+                            {item.itemName}
+                          </td>
+                          <td style={{padding: '1rem', color: '#666'}}>
+                            {item.quantity}
+                          </td>
+                          <td style={{padding: '1rem'}}>
+                            <div>
+                              <div style={{fontWeight: '500'}}>
+                                {formatDate(item.expiryDate)}
+                              </div>
+                              <div style={{
+                                fontSize: '0.8rem',
+                                color: daysUntilExpiry < 0 ? '#F44336' : 
+                                       daysUntilExpiry <= 3 ? '#FF5722' : '#666'
+                              }}>
+                                {daysUntilExpiry < 0 ? `${Math.abs(daysUntilExpiry)} days ago` :
+                                 daysUntilExpiry === 0 ? 'Today' :
+                                 daysUntilExpiry === 1 ? 'Tomorrow' :
+                                 `${daysUntilExpiry} days left`}
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td style={{padding: '1rem'}}>
-                          <span style={{
-                            padding: '0.25rem 0.75rem',
-                            background: `${getStatusColor(item.status)}20`,
-                            color: getStatusColor(item.status),
-                            borderRadius: '20px',
-                            fontSize: '0.8rem',
-                            fontWeight: '500'
-                          }}>
-                            {item.status}
-                          </span>
-                        </td>
-                        <td style={{padding: '1rem'}}>
-                          <div style={{
-                            display: 'flex',
-                            gap: '0.5rem',
-                            alignItems: 'center'
-                          }}>
-                            <button style={{
-                              background: '#f8f9fa',
-                              border: '1px solid #e0e0e0',
-                              cursor: 'pointer',
-                              padding: '0.5rem',
-                              borderRadius: '6px',
-                              color: '#666',
-                              fontSize: '1rem',
-                              width: '32px',
-                              height: '32px',
+                          </td>
+                          <td style={{padding: '1rem'}}>
+                            <span style={{
+                              padding: '0.25rem 0.75rem',
+                              background: `${getStatusColor(item.status)}20`,
+                              color: getStatusColor(item.status),
+                              borderRadius: '20px',
+                              fontSize: '0.8rem',
+                              fontWeight: '500'
+                            }}>
+                              {item.status}
+                            </span>
+                          </td>
+                          <td style={{padding: '1rem'}}>
+                            <div style={{
                               display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              transition: 'all 0.2s ease'
-                            }} 
-                            onMouseEnter={(e) => {
-                              e.target.style.background = '#e9ecef';
-                              e.target.style.borderColor = '#adb5bd';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.target.style.background = '#f8f9fa';
-                              e.target.style.borderColor = '#e0e0e0';
-                            }}
-                            title="Edit">
-                              <EditIcon />
-                            </button>
-                            <button style={{
-                              background: '#f8f9fa',
-                              border: '1px solid #e0e0e0',
-                              cursor: 'pointer',
-                              padding: '0.5rem',
-                              borderRadius: '6px',
-                              color: '#666',
-                              fontSize: '1rem',
-                              width: '32px',
-                              height: '32px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              transition: 'all 0.2s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                              e.target.style.background = '#e9ecef';
-                              e.target.style.borderColor = '#adb5bd';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.target.style.background = '#f8f9fa';
-                              e.target.style.borderColor = '#e0e0e0';
-                            }}
-                            onClick={() => handleDeleteItem(item)}
-                            title="Delete">
-                              <DeleteIcon />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                              gap: '0.5rem',
+                              alignItems: 'center'
+                            }}>
+                              <button style={{
+                                background: '#f8f9fa',
+                                border: '1px solid #e0e0e0',
+                                cursor: 'pointer',
+                                padding: '0.5rem',
+                                borderRadius: '6px',
+                                color: '#666',
+                                fontSize: '1rem',
+                                width: '32px',
+                                height: '32px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s ease'
+                              }} 
+                              onMouseEnter={(e) => {
+                                e.target.style.background = '#e9ecef';
+                                e.target.style.borderColor = '#adb5bd';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.background = '#f8f9fa';
+                                e.target.style.borderColor = '#e0e0e0';
+                              }}
+                              onClick={() => handleEditItem(item)}
+                              title="Edit">
+                                <EditIcon />
+                              </button>
+                              <button style={{
+                                background: '#f8f9fa',
+                                border: '1px solid #e0e0e0',
+                                cursor: 'pointer',
+                                padding: '0.5rem',
+                                borderRadius: '6px',
+                                color: '#666',
+                                fontSize: '1rem',
+                                width: '32px',
+                                height: '32px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s ease'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.target.style.background = '#e9ecef';
+                                e.target.style.borderColor = '#adb5bd';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.background = '#f8f9fa';
+                                e.target.style.borderColor = '#e0e0e0';
+                              }}
+                              onClick={() => handleDeleteItem(item)}
+                              title="Delete">
+                                <DeleteIcon />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
@@ -629,90 +859,197 @@ const InventoryPage = () => {
           )}
 
           {/* Inventory Cards - Mobile */}
-          {!loading && !error && inventoryItems.length > 0 && (
+          {!loading && !error && inventoryItems.length > 0 && filteredItems.length > 0 && (
             <div className="inventory-page__mobile-cards">
-              {inventoryItems.map((item) => {
-                const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
-                const { status, urgency } = getExpiryStatus(daysUntilExpiry);
-                const itemIcon = getItemIconIcons8(item.category, item.itemName, { 
-                  size: 28
-                });
-                const formattedQuantity = formatQuantity(item.quantity);
-                
-                const getStatusPillClass = (urgency) => {
-                  switch (urgency) {
-                    case 'expired': return 'inventory-page__card-status-pill--expired';
-                    case 'expiring': return 'inventory-page__card-status-pill--expiring';
-                    case 'warning': return 'inventory-page__card-status-pill--warning';
-                    case 'good': return 'inventory-page__card-status-pill--good';
-                    default: return 'inventory-page__card-status-pill--good';
-                  }
-                };
-
-                return (
-                  <div key={item.id} className="inventory-page__mobile-card">
-                    {/* Left: Emoji icon */}
-                    <div className="inventory-page__card-icon">
-                      {itemIcon}
-                    </div>
-                    
-                    {/* Right: Content */}
-                    <div className="inventory-page__card-content">
-                      {/* Top: Item name + status pill on same line */}
-                      <div className="inventory-page__card-name-row">
-                        <h3 className="inventory-page__card-item-name">{item.itemName}</h3>
-                        <span className={`inventory-page__card-status-pill ${getStatusPillClass(urgency)}`}>
-                          {status}
-                        </span>
-                      </div>
+              {activeFilter === 'by-category' ? (
+                // Grouped by category
+                Object.entries(groupedItems).map(([category, items]) => (
+                  <div key={category}>
+                    {/* Category header */}
+                    <h3 style={{
+                      margin: '1.5rem 0 1rem 0',
+                      padding: '0.5rem 1rem',
+                      background: '#f8f9fa',
+                      borderRadius: '8px',
+                      fontSize: '1rem',
+                      fontWeight: '600',
+                      color: '#495057',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      border: '1px solid #e9ecef'
+                    }}>
+                      {category}
+                    </h3>
+                    {/* Category items */}
+                    {items.map((item) => {
+                      const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
+                      const { status, urgency } = getExpiryStatus(daysUntilExpiry);
+                      const itemIcon = getItemIconIcons8(item.category, item.itemName, { 
+                        size: 28
+                      });
+                      const formattedQuantity = formatQuantity(item.quantity);
                       
-                      {/* Bottom: Details row with quantity and category */}
-                      <div className="inventory-page__card-details-row">
-                        <span className="inventory-page__card-text-info">
-                          Qty: {formattedQuantity}
-                        </span>
-                        <span className="inventory-page__card-text-info">
-                          {item.category}
-                        </span>
-                      </div>
-                    </div>
+                      const getStatusPillClass = (urgency) => {
+                        switch (urgency) {
+                          case 'expired': return 'inventory-page__card-status-pill--expired';
+                          case 'expiring': return 'inventory-page__card-status-pill--expiring';
+                          case 'warning': return 'inventory-page__card-status-pill--warning';
+                          case 'good': return 'inventory-page__card-status-pill--good';
+                          default: return 'inventory-page__card-status-pill--good';
+                        }
+                      };
 
-                    {/* Top-right: 3-dot menu */}
-                    <div className="inventory-page__card-menu">
-                      <button 
-                        className="inventory-page__card-menu-btn"
-                        onClick={() => handleDropdownToggle(item.id)}
-                        title="Options"
-                      >
-                        ⋮
-                      </button>
-                      
-                      {/* Dropdown menu */}
-                      {openDropdownId === item.id && (
-                        <>
-                          <div className="inventory-page__dropdown-overlay" onClick={handleDropdownClose}></div>
-                          <div className="inventory-page__dropdown-menu">
-                            <button 
-                              className="inventory-page__dropdown-option"
-                              onClick={() => handleEditItem(item)}
-                            >
-                              <EditIcon />
-                              <span>Edit</span>
-                            </button>
-                            <button 
-                              className="inventory-page__dropdown-option"
-                              onClick={() => handleDeleteItemFromDropdown(item)}
-                            >
-                              <DeleteIcon />
-                              <span>Delete</span>
-                            </button>
+                      return (
+                        <div key={item.id} className="inventory-page__mobile-card">
+                          {/* Left: Emoji icon */}
+                          <div className="inventory-page__card-icon">
+                            {itemIcon}
                           </div>
-                        </>
-                      )}
-                    </div>
+                          
+                          {/* Right: Content */}
+                          <div className="inventory-page__card-content">
+                            {/* Top: Item name + status pill on same line */}
+                            <div className="inventory-page__card-name-row">
+                              <h3 className="inventory-page__card-item-name">{item.itemName}</h3>
+                              <span className={`inventory-page__card-status-pill ${getStatusPillClass(urgency)}`}>
+                                {status}
+                              </span>
+                            </div>
+                            
+                            {/* Bottom: Details row with quantity and category */}
+                            <div className="inventory-page__card-details-row">
+                              <span className="inventory-page__card-text-info">
+                                Qty: {formattedQuantity}
+                              </span>
+                              <span className="inventory-page__card-text-info">
+                                {item.category}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Top-right: 3-dot menu */}
+                          <div className="inventory-page__card-menu">
+                            <button 
+                              className="inventory-page__card-menu-btn"
+                              onClick={() => handleDropdownToggle(item.id)}
+                              title="Options"
+                            >
+                              ⋮
+                            </button>
+                            
+                            {/* Dropdown menu */}
+                            {openDropdownId === item.id && (
+                              <>
+                                <div className="inventory-page__dropdown-overlay" onClick={handleDropdownClose}></div>
+                                <div className="inventory-page__dropdown-menu">
+                                  <button 
+                                    className="inventory-page__dropdown-option"
+                                    onClick={() => handleEditItem(item)}
+                                  >
+                                    <EditIcon />
+                                    <span>Edit</span>
+                                  </button>
+                                  <button 
+                                    className="inventory-page__dropdown-option"
+                                    onClick={() => handleDeleteItemFromDropdown(item)}
+                                  >
+                                    <DeleteIcon />
+                                    <span>Delete</span>
+                                  </button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
+                ))
+              ) : (
+                // Regular list view
+                filteredItems.map((item) => {
+                  const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
+                  const { status, urgency } = getExpiryStatus(daysUntilExpiry);
+                  const itemIcon = getItemIconIcons8(item.category, item.itemName, { 
+                    size: 28
+                  });
+                  const formattedQuantity = formatQuantity(item.quantity);
+                  
+                  const getStatusPillClass = (urgency) => {
+                    switch (urgency) {
+                      case 'expired': return 'inventory-page__card-status-pill--expired';
+                      case 'expiring': return 'inventory-page__card-status-pill--expiring';
+                      case 'warning': return 'inventory-page__card-status-pill--warning';
+                      case 'good': return 'inventory-page__card-status-pill--good';
+                      default: return 'inventory-page__card-status-pill--good';
+                    }
+                  };
+
+                  return (
+                    <div key={item.id} className="inventory-page__mobile-card">
+                      {/* Left: Emoji icon */}
+                      <div className="inventory-page__card-icon">
+                        {itemIcon}
+                      </div>
+                      
+                      {/* Right: Content */}
+                      <div className="inventory-page__card-content">
+                        {/* Top: Item name + status pill on same line */}
+                        <div className="inventory-page__card-name-row">
+                          <h3 className="inventory-page__card-item-name">{item.itemName}</h3>
+                          <span className={`inventory-page__card-status-pill ${getStatusPillClass(urgency)}`}>
+                            {status}
+                          </span>
+                        </div>
+                        
+                        {/* Bottom: Details row with quantity and category */}
+                        <div className="inventory-page__card-details-row">
+                          <span className="inventory-page__card-text-info">
+                            Qty: {formattedQuantity}
+                          </span>
+                          <span className="inventory-page__card-text-info">
+                            {item.category}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Top-right: 3-dot menu */}
+                      <div className="inventory-page__card-menu">
+                        <button 
+                          className="inventory-page__card-menu-btn"
+                          onClick={() => handleDropdownToggle(item.id)}
+                          title="Options"
+                        >
+                          ⋮
+                        </button>
+                        
+                        {/* Dropdown menu */}
+                        {openDropdownId === item.id && (
+                          <>
+                            <div className="inventory-page__dropdown-overlay" onClick={handleDropdownClose}></div>
+                            <div className="inventory-page__dropdown-menu">
+                              <button 
+                                className="inventory-page__dropdown-option"
+                                onClick={() => handleEditItem(item)}
+                              >
+                                <EditIcon />
+                                <span>Edit</span>
+                              </button>
+                              <button 
+                                className="inventory-page__dropdown-option"
+                                onClick={() => handleDeleteItemFromDropdown(item)}
+                              >
+                                <DeleteIcon />
+                                <span>Delete</span>
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           )}
         </div>
@@ -723,7 +1060,7 @@ const InventoryPage = () => {
         <div className="camera-modal-overlay">
           <div className="camera-modal">
             <div className="camera-modal-header">
-              <h2>Scan Items</h2>
+              <h2>Add Items</h2>
               <button 
                 className="close-modal-btn"
                 onClick={() => setShowCameraModal(false)}
@@ -731,7 +1068,7 @@ const InventoryPage = () => {
                 ✕
               </button>
             </div>
-            <BatchCamera onComplete={handleCameraModalClose} />
+            <StreamlinedCamera onComplete={handleCameraModalClose} />
           </div>
         </div>
       )}
