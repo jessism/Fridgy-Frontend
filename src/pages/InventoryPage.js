@@ -1,20 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import BatchCamera from '../features/batchcamera/components/BatchCamera';
 import { EditIcon, DeleteIcon } from '../components/icons';
 import useInventory from '../hooks/useInventory';
+import { getItemIcon, getExpiryStatus, formatQuantity } from '../assets/inventory_emojis/iconHelpers.js';
 import './HomePage.css'; // Now in the same directory
 
 const InventoryPage = () => {
-  const { items: inventoryItems, loading, error, refreshInventory, deleteItem } = useInventory();
+  const { items: inventoryItems, loading, error, refreshInventory, deleteItem, updateItem } = useInventory();
 
   const [showAddDropdown, setShowAddDropdown] = useState(false);
   const [dropdownTimeout, setDropdownTimeout] = useState(null);
   const [showCameraModal, setShowCameraModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [itemToEdit, setItemToEdit] = useState(null);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -82,13 +86,73 @@ const InventoryPage = () => {
     setItemToDelete(null);
   };
 
+  // Dropdown menu handlers
+  const handleDropdownToggle = (itemId) => {
+    setOpenDropdownId(openDropdownId === itemId ? null : itemId);
+  };
+
+  const handleDropdownClose = () => {
+    setOpenDropdownId(null);
+  };
+
+  // Edit handlers
+  const handleEditItem = (item) => {
+    setItemToEdit(item);
+    setShowEditModal(true);
+    setOpenDropdownId(null);
+  };
+
+  const handleEditCancel = () => {
+    setShowEditModal(false);
+    setItemToEdit(null);
+  };
+
+  const handleEditConfirm = async (updatedData) => {
+    if (!itemToEdit) return;
+    
+    try {
+      await updateItem(itemToEdit.id, updatedData);
+      console.log('Item updated successfully');
+    } catch (error) {
+      console.error('Failed to update item:', error);
+      alert('Failed to update item. Please try again.');
+    } finally {
+      setShowEditModal(false);
+      setItemToEdit(null);
+    }
+  };
+
+  // Enhanced delete handler that closes dropdown
+  const handleDeleteItemFromDropdown = (item) => {
+    setItemToDelete(item);
+    setShowDeleteModal(true);
+    setOpenDropdownId(null);
+  };
+
+  // Handle keyboard events (ESC to close dropdown)
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setOpenDropdownId(null);
+      }
+    };
+
+    if (openDropdownId) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [openDropdownId]);
+
   return (
     <div className="homepage">
       <AppNavBar />
 
       {/* Inventory Content */}
       <div style={{paddingTop: '100px', minHeight: '100vh', background: 'white'}}>
-        <div className="container" style={{maxWidth: '1200px', margin: '0 auto', padding: '2rem'}}>
+        <div className="container" style={{maxWidth: '1200px', margin: '0 auto', padding: '2rem', overflow: 'visible'}}>
           {/* Header Section */}
           <div style={{
             display: 'flex',
@@ -345,9 +409,9 @@ const InventoryPage = () => {
             </div>
           )}
 
-          {/* Inventory Table */}
+          {/* Inventory Table - Desktop */}
           {!loading && !error && inventoryItems.length > 0 && (
-            <div style={{
+            <div className="inventory-page__table-container" style={{
               background: 'white',
               borderRadius: '12px',
               boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
@@ -561,7 +625,93 @@ const InventoryPage = () => {
                 </tbody>
               </table>
             </div>
-          </div>
+            </div>
+          )}
+
+          {/* Inventory Cards - Mobile */}
+          {!loading && !error && inventoryItems.length > 0 && (
+            <div className="inventory-page__mobile-cards">
+              {inventoryItems.map((item) => {
+                const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
+                const { status, urgency } = getExpiryStatus(daysUntilExpiry);
+                const itemIcon = getItemIcon(item.category, item.itemName);
+                const formattedQuantity = formatQuantity(item.quantity);
+                
+                const getStatusPillClass = (urgency) => {
+                  switch (urgency) {
+                    case 'expired': return 'inventory-page__card-status-pill--expired';
+                    case 'expiring': return 'inventory-page__card-status-pill--expiring';
+                    case 'warning': return 'inventory-page__card-status-pill--warning';
+                    case 'good': return 'inventory-page__card-status-pill--good';
+                    default: return 'inventory-page__card-status-pill--good';
+                  }
+                };
+
+                return (
+                  <div key={item.id} className="inventory-page__mobile-card">
+                    {/* Left: Emoji icon */}
+                    <div className="inventory-page__card-icon">
+                      {itemIcon}
+                    </div>
+                    
+                    {/* Right: Content */}
+                    <div className="inventory-page__card-content">
+                      {/* Top: Item name + status pill on same line */}
+                      <div className="inventory-page__card-name-row">
+                        <h3 className="inventory-page__card-item-name">{item.itemName}</h3>
+                        <span className={`inventory-page__card-status-pill ${getStatusPillClass(urgency)}`}>
+                          {status}
+                        </span>
+                      </div>
+                      
+                      {/* Bottom: Details row with quantity and category */}
+                      <div className="inventory-page__card-details-row">
+                        <span className="inventory-page__card-text-info">
+                          Qty: {formattedQuantity}
+                        </span>
+                        <span className="inventory-page__card-text-info">
+                          {item.category}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Top-right: 3-dot menu */}
+                    <div className="inventory-page__card-menu">
+                      <button 
+                        className="inventory-page__card-menu-btn"
+                        onClick={() => handleDropdownToggle(item.id)}
+                        title="Options"
+                      >
+                        ⋮
+                      </button>
+                      
+                      {/* Dropdown menu */}
+                      {openDropdownId === item.id && (
+                        <>
+                          <div className="inventory-page__dropdown-overlay" onClick={handleDropdownClose}></div>
+                          <div className="inventory-page__dropdown-menu">
+                            <button 
+                              className="inventory-page__dropdown-option"
+                              onClick={() => handleEditItem(item)}
+                            >
+                              <EditIcon />
+                              <span>Edit</span>
+                            </button>
+                            <button 
+                              className="inventory-page__dropdown-option"
+                              onClick={() => handleDeleteItemFromDropdown(item)}
+                            >
+                              <DeleteIcon />
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       </div>
@@ -580,6 +730,163 @@ const InventoryPage = () => {
               </button>
             </div>
             <BatchCamera onComplete={handleCameraModalClose} />
+          </div>
+        </div>
+      )}
+
+      {/* Edit Item Modal */}
+      {showEditModal && itemToEdit && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '2rem',
+            maxWidth: '400px',
+            width: '90%',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+          }}>
+            <h3 style={{
+              margin: '0 0 1.5rem 0',
+              fontSize: '1.25rem',
+              fontWeight: '600',
+              color: '#333'
+            }}>
+              Edit {itemToEdit.itemName}
+            </h3>
+            
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              handleEditConfirm({
+                itemName: formData.get('itemName'),
+                quantity: formData.get('quantity'),
+                category: formData.get('category'),
+                expiryDate: formData.get('expiryDate')
+              });
+            }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Item Name
+                </label>
+                <input 
+                  type="text" 
+                  name="itemName"
+                  defaultValue={itemToEdit.itemName}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #ddd',
+                    borderRadius: '8px',
+                    fontSize: '1rem'
+                  }}
+                  required
+                />
+              </div>
+              
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Quantity
+                </label>
+                <input 
+                  type="text" 
+                  name="quantity"
+                  defaultValue={itemToEdit.quantity}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #ddd',
+                    borderRadius: '8px',
+                    fontSize: '1rem'
+                  }}
+                  required
+                />
+              </div>
+              
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Category
+                </label>
+                <input 
+                  type="text" 
+                  name="category"
+                  defaultValue={itemToEdit.category}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #ddd',
+                    borderRadius: '8px',
+                    fontSize: '1rem'
+                  }}
+                  required
+                />
+              </div>
+              
+              <div style={{ marginBottom: '2rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Expiry Date
+                </label>
+                <input 
+                  type="date" 
+                  name="expiryDate"
+                  defaultValue={itemToEdit.expiryDate ? new Date(itemToEdit.expiryDate).toISOString().split('T')[0] : ''}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #ddd',
+                    borderRadius: '8px',
+                    fontSize: '1rem'
+                  }}
+                  required
+                />
+              </div>
+              
+              <div style={{
+                display: 'flex',
+                gap: '1rem',
+                justifyContent: 'flex-end'
+              }}>
+                <button
+                  type="button"
+                  onClick={handleEditCancel}
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    backgroundColor: '#f8f9fa',
+                    border: '1px solid #ddd',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '1rem'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    backgroundColor: 'var(--primary-green)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    fontWeight: '600'
+                  }}
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
