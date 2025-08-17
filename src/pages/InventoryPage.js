@@ -152,7 +152,7 @@ const InventoryPage = () => {
 
       {/* Inventory Content */}
       <div style={{paddingTop: '100px', minHeight: '100vh', background: 'white'}}>
-        <div className="container" style={{maxWidth: '1200px', margin: '0 auto', padding: '2rem', overflow: 'visible'}}>
+        <div className="container" style={{maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem', overflow: 'visible'}}>
           {/* Header Section */}
           <div style={{
             display: 'flex',
@@ -746,7 +746,7 @@ const InventoryPage = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 9999
+          zIndex: 10000
         }}>
           <div style={{
             backgroundColor: 'white',
@@ -754,7 +754,9 @@ const InventoryPage = () => {
             padding: '2rem',
             maxWidth: '400px',
             width: '90%',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+            boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+            zIndex: 10001,
+            position: 'relative'
           }}>
             <h3 style={{
               margin: '0 0 1.5rem 0',

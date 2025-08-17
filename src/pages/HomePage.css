@@ -2937,6 +2937,16 @@ h2.section-title::after {
 }
 
 @media (max-width: 768px) {
+  /* Reduce top padding on mobile for inventory content */
+  .homepage div[style*="paddingTop: 100px"] {
+    padding-top: 0px !important;
+  }
+  
+  /* Reduce container padding on mobile */
+  .homepage .container {
+    padding: 0.25rem 1rem !important;
+  }
+  
   /* Hide table on mobile */
   .inventory-page__table-container {
     display: none !important;
@@ -2949,27 +2959,29 @@ h2.section-title::after {
     gap: 0.75rem;
     padding: 0;
     overflow: visible;
+    margin: 0;
   }
   
-  /* Compact horizontal card layout like the screenshot */
+  /* Compact horizontal card layout - borderless design */
   .inventory-page__mobile-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 1rem;
+    background: transparent;
+    padding: 1rem 0.25rem;
     transition: all 0.2s ease;
-    border: 1px solid #f0f0f0;
     display: flex;
     align-items: center;
     gap: 1rem;
     min-height: 80px;
     position: relative;
     overflow: visible;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .inventory-page__mobile-card:last-child {
+    border-bottom: none;
   }
   
   .inventory-page__mobile-card:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: rgba(248, 249, 250, 0.5);
   }
   
   /* Left: Large emoji icon in rounded square background (like Mazda logo) */
@@ -2993,7 +3005,7 @@ h2.section-title::after {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    padding-right: 1.75rem;
+    padding-right: 0.75rem;
   }
   
   /* Top row: Item name + status pill */
@@ -3064,11 +3076,11 @@ h2.section-title::after {
     border: 1px solid rgba(244, 67, 54, 0.2);
   }
   
-  /* 3-dot menu in middle-right position */
+  /* 3-dot menu in middle-right position - moved further right */
   .inventory-page__card-menu {
     position: absolute;
     top: 50%;
-    right: 0.5rem;
+    right: -0.75rem;
     transform: translateY(-50%);
   }
   
