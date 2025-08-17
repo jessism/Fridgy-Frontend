@@ -6,7 +6,7 @@ import BatchCamera from '../features/batchcamera/components/BatchCamera';
 import { EditIcon, DeleteIcon } from '../components/icons';
 import useInventory from '../hooks/useInventory';
 import { getItemIcon, getExpiryStatus, formatQuantity } from '../assets/inventory_emojis/iconHelpers.js';
-import './HomePage.css'; // Now in the same directory
+import './InventoryPage.css';
 
 const InventoryPage = () => {
   const { items: inventoryItems, loading, error, refreshInventory, deleteItem, updateItem } = useInventory();
@@ -147,7 +147,7 @@ const InventoryPage = () => {
   }, [openDropdownId]);
 
   return (
-    <div className="homepage">
+    <div className="inventory-page">
       <AppNavBar />
 
       {/* Inventory Content */}
