@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 const SuccessModal = ({ 
   isOpen, 
@@ -6,6 +7,17 @@ const SuccessModal = ({
   savedItems = [], 
   itemCount = 0 
 }) => {
+  // Auto-close after 2 seconds
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleOkClick = () => {
@@ -18,9 +30,18 @@ const SuccessModal = ({
     }
   };
 
-  return (
+  const modalContent = (
     <div className="success-modal-overlay" onClick={handleOverlayClick}>
       <div className="success-modal">
+        {/* Close button */}
+        <button 
+          className="success-modal-close"
+          onClick={onClose}
+          title="Close"
+        >
+          ✕
+        </button>
+        
         <div className="success-modal-header">
           <div className="success-icon">🎉</div>
           <h2>Items Saved Successfully!</h2>
@@ -57,6 +78,9 @@ const SuccessModal = ({
       </div>
     </div>
   );
+
+  // Render using portal to break out of any parent containers
+  return createPortal(modalContent, document.body);
 };
 
 export default SuccessModal;

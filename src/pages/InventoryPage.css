@@ -307,10 +307,11 @@
 
 .camera-modal-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 1.5rem 2rem 1rem;
   border-bottom: 1px solid #e0e0e0;
+  position: relative;
 }
 
 .camera-modal-header h2 {
@@ -334,6 +335,10 @@
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s ease;
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .close-modal-btn:hover {

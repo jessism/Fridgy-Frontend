@@ -3,7 +3,6 @@
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   max-height: 80vh;
   overflow-y: auto;
@@ -198,7 +197,7 @@
 }
 
 .streamlined-camera__analyze-btn {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  background: var(--primary-green);
   color: white;
   border: none;
   border-radius: 12px;
@@ -207,12 +206,10 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
 }
 
 .streamlined-camera__analyze-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
 }
 
 .streamlined-camera__analyze-btn:disabled {
@@ -310,20 +307,40 @@
   margin-bottom: 1rem;
 }
 
-.streamlined-camera__back-btn {
-  background: transparent;
-  border: 1px solid #e0e0e0;
-  color: #666;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
+.streamlined-camera__add-more-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
 }
 
-.streamlined-camera__back-btn:hover {
-  background: #f8f9fa;
-  border-color: #c0c0c0;
+.streamlined-camera__add-more-text {
+  color: #6c757d;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.streamlined-camera__add-more-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-green);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 1.4rem;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(76, 207, 97, 0.2);
+}
+
+.streamlined-camera__add-more-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 207, 97, 0.3);
 }
 
 /* RESULTS CONTENT */
@@ -368,95 +385,162 @@
   background: #f8f9fa;
 }
 
-/* MOBILE CARDS */
+/* MOBILE CARDS - INVENTORY STYLE */
 .streamlined-camera__results-cards {
   display: none;
 }
 
-.streamlined-camera__result-card {
-  background: white;
-  border: 1px solid #e9ecef;
-  border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.streamlined-camera__card-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.streamlined-camera__card-title-input {
-  flex: 1;
-  font-size: 1.1rem;
-  font-weight: 600;
-  border: none;
+.streamlined-camera__inventory-card {
   background: transparent;
-  color: #2c3e50;
-  padding: 0.25rem 0;
-  border-bottom: 2px solid transparent;
-  transition: border-color 0.2s ease;
+  padding: 0.5rem 0.25rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-height: 60px;
+  position: relative;
+  overflow: visible;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.streamlined-camera__card-title-input:focus {
-  outline: none;
-  border-bottom-color: #20c997;
+.streamlined-camera__inventory-card:last-child {
+  border-bottom: none;
 }
 
-.streamlined-camera__card-remove-btn {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #ff4757;
-  color: white;
-  border: none;
-  cursor: pointer;
-  font-size: 12px;
+.streamlined-camera__inventory-card:hover {
+  background: rgba(248, 249, 250, 0.5);
+}
+
+/* Left: Icon */
+.streamlined-camera__card-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid #e9ecef;
 }
 
-.streamlined-camera__card-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-.streamlined-camera__card-field {
+/* Middle: Content */
+.streamlined-camera__card-content {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  padding-right: 0.5rem;
 }
 
-.streamlined-camera__card-field:last-child {
-  grid-column: 1 / -1;
+/* Item name row */
+.streamlined-camera__card-name-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.streamlined-camera__card-field label {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: #6c757d;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.streamlined-camera__card-input,
-.streamlined-camera__card-select {
-  padding: 0.5rem;
-  border: 1px solid #e9ecef;
-  border-radius: 6px;
-  font-size: 0.9rem;
+.streamlined-camera__card-item-name-input {
+  font-family: var(--header-font);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--header-color);
+  border: none;
+  background: transparent;
+  padding: 0.15rem 0;
+  border-bottom: 1px solid transparent;
   transition: border-color 0.2s ease;
+  flex: 1;
+  min-width: 0;
 }
 
-.streamlined-camera__card-input:focus,
-.streamlined-camera__card-select:focus {
+.streamlined-camera__card-item-name-input:focus {
   outline: none;
-  border-color: #20c997;
+  border-bottom-color: var(--primary-green);
+}
+
+/* Details row */
+.streamlined-camera__card-details-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.streamlined-camera__card-detail-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.streamlined-camera__card-label {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.streamlined-camera__card-quantity-input {
+  width: 50px;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.streamlined-camera__card-category-select {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  background: white;
+}
+
+/* Expiry row */
+.streamlined-camera__card-expiry-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.streamlined-camera__card-date-input {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+
+.streamlined-camera__card-remove-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  color: #9ca3af;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.streamlined-camera__card-remove-btn:hover {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* Input focus states */
+.streamlined-camera__card-quantity-input:focus,
+.streamlined-camera__card-category-select:focus,
+.streamlined-camera__card-date-input:focus {
+  outline: none;
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 2px rgba(76, 207, 97, 0.1);
 }
 
 /* EDITABLE INPUTS */
@@ -589,7 +673,7 @@
 /* SAVE ACTIONS */
 .streamlined-camera__save-actions {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 1.5rem 0;
   border-top: 1px solid #e9ecef;
@@ -602,7 +686,7 @@
 }
 
 .streamlined-camera__save-btn {
-  background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+  background: var(--primary-green);
   color: white;
   border: none;
   border-radius: 10px;
@@ -611,12 +695,10 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(32, 201, 151, 0.3);
 }
 
 .streamlined-camera__save-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(32, 201, 151, 0.4);
 }
 
 .streamlined-camera__save-btn:disabled {

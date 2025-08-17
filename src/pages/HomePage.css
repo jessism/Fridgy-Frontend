@@ -1550,8 +1550,8 @@ h2.section-title::after {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  z-index: 1000;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1566,6 +1566,30 @@ h2.section-title::after {
   position: relative;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   animation: modalSlideIn 0.3s ease-out;
+}
+
+.success-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.success-modal-close:hover {
+  background: #f3f4f6;
+  color: #6b7280;
 }
 
 @keyframes modalSlideIn {

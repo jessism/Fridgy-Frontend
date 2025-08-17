@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../auth/context/AuthContext';
 import SuccessModal from '../../../components/modals/SuccessModal';
+import { getItemIconIcons8, formatQuantity } from '../../../assets/inventory_emojis/iconHelpers.js';
 import './StreamlinedCamera.css';
 
 const StreamlinedCamera = ({ onComplete }) => {
@@ -235,10 +236,13 @@ const StreamlinedCamera = ({ onComplete }) => {
     setShowResults(false);
     setSuccessData({ items: [], count: 0 });
     
-    // Close the parent modal
+    // Close the parent modal and navigate to inventory
     if (onComplete) {
       onComplete();
     }
+    
+    // Navigate to inventory page
+    window.location.href = '/inventory';
   };
 
   const triggerCamera = () => {
@@ -288,17 +292,11 @@ const StreamlinedCamera = ({ onComplete }) => {
             multiple
           />
 
-          {/* Show capture button only if camera didn't auto-trigger or user wants to add more */}
+          {/* Minimal waiting state - no buttons needed since camera auto-triggers */}
           {capturedFiles.length === 0 && (
             <div className="streamlined-camera__capture-area">
               <div className="streamlined-camera__waiting-message">
                 <p>Camera opening...</p>
-                <button 
-                  className="streamlined-camera__manual-trigger"
-                  onClick={triggerCamera}
-                >
-                  📷 Open Camera Manually
-                </button>
               </div>
             </div>
           )}
@@ -353,8 +351,8 @@ const StreamlinedCamera = ({ onComplete }) => {
                 disabled={isAnalyzing}
               >
                 {isAnalyzing 
-                  ? '🔄 Analyzing...' 
-                  : `🤖 Analyze ${capturedFiles.length} Photo${capturedFiles.length > 1 ? 's' : ''}`
+                  ? 'Analyzing...' 
+                  : `Analyze ${capturedFiles.length} Photo${capturedFiles.length > 1 ? 's' : ''}`
                 }
               </button>
             </div>
@@ -366,12 +364,16 @@ const StreamlinedCamera = ({ onComplete }) => {
           <div className="streamlined-camera__results-header">
             <h3>Review & Edit Results</h3>
             <p>Review the AI-detected items below. You can edit any details before saving.</p>
-            <button 
-              className="streamlined-camera__back-btn"
-              onClick={() => setShowResults(false)}
-            >
-              ← Back to Camera
-            </button>
+            <div className="streamlined-camera__add-more-section">
+              <span className="streamlined-camera__add-more-text">Add more items</span>
+              <button 
+                className="streamlined-camera__add-more-btn"
+                onClick={() => setShowResults(false)}
+                title="Add more items"
+              >
+                +
+              </button>
+            </div>
           </div>
           
           {/* Bulk Editing Toolbar */}
@@ -527,101 +529,108 @@ const StreamlinedCamera = ({ onComplete }) => {
               </table>
             </div>
 
-            {/* Mobile Cards */}
+            {/* Mobile Cards - Inventory Style */}
             <div className="streamlined-camera__results-cards">
-              {editableResults && editableResults.map((item, index) => (
-                <div key={index} className={`streamlined-camera__result-card ${selectedItems.has(index) ? 'streamlined-camera__card-selected' : ''}`}>
-                  <div className="streamlined-camera__card-header">
-                    <input
-                      type="checkbox"
-                      checked={selectedItems.has(index)}
-                      onChange={() => toggleSelectItem(index)}
-                      className="streamlined-camera__card-checkbox"
-                    />
-                    <input
-                      type="text"
-                      value={item.name}
-                      onChange={(e) => updateEditableItem(index, 'name', e.target.value)}
-                      className="streamlined-camera__card-title-input"
-                      placeholder="Item name"
-                    />
-                    <button 
-                      onClick={() => removeEditableItem(index)}
-                      className="streamlined-camera__card-remove-btn"
-                      title="Remove this item"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  
-                  <div className="streamlined-camera__card-fields">
-                    <div className="streamlined-camera__card-field">
-                      <label>Category</label>
-                      <select 
-                        value={item.category} 
-                        onChange={(e) => updateEditableItem(index, 'category', e.target.value)}
-                        className="streamlined-camera__card-select"
-                      >
-                        <option value="Fruits">Fruits</option>
-                        <option value="Vegetables">Vegetables</option>
-                        <option value="Dairy">Dairy</option>
-                        <option value="Protein">Protein</option>
-                        <option value="Grains">Grains</option>
-                        <option value="Fats and oils">Fats and oils</option>
-                        <option value="Other">Other</option>
-                      </select>
+              {editableResults && editableResults.map((item, index) => {
+                const itemIcon = getItemIconIcons8(item.category, item.name, { size: 28 });
+                const formattedQuantity = formatQuantity(item.quantity);
+                
+                return (
+                  <div key={index} className="streamlined-camera__inventory-card">
+                    {/* Left: Emoji icon */}
+                    <div className="streamlined-camera__card-icon">
+                      {itemIcon}
                     </div>
                     
-                    <div className="streamlined-camera__card-field">
-                      <label>Quantity</label>
-                      <input
-                        type="number"
-                        value={item.quantity}
-                        onChange={(e) => updateEditableItem(index, 'quantity', parseInt(e.target.value) || 1)}
-                        className="streamlined-camera__card-input"
-                        min="1"
-                        max="99"
-                      />
-                    </div>
-                    
-                    <div className="streamlined-camera__card-field">
-                      <label>Expiry Date</label>
-                      <input
-                        type="date"
-                        value={item.expiryDate}
-                        onChange={(e) => updateEditableItem(index, 'expiryDate', e.target.value)}
-                        className="streamlined-camera__card-input"
-                      />
+                    {/* Middle: Content */}
+                    <div className="streamlined-camera__card-content">
+                      {/* Top: Item name (editable) with remove button */}
+                      <div className="streamlined-camera__card-name-row">
+                        <input
+                          type="text"
+                          value={item.name}
+                          onChange={(e) => updateEditableItem(index, 'name', e.target.value)}
+                          className="streamlined-camera__card-item-name-input"
+                          placeholder="Item name"
+                        />
+                        <button 
+                          onClick={() => removeEditableItem(index)}
+                          className="streamlined-camera__card-remove-btn"
+                          title="Remove this item"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      
+                      {/* Bottom: Details row with quantity and category (editable) */}
+                      <div className="streamlined-camera__card-details-row">
+                        <div className="streamlined-camera__card-detail-group">
+                          <span className="streamlined-camera__card-label">Qty:</span>
+                          <input
+                            type="number"
+                            value={item.quantity}
+                            onChange={(e) => updateEditableItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                            className="streamlined-camera__card-quantity-input"
+                            min="1"
+                            max="99"
+                          />
+                        </div>
+                        <div className="streamlined-camera__card-detail-group">
+                          <select 
+                            value={item.category} 
+                            onChange={(e) => updateEditableItem(index, 'category', e.target.value)}
+                            className="streamlined-camera__card-category-select"
+                          >
+                            <option value="Fruits">Fruits</option>
+                            <option value="Vegetables">Vegetables</option>
+                            <option value="Dairy">Dairy</option>
+                            <option value="Protein">Protein</option>
+                            <option value="Grains">Grains</option>
+                            <option value="Fats and oils">Fats and oils</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+                      </div>
+                      
+                      {/* Expiry date row */}
+                      <div className="streamlined-camera__card-expiry-row">
+                        <span className="streamlined-camera__card-label">Expires:</span>
+                        <input
+                          type="date"
+                          value={item.expiryDate}
+                          onChange={(e) => updateEditableItem(index, 'expiryDate', e.target.value)}
+                          className="streamlined-camera__card-date-input"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
           
           {/* Save Actions */}
           <div className="streamlined-camera__save-actions">
-            <div className="streamlined-camera__items-count">
-              {(editableResults && editableResults.length) || 0} item{((editableResults && editableResults.length) || 0) !== 1 ? 's' : ''} ready to save
-            </div>
             <button 
               onClick={handleSaveItems} 
               disabled={isSaving || !(editableResults && editableResults.length)}
               className="streamlined-camera__save-btn"
             >
-              {isSaving ? '💾 Saving...' : `✔️ Add ${(editableResults && editableResults.length) || 0} Item${((editableResults && editableResults.length) || 0) !== 1 ? 's' : ''} to Inventory`}
+              {isSaving ? 'Saving...' : `✓ Add ${(editableResults && editableResults.length) || 0} Item${((editableResults && editableResults.length) || 0) !== 1 ? 's' : ''} to Inventory`}
             </button>
           </div>
         </div>
       )}
 
-      {/* Success Modal */}
-      <SuccessModal
-        isOpen={showSuccessModal}
-        onClose={handleSuccessModalClose}
-        savedItems={successData.items}
-        itemCount={successData.count}
-      />
+      {/* Success Modal - Rendered at root level */}
+      {showSuccessModal && (
+        <SuccessModal
+          isOpen={showSuccessModal}
+          onClose={handleSuccessModalClose}
+          savedItems={successData.items}
+          itemCount={successData.count}
+        />
+      )}
     </div>
   );
 };

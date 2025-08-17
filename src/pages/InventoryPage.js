@@ -208,114 +208,92 @@ const InventoryPage = () => {
             justifyContent: 'space-between',
             alignItems: 'flex-start',
             marginBottom: '2rem',
+            marginTop: '1.5rem',
             flexWrap: 'wrap',
             gap: '1rem'
           }}>
-            <div>
-              <h1 style={{
-                fontFamily: 'var(--header-font)', 
-                fontSize: '2.5rem', 
-                color: 'var(--header-color)', 
-                marginBottom: '0.5rem'
-              }}>
-                Inventory Overview
-          </h1>
-              <p style={{
-                fontFamily: 'var(--description-font)', 
-                fontSize: '1.1rem', 
-                color: 'var(--description-color)'
-              }}>
-            Manage your food items and track expiration dates
-          </p>
-            </div>
-            
-            {/* Search and Add Item */}
+            {/* Spotify-style Header */}
             <div style={{
               display: 'flex',
-              gap: '1rem',
+              justifyContent: 'space-between',
               alignItems: 'center',
-              flexWrap: 'wrap',
-              justifyContent: 'flex-end'
+              marginBottom: '0.5rem',
+              width: '100%'
             }}>
-              <div style={{
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center'
+              <h1 style={{
+                fontFamily: 'var(--header-font)', 
+                fontSize: '2rem', 
+                color: 'var(--header-color)', 
+                margin: '0',
+                fontWeight: '700'
               }}>
-                <input
-                  type="text"
-                  placeholder="Search Item"
-                  style={{
-                    padding: '0.75rem 1rem 0.75rem 2.5rem',
-                    border: '1px solid #e0e0e0',
-                    borderRadius: '8px',
-                    fontSize: '0.9rem',
-                    width: '200px',
-                    outline: 'none'
-                  }}
-                />
-                <svg style={{
-                  position: 'absolute',
-                  left: '0.75rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)'
-                }} width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="11" cy="11" r="8" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="m21 21-4.35-4.35" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </div>
+                Your Fridge
+              </h1>
               
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '1rem'
               }}>
-                {/* Main Add Item Button - Opens Camera Directly */}
+                {/* Search Icon */}
                 <button 
                   style={{
-                    padding: '0.75rem 1.5rem',
-                    background: 'var(--primary-green)',
-                    color: 'white',
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '50%',
+                    background: 'transparent',
                     border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.5rem'
-                  }}
-                  onClick={() => setShowCameraModal(true)}
-                >
-                  📷 Add Item
-                </button>
-                
-                {/* Manual Entry Toggle */}
-                <button
-                  style={{
-                    padding: '0.5rem 1rem',
-                    background: 'transparent',
+                    justifyContent: 'center',
                     color: '#666',
-                    border: '1px solid #e0e0e0',
-                    borderRadius: '6px',
-                    fontSize: '0.8rem',
-                    cursor: 'pointer',
                     transition: 'all 0.2s ease'
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.background = '#f8f9fa';
-                    e.target.style.borderColor = '#c0c0c0';
+                    e.target.style.background = '#f0f0f0';
                   }}
                   onMouseLeave={(e) => {
                     e.target.style.background = 'transparent';
-                    e.target.style.borderColor = '#e0e0e0';
                   }}
-                  onClick={() => {
-                    console.log('Manual entry clicked');
-                    // TODO: Implement manual entry modal
-                  }}
+                  title="Search items"
                 >
-                  ✏️ Manual
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </button>
+                
+                {/* Add Item Plus Icon - Green */}
+                <button 
+                  style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '50%',
+                    background: 'var(--primary-green)',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontSize: '24px',
+                    fontWeight: '300',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 2px 8px rgba(76, 207, 97, 0.2)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'translateY(-1px)';
+                    e.target.style.boxShadow = '0 4px 12px rgba(76, 207, 97, 0.3)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 2px 8px rgba(76, 207, 97, 0.2)';
+                  }}
+                  onClick={() => setShowCameraModal(true)}
+                  title="Add item"
+                >
+                  +
                 </button>
               </div>
             </div>
@@ -325,10 +303,10 @@ const InventoryPage = () => {
           {!loading && !error && inventoryItems.length > 0 && (
             <div style={{
               display: 'flex',
-              gap: '0.5rem',
+              gap: '0.75rem',
               marginBottom: '1.5rem',
               overflowX: 'auto',
-              paddingBottom: '0.25rem',
+              paddingBottom: '0.5rem',
               alignItems: 'center',
               WebkitOverflowScrolling: 'touch'
             }}>
@@ -342,14 +320,14 @@ const InventoryPage = () => {
                   key={filter.key}
                   onClick={() => setActiveFilter(filter.key)}
                   style={{
-                    padding: '0.4rem 0.8rem',
-                    borderRadius: '18px',
+                    padding: '0.75rem 1.25rem',
+                    borderRadius: '12px',
                     border: activeFilter === filter.key ? '1px solid var(--primary-green)' : '1px solid #e0e0e0',
                     background: activeFilter === filter.key ? 'var(--primary-green)' : 'white',
                     color: activeFilter === filter.key ? 'white' : '#666',
                     cursor: 'pointer',
-                    fontSize: '0.85rem',
-                    fontWeight: activeFilter === filter.key ? '600' : '400',
+                    fontSize: '0.9rem',
+                    fontWeight: activeFilter === filter.key ? '600' : '500',
                     transition: 'all 0.2s ease',
                     outline: 'none',
                     whiteSpace: 'nowrap',
