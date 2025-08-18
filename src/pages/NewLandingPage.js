@@ -49,8 +49,8 @@ const NewLandingPage = () => {
               <span className="landing-page-v2__brand-name">Trackabite</span>
             </div>
             <div className="landing-page-v2__header-actions">
-              <Button variant="secondary" size="medium" href="/signup">
-                Get started
+              <Button variant="secondary" size="medium" href="/signin">
+                Sign in
               </Button>
             </div>
           </div>

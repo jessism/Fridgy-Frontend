@@ -362,10 +362,8 @@ const StreamlinedCamera = ({ onComplete }) => {
         // Results Review Mode
         <div className="streamlined-camera__results-mode">
           <div className="streamlined-camera__results-header">
-            <h3>Review & Edit Results</h3>
-            <p>Review the AI-detected items below. You can edit any details before saving.</p>
             <div className="streamlined-camera__add-more-section">
-              <span className="streamlined-camera__add-more-text">Add more items</span>
+              <span className="streamlined-camera__add-more-text">Add items</span>
               <button 
                 className="streamlined-camera__add-more-btn"
                 onClick={() => setShowResults(false)}

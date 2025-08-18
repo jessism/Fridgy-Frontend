@@ -863,7 +863,7 @@ const InventoryPage = () => {
                       const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
                       const { status, urgency } = getExpiryStatus(daysUntilExpiry);
                       const itemIcon = getItemIconIcons8(item.category, item.itemName, { 
-                        size: 28
+                        size: 48
                       });
                       const formattedQuantity = formatQuantity(item.quantity);
                       
@@ -949,7 +949,7 @@ const InventoryPage = () => {
                   const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
                   const { status, urgency } = getExpiryStatus(daysUntilExpiry);
                   const itemIcon = getItemIconIcons8(item.category, item.itemName, { 
-                    size: 28
+                    size: 48
                   });
                   const formattedQuantity = formatQuantity(item.quantity);
                   

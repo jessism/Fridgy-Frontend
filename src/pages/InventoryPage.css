@@ -78,25 +78,27 @@
     background: rgba(248, 249, 250, 0.5);
   }
   
-  /* Left: Modern SVG icon in rounded square background */
+  /* Left: Larger icon without background box */
   .inventory-page__card-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    width: 80px;
+    height: 80px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    border: 2px solid #e9ecef;
   }
   
-  /* SVG icon styling */
+  /* SVG icon styling - larger icons */
   .inventory-page__card-icon svg {
-    width: 28px;
-    height: 28px;
+    width: 40px;
+    height: 40px;
     color: #64748b;
     stroke-width: 1.5;
+  }
+  
+  /* Emoji icon styling - larger emojis */
+  .inventory-page__card-icon {
+    font-size: 2.5rem;
   }
   
   /* Right: Content area with item name and pills */
@@ -350,6 +352,7 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
 
 /* Mobile responsive for modal */
 @media (max-width: 768px) {
