@@ -100,6 +100,24 @@
   background: var(--primary-green);
 }
 
+/* Add to Fridge Button */
+.add-to-fridge-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  border-radius: 50%;
+}
+
+.add-to-fridge-button:hover {
+  transform: scale(1.1);
+}
+
+.add-to-fridge-button:hover svg circle {
+  fill: var(--primary-green-dark);
+}
+
 .nav-actions {
   display: flex;
   gap: 1rem;

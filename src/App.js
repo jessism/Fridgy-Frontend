@@ -11,6 +11,7 @@ import InventoryPage from './pages/InventoryPage';
 import MealPlansPage from './pages/MealPlansPage';
 import ShoppingListPage from './pages/ShoppingListPage';
 import ProfilePage from './pages/ProfilePage';
+import BatchCamera from './features/batchcamera/components/BatchCamera';
 
 function App() {
   return (
@@ -44,6 +45,11 @@ function App() {
           <Route path="/profile" element={
             <AuthGuard>
               <ProfilePage />
+            </AuthGuard>
+          } />
+          <Route path="/batchcamera" element={
+            <AuthGuard>
+              <BatchCamera />
             </AuthGuard>
           } />
         </Routes>

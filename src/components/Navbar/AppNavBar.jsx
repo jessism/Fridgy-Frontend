@@ -119,6 +119,18 @@ const AppNavBar = () => {
             Meal Plans
           </Link>
           
+          {/* Add to Fridge Button */}
+          <Link 
+            to="/batchcamera" 
+            className="add-to-fridge-button"
+            title="Add to Fridge"
+          >
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <circle cx="16" cy="16" r="14" fill="#81e053"/>
+              <path d="M16 10V22M10 16H22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </Link>
+          
           {/* Profile Dropdown */}
           <div className="profile-dropdown-container" ref={dropdownRef}>
             <button 

@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import { useAuth } from '../features/auth/context/AuthContext';
+import useInventory from '../hooks/useInventory';
 import appLogo from '../assets/images/Logo.png';
-import { ReactComponent as ArrowUpRight } from '../assets/images/arrow-up-right.svg';
 import { ReactComponent as AddToFridgeIcon } from '../assets/icons/quickaccess/add-to-fridge.svg';
 import { ReactComponent as MyFridgeIcon } from '../assets/icons/quickaccess/my-fridge.svg';
 import { ReactComponent as ShopListsIcon } from '../assets/icons/quickaccess/shop-lists.svg';
@@ -13,6 +13,29 @@ import './HomePage.css';
 
 const HomePage = () => {
   const { user } = useAuth();
+  const { items } = useInventory();
+
+  // Calculate category counts from real inventory data
+  const getCategoryCounts = () => {
+    const counts = {
+      'Protein': 0,
+      'Dairy': 0, 
+      'Vegetables': 0,
+      'Fruits': 0,
+      'Grains': 0,
+      'Fats and Oils': 0
+    };
+
+    items.forEach(item => {
+      if (counts.hasOwnProperty(item.category)) {
+        counts[item.category]++;
+      }
+    });
+
+    return counts;
+  };
+
+  const categoryCounts = getCategoryCounts();
   
   return (
     <div className="homepage">
@@ -50,7 +73,7 @@ const HomePage = () => {
           </div>
           <div className="categories-grid">
             <div className="category-card">
-              <div className="category-count">12</div>
+              <div className="category-count">{categoryCounts['Protein']}</div>
               <div className="category-image">
                 <span className="food-emoji">🍖</span>
               </div>
@@ -58,7 +81,7 @@ const HomePage = () => {
             </div>
 
             <div className="category-card">
-              <div className="category-count">8</div>
+              <div className="category-count">{categoryCounts['Dairy']}</div>
               <div className="category-image">
                 <span className="food-emoji">🧀</span>
               </div>
@@ -66,7 +89,7 @@ const HomePage = () => {
             </div>
 
             <div className="category-card">
-              <div className="category-count">15</div>
+              <div className="category-count">{categoryCounts['Vegetables']}</div>
               <div className="category-image">
                 <span className="food-emoji">🥬</span>
               </div>
@@ -74,7 +97,7 @@ const HomePage = () => {
             </div>
 
             <div className="category-card">
-              <div className="category-count">7</div>
+              <div className="category-count">{categoryCounts['Fruits']}</div>
               <div className="category-image">
                 <span className="food-emoji">🍊</span>
               </div>
@@ -82,7 +105,7 @@ const HomePage = () => {
             </div>
 
             <div className="category-card">
-              <div className="category-count">5</div>
+              <div className="category-count">{categoryCounts['Grains']}</div>
               <div className="category-image">
                 <span className="food-emoji">🍞</span>
               </div>
@@ -90,7 +113,7 @@ const HomePage = () => {
             </div>
 
             <div className="category-card">
-              <div className="category-count">3</div>
+              <div className="category-count">{categoryCounts['Fats and Oils']}</div>
               <div className="category-image">
                 <span className="food-emoji">🥥</span>
               </div>
