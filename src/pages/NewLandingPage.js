@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import trackaBiteLogo from '../assets/images/Trackabite-logo.png';
+import appLogo from '../assets/images/Logo.png';
 import fridgeHeroImage from '../assets/images/fridge.jpg';
 import foodImage1 from '../assets/images/Landingpage_food_1.jpg';
 import foodImage2 from '../assets/images/Landingpage_food_2.jpg';
@@ -45,7 +45,7 @@ const NewLandingPage = () => {
         <div className="landing-page-v2__container">
           <div className="landing-page-v2__header-content">
             <div className="landing-page-v2__logo-section">
-              <img src={trackaBiteLogo} alt="Trackabite logo" className="landing-page-v2__logo" />
+              <img src={appLogo} alt="App logo" className="landing-page-v2__logo" />
               <span className="landing-page-v2__brand-name">Trackabite</span>
             </div>
             <div className="landing-page-v2__header-actions">

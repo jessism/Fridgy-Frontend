@@ -32,6 +32,17 @@ const MobileBottomNav = () => {
       label: 'Inventory'
     },
     {
+      path: '/batchcamera',
+      icon: (
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="12" fill="#81e053"/>
+          <path d="M14 9V19M9 14H19" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+      ),
+      label: '',
+      isAddButton: true
+    },
+    {
       path: '/meal-plans',
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -40,18 +51,6 @@ const MobileBottomNav = () => {
         </svg>
       ),
       label: 'Meal Plans'
-    },
-    {
-      path: '/shopping-list',
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M7 4V2a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v2"/>
-          <path d="M5 4h14l-1 14H6L5 4z"/>
-          <line x1="10" y1="11" x2="10" y2="17"/>
-          <line x1="14" y1="11" x2="14" y2="17"/>
-        </svg>
-      ),
-      label: 'Shopping List'
     },
     {
       path: '/profile',
@@ -72,14 +71,16 @@ const MobileBottomNav = () => {
           <Link
             key={item.path}
             to={item.path}
-            className={`nav-tab ${isActiveTab(item.path) ? 'active' : ''}`}
+            className={`nav-tab ${isActiveTab(item.path) ? 'active' : ''} ${item.isAddButton ? 'add-button' : ''}`}
           >
             <div className="nav-icon">
               {item.icon}
             </div>
-            <span className="nav-label">
-              {item.label}
-            </span>
+            {item.label && (
+              <span className="nav-label">
+                {item.label}
+              </span>
+            )}
           </Link>
         ))}
       </div>

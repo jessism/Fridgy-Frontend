@@ -63,7 +63,7 @@
 
 /* Secondary - Black background, white text (like your Download App button) */
 .button--secondary {
-  background: #000;
+  background: #222222;
   color: white;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }

@@ -63,19 +63,19 @@
 .brand-name {
   font-size: 20px;
   font-weight: 600;
-  color: #000;
+  color: #222222;
   margin: 0;
   transition: color 0.3s ease;
 }
 
 /* Ensure brand name is visible on both transparent and white backgrounds */
 .landing-header:not(.scrolled) .brand-name {
-  color: #000;
+  color: #222222;
   text-shadow: 0 1px 3px rgba(255, 255, 255, 0.5);
 }
 
 .download-app-btn {
-  background: #000;
+  background: #222222;
   color: white;
   text-decoration: none;
   padding: 12px 24px;
@@ -146,7 +146,7 @@
 .hero-title {
   font-size: clamp(32px, 5vw, 64px);
   font-weight: 800;
-  color: #000;
+  color: #222222;
   margin: 0 0 24px 0;
   line-height: 1.1;
   letter-spacing: -1px;
@@ -174,7 +174,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #000;
+  background: #222222;
   color: white;
   text-decoration: none;
   padding: 14px 20px;
@@ -227,7 +227,7 @@
 .phone-frame {
   width: 280px;
   height: 570px;
-  background: #000;
+  background: #222222;
   border-radius: 35px;
   padding: 6px;
   box-shadow: 
@@ -242,7 +242,7 @@
   transform: translateX(-50%);
   width: 120px;
   height: 25px;
-  background: #000;
+  background: #222222;
   border-radius: 0 0 15px 15px;
   z-index: 10;
 }
@@ -266,7 +266,7 @@
 }
 
 .status-time {
-  color: #000;
+  color: #222222;
 }
 
 .status-indicators {
@@ -297,7 +297,7 @@
 .app-name {
   font-size: 16px;
   font-weight: 600;
-  color: #000;
+  color: #222222;
   flex: 1;
   margin-left: 8px;
 }
@@ -370,7 +370,7 @@
 .section-header h3 {
   font-size: 16px;
   font-weight: 600;
-  color: #000;
+  color: #222222;
   margin: 0;
 }
 

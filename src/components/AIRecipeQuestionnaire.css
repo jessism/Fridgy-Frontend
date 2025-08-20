@@ -363,8 +363,8 @@
   }
   
   .chip.selected {
-    background: #000;
-    border-color: #000;
+    background: #222222;
+    border-color: #222222;
     color: #fff;
   }
 }

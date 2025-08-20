@@ -3,8 +3,12 @@ import { Link } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import { useAuth } from '../features/auth/context/AuthContext';
-import trackaBiteLogo from '../assets/images/Trackabite-logo.png';
+import appLogo from '../assets/images/Logo.png';
 import { ReactComponent as ArrowUpRight } from '../assets/images/arrow-up-right.svg';
+import { ReactComponent as AddToFridgeIcon } from '../assets/icons/quickaccess/add-to-fridge.svg';
+import { ReactComponent as MyFridgeIcon } from '../assets/icons/quickaccess/my-fridge.svg';
+import { ReactComponent as ShopListsIcon } from '../assets/icons/quickaccess/shop-lists.svg';
+import { ReactComponent as RecipesIcon } from '../assets/icons/quickaccess/recipes.svg';
 import './HomePage.css';
 
 const HomePage = () => {
@@ -17,7 +21,7 @@ const HomePage = () => {
       {/* Mobile Header - Only visible on mobile */}
       <div className="mobile-header">
         <div className="mobile-header-content">
-          <img src={trackaBiteLogo} alt="Trackabite logo" className="mobile-logo"/>
+          <img src={appLogo} alt="App logo" className="mobile-logo"/>
           <h2 className="mobile-brand-name">Trackabite</h2>
         </div>
       </div>
@@ -33,11 +37,6 @@ const HomePage = () => {
                 <p className="hero-subtitle">
                   What are you cooking today?
                 </p>
-            </div>
-            <div className="hero-image">
-              <div className="food-bowl">
-                <img src="/hero-bowl.jpg" alt="Fresh healthy bowl" className="bowl-image" />
-              </div>
             </div>
           </div>
         </div>
@@ -113,7 +112,6 @@ const HomePage = () => {
             <div className="expiring-item">
               <div className="item-info">
                 <h4 className="item-name">Greek Yogurt</h4>
-                <p className="item-category">Fridge</p>
               </div>
               <div className="expiry-countdown">
                 <span className="days-left">2 days</span>
@@ -122,7 +120,6 @@ const HomePage = () => {
             <div className="expiring-item">
               <div className="item-info">
                 <h4 className="item-name">Spinach</h4>
-                <p className="item-category">Fridge</p>
               </div>
               <div className="expiry-countdown">
                 <span className="days-left urgent">1 day</span>
@@ -147,9 +144,6 @@ const HomePage = () => {
               </div>
             </div>
           </div>
-          <Link to="/inventory" className="expiring-nav-arrow">
-            <ArrowUpRight />
-          </Link>
         </div>
       </section>
 
@@ -249,26 +243,6 @@ const HomePage = () => {
       </section>
       */}
 
-      {/* Cook What You Already Have Section - Hero Style */}
-      <section className="hero">
-        <div className="container">
-          <div className="hero-content">
-            <div className="hero-text">
-              <h1 className="hero-title">
-                Cook What You Already Have
-              </h1>
-              <p className="hero-subtitle">
-                Discover delicious recipes using ingredients from your fridge
-              </p>
-            </div>
-            <div className="hero-image">
-              <div className="food-bowl">
-                <img src="/hero-bowl.jpg" alt="Fresh healthy bowl" className="bowl-image" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Inspired by Your Preference Section - COMMENTED OUT
       <section className="cook-what-you-have">
@@ -388,7 +362,7 @@ const HomePage = () => {
       </section>
       */}
 
-      {/* Your Shopping List Section */}
+      {/* Your Shopping List Section - COMMENTED OUT
       <section className="expiring-soon">
         <div className="container">
           <div className="section-header">
@@ -482,9 +456,42 @@ const HomePage = () => {
               Add more items
             </button>
           </div>
-          <Link to="/shopping-list" className="shopping-nav-arrow">
-            <ArrowUpRight />
-          </Link>
+        </div>
+      </section>
+      */}
+
+      {/* Quick Access Section */}
+      <section className="quick-access">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">Quick Access</h2>
+          </div>
+          <div className="quick-access-grid">
+            <Link to="/batchcamera" className="quick-access-item primary">
+              <div className="quick-access-icon">
+                <AddToFridgeIcon />
+              </div>
+              <span className="quick-access-label">Add to fridge</span>
+            </Link>
+            <Link to="/inventory" className="quick-access-item">
+              <div className="quick-access-icon">
+                <MyFridgeIcon />
+              </div>
+              <span className="quick-access-label">My fridge</span>
+            </Link>
+            <Link to="/shopping-list" className="quick-access-item">
+              <div className="quick-access-icon">
+                <ShopListsIcon />
+              </div>
+              <span className="quick-access-label">Shop lists</span>
+            </Link>
+            <div className="quick-access-item">
+              <div className="quick-access-icon">
+                <RecipesIcon />
+              </div>
+              <span className="quick-access-label">Recipes</span>
+            </div>
+          </div>
         </div>
       </section>
       

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../features/auth/context/AuthContext';
 import './AppNavBar.css';
-import trackaBiteLogo from '../../assets/images/Trackabite-logo.png';
+import appLogo from '../../assets/images/Logo.png';
 
 const AppNavBar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -92,8 +92,8 @@ const AppNavBar = () => {
         <div className="nav-brand">
           <Link to="/home" className="brand-link">
             <img 
-              src={trackaBiteLogo} 
-              alt="Trackabite logo" 
+              src={appLogo} 
+              alt="App logo" 
               className="brand-logo"
             />
             <h2>Trackabite</h2>

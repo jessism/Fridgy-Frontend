@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './PublicNavBar.css';
-import trackaBiteLogo from '../../assets/images/Trackabite-logo.png';
+import appLogo from '../../assets/images/Logo.png';
 
 const PublicNavBar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -23,8 +23,8 @@ const PublicNavBar = () => {
           <div className="logo">
             <Link to="/" className="brand-link">
               <img 
-                src={trackaBiteLogo} 
-                alt="Trackabite logo" 
+                src={appLogo} 
+                alt="App logo" 
                 className="brand-logo"
               />
               <h2>Trackabite</h2>

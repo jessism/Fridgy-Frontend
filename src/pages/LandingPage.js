@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import trackaBiteLogo from '../assets/images/Trackabite-logo.png';
+import appLogo from '../assets/images/Logo.png';
 import heroBackground from '../assets/images/LandingPage_Hero_Background.png';
 import './LandingPage.css';
 
@@ -54,7 +54,7 @@ const LandingPage = () => {
         <div className="container">
           <div className="header-content">
             <div className="logo-section">
-              <img src={trackaBiteLogo} alt="Fridgy logo" className="header-logo" />
+              <img src={appLogo} alt="App logo" className="header-logo" />
               <span className="brand-name">Fridgy</span>
             </div>
             <div className="header-actions">
@@ -138,7 +138,7 @@ const LandingPage = () => {
                         
                         <div className="app-interface">
                           <div className="app-header">
-                            <img src={trackaBiteLogo} alt="Fridgy" className="app-logo" />
+                            <img src={appLogo} alt="App" className="app-logo" />
                             <span className="app-name">Fridgy</span>
                             <div className="app-icons">
                               <span className="search-icon">🔍</span>
