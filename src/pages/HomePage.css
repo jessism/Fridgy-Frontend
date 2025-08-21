@@ -1004,20 +1004,17 @@
 
 .quick-access-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border-color: var(--primary-green);
 }
 
 .quick-access-item.primary {
   background: rgba(129, 224, 83, 0.3);
   color: var(--header-color);
-  box-shadow: 0 4px 16px rgba(129, 224, 83, 0.2);
   border: 1px solid rgba(129, 224, 83, 0.2);
 }
 
 .quick-access-item.primary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(129, 224, 83, 0.4);
 }
 
 .quick-access-icon {
