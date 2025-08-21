@@ -149,20 +149,19 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
       
       if (data.success) {
         setEditableResults(data.items.map(item => ({ ...item })));
-        // Stop camera when showing results
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach(track => track.stop());
-          setIsCameraActive(false);
-        }
         // Proceed to save items immediately
         await saveItems(data.items);
       } else {
         console.error('Processing failed:', data.error);
         alert('Failed to process images. Please try again.');
+        // Reset camera interface after error
+        await resetCameraInterface();
       }
     } catch (error) {
       console.error('Error analyzing photos:', error);
       alert('Failed to process images. Please try again.');
+      // Reset camera interface after error
+      await resetCameraInterface();
     } finally {
       setIsAnalyzing(false);
     }
@@ -194,6 +193,12 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
       if (data.success) {
         const itemCount = data.savedItems ? data.savedItems.length : items.length;
         
+        // Stop camera only when we successfully save
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(track => track.stop());
+          setIsCameraActive(false);
+        }
+        
         setSuccessData({
           items: items,
           count: itemCount
@@ -202,13 +207,31 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
       } else {
         console.error('Save failed:', data.error);
         alert(`Failed to save items: ${data.error}\n\nPlease try again.`);
+        // Reset camera interface after save error
+        await resetCameraInterface();
       }
     } catch (error) {
       console.error('Error saving items:', error);
       alert(`Failed to save items to your inventory.\n\nError: ${error.message}\n\nPlease check your internet connection and try again.`);
+      // Reset camera interface after save error
+      await resetCameraInterface();
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const resetCameraInterface = async () => {
+    // Reset all states
+    setCapturedPhotos([]);
+    setEditableResults(null);
+    setIsAnalyzing(false);
+    setIsSaving(false);
+    
+    // Force restart camera
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+    }
+    await initializeCamera();
   };
 
   const handleSuccessModalClose = () => {
@@ -347,6 +370,24 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Instructions Section */}
+      <div className="camera-v2__instructions">
+        <ul className="camera-v2__instruction-list">
+          <li className="camera-v2__instruction-item">
+            <div className="camera-v2__instruction-number">1</div>
+            <p className="camera-v2__instruction-text">
+              Point the camera to the food item and capture the front.
+            </p>
+          </li>
+          <li className="camera-v2__instruction-item">
+            <div className="camera-v2__instruction-number">2</div>
+            <p className="camera-v2__instruction-text">
+              Find the expiry date and capture for a more accurate log.
+            </p>
+          </li>
+        </ul>
       </div>
 
       {/* Bottom Control Bar */}
