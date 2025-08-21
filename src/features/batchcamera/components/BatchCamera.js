@@ -1,8 +1,8 @@
 import React from 'react';
-import DirectCameraInterface from './DirectCameraInterface';
+import DirectCameraInterfaceV2 from './DirectCameraInterfaceV2';
 
 const BatchCamera = ({ onComplete }) => {
-  return <DirectCameraInterface onComplete={onComplete} />;
+  return <DirectCameraInterfaceV2 onComplete={onComplete} />;
 };
 
 export default BatchCamera;
