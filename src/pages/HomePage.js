@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import { useAuth } from '../features/auth/context/AuthContext';
@@ -14,6 +14,13 @@ import './HomePage.css';
 const HomePage = () => {
   const { user } = useAuth();
   const { items } = useInventory();
+  const navigate = useNavigate();
+
+  // Function to navigate and scroll to top
+  const navigateToPage = (path) => {
+    navigate(path);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Calculate category counts from real inventory data
   const getCategoryCounts = () => {
@@ -41,15 +48,16 @@ const HomePage = () => {
     <div className="homepage">
       <AppNavBar />
 
-      {/* Mobile Header - Only visible on mobile */}
+      {/* Mobile Header - Only visible on mobile - COMMENTED OUT FOR NOW
       <div className="mobile-header">
         <div className="mobile-header-content">
           <img src={appLogo} alt="App logo" className="mobile-logo"/>
           <h2 className="mobile-brand-name">Trackabite</h2>
         </div>
       </div>
+      */}
 
-      {/* Hero Section */}
+      {/* Hero Section - COMMENTED OUT - greeting moved to navigation
       <section className="hero">
         <div className="container">
           <div className="hero-content">
@@ -60,6 +68,20 @@ const HomePage = () => {
                 <p className="hero-subtitle">
                   What are you cooking today?
                 </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      */}
+
+      {/* Page Greeting */}
+      <section className="page-greeting">
+        <div className="container">
+          <div className="greeting-content">
+            <img src={appLogo} alt="Logo" className="greeting-logo" />
+            <div className="greeting-text">
+              <h1 className="greeting-hello">Hello {user?.firstName || 'User'},</h1>
+              <p className="greeting-subtitle">What are you cooking today?</p>
             </div>
           </div>
         </div>
@@ -490,24 +512,33 @@ const HomePage = () => {
             <h2 className="section-title">Quick Access</h2>
           </div>
           <div className="quick-access-grid">
-            <Link to="/batchcamera" className="quick-access-item primary">
+            <div 
+              className="quick-access-item primary"
+              onClick={() => navigateToPage('/batchcamera')}
+            >
               <div className="quick-access-icon">
                 <AddToFridgeIcon />
               </div>
               <span className="quick-access-label">Add to fridge</span>
-            </Link>
-            <Link to="/inventory" className="quick-access-item">
+            </div>
+            <div 
+              className="quick-access-item"
+              onClick={() => navigateToPage('/inventory')}
+            >
               <div className="quick-access-icon">
                 <MyFridgeIcon />
               </div>
               <span className="quick-access-label">My fridge</span>
-            </Link>
-            <Link to="/shopping-list" className="quick-access-item">
+            </div>
+            <div 
+              className="quick-access-item"
+              onClick={() => navigateToPage('/shopping-list')}
+            >
               <div className="quick-access-icon">
                 <ShopListsIcon />
               </div>
               <span className="quick-access-label">Shop lists</span>
-            </Link>
+            </div>
             <div className="quick-access-item">
               <div className="quick-access-icon">
                 <RecipesIcon />

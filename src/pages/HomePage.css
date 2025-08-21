@@ -297,6 +297,93 @@
   box-shadow: 0 35px 100px rgba(0, 0, 0, 0.25);
 }
 
+/* PAGE GREETING */
+.page-greeting {
+  padding: 2rem 0 3rem 0;
+  background: transparent;
+  width: 100%;
+  margin-top: 4rem; /* Space for fixed navbar */
+}
+
+.page-greeting .container {
+  width: 96vw;
+  max-width: none;
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+}
+
+.greeting-content {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.greeting-logo {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+}
+
+.greeting-text {
+  flex: 1;
+}
+
+.greeting-hello {
+  font-family: var(--header-font);
+  font-size: 4.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #9BEC00 0%, #81e053 50%, #6bc93f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.5rem 0;
+  text-align: left;
+  line-height: 1.1;
+}
+
+.greeting-subtitle {
+  font-family: var(--header-font);
+  font-size: 2.5rem;
+  font-weight: 400;
+  color: #888;
+  margin: 0;
+  text-align: left;
+  line-height: 1.2;
+}
+
+/* Mobile styles for greeting */
+@media (max-width: 768px) {
+  .page-greeting {
+    padding: 1rem 0 2rem 0;
+    margin-top: 0;
+  }
+  
+  .page-greeting .container {
+    width: 96vw;
+    padding: 0.75rem 0.75rem;
+  }
+  
+  .greeting-content {
+    gap: 1rem;
+  }
+  
+  .greeting-logo {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .greeting-hello {
+    font-size: 24px;
+    text-align: left;
+    margin-bottom: 0.25rem;
+  }
+  
+  .greeting-subtitle {
+    font-size: 18px;
+    text-align: left;
+  }
+}
+
 /* FEATURED CATEGORIES */
 .featured-categories {
   padding: 0;
@@ -902,9 +989,9 @@
 .quick-access-item {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1.5rem 1rem;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem 1rem 1.5rem 1rem;
   background: #f8fafc;
   border-radius: 16px;
   text-decoration: none;
@@ -912,6 +999,7 @@
   transition: all 0.3s ease;
   border: 2px solid transparent;
   cursor: pointer;
+  min-height: 120px;
 }
 
 .quick-access-item:hover {
@@ -967,8 +1055,9 @@
   font-family: var(--header-font);
   font-size: 0.9rem;
   font-weight: 600;
-  text-align: center;
+  text-align: left;
   line-height: 1.2;
+  align-self: flex-start;
 }
 
 /* Mobile Responsive for Quick Access */
@@ -989,8 +1078,8 @@
   }
 
   .quick-access-item {
-    padding: 1.25rem 0.75rem;
-    gap: 0.5rem;
+    padding: 0.75rem 0.75rem 1.25rem 0.75rem;
+    min-height: 100px;
   }
 
   .quick-access-icon {

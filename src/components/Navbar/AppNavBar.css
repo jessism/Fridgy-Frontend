@@ -45,6 +45,15 @@
   transition: transform 0.3s ease;
 }
 
+.greeting-section h2 {
+  font-family: var(--header-font);
+  color: var(--black);
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
 .nav-brand h2 {
   font-family: var(--header-font);
   color: var(--primary-green);
