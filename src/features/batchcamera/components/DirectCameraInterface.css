@@ -18,11 +18,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   background: white;
   color: var(--header-color);
   z-index: 10;
-  min-height: 60px;
+  min-height: 50px;
 }
 
 .back-button {
@@ -71,8 +71,8 @@
   background: #000;
   overflow: hidden;
   width: calc(100% - 2.5rem);
-  aspect-ratio: 1/1;
-  margin: 1rem auto;
+  aspect-ratio: 4/3;
+  margin: 0.5rem auto;
   border-radius: 12px;
 }
 
@@ -194,9 +194,9 @@
 /* Photos Gallery */
 .photos-gallery {
   background: white;
-  padding: 1.5rem;
+  padding: 1rem;
   border-top: 1px solid #e0e0e0;
-  max-height: 55vh;
+  max-height: 35vh;
   overflow-y: auto;
   position: fixed;
   bottom: 0;
@@ -209,7 +209,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
 }
 
 .photos-count {
@@ -223,7 +223,7 @@
   gap: 0.75rem;
   overflow-x: auto;
   padding-bottom: 0.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .photo-thumbnail {
@@ -268,7 +268,7 @@
 .analyze-controls {
   display: flex;
   justify-content: center;
-  padding: 1rem 1rem 0.5rem 1rem;
+  padding: 0.5rem 1rem;
 }
 
 .analyze-button {
@@ -472,8 +472,8 @@
   }
   
   .photos-gallery {
-    padding: 1rem;
-    max-height: 50vh;
+    padding: 0.75rem;
+    max-height: 30vh;
   }
   
   .photo-thumbnail {
@@ -533,7 +533,7 @@
   }
   
   .photos-gallery {
-    max-height: 45vh;
+    max-height: 25vh;
   }
   
   .photos-row {
