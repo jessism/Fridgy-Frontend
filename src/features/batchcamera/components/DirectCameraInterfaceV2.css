@@ -498,6 +498,214 @@
   max-width: 300px;
 }
 
+/* Results Section Styles (Modern Card Interface) */
+.camera-v2__results-section {
+  flex: 1;
+  background: white;
+  padding: 1rem;
+  overflow-y: auto;
+  margin-top: 0;
+}
+
+.camera-v2__results-subtitle {
+  color: #666;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* MODERN CARD INTERFACE (copied from StreamlinedCamera.css) */
+.camera-v2__results-cards {
+  margin-bottom: 2rem;
+}
+
+.camera-v2__inventory-card {
+  background: transparent;
+  padding: 0.5rem 0.25rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-height: 60px;
+  position: relative;
+  overflow: visible;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.camera-v2__inventory-card:last-child {
+  border-bottom: none;
+}
+
+.camera-v2__inventory-card:hover {
+  background: rgba(248, 249, 250, 0.5);
+}
+
+/* Left: Icon */
+.camera-v2__card-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid #e9ecef;
+}
+
+/* Middle: Content */
+.camera-v2__card-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-right: 0.5rem;
+}
+
+/* Item name row */
+.camera-v2__card-name-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.camera-v2__card-item-name-input {
+  font-family: var(--header-font);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--header-color, #333);
+  border: none;
+  background: transparent;
+  padding: 0.15rem 0;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+  flex: 1;
+  min-width: 0;
+}
+
+.camera-v2__card-item-name-input:focus {
+  outline: none;
+  border-bottom-color: var(--primary-green, #81e053);
+}
+
+/* Details row */
+.camera-v2__card-details-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.camera-v2__card-detail-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.camera-v2__card-label {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.camera-v2__card-quantity-input {
+  width: 50px;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.camera-v2__card-category-select {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  background: white;
+}
+
+/* Expiry row */
+.camera-v2__card-expiry-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.camera-v2__card-date-input {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.camera-v2__card-remove-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  color: #9ca3af;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.camera-v2__card-remove-btn:hover {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* Input focus states */
+.camera-v2__card-quantity-input:focus,
+.camera-v2__card-category-select:focus,
+.camera-v2__card-date-input:focus {
+  outline: none;
+  border-color: var(--primary-green, #81e053);
+  box-shadow: 0 0 0 2px rgba(129, 224, 83, 0.1);
+}
+
+/* Save Actions */
+.camera-v2__save-actions {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.camera-v2__save-btn {
+  width: 100%;
+  background: var(--primary-green, #81e053);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(129, 224, 83, 0.3);
+}
+
+.camera-v2__save-btn:hover:not(:disabled) {
+  background: var(--primary-green-dark, #6bc93f);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(129, 224, 83, 0.4);
+}
+
+.camera-v2__save-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .camera-v2__header {

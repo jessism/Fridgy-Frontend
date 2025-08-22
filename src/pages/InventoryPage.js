@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
-import StreamlinedCamera from '../features/batchcamera/components/StreamlinedCamera';
 import { EditIcon, DeleteIcon } from '../components/icons';
 import useInventory from '../hooks/useInventory';
 import { getItemIconIcons8, getExpiryStatus, formatQuantity } from '../assets/inventory_emojis/iconHelpers.js';
@@ -10,8 +9,7 @@ import './InventoryPage.css';
 
 const InventoryPage = () => {
   const { items: inventoryItems, loading, error, refreshInventory, deleteItem, updateItem } = useInventory();
-
-  const [showCameraModal, setShowCameraModal] = useState(false);
+  const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [openDropdownId, setOpenDropdownId] = useState(null);
@@ -51,11 +49,6 @@ const InventoryPage = () => {
     return diffDays;
   };
 
-  const handleCameraModalClose = () => {
-    setShowCameraModal(false);
-    // Refresh inventory to show newly added items
-    refreshInventory();
-  };
 
   const handleDeleteItem = (item) => {
     console.log('Delete button clicked for item:', item);
@@ -290,7 +283,7 @@ const InventoryPage = () => {
                     e.target.style.transform = 'translateY(0)';
                     e.target.style.boxShadow = '0 2px 8px rgba(76, 207, 97, 0.2)';
                   }}
-                  onClick={() => setShowCameraModal(true)}
+                  onClick={() => navigate('/batchcamera')}
                   title="Add item"
                 >
                   +
@@ -428,7 +421,7 @@ const InventoryPage = () => {
                   fontSize: '1rem',
                   cursor: 'pointer'
                 }}
-                onClick={() => setShowCameraModal(true)}
+                onClick={() => navigate('/batchcamera')}
               >
                 📷 Scan Items
               </button>
@@ -1033,23 +1026,6 @@ const InventoryPage = () => {
         </div>
       </div>
       
-      {/* Camera Modal */}
-      {showCameraModal && (
-        <div className="camera-modal-overlay">
-          <div className="camera-modal">
-            <div className="camera-modal-header">
-              <h2>Add Items</h2>
-              <button 
-                className="close-modal-btn"
-                onClick={() => setShowCameraModal(false)}
-              >
-                ✕
-              </button>
-            </div>
-            <StreamlinedCamera onComplete={handleCameraModalClose} />
-          </div>
-        </div>
-      )}
 
       {/* Edit Item Modal */}
       {showEditModal && itemToEdit && (

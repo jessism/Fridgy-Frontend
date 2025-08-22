@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/context/AuthContext';
 import SuccessModal from '../../../components/modals/SuccessModal';
+import { getItemIconIcons8, formatQuantity } from '../../../assets/inventory_emojis/iconHelpers.js';
 import './DirectCameraInterfaceV2.css';
 
 const DirectCameraInterfaceV2 = ({ onComplete }) => {
@@ -20,12 +21,14 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
   // New V2 states
   const [editMode, setEditMode] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   
   // Analysis and results states
   const [editableResults, setEditableResults] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successData, setSuccessData] = useState({ items: [], count: 0 });
+  const [selectedItems, setSelectedItems] = useState(new Set());
 
   // Initialize camera on component mount
   useEffect(() => {
@@ -149,8 +152,8 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
       
       if (data.success) {
         setEditableResults(data.items.map(item => ({ ...item })));
-        // Proceed to save items immediately
-        await saveItems(data.items);
+        // Show confirmation page instead of saving immediately
+        setShowConfirmation(true);
       } else {
         console.error('Processing failed:', data.error);
         alert('Failed to process images. Please try again.');
@@ -172,10 +175,13 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
 
     try {
       const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const token = localStorage.getItem('fridgy_token');
+      
       const response = await fetch(`${API_BASE_URL}/inventory`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
         },
         body: JSON.stringify({
           items: items.map(item => ({
@@ -240,9 +246,73 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
     // Reset for next batch
     setCapturedPhotos([]);
     setEditableResults(null);
+    setShowConfirmation(false);
     
     // Navigate back to home
     navigate('/home');
+  };
+
+  // Editable item functions (copied from DirectCameraInterface.js)
+  const updateEditableItem = (index, field, value) => {
+    setEditableResults(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  };
+
+  const removeEditableItem = (indexToRemove) => {
+    setEditableResults(prev => prev.filter((_, index) => index !== indexToRemove));
+    // Remove from selected items if it was selected
+    setSelectedItems(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(indexToRemove);
+      // Adjust indices for remaining items
+      const adjustedSet = new Set();
+      newSet.forEach(index => {
+        if (index > indexToRemove) {
+          adjustedSet.add(index - 1);
+        } else {
+          adjustedSet.add(index);
+        }
+      });
+      return adjustedSet;
+    });
+  };
+
+  // Selection functions (copied from StreamlinedCamera.js)
+  const toggleSelectAll = () => {
+    if (selectedItems.size === (editableResults && editableResults.length)) {
+      setSelectedItems(new Set());
+    } else {
+      setSelectedItems(new Set(editableResults ? editableResults.map((_, index) => index) : []));
+    }
+  };
+
+  const toggleSelectItem = (index) => {
+    setSelectedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
+
+  const handleConfirm = async () => {
+    if (!editableResults || editableResults.length === 0) {
+      alert('No items to save');
+      return;
+    }
+    await saveItems(editableResults);
+  };
+
+  const handleBackToCamera = async () => {
+    setShowConfirmation(false);
+    // Reset camera interface and restart camera
+    await resetCameraInterface();
   };
 
   // Render analyzing overlay
@@ -256,6 +326,127 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
             AI is identifying food items and expiration dates
           </div>
         </div>
+      </div>
+    );
+  }
+
+  // Render editable results interface (copied from DirectCameraInterface.js)
+  if (showConfirmation && editableResults) {
+    return (
+      <div className="camera-interface-v2">
+        <div className="camera-v2__header">
+          <button 
+            className="camera-v2__back-button"
+            onClick={handleBackToCamera}
+            aria-label="Back to camera"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <h1 className="camera-v2__title">Review Items</h1>
+        </div>
+
+        <div className="camera-v2__results-section">
+          <p className="camera-v2__results-subtitle">Review the AI-detected items below. You can edit any details before saving.</p>
+          
+          {/* Modern Card Interface (copied from StreamlinedCamera.js) */}
+          <div className="camera-v2__results-cards">
+            {editableResults.map((item, index) => {
+              const itemIcon = getItemIconIcons8(item.category, item.name, { size: 28 });
+              const formattedQuantity = formatQuantity(item.quantity);
+              
+              return (
+                <div key={index} className="camera-v2__inventory-card">
+                  {/* Left: Emoji icon */}
+                  <div className="camera-v2__card-icon">
+                    {itemIcon}
+                  </div>
+                  
+                  {/* Middle: Content */}
+                  <div className="camera-v2__card-content">
+                    {/* Top: Item name (editable) with remove button */}
+                    <div className="camera-v2__card-name-row">
+                      <input
+                        type="text"
+                        value={item.name}
+                        onChange={(e) => updateEditableItem(index, 'name', e.target.value)}
+                        className="camera-v2__card-item-name-input"
+                        placeholder="Item name"
+                      />
+                      <button 
+                        onClick={() => removeEditableItem(index)}
+                        className="camera-v2__card-remove-btn"
+                        title="Remove this item"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    
+                    {/* Bottom: Details row with quantity and category (editable) */}
+                    <div className="camera-v2__card-details-row">
+                      <div className="camera-v2__card-detail-group">
+                        <span className="camera-v2__card-label">Qty:</span>
+                        <input
+                          type="number"
+                          value={item.quantity}
+                          onChange={(e) => updateEditableItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                          className="camera-v2__card-quantity-input"
+                          min="1"
+                          max="99"
+                        />
+                      </div>
+                      <div className="camera-v2__card-detail-group">
+                        <select 
+                          value={item.category} 
+                          onChange={(e) => updateEditableItem(index, 'category', e.target.value)}
+                          className="camera-v2__card-category-select"
+                        >
+                          <option value="Fruits">Fruits</option>
+                          <option value="Vegetables">Vegetables</option>
+                          <option value="Dairy">Dairy</option>
+                          <option value="Protein">Protein</option>
+                          <option value="Grains">Grains</option>
+                          <option value="Fats and oils">Fats and oils</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    {/* Expiry date row */}
+                    <div className="camera-v2__card-expiry-row">
+                      <span className="camera-v2__card-label">Expires:</span>
+                      <input
+                        type="date"
+                        value={item.expiryDate}
+                        onChange={(e) => updateEditableItem(index, 'expiryDate', e.target.value)}
+                        className="camera-v2__card-date-input"
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          
+          {/* Save Actions */}
+          <div className="camera-v2__save-actions">
+            <button 
+              onClick={handleConfirm} 
+              disabled={isSaving || editableResults.length === 0}
+              className="camera-v2__save-btn"
+            >
+              {isSaving ? 'Saving...' : `✓ Add ${editableResults.length} Item${editableResults.length !== 1 ? 's' : ''} to Inventory`}
+            </button>
+          </div>
+        </div>
+
+        <SuccessModal
+          isOpen={showSuccessModal}
+          onClose={handleSuccessModalClose}
+          savedItems={successData.items}
+          itemCount={successData.count}
+        />
       </div>
     );
   }

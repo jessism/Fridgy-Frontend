@@ -52,7 +52,7 @@ const ConfirmationPage = ({ items, onConfirm, onBack }) => {
     <div className="confirmation-page">
       <div className="confirmation-content">
         <div className="header-section">
-          <h2 className="page-title">✅ Confirm Your Items</h2>
+          <h2 className="page-title">Confirm Your Items</h2>
           <p className="page-subtitle">
             Review the items we found and uncheck any that are incorrect
           </p>

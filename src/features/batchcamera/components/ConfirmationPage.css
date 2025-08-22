@@ -1,6 +1,6 @@
 .confirmation-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: white;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -18,19 +18,18 @@
 .header-section {
   text-align: center;
   margin-bottom: 30px;
-  color: white;
 }
 
 .page-title {
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 10px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  color: var(--black, #222222);
 }
 
 .page-subtitle {
   font-size: 1.1rem;
-  opacity: 0.9;
+  color: var(--gray, #666666);
   line-height: 1.5;
 }
 
@@ -47,35 +46,36 @@
 }
 
 .items-list::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+  background: #f1f1f1;
   border-radius: 3px;
 }
 
 .items-list::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--gray-light, #E0E0E0);
   border-radius: 3px;
 }
 
 .item-card {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 15px;
+  background: white;
+  border: 1px solid var(--gray-light, #E0E0E0);
+  border-radius: 12px;
   padding: 20px;
   margin-bottom: 15px;
   display: flex;
   align-items: center;
   gap: 15px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .item-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .item-card.unchecked {
   opacity: 0.6;
-  background: rgba(255, 255, 255, 0.7);
+  background: #fafafa;
 }
 
 .item-checkbox {
@@ -86,7 +86,7 @@
   appearance: none;
   width: 24px;
   height: 24px;
-  border: 2px solid #ddd;
+  border: 2px solid var(--gray-light, #E0E0E0);
   border-radius: 6px;
   background: white;
   cursor: pointer;
@@ -94,8 +94,8 @@
 }
 
 .item-checkbox input[type="checkbox"]:checked {
-  background: #4CAF50;
-  border-color: #4CAF50;
+  background: var(--primary-green, #81e053);
+  border-color: var(--primary-green, #81e053);
 }
 
 .item-checkbox input[type="checkbox"]:checked::after {
@@ -123,16 +123,16 @@
 .item-name {
   font-size: 1.3rem;
   font-weight: 600;
-  color: #333;
+  color: var(--black, #222222);
   margin: 0;
 }
 
 .item-quantity {
-  background: #f0f0f0;
+  background: var(--beige, #F8F6F0);
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.9rem;
-  color: #666;
+  color: var(--gray, #666666);
   font-weight: 500;
 }
 
@@ -145,7 +145,7 @@
 
 .expiry-date {
   font-size: 0.95rem;
-  color: #666;
+  color: var(--gray, #666666);
 }
 
 .expiry-indicator {
@@ -159,7 +159,7 @@
 
 .expiry-indicator.fresh {
   background: #e8f5e8;
-  color: #4CAF50;
+  color: var(--primary-green-dark, #6bc93f);
 }
 
 .expiry-indicator.expiring-week {
@@ -178,11 +178,10 @@
 }
 
 .action-section {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
+  background: var(--beige-light, #FEFCF7);
+  border-radius: 16px;
   padding: 25px;
-  color: white;
+  border: 1px solid var(--gray-light, #E0E0E0);
 }
 
 .items-summary {
@@ -190,6 +189,7 @@
   font-size: 1.1rem;
   margin-bottom: 20px;
   font-weight: 500;
+  color: var(--black, #222222);
 }
 
 .action-buttons {
@@ -200,38 +200,36 @@
 
 .back-btn, .confirm-btn {
   border: none;
-  border-radius: 50px;
+  border-radius: 25px;
   font-size: 1.1rem;
   font-weight: 600;
   padding: 15px 30px;
   cursor: pointer;
   transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .back-btn {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: white;
+  color: var(--gray, #666666);
+  border: 2px solid var(--gray-light, #E0E0E0);
 }
 
 .back-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
+  background: var(--beige, #F8F6F0);
+  transform: translateY(-1px);
 }
 
 .confirm-btn {
-  background: linear-gradient(45deg, #4CAF50, #45a049);
+  background: var(--gradient-green, linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%));
   color: white;
-  box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 4px 12px rgba(129, 224, 83, 0.3);
   flex: 1;
   max-width: 250px;
 }
 
 .confirm-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 35px rgba(76, 175, 80, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(129, 224, 83, 0.4);
 }
 
 .confirm-btn:disabled {
@@ -315,4 +313,4 @@
   .items-list {
     max-height: 65vh;
   }
-} 
+}
