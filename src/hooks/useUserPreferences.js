@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../features/auth/context/AuthContext';
+import { safeJSONStringify } from '../utils/jsonSanitizer';
 
 // API base URL - adjust for your backend
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -99,7 +100,7 @@ const useUserPreferences = () => {
       
       const response = await apiRequest('/user-preferences', {
         method: 'POST',
-        body: JSON.stringify(newPreferences),
+        body: safeJSONStringify(newPreferences),
       });
 
       if (response.success) {

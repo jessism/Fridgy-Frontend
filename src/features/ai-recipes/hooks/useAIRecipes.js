@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import { useAuth } from '../features/auth/context/AuthContext';
+import { useAuth } from '../../auth/context/AuthContext';
+import { safeJSONStringify } from '../../../utils/jsonSanitizer';
 
 // API base URL - adjust for your backend
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -79,7 +80,7 @@ const useAIRecipes = () => {
       
       const response = await apiRequest('/ai-recipes/generate', {
         method: 'POST',
-        body: JSON.stringify(questionnaireData)
+        body: safeJSONStringify(questionnaireData)
       });
 
       if (response.success && response.data) {
@@ -185,6 +186,7 @@ const useAIRecipes = () => {
   const clearError = useCallback(() => {
     setError(null);
   }, []);
+
 
   // Clear recipes state
   const clearRecipes = useCallback(() => {

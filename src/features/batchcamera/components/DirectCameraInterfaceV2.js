@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/context/AuthContext';
 import SuccessModal from '../../../components/modals/SuccessModal';
 import { getItemIconIcons8, formatQuantity } from '../../../assets/inventory_emojis/iconHelpers.js';
+import { safeJSONStringify } from '../../../utils/jsonSanitizer';
 import './DirectCameraInterfaceV2.css';
 
 const DirectCameraInterfaceV2 = ({ onComplete }) => {
@@ -183,7 +184,7 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
           'Content-Type': 'application/json',
           ...(token && { Authorization: `Bearer ${token}` }),
         },
-        body: JSON.stringify({
+        body: safeJSONStringify({
           items: items.map(item => ({
             item_name: item.name,
             quantity: item.quantity,
@@ -252,7 +253,7 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
     navigate('/home');
   };
 
-  // Editable item functions (copied from DirectCameraInterface.js)
+  // Editable item functions
   const updateEditableItem = (index, field, value) => {
     setEditableResults(prev => {
       const updated = [...prev];
@@ -280,7 +281,7 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
     });
   };
 
-  // Selection functions (copied from StreamlinedCamera.js)
+  // Selection functions
   const toggleSelectAll = () => {
     if (selectedItems.size === (editableResults && editableResults.length)) {
       setSelectedItems(new Set());
@@ -330,7 +331,7 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
     );
   }
 
-  // Render editable results interface (copied from DirectCameraInterface.js)
+  // Render editable results interface
   if (showConfirmation && editableResults) {
     return (
       <div className="camera-interface-v2">
@@ -350,7 +351,7 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
         <div className="camera-v2__results-section">
           <p className="camera-v2__results-subtitle">Review the AI-detected items below. You can edit any details before saving.</p>
           
-          {/* Modern Card Interface (copied from StreamlinedCamera.js) */}
+          {/* Modern Card Interface */}
           <div className="camera-v2__results-cards">
             {editableResults.map((item, index) => {
               const itemIcon = getItemIconIcons8(item.category, item.name, { size: 28 });

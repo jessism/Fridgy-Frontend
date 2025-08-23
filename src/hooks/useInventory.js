@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../features/auth/context/AuthContext';
+import recipeCache from '../services/RecipeCache';
+import { safeJSONStringify } from '../utils/jsonSanitizer';
 
 // API base URL - adjust for your backend
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -79,11 +81,18 @@ const useInventory = () => {
       
       const response = await apiRequest(`/inventory/${itemId}`, {
         method: 'PUT',
-        body: JSON.stringify(updateData),
+        body: safeJSONStringify(updateData),
       });
 
       if (response.success) {
         console.log('✅ Item updated successfully:', response.item);
+        
+        // Invalidate recipe cache since inventory changed
+        if (user) {
+          recipeCache.invalidateUser(user.id);
+          console.log('🗑️ Recipe cache invalidated after item update');
+        }
+        
         // Refresh inventory after update
         await fetchInventory();
         return response.item;
@@ -106,13 +115,20 @@ const useInventory = () => {
       
       const response = await apiRequest(`/inventory/${itemId}`, {
         method: 'DELETE',
-        body: JSON.stringify({
+        body: safeJSONStringify({
           deleteReason: deleteReason
         }),
       });
 
       if (response.success) {
         console.log('✅ Item deleted successfully with analytics:', response.analytics);
+        
+        // Invalidate recipe cache since inventory changed
+        if (user) {
+          recipeCache.invalidateUser(user.id);
+          console.log('🗑️ Recipe cache invalidated after item deletion');
+        }
+        
         // Refresh inventory after deletion
         await fetchInventory();
         return true;
@@ -132,6 +148,21 @@ const useInventory = () => {
     fetchInventory();
   }, [fetchInventory]);
 
+  // Invalidate recipe cache after adding new items
+  const invalidateRecipeCache = useCallback(() => {
+    if (user) {
+      recipeCache.invalidateUser(user.id);
+      console.log('🗑️ Recipe cache invalidated after inventory change');
+    }
+  }, [user]);
+  
+  // Refresh inventory and invalidate cache (for use after adding items)
+  const refreshInventoryWithCacheInvalidation = useCallback(async () => {
+    console.log('🔄 Refreshing inventory and invalidating recipe cache...');
+    await fetchInventory();
+    invalidateRecipeCache();
+  }, [fetchInventory, invalidateRecipeCache]);
+
   // Fetch inventory on mount and when user changes
   useEffect(() => {
     fetchInventory();
@@ -144,7 +175,9 @@ const useInventory = () => {
     updateItem,
     deleteItem,
     refreshInventory,
-    fetchInventory
+    fetchInventory,
+    invalidateRecipeCache,
+    refreshInventoryWithCacheInvalidation
   };
 };
 

@@ -116,7 +116,7 @@ const AppNavBar = () => {
             to="/meal-plans" 
             className={`nav-link ${isActiveLink('/meal-plans') ? 'active' : ''}`}
           >
-            Meal Plans
+            Meals
           </Link>
           
           {/* Add to Fridge Button */}

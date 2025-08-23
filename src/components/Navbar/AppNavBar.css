@@ -117,6 +117,21 @@
   transition: all 0.3s ease;
   text-decoration: none;
   border-radius: 50%;
+  border: none;
+  outline: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+}
+
+.add-to-fridge-button:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.add-to-fridge-button:active {
+  outline: none;
+  box-shadow: none;
 }
 
 .add-to-fridge-button:hover {

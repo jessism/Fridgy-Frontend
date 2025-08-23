@@ -195,30 +195,7 @@
   font-style: italic;
 }
 
-/* Cooking Tip */
-.cooking-tip {
-  background: #fef3c7;
-  border: 1px solid #fbbf24;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 20px;
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-}
 
-.tip-icon {
-  font-size: 1rem;
-  flex-shrink: 0;
-}
-
-.tip-text {
-  color: #92400e;
-  font-size: 0.85rem;
-  margin: 0;
-  line-height: 1.4;
-  font-weight: 500;
-}
 
 /* Action Buttons */
 .recipe-actions {

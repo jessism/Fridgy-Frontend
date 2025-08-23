@@ -2,3 +2,5 @@
 export { default as FridgeIcon } from './FridgeIcon';
 export { default as ChefIcon } from './ChefIcon';
 export { default as SaveIcon } from './SaveIcon';
+export { default as IngredientMatchIcon } from './IngredientMatchIcon';
+export { default as CookTimeIcon } from './CookTimeIcon';

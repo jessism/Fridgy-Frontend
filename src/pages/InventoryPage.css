@@ -5,6 +5,15 @@
   position: relative;
 }
 
+/* Title Styling to match MealPlansPage */
+.inventory-page__title {
+  font-family: var(--header-font);
+  font-size: 2.5rem;
+  color: var(--header-color);
+  margin: 0;
+  font-weight: 700;
+}
+
 /* MOBILE SPACING - BRING HEADLINE CLOSER TO TOP */
 @media (max-width: 768px) {
   /* Main content area - remove top padding */
@@ -23,10 +32,12 @@
     margin-bottom: 1rem !important;
   }
   
-  /* H1 headline - minimal top margin */
-  .inventory-page h1 {
+  /* H1 headline - minimal top margin and responsive font size */
+  .inventory-page h1,
+  .inventory-page__title {
     margin-top: 0 !important;
     margin-bottom: 0.5rem !important;
+    font-size: 2rem !important; /* Match MealPlansPage mobile size */
   }
   
   /* Subtitle - reduce spacing */
@@ -133,6 +144,27 @@
     min-width: 0;
   }
   
+  /* Shelf life text styling */
+  .inventory-page__card-shelf-life {
+    font-size: 0.9rem;
+    color: #888;
+    margin: 0.25rem 0 0.5rem 0;
+    font-weight: 500;
+  }
+  
+  /* Shelf life color states */
+  .inventory-page__card-shelf-life--expired {
+    color: #F44336; /* Red for expired */
+  }
+  
+  .inventory-page__card-shelf-life--expiring {
+    color: #FF9800; /* Yellow/Orange for expiring soon */
+  }
+  
+  .inventory-page__card-shelf-life--fresh {
+    color: #4CAF50; /* Green for fresh */
+  }
+  
   /* Bottom: Details row (quantity + category + status) */
   .inventory-page__card-details-row {
     display: flex;
@@ -168,9 +200,9 @@
   }
   
   .inventory-page__card-status-pill--expiring {
-    background: rgba(255, 87, 34, 0.15);
-    color: #FF5722;
-    border: 1px solid rgba(255, 87, 34, 0.2);
+    background: rgba(255, 152, 0, 0.15);
+    color: #FF9800;
+    border: 1px solid rgba(255, 152, 0, 0.2);
   }
   
   .inventory-page__card-status-pill--expired {
@@ -279,6 +311,14 @@
   
   .inventory-page__dropdown-option span {
     font-weight: 500;
+  }
+}
+
+/* Very small screens - match MealPlansPage */
+@media (max-width: 480px) {
+  .inventory-page h1,
+  .inventory-page__title {
+    font-size: 1.75rem !important; /* Match MealPlansPage very small screen size */
   }
 }
 

@@ -35,7 +35,7 @@ const MobileBottomNav = () => {
       path: '/batchcamera',
       icon: (
         <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <circle cx="14" cy="14" r="12" fill="#81e053"/>
+          <circle cx="14" cy="14" r="12" fill="#81e053" stroke="none"/>
           <path d="M14 9V19M9 14H19" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
         </svg>
       ),
@@ -50,7 +50,7 @@ const MobileBottomNav = () => {
           <path d="M16.2 7.8l-2 6.3-6.3 2 2-6.3 6.3-2z"/>
         </svg>
       ),
-      label: 'Meal Plans'
+      label: 'Meals'
     },
     {
       path: '/profile',

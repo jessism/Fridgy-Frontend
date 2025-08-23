@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { safeJSONStringify } from '../../../utils/jsonSanitizer';
 
 // Create the authentication context
 const AuthContext = createContext();
@@ -119,7 +120,7 @@ export const AuthProvider = ({ children }) => {
       // Call backend signup endpoint
       const response = await apiRequest('/auth/signup', {
         method: 'POST',
-        body: JSON.stringify({
+        body: safeJSONStringify({
           firstName: firstName.trim(),
           email: email.toLowerCase(),
           password,
@@ -156,7 +157,7 @@ export const AuthProvider = ({ children }) => {
       // Call backend signin endpoint
       const response = await apiRequest('/auth/signin', {
         method: 'POST',
-        body: JSON.stringify({
+        body: safeJSONStringify({
           email: email.toLowerCase(),
           password,
         }),

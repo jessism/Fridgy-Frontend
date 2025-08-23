@@ -1,22 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import useRecipes from '../hooks/useRecipes';
 import RecipeDetailModal from '../components/modals/RecipeDetailModal';
-import AIRecipeSection from '../components/AIRecipeSection';
-import './HomePage.css'; // Now in the same directory
+import { AIRecipeSection } from '../features/ai-recipes';
+import { IngredientMatchIcon, CookTimeIcon } from '../assets/icons';
+import './MealPlansPage.css';
 
 const MealPlansPage = () => {
+  const navigate = useNavigate();
   const {
     suggestions,
     loading,
     error,
+    isFromCache,
     fetchSuggestions,
     fetchRecipeDetails,
     getHighMatchRecipes,
     markRecipeCooked,
-    clearError
+    clearError,
+    refreshSuggestions
   } = useRecipes();
 
   // Modal state
@@ -34,11 +38,19 @@ const MealPlansPage = () => {
   }, [fetchSuggestions]);
 
 
+  // Debug: Log the data to see what we're working with
+  console.log('🔍 MealPlansPage Debug:', {
+    suggestions: suggestions,
+    suggestionsLength: suggestions?.length || 0,
+    loading,
+    error
+  });
+
   // Get high-match recipes for "Cook what you have" section
   const cookWhatYouHaveRecipes = getHighMatchRecipes(30); // Lowered threshold
   
-  // Get remaining recipes for "Inspired by your preference" section  
-  const preferenceRecipes = suggestions.filter(recipe => recipe.matchPercentage < 30);
+  // Get all recipes for "Inspired by your preference" section  
+  const preferenceRecipes = suggestions; // Show all suggestions to ensure section appears
 
   const handleCookNow = async (recipe) => {
     try {
@@ -102,11 +114,15 @@ const MealPlansPage = () => {
         </button>
         <div className="meal-stats">
           <div className="stat-item">
-            <span className="stat-icon">🥘</span>
+            <span className="stat-icon">
+              <IngredientMatchIcon size={20} color="#81e053" />
+            </span>
             <span className="stat-text">Ingredients match: {recipe.matchPercentage}%</span>
           </div>
           <div className="stat-item">
-            <span className="stat-icon">⏱️</span>
+            <span className="stat-icon">
+              <CookTimeIcon size={20} color="#81e053" />
+            </span>
             <span className="stat-text">
               {recipe.cookingTime ? `Cook time: ${recipe.cookingTime} minutes` : 'Cook time: varies'}
             </span>
@@ -153,19 +169,34 @@ const MealPlansPage = () => {
       </button>
     </div>
   );
+  const handleLogMeal = () => {
+    // Navigate to camera or meal logging functionality
+    navigate('/batchcamera');
+  };
+
   return (
-    <div className="homepage">
+    <div className="meal-plans-page">
       <AppNavBar />
 
       {/* Meal Plans Content */}
-      <div style={{paddingTop: '100px', minHeight: '100vh', background: 'white'}}>
-        <div className="container" style={{maxWidth: '1200px', margin: '0 auto', padding: '2rem'}}>
-          <h1 style={{fontFamily: 'var(--header-font)', fontSize: '3rem', color: 'var(--header-color)', marginBottom: '2rem'}}>
-            Meal Plans
-          </h1>
-          <p style={{fontFamily: 'var(--description-font)', fontSize: '1.2rem', color: 'var(--description-color)', marginBottom: '3rem'}}>
-            Plan your meals and discover recipes based on your available ingredients
-          </p>
+      <div className="meal-plans-page__main">
+        <div className="meal-plans-page__container">
+          {/* Hero Section */}
+          <div className="meal-plans-page__hero">
+            <h1 className="meal-plans-page__hero-title">Meals</h1>
+          </div>
+
+          {/* Quick Access Section */}
+          <div className="meal-plans-page__quick-access">
+            <div className="meal-plans-page__quick-access-item" onClick={handleLogMeal}>
+              <div className="meal-plans-page__quick-access-icon">
+                +
+              </div>
+              <div className="meal-plans-page__quick-access-label">
+                Log your meal
+              </div>
+            </div>
+          </div>
           
           {/* Cook What You Have Section - TEMPORARILY HIDDEN */}
           {/* 
@@ -194,25 +225,87 @@ const MealPlansPage = () => {
           */}
           
           {/* Inspired by Your Preference Section */}
-          {preferenceRecipes.length > 0 && (
-            <div className="cook-what-you-have" style={{marginBottom: '4rem'}}>
-              <div className="section-header-with-arrow">
-                <h2 className="section-title">Inspired by your preference</h2>
-                <button className="slider-arrow" onClick={() => fetchSuggestions({ limit: 20, ranking: 2 })}>
-                  <span className="arrow-text">More recipes</span>
-                  <span className="arrow-icon">→</span>
+          <div className="meal-plans-page__section">
+            <div className="meal-plans-page__section-header" style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'flex-start',
+              marginBottom: '1.5rem'
+            }}>
+              <h2 className="meal-plans-page__section-title">
+                Inspired by<br />your preference
+              </h2>
+              {!loading && suggestions.length > 0 && (
+                <button
+                  onClick={() => refreshSuggestions()}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    background: 'transparent',
+                    border: '1px solid var(--primary-green)',
+                    borderRadius: '20px',
+                    color: 'var(--primary-green)',
+                    fontSize: '0.85rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'var(--primary-green)';
+                    e.target.style.color = 'white';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'transparent';
+                    e.target.style.color = 'var(--primary-green)';
+                  }}
+                  title={isFromCache ? 'Recipes loaded from cache. Click to get fresh suggestions.' : 'Get new recipe suggestions'}
+                >
+                  {/* Refresh icon */}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 2v6h-6M3 22v-6h6M21 8c-1.5-4.5-6-7-11-7-6 0-11 5-11 11M3 16c1.5 4.5 6 7 11 7 6 0 11-5 11-11" 
+                          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Discover New
                 </button>
-              </div>
-              <div className="meals-slider">
-                {preferenceRecipes.slice(0, 4).map(recipe => 
-                  renderRecipeCard(recipe, true)
-                )}
-              </div>
+              )}
             </div>
-          )}
+            <div className="meal-plans-page__recipes-grid">
+              {loading && renderLoadingCards(4)}
+              {error && !loading && renderErrorState()}
+              {!loading && !error && preferenceRecipes.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+                  <p>No recipe suggestions available right now.</p>
+                  <p>Try adding more items to your inventory!</p>
+                </div>
+              )}
+              {!loading && !error && preferenceRecipes.length > 0 && (
+                <>
+                  {preferenceRecipes.slice(0, 4).map(recipe => 
+                    renderRecipeCard(recipe, true)
+                  )}
+                  {isFromCache && (
+                    <div style={{
+                      gridColumn: '1 / -1',
+                      textAlign: 'center',
+                      padding: '0.5rem',
+                      fontSize: '0.75rem',
+                      color: '#999',
+                      fontStyle: 'italic'
+                    }}>
+                      ⚡ Recipes loaded instantly from cache
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
           
           {/* AI Recipe Section */}
-          <AIRecipeSection />
+          <div className="meal-plans-page__section">
+            <AIRecipeSection />
+          </div>
         </div>
       </div>
       

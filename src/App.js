@@ -9,6 +9,7 @@ import SignInPage from './pages/SignInPage';
 import HomePage from './pages/HomePage';
 import InventoryPage from './pages/InventoryPage';
 import MealPlansPage from './pages/MealPlansPage';
+import { AIRecipePage } from './features/ai-recipes';
 import ShoppingListPage from './pages/ShoppingListPage';
 import ProfilePage from './pages/ProfilePage';
 import BatchCamera from './features/batchcamera/components/BatchCamera';
@@ -35,6 +36,11 @@ function App() {
           <Route path="/meal-plans" element={
             <AuthGuard>
               <MealPlansPage />
+            </AuthGuard>
+          } />
+          <Route path="/ai-recipes" element={
+            <AuthGuard>
+              <AIRecipePage />
             </AuthGuard>
           } />
           <Route path="/shopping-list" element={

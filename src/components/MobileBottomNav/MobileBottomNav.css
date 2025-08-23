@@ -90,6 +90,16 @@
 .nav-tab.add-button {
   position: relative;
   top: -8px; /* Raise it slightly above other tabs */
+  outline: none;
+  border: none;
+  box-shadow: none;
+}
+
+.nav-tab.add-button:focus,
+.nav-tab.add-button:active {
+  outline: none;
+  border: none;
+  box-shadow: none;
 }
 
 .nav-tab.add-button .nav-icon {

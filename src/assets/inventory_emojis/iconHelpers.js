@@ -119,7 +119,7 @@ export const getItemIcon = (category, itemName = '') => {
 export const getExpiryStatus = (daysUntilExpiry) => {
   if (daysUntilExpiry < 0) {
     return { status: 'Expired', urgency: 'expired' };
-  } else if (daysUntilExpiry <= 3) {
+  } else if (daysUntilExpiry <= 4) {
     return { status: 'Expiring Soon', urgency: 'expiring' };
   } else if (daysUntilExpiry <= 7) {
     return { status: 'Good', urgency: 'warning' };

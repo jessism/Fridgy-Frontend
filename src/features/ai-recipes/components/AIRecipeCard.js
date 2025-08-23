@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './AIRecipeCard.css';
 
-const AIRecipeCard = ({ recipe, index = 0 }) => {
+const AIRecipeCard = ({ recipe, index = 0, onViewFullRecipe }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -104,7 +104,6 @@ const AIRecipeCard = ({ recipe, index = 0 }) => {
           
           {recipe.cuisine_type && (
             <div className="meta-item">
-              <span className="meta-icon">🍽️</span>
               <span className="meta-text">{recipe.cuisine_type}</span>
             </div>
           )}
@@ -144,22 +143,12 @@ const AIRecipeCard = ({ recipe, index = 0 }) => {
           </div>
         )}
 
-        {/* Cooking Tip */}
-        {recipe.tips && (
-          <div className="cooking-tip">
-            <span className="tip-icon">💡</span>
-            <p className="tip-text">{recipe.tips}</p>
-          </div>
-        )}
 
         {/* Action Buttons */}
         <div className="recipe-actions">
           <button 
             className="btn-primary view-recipe-btn"
-            onClick={() => {
-              // TODO: Implement recipe detail modal
-              console.log('View full recipe:', recipe);
-            }}
+            onClick={() => onViewFullRecipe && onViewFullRecipe(recipe)}
           >
             View Full Recipe
           </button>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import { EditIcon, DeleteIcon } from '../components/icons';
@@ -47,6 +47,30 @@ const InventoryPage = () => {
     const diffTime = expiryDate - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
+  };
+
+  const getShelfLifeText = (dateString) => {
+    const daysLeft = getDaysUntilExpiry(dateString);
+    if (daysLeft < 0) {
+      return `Shelf life left: - ${Math.abs(daysLeft)} days`;
+    } else if (daysLeft === 0) {
+      return 'Shelf life left: Expires today';
+    } else if (daysLeft === 1) {
+      return 'Shelf life left: 1 day';
+    } else {
+      return `Shelf life left: ${daysLeft} days`;
+    }
+  };
+
+  const getShelfLifeColorClass = (dateString) => {
+    const daysLeft = getDaysUntilExpiry(dateString);
+    if (daysLeft < 0) {
+      return 'inventory-page__card-shelf-life--expired';
+    } else if (daysLeft >= 0 && daysLeft <= 4) {
+      return 'inventory-page__card-shelf-life--expiring';
+    } else {
+      return 'inventory-page__card-shelf-life--fresh';
+    }
   };
 
 
@@ -194,14 +218,14 @@ const InventoryPage = () => {
 
       {/* Inventory Content */}
       <div style={{paddingTop: '100px', minHeight: '100vh', background: 'white'}}>
-        <div className="container" style={{maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem', overflow: 'visible'}}>
+        <div className="container" style={{maxWidth: '1200px', margin: '0 auto', padding: '1rem 1rem', overflow: 'visible'}}>
           {/* Header Section */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-start',
             marginBottom: '2rem',
-            marginTop: '1.5rem',
+            marginTop: '0.5rem',
             flexWrap: 'wrap',
             gap: '1rem'
           }}>
@@ -213,13 +237,7 @@ const InventoryPage = () => {
               marginBottom: '0.5rem',
               width: '100%'
             }}>
-              <h1 style={{
-                fontFamily: 'var(--header-font)', 
-                fontSize: '2rem', 
-                color: 'var(--header-color)', 
-                margin: '0',
-                fontWeight: '700'
-              }}>
+              <h1 className="inventory-page__title">
                 Your Fridge
               </h1>
               
@@ -882,9 +900,11 @@ const InventoryPage = () => {
                             {/* Top: Item name + status pill on same line */}
                             <div className="inventory-page__card-name-row">
                               <h3 className="inventory-page__card-item-name">{item.itemName}</h3>
-                              <span className={`inventory-page__card-status-pill ${getStatusPillClass(urgency)}`}>
-                                {status}
-                              </span>
+                              {urgency !== 'warning' && urgency !== 'good' && (
+                                <span className={`inventory-page__card-status-pill ${getStatusPillClass(urgency)}`}>
+                                  {status}
+                                </span>
+                              )}
                             </div>
                             
                             {/* Bottom: Details row with quantity and category */}
@@ -895,6 +915,11 @@ const InventoryPage = () => {
                               <span className="inventory-page__card-text-info">
                                 {item.category}
                               </span>
+                            </div>
+                            
+                            {/* Shelf life text - Third row */}
+                            <div className={`inventory-page__card-shelf-life ${getShelfLifeColorClass(item.expiryDate)}`}>
+                              {getShelfLifeText(item.expiryDate)}
                             </div>
                           </div>
 
@@ -968,9 +993,11 @@ const InventoryPage = () => {
                         {/* Top: Item name + status pill on same line */}
                         <div className="inventory-page__card-name-row">
                           <h3 className="inventory-page__card-item-name">{item.itemName}</h3>
-                          <span className={`inventory-page__card-status-pill ${getStatusPillClass(urgency)}`}>
-                            {status}
-                          </span>
+                          {urgency !== 'warning' && urgency !== 'good' && (
+                            <span className={`inventory-page__card-status-pill ${getStatusPillClass(urgency)}`}>
+                              {status}
+                            </span>
+                          )}
                         </div>
                         
                         {/* Bottom: Details row with quantity and category */}
@@ -981,6 +1008,11 @@ const InventoryPage = () => {
                           <span className="inventory-page__card-text-info">
                             {item.category}
                           </span>
+                        </div>
+                        
+                        {/* Shelf life text - Third row */}
+                        <div className={`inventory-page__card-shelf-life ${getShelfLifeColorClass(item.expiryDate)}`}>
+                          {getShelfLifeText(item.expiryDate)}
                         </div>
                       </div>
 

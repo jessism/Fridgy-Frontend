@@ -1,16 +1,23 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../features/auth/context/AuthContext';
+import recipeCache from '../services/RecipeCache';
+import { generateInventoryFingerprint, generateCacheKey, hasInventoryChanged } from '../utils/inventoryFingerprint';
+import { safeJSONStringify } from '../utils/jsonSanitizer';
+import useInventory from './useInventory';
 
 // API base URL - adjust for your backend
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const useRecipes = () => {
   const { user } = useAuth();
+  const { items: inventoryItems } = useInventory();
   const [suggestions, setSuggestions] = useState([]);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [loading, setLoading] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isFromCache, setIsFromCache] = useState(false);
+  const [lastFingerprint, setLastFingerprint] = useState(null);
 
   // Get token from localStorage
   const getToken = () => {
@@ -49,9 +56,41 @@ const useRecipes = () => {
       return;
     }
 
+    const { forceRefresh = false } = options;
+
     try {
+      // Generate fingerprint from current inventory
+      const currentFingerprint = generateInventoryFingerprint(inventoryItems);
+      const cacheKey = generateCacheKey(user.id, currentFingerprint);
+      
+      console.log('🔍 Inventory fingerprint:', currentFingerprint);
+      console.log('🔍 Cache key:', cacheKey);
+      
+      // Check if we can use cached data
+      if (!forceRefresh && cacheKey) {
+        const cachedData = recipeCache.get(cacheKey);
+        
+        if (cachedData && cachedData.recipes) {
+          console.log('✨ Using cached recipes:', cachedData.recipes.length, 'recipes');
+          console.log('📅 Cached at:', new Date(cachedData.timestamp).toLocaleString());
+          
+          setSuggestions(cachedData.recipes);
+          setIsFromCache(true);
+          setLastFingerprint(currentFingerprint);
+          setLoading(false);
+          setError(null);
+          
+          // Return cached recipes
+          return cachedData.recipes;
+        }
+      }
+      
+      // No valid cache or force refresh - fetch from API
+      console.log('🔄 ' + (forceRefresh ? 'Force refresh requested' : 'No cache found') + ', fetching from API...');
+      
       setLoading(true);
       setError(null);
+      setIsFromCache(false);
       
       console.log('🔄 Fetching recipe suggestions for user:', user.id);
       console.log('🔄 Token available:', !!getToken());
@@ -73,8 +112,25 @@ const useRecipes = () => {
       
       if (response.success) {
         console.log('✅ Recipe suggestions fetched successfully:', response.suggestions.length, 'recipes');
-        setSuggestions(response.suggestions || []);
-        return response.suggestions;
+        
+        const recipes = response.suggestions || [];
+        setSuggestions(recipes);
+        setLastFingerprint(currentFingerprint);
+        
+        // Cache the fresh results
+        if (cacheKey && recipes.length > 0) {
+          const cached = recipeCache.set(cacheKey, recipes, {
+            inventoryCount: inventoryItems.length,
+            fingerprint: currentFingerprint,
+            fetchOptions: { limit, ranking, minMatch }
+          });
+          
+          if (cached) {
+            console.log('💾 Recipes cached successfully');
+          }
+        }
+        
+        return recipes;
       } else {
         throw new Error(response.error || 'Failed to fetch recipe suggestions');
       }
@@ -82,12 +138,26 @@ const useRecipes = () => {
       console.error('❌ Error fetching recipe suggestions:', err);
       console.error('❌ Error details:', err.message);
       setError(err.message);
+      
+      // Try to use stale cache as fallback
+      if (!forceRefresh && lastFingerprint) {
+        const fallbackKey = generateCacheKey(user.id, lastFingerprint);
+        const staleCache = recipeCache.get(fallbackKey);
+        
+        if (staleCache && staleCache.recipes) {
+          console.log('⚠️ Using stale cache as fallback');
+          setSuggestions(staleCache.recipes);
+          setIsFromCache(true);
+          return staleCache.recipes;
+        }
+      }
+      
       setSuggestions([]);
       return [];
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, inventoryItems, lastFingerprint]);
 
   // Fetch detailed recipe information
   const fetchRecipeDetails = async (recipeId) => {
@@ -132,7 +202,7 @@ const useRecipes = () => {
       
       const response = await apiRequest(`/recipes/${recipeId}/cook`, {
         method: 'POST',
-        body: JSON.stringify({
+        body: safeJSONStringify({
           usedIngredients: usedIngredients
         }),
       });
@@ -200,9 +270,43 @@ const useRecipes = () => {
 
   // Refresh suggestions (convenience method)
   const refreshSuggestions = useCallback((options = {}) => {
-    console.log('🔄 Refreshing recipe suggestions...');
-    return fetchSuggestions(options);
+    console.log('🔄 Force refreshing recipe suggestions...');
+    return fetchSuggestions({ ...options, forceRefresh: true });
   }, [fetchSuggestions]);
+  
+  // Invalidate cache for current inventory
+  const invalidateCache = useCallback(() => {
+    if (!user || !inventoryItems) return;
+    
+    const fingerprint = generateInventoryFingerprint(inventoryItems);
+    const cacheKey = generateCacheKey(user.id, fingerprint);
+    
+    if (cacheKey) {
+      recipeCache.invalidate(cacheKey);
+      console.log('🗑️ Recipe cache invalidated for current inventory');
+    }
+  }, [user, inventoryItems]);
+  
+  // Clear all cache for user
+  const clearUserCache = useCallback(() => {
+    if (!user) return;
+    
+    recipeCache.invalidateUser(user.id);
+    console.log('🗑️ All recipe cache cleared for user');
+  }, [user]);
+  
+  // Check if inventory has changed since last fetch
+  useEffect(() => {
+    if (!user || !inventoryItems || inventoryItems.length === 0) return;
+    
+    const currentFingerprint = generateInventoryFingerprint(inventoryItems);
+    
+    // If fingerprint changed, we'll fetch new recipes on next call
+    if (lastFingerprint && hasInventoryChanged(lastFingerprint, currentFingerprint)) {
+      console.log('📦 Inventory changed, recipes will refresh on next fetch');
+      // Don't auto-fetch here, let the component decide when to fetch
+    }
+  }, [inventoryItems, lastFingerprint, user]);
 
   return {
     // Data
@@ -213,12 +317,17 @@ const useRecipes = () => {
     loading,
     detailsLoading,
     error,
+    isFromCache,
     
     // Core methods
     fetchSuggestions,
     fetchRecipeDetails,
     markRecipeCooked,
     refreshSuggestions,
+    
+    // Cache methods
+    invalidateCache,
+    clearUserCache,
     
     // Utility methods
     getHighMatchRecipes,
