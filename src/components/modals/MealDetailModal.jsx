@@ -144,16 +144,25 @@ const MealDetailModal = ({ meal, isOpen, onClose }) => {
         </button>
         
         <div className="meal-modal__image-container">
-          {imageLoading && (
-            <div className="meal-modal__image-skeleton" />
+          {meal.meal_photo_url && !imageError ? (
+            <>
+              {imageLoading && (
+                <div className="meal-modal__image-skeleton" />
+              )}
+              <img
+                src={meal.meal_photo_url}
+                alt={getMealName()}
+                className={`meal-modal__image ${imageLoading ? 'meal-modal__image--loading' : ''}`}
+                onError={handleImageError}
+                onLoad={handleImageLoad}
+              />
+            </>
+          ) : (
+            <div className="meal-modal__no-photo">
+              <div className="meal-modal__no-photo-icon">📷</div>
+              <p className="meal-modal__no-photo-text">No photo available</p>
+            </div>
           )}
-          <img
-            src={imageError ? '/assets/images/default-meal.svg' : (meal.meal_photo_url || '/assets/images/default-meal.svg')}
-            alt={getMealName()}
-            className={`meal-modal__image ${imageLoading ? 'meal-modal__image--loading' : ''}`}
-            onError={handleImageError}
-            onLoad={handleImageLoad}
-          />
         </div>
         
         <div className="meal-modal__content">

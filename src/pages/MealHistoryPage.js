@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
-import MealCard from '../components/cards/MealCard';
+import { EditIcon, DeleteIcon } from '../components/icons';
 import MealDetailModal from '../components/modals/MealDetailModal';
 import './MealHistoryPage.css';
 
@@ -296,47 +296,162 @@ const MealHistoryPage = () => {
     return [];
   };
 
+  // State for selected meal and dropdown
+  const [selectedMeal, setSelectedMeal] = useState(null);
+  const [openDropdownId, setOpenDropdownId] = useState(null);
+
+  // Extract meal name from data
+  const getMealName = (meal) => {
+    if (meal.meal_name) {
+      return meal.meal_name;
+    }
+    
+    try {
+      const ingredients = typeof meal.ingredients_logged === 'string' 
+        ? JSON.parse(meal.ingredients_logged) 
+        : meal.ingredients_logged;
+      
+      if (Array.isArray(ingredients) && ingredients.length > 0) {
+        const mainItems = ingredients.slice(0, 2).map(item => {
+          const name = item.name || item.item_name || '';
+          return name.split(' ').map(word => 
+            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+          ).join(' ');
+        });
+        return mainItems.join(' & ');
+      }
+    } catch (error) {
+      console.error('Error parsing ingredients:', error);
+    }
+    
+    return 'Home-cooked Meal';
+  };
+
+  // Calculate total calories
+  const getTotalCalories = (meal) => {
+    try {
+      const ingredients = typeof meal.ingredients_logged === 'string' 
+        ? JSON.parse(meal.ingredients_logged) 
+        : meal.ingredients_logged;
+      
+      if (Array.isArray(ingredients)) {
+        const total = ingredients.reduce((sum, item) => {
+          return sum + (item.calories || 0);
+        }, 0);
+        return total > 0 ? `~${total} calories` : null;
+      }
+    } catch (error) {
+      console.error('Error calculating calories:', error);
+    }
+    return null;
+  };
+
+  // Handle dropdown toggle
+  const handleDropdownToggle = (mealId) => {
+    setOpenDropdownId(openDropdownId === mealId ? null : mealId);
+  };
+
+  // Handle dropdown close
+  const handleDropdownClose = () => {
+    setOpenDropdownId(null);
+  };
+
+  // Handle meal name click to open detail modal
+  const handleMealNameClick = (meal) => {
+    setSelectedMeal(meal);
+  };
+
+  // Enhanced edit/delete handlers that close dropdown
+  const handleEditMealFromDropdown = (meal) => {
+    handleEditMeal(meal);
+    setOpenDropdownId(null);
+  };
+
+  const handleDeleteMealFromDropdown = (meal) => {
+    handleDeleteMeal(meal);
+    setOpenDropdownId(null);
+  };
+
+  // Close dropdown on ESC key
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setOpenDropdownId(null);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Meal Category Section Component
   const MealCategorySection = ({ title, meals, mealType }) => {
-    const [selectedMeal, setSelectedMeal] = useState(null);
-    
     return (
-      <>
-        <div className="meal-history-page__meal-section">
-          <h3 className="meal-history-page__meal-title">{title}</h3>
-          
-          {meals && meals.length > 0 ? (
-            <div className="meal-history-page__meal-grid">
-              {meals.map((meal) => (
-                <MealCard
-                  key={meal.id}
-                  meal={meal}
-                  onClick={setSelectedMeal}
-                  onEdit={handleEditMeal}
-                  onDelete={handleDeleteMeal}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="meal-history-page__empty-state">
-              <p>No meals logged yet</p>
-            </div>
-          )}
-          
-          <button 
-            className="meal-history-page__add-food-btn"
-            onClick={() => handleAddFood(mealType)}
-          >
-            ADD FOOD
-          </button>
-        </div>
+      <div className="meal-history-page__meal-section">
+        <h3 className="meal-history-page__meal-title">{title}</h3>
         
-        <MealDetailModal
-          meal={selectedMeal}
-          isOpen={!!selectedMeal}
-          onClose={() => setSelectedMeal(null)}
-        />
-      </>
+        {meals && meals.length > 0 ? (
+          <div className="meal-history-page__meal-list">
+            {meals.map((meal) => (
+              <div key={meal.id} className="meal-history-page__meal-item">
+                <div className="meal-history-page__meal-content" onClick={() => handleMealNameClick(meal)}>
+                  <div className="meal-history-page__meal-info">
+                    <h4 className="meal-history-page__meal-name">{getMealName(meal)}</h4>
+                    {getTotalCalories(meal) && (
+                      <span className="meal-history-page__meal-calories">{getTotalCalories(meal)}</span>
+                    )}
+                  </div>
+                </div>
+                
+                {/* 3-dot menu */}
+                <div className="meal-history-page__meal-menu">
+                  <button 
+                    className="meal-history-page__meal-menu-btn"
+                    onClick={() => handleDropdownToggle(meal.id)}
+                    aria-label="Meal options"
+                  >
+                    ⋮
+                  </button>
+                  
+                  {/* Dropdown menu */}
+                  {openDropdownId === meal.id && (
+                    <>
+                      <div className="meal-history-page__dropdown-overlay" onClick={handleDropdownClose}></div>
+                      <div className="meal-history-page__dropdown-menu">
+                        <button 
+                          className="meal-history-page__dropdown-option"
+                          onClick={() => handleEditMealFromDropdown(meal)}
+                        >
+                          <EditIcon />
+                          <span>Edit</span>
+                        </button>
+                        <button 
+                          className="meal-history-page__dropdown-option"
+                          onClick={() => handleDeleteMealFromDropdown(meal)}
+                        >
+                          <DeleteIcon />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="meal-history-page__empty-state">
+            <p>No meals logged yet</p>
+          </div>
+        )}
+        
+        <button 
+          className="meal-history-page__add-food-btn"
+          onClick={() => handleAddFood(mealType)}
+        >
+          ADD FOOD
+        </button>
+      </div>
     );
   };
 
@@ -476,6 +591,13 @@ const MealHistoryPage = () => {
       </div>
 
       <MobileBottomNav />
+      
+      {/* Meal Detail Modal */}
+      <MealDetailModal
+        meal={selectedMeal}
+        isOpen={!!selectedMeal}
+        onClose={() => setSelectedMeal(null)}
+      />
       
       {/* Edit Modal */}
       {showEditModal && mealToEdit && (

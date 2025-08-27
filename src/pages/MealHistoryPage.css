@@ -422,12 +422,164 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
-/* Meal Grid Layout */
-.meal-history-page__meal-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 1rem;
+/* Meal List Layout (replacing grid) */
+.meal-history-page__meal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
   margin-bottom: 1rem;
+}
+
+/* Individual meal item (line-based) */
+.meal-history-page__meal-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  position: relative;
+}
+
+.meal-history-page__meal-item:last-child {
+  border-bottom: none;
+}
+
+/* Meal content (clickable area) */
+.meal-history-page__meal-content {
+  flex: 1;
+  cursor: pointer;
+  padding-right: 1rem;
+  transition: opacity 0.2s ease;
+}
+
+.meal-history-page__meal-content:hover {
+  opacity: 0.7;
+}
+
+.meal-history-page__meal-content:active {
+  opacity: 0.5;
+}
+
+/* Meal info container */
+.meal-history-page__meal-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Meal name styling */
+.meal-history-page__meal-name {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Meal calories styling */
+.meal-history-page__meal-calories {
+  font-size: 0.875rem;
+  color: #666;
+  font-weight: 400;
+}
+
+/* Meal menu (3-dot) container */
+.meal-history-page__meal-menu {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.meal-history-page__meal-menu-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  color: #666;
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+}
+
+.meal-history-page__meal-menu-btn:hover {
+  color: #333;
+  background-color: #f5f5f5;
+  transform: scale(1.1);
+}
+
+.meal-history-page__meal-menu-btn:active {
+  transform: scale(0.95);
+  background-color: #e9ecef;
+}
+
+/* Dropdown overlay for click-outside handling */
+.meal-history-page__dropdown-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
+
+/* Dropdown menu */
+.meal-history-page__dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.25rem;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  min-width: 120px;
+  z-index: 1001;
+  opacity: 0;
+  transform: translateY(-8px) scale(0.95);
+  animation: dropdownFadeIn 0.15s ease-out forwards;
+}
+
+@keyframes dropdownFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.meal-history-page__dropdown-option {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: none;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #333;
+  transition: background-color 0.15s ease;
+  touch-action: manipulation;
+  min-height: 40px;
+}
+
+.meal-history-page__dropdown-option:hover {
+  background-color: #f8f9fa;
+}
+
+.meal-history-page__dropdown-option:active {
+  background-color: #e9ecef;
+}
+
+.meal-history-page__dropdown-option:not(:last-child) {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.meal-history-page__dropdown-option span {
+  font-weight: 500;
 }
 
 /* Empty State */
@@ -513,9 +665,22 @@
     font-size: 1rem;
   }
 
-  .meal-history-page__meal-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
+  .meal-history-page__meal-item {
+    padding: 0.75rem 0;
+  }
+  
+  .meal-history-page__meal-name {
+    font-size: 0.95rem;
+  }
+  
+  .meal-history-page__meal-calories {
+    font-size: 0.8125rem;
+  }
+  
+  .meal-history-page__meal-menu-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 1.125rem;
   }
 
   .meal-history-page__add-food-btn {
@@ -526,9 +691,22 @@
 
 /* Extra small screens */
 @media (max-width: 480px) {
-  .meal-history-page__meal-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.625rem;
+  .meal-history-page__meal-item {
+    padding: 0.625rem 0;
+  }
+  
+  .meal-history-page__meal-name {
+    font-size: 0.9rem;
+  }
+  
+  .meal-history-page__meal-calories {
+    font-size: 0.8rem;
+  }
+  
+  .meal-history-page__meal-menu-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 1rem;
   }
 
   .meal-history-page__meal-section {
