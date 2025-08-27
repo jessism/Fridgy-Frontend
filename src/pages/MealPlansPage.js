@@ -190,28 +190,15 @@ const MealPlansPage = () => {
             <h1 className="meal-plans-page__hero-title">Meals</h1>
           </div>
 
-          {/* Quick Access Section */}
-          <div className="meal-plans-page__quick-access">
-            <div className="meal-plans-page__quick-access-item" onClick={handleLogMeal}>
-              <div className="meal-plans-page__quick-access-icon meal-plans-page__quick-access-icon--small">
-                +
-              </div>
-              <div className="meal-plans-page__quick-access-label">
-                Scan your meal
-              </div>
-            </div>
-            
-            <div className="meal-plans-page__quick-access-item" onClick={handleViewMealLogs}>
-              <div className="meal-plans-page__quick-access-icon meal-plans-page__quick-access-icon--small">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                  <polyline points="12,6 12,12 16,14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <div className="meal-plans-page__quick-access-label">
-                View meal history
-              </div>
-            </div>
+          {/* Scan Your Meal Section Header */}
+          <div className="meal-plans-page__scan-header">
+            <h2 className="meal-plans-page__scan-title">Scan your meal</h2>
+            <button className="meal-plans-page__scan-button" onClick={handleLogMeal}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" strokeWidth="2"/>
+                <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" strokeWidth="2"/>
+              </svg>
+            </button>
           </div>
           
           {/* Cook What You Have Section - TEMPORARILY HIDDEN */}
@@ -320,6 +307,26 @@ const MealPlansPage = () => {
           
           {/* AI Recipe Section */}
           <AIRecipeSection />
+          
+          {/* View Meal Analytics Section */}
+          <div className="meal-plans-page__analytics-section">
+            {/* Text Section - Same structure as AI section */}
+            <div className="meal-plans-page__analytics-text-section">
+              <h2 className="meal-plans-page__section-title">View meal analytics</h2>
+              <p className="meal-plans-page__section-subtitle">Track your eating patterns and meal preferences over time</p>
+            </div>
+            
+            {/* View Meal History - Full Width */}
+            <div className="meal-plans-page__view-history" onClick={handleViewMealLogs}>
+              <div className="meal-plans-page__history-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                  <polyline points="12,6 12,12 16,14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <span className="meal-plans-page__history-label">View meal history</span>
+            </div>
+          </div>
         </div>
       </div>
       

@@ -105,12 +105,13 @@ const MealCameraInterface = () => {
       const data = await apiResponse.json();
 
       if (data.success && data.ingredients) {
-        // Navigate to ingredient selector with detected ingredients, image URL, and context from meal history
+        // Navigate to ingredient selector with detected ingredients, image URL, meal name, and context from meal history
         navigate('/mealscanner/ingredients', { 
           state: { 
             ingredients: data.ingredients,
             mealImage: capturedImage,  // Keep for display purposes
             imageUrl: data.imageUrl,   // Storage URL for saving
+            mealName: data.meal_name,  // AI-generated meal name
             mealType: location.state?.mealType,  // Pass through meal type from meal history
             targetDate: location.state?.targetDate,  // Pass through target date from meal history
             returnTo: location.state?.returnTo,  // Pass through return navigation

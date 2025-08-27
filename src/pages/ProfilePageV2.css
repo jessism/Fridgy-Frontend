@@ -1,0 +1,244 @@
+/* PROFILE PAGE V2 STYLES */
+.profile-v2 {
+  min-height: 100vh;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.profile-v2__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  padding-top: 3rem; /* Account for status bar */
+}
+
+.profile-v2__header-left {
+  flex: 1;
+}
+
+.profile-v2__close-button {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  width: 40px;
+  height: 40px;
+}
+
+.profile-v2__close-button:hover {
+  background-color: #f5f5f5;
+  color: #000;
+}
+
+.profile-v2__title {
+  font-family: var(--header-font);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+}
+
+/* User Profile Section */
+.profile-v2__user-section {
+  display: flex;
+  align-items: center;
+  padding: 2rem 1.5rem;
+  gap: 1rem;
+}
+
+.profile-v2__avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-v2__avatar-text {
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: var(--header-font);
+}
+
+.profile-v2__user-info {
+  flex: 1;
+}
+
+.profile-v2__user-name {
+  font-family: var(--header-font);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.2;
+}
+
+.profile-v2__user-email {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Menu Sections */
+.profile-v2__menu {
+  flex: 1;
+  padding: 0 1.5rem;
+}
+
+.profile-v2__menu-item {
+  display: flex;
+  align-items: center;
+  padding: 1.25rem 0;
+  gap: 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.profile-v2__menu-item:hover {
+  background-color: #f9f9f9;
+  margin: 0 -1.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.profile-v2__menu-item:first-child {
+  border-top: 1px solid #f0f0f0;
+}
+
+.profile-v2__menu-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(79, 207, 97, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-green);
+  flex-shrink: 0;
+}
+
+.profile-v2__menu-text {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #000;
+  flex: 1;
+}
+
+/* Logout Section */
+.profile-v2__logout-section {
+  padding: 2rem 1.5rem;
+  padding-bottom: 3rem; /* Account for home indicator */
+}
+
+.profile-v2__logout-button {
+  width: 100%;
+  padding: 1rem;
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-v2__logout-button:hover {
+  border-color: #ccc;
+  background: #f9f9f9;
+}
+
+.profile-v2__logout-button:active {
+  transform: translateY(1px);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .profile-v2__header {
+    padding-top: 2rem;
+  }
+  
+  .profile-v2__title {
+    font-size: 1.5rem;
+  }
+  
+  .profile-v2__user-section {
+    padding: 1.5rem 1rem;
+  }
+  
+  .profile-v2__avatar {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .profile-v2__avatar-text {
+    font-size: 1.25rem;
+  }
+  
+  .profile-v2__user-name {
+    font-size: 1.25rem;
+  }
+  
+  .profile-v2__user-email {
+    font-size: 0.9rem;
+  }
+  
+  .profile-v2__menu {
+    padding: 0 1rem;
+  }
+  
+  .profile-v2__menu-item:hover {
+    margin: 0 -1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .profile-v2__logout-section {
+    padding: 1.5rem 1rem;
+    padding-bottom: 2rem;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+  .profile-v2__header {
+    padding: 1.5rem 0.75rem;
+  }
+  
+  .profile-v2__title {
+    font-size: 1.375rem;
+  }
+  
+  .profile-v2__user-section {
+    padding: 1.25rem 0.75rem;
+  }
+  
+  .profile-v2__menu {
+    padding: 0 0.75rem;
+  }
+  
+  .profile-v2__menu-item:hover {
+    margin: 0 -0.75rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  
+  .profile-v2__logout-section {
+    padding: 1.25rem 0.75rem;
+  }
+}

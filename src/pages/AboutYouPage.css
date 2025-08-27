@@ -1,0 +1,158 @@
+/* ABOUT YOU PAGE STYLES */
+.about-you {
+  min-height: 100vh;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header - Same style as ProfilePageV2 */
+.about-you__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  padding-top: 3rem; /* Account for status bar */
+}
+
+.about-you__header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.about-you__back-button {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.about-you__back-button:hover {
+  background-color: #f5f5f5;
+}
+
+.about-you__title {
+  font-family: var(--header-font);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+}
+
+/* Content */
+.about-you__content {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Card Styles */
+.about-you__card {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+
+.about-you__header-edit-button {
+  background: none;
+  border: 1px solid var(--primary-green);
+  color: var(--primary-green);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.about-you__header-edit-button:hover {
+  background: var(--primary-green);
+  color: white;
+}
+
+.about-you__card-content {
+  padding: 1.5rem;
+}
+
+/* Info Items */
+.about-you__info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.about-you__info-item:last-child {
+  margin-bottom: 0;
+}
+
+.about-you__info-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.about-you__info-value {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #000;
+  line-height: 1.4;
+}
+
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .about-you__header {
+    padding-top: 2rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .about-you__title {
+    font-size: 1.5rem;
+  }
+  
+  .about-you__content {
+    padding: 1rem;
+  }
+  
+  
+  .about-you__card-content {
+    padding: 1.25rem;
+  }
+  
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+  .about-you__header {
+    padding: 1.5rem 0.75rem;
+  }
+  
+  .about-you__title {
+    font-size: 1.375rem;
+  }
+  
+  .about-you__content {
+    padding: 0.75rem;
+  }
+  
+  
+  .about-you__card-content {
+    padding: 1rem;
+  }
+  
+}

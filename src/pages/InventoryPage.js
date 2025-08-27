@@ -16,6 +16,7 @@ const InventoryPage = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [itemToEdit, setItemToEdit] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -162,16 +163,25 @@ const InventoryPage = () => {
     };
   }, [openDropdownId]);
 
-  // Filter items based on active filter
+  // Filter items based on active filter and search term
   const getFilteredItems = () => {
     if (!inventoryItems) return [];
     
+    // First filter by search term if provided
+    let filtered = inventoryItems;
+    if (searchTerm.trim()) {
+      filtered = inventoryItems.filter(item =>
+        item.item_name.toLowerCase().includes(searchTerm.toLowerCase().trim())
+      );
+    }
+    
+    // Then apply category/expiration filters
     switch (activeFilter) {
       case 'by-expiration':
       case 'by-category':
       case 'all':
       default:
-        return inventoryItems;
+        return filtered;
     }
   };
 
@@ -247,95 +257,50 @@ const InventoryPage = () => {
       {/* Inventory Content */}
       <div style={{paddingTop: '100px', minHeight: '100vh', background: 'white'}}>
         <div className="container" style={{maxWidth: '1200px', margin: '0 auto', padding: '1rem 1rem', overflow: 'visible'}}>
-          {/* Header Section */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            marginBottom: '2rem',
-            marginTop: '0.5rem',
-            flexWrap: 'wrap',
-            gap: '1rem'
-          }}>
-            {/* Spotify-style Header */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '0.5rem',
-              width: '100%'
-            }}>
-              <h1 className="inventory-page__title">
-                Your Fridge
-              </h1>
-              
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem'
-              }}>
-                {/* Search Icon */}
-                <button 
-                  style={{
-                    width: '48px',
-                    height: '48px',
-                    borderRadius: '50%',
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#666',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.background = '#f0f0f0';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.background = 'transparent';
-                  }}
-                  title="Search items"
+          {/* Row 1: Title Only */}
+          <div style={{ marginBottom: '1.5rem', marginTop: '0.5rem' }}>
+            <h1 className="inventory-page__title">
+              Your Fridge
+            </h1>
+          </div>
+
+          {/* Row 2: Search Bar + Plus Button */}
+          <div className="inventory-page__actions-row">
+            {/* Search Bar */}
+            <div className="inventory-page__search-container">
+              <svg className="inventory-page__search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              <input
+                type="text"
+                placeholder="Search your fridge..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="inventory-page__search-input"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="inventory-page__search-clear"
+                  title="Clear search"
                 >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                    <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2"/>
+                    <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2"/>
                   </svg>
                 </button>
-                
-                {/* Add Item Plus Icon - Green */}
-                <button 
-                  style={{
-                    width: '48px',
-                    height: '48px',
-                    borderRadius: '50%',
-                    background: 'var(--primary-green)',
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontSize: '24px',
-                    fontWeight: '300',
-                    transition: 'all 0.2s ease',
-                    boxShadow: '0 2px 8px rgba(76, 207, 97, 0.2)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.transform = 'translateY(-1px)';
-                    e.target.style.boxShadow = '0 4px 12px rgba(76, 207, 97, 0.3)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.transform = 'translateY(0)';
-                    e.target.style.boxShadow = '0 2px 8px rgba(76, 207, 97, 0.2)';
-                  }}
-                  onClick={() => navigate('/batchcamera')}
-                  title="Add item"
-                >
-                  +
-                </button>
-              </div>
+              )}
             </div>
+
+            {/* Add Item Plus Button */}
+            <button 
+              className="inventory-page__add-button"
+              onClick={() => navigate('/batchcamera')}
+              title="Add item"
+            >
+              +
+            </button>
           </div>
 
           {/* Filter Pills */}

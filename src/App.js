@@ -11,7 +11,9 @@ import InventoryPage from './pages/InventoryPage';
 import MealPlansPage from './pages/MealPlansPage';
 import { AIRecipePage } from './features/ai-recipes';
 import ShoppingListPage from './pages/ShoppingListPage';
-import ProfilePage from './pages/ProfilePage';
+import ProfilePageV2 from './pages/ProfilePageV2';
+import AboutYouPage from './pages/AboutYouPage';
+import DietaryPreferencesPage from './pages/DietaryPreferencesPage';
 import MealHistoryPage from './pages/MealHistoryPage';
 import BatchCamera from './features/batchcamera/components/BatchCamera';
 import { MealCameraInterface, MealIngredientSelector } from './features/mealscanner';
@@ -52,7 +54,17 @@ function App() {
           } />
           <Route path="/profile" element={
             <AuthGuard>
-              <ProfilePage />
+              <ProfilePageV2 />
+            </AuthGuard>
+          } />
+          <Route path="/about-you" element={
+            <AuthGuard>
+              <AboutYouPage />
+            </AuthGuard>
+          } />
+          <Route path="/dietary-preferences" element={
+            <AuthGuard>
+              <DietaryPreferencesPage />
             </AuthGuard>
           } />
           <Route path="/meal-history" element={

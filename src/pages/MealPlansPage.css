@@ -43,47 +43,103 @@
   margin-right: auto;
 }
 
-/* Quick Access Section - Slim horizontal design */
-.meal-plans-page__quick-access {
-  background: linear-gradient(135deg, #4fcf61, #81e053);
-  border-radius: 12px;
-  padding: 1rem 1.25rem;
-  margin-bottom: 2rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(76, 207, 97, 0.2);
-}
-
-.meal-plans-page__quick-access:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(76, 207, 97, 0.3);
-}
-
-.meal-plans-page__quick-access-item {
+/* Scan Meal Section Header */
+.meal-plans-page__scan-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.75rem;
+  margin-bottom: 2rem;
 }
 
-.meal-plans-page__quick-access-icon {
-  width: 32px;
-  height: 32px;
+.meal-plans-page__scan-title {
+  font-family: var(--header-font);
+  font-size: 1.125rem;
+  color: var(--header-color);
+  margin: 0;
+  font-weight: 700;
+}
+
+.meal-plans-page__scan-button {
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--primary-green);
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 1.2rem;
-  font-weight: 300;
-  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(79, 207, 97, 0.2);
 }
 
-.meal-plans-page__quick-access-label {
-  font-size: 1rem;
-  font-weight: 600;
+.meal-plans-page__scan-button:hover {
+  background: var(--primary-green-dark);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3);
+}
+
+/* View History - Full Width Button */
+.meal-plans-page__view-history {
+  background: linear-gradient(135deg, #4fcf61, #81e053);
+  border-radius: 12px;
+  padding: 2rem 1.25rem;
+  margin-bottom: 2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(76, 207, 97, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.meal-plans-page__view-history:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 207, 97, 0.3);
+}
+
+.meal-plans-page__history-icon {
   color: white;
-  line-height: 1.3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.meal-plans-page__history-label {
+  font-size: 1rem;
+  font-weight: normal;
+  color: white;
+  line-height: 1.2;
+}
+
+/* Analytics Section */
+.meal-plans-page__analytics-section {
+  margin-bottom: 2rem;
+}
+
+.meal-plans-page__analytics-text-section {
+  margin-bottom: 1.5rem;
+}
+
+.meal-plans-page__section-header {
+  margin-bottom: 1.5rem;
+}
+
+.meal-plans-page__section-title {
+  font-family: var(--header-font);
+  font-size: 2rem;
+  color: var(--header-color);
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+}
+
+.meal-plans-page__section-subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
 }
 
 /* View Toggle Buttons */
@@ -130,7 +186,7 @@
   font-family: var(--header-font);
   font-size: 1.125rem;
   color: var(--header-color);
-  margin: 0;
+  margin: 0 0 0.5rem 0;
   font-weight: 700;
 }
 

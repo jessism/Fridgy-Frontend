@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
+import MealCard from '../components/cards/MealCard';
+import MealDetailModal from '../components/modals/MealDetailModal';
 import './MealHistoryPage.css';
 
 const MealHistoryPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedDate, setSelectedDate] = useState(new Date()); // Default to today
+  const [currentWeekOffset, setCurrentWeekOffset] = useState(0); // 0 = current week, -1 = previous week, 1 = next week
   const [dailyMeals, setDailyMeals] = useState({
     breakfast: [],
     lunch: [],
@@ -16,6 +19,12 @@ const MealHistoryPage = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Edit/Delete modal states
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [mealToEdit, setMealToEdit] = useState(null);
+  const [mealToDelete, setMealToDelete] = useState(null);
 
   // Load today's meals on initial mount
   useEffect(() => {
@@ -52,6 +61,9 @@ const MealHistoryPage = () => {
     const currentWeekStart = new Date(today);
     currentWeekStart.setDate(today.getDate() - today.getDay()); // Start from Sunday
     
+    // Apply week offset
+    currentWeekStart.setDate(currentWeekStart.getDate() + (currentWeekOffset * 7));
+    
     const weekDates = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date(currentWeekStart);
@@ -67,6 +79,42 @@ const MealHistoryPage = () => {
 
   const handleBackClick = () => {
     navigate('/meal-plans');
+  };
+
+  // Week navigation functions
+  const navigateToWeek = (direction) => {
+    setCurrentWeekOffset(prev => prev + direction);
+  };
+
+  const goToPreviousWeek = () => navigateToWeek(-1);
+  const goToNextWeek = () => navigateToWeek(1);
+
+  // Swipe gesture handling
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  const handleTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+    
+    if (isLeftSwipe) {
+      goToNextWeek(); // Swipe left to go to next week
+    }
+    if (isRightSwipe) {
+      goToPreviousWeek(); // Swipe right to go to previous week
+    }
   };
 
   const isToday = (dateObj) => {
@@ -162,69 +210,135 @@ const MealHistoryPage = () => {
     return `${monthNames[selectedDate.getMonth()]} ${selectedDate.getDate()}, ${selectedDate.getFullYear()}`;
   };
 
+  // Handle edit meal
+  const handleEditMeal = (meal) => {
+    setMealToEdit(meal);
+    setShowEditModal(true);
+  };
+  
+  // Handle delete meal
+  const handleDeleteMeal = (meal) => {
+    setMealToDelete(meal);
+    setShowDeleteModal(true);
+  };
+  
+  // Handle edit confirmation
+  const handleEditConfirm = async (updatedData) => {
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/meals/${mealToEdit.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedData)
+      });
+      
+      if (response.ok) {
+        // Refresh meals for the current date
+        fetchMealsForDate(selectedDate);
+        setShowEditModal(false);
+        setMealToEdit(null);
+      } else {
+        console.error('Failed to update meal');
+      }
+    } catch (error) {
+      console.error('Error updating meal:', error);
+    }
+  };
+  
+  // Handle delete confirmation
+  const handleDeleteConfirm = async () => {
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/meals/${mealToDelete.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        // Refresh meals for the current date
+        fetchMealsForDate(selectedDate);
+        setShowDeleteModal(false);
+        setMealToDelete(null);
+      } else {
+        console.error('Failed to delete meal');
+      }
+    } catch (error) {
+      console.error('Error deleting meal:', error);
+    }
+  };
+  
+  // Handle cancel modals
+  const handleEditCancel = () => {
+    setShowEditModal(false);
+    setMealToEdit(null);
+  };
+  
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setMealToDelete(null);
+  };
+
+  // Helper to safely get ingredients array (handles both string and object)
+  const getIngredientsArray = (ingredients) => {
+    if (Array.isArray(ingredients)) return ingredients;
+    if (typeof ingredients === 'string') {
+      try {
+        return JSON.parse(ingredients);
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  };
+
   // Meal Category Section Component
-  const MealCategorySection = ({ title, meals, mealType }) => (
-    <div className="meal-history-page__meal-section">
-      <h3 className="meal-history-page__meal-title">{title}</h3>
-      
-      {meals && meals.length > 0 ? (
-        meals.map((meal, index) => {
-          // Parse ingredients_logged if it's a string
-          let loggedIngredients = meal.ingredients_logged;
-          if (typeof loggedIngredients === 'string') {
-            try {
-              loggedIngredients = JSON.parse(loggedIngredients);
-            } catch (e) {
-              loggedIngredients = [];
-            }
-          }
-
-          // Handle array of ingredients
-          if (Array.isArray(loggedIngredients)) {
-            return (
-              <div key={index} className="meal-history-page__meal-item">
-                {loggedIngredients.map((item, idx) => (
-                  <div key={idx}>
-                    <div className="meal-history-page__meal-name">
-                      {item.name || item.item_name || 'Food item'}
-                    </div>
-                    {item.quantity && (
-                      <div className="meal-history-page__meal-ingredients">
-                        Quantity: {item.quantity} {item.unit || ''}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            );
-          }
-
-          // Handle object with name and ingredients
-          return (
-            <div key={index} className="meal-history-page__meal-item">
-              <div className="meal-history-page__meal-name">
-                {loggedIngredients?.name || 'Meal'}
-              </div>
-              {loggedIngredients?.ingredients && (
-                <div className="meal-history-page__meal-ingredients">
-                  {Array.isArray(loggedIngredients.ingredients) 
-                    ? loggedIngredients.ingredients.join(', ')
-                    : loggedIngredients.ingredients}
-                </div>
-              )}
+  const MealCategorySection = ({ title, meals, mealType }) => {
+    const [selectedMeal, setSelectedMeal] = useState(null);
+    
+    return (
+      <>
+        <div className="meal-history-page__meal-section">
+          <h3 className="meal-history-page__meal-title">{title}</h3>
+          
+          {meals && meals.length > 0 ? (
+            <div className="meal-history-page__meal-grid">
+              {meals.map((meal) => (
+                <MealCard
+                  key={meal.id}
+                  meal={meal}
+                  onClick={setSelectedMeal}
+                  onEdit={handleEditMeal}
+                  onDelete={handleDeleteMeal}
+                />
+              ))}
             </div>
-          );
-        })
-      ) : null}
-      
-      <button 
-        className="meal-history-page__add-food-btn"
-        onClick={() => handleAddFood(mealType)}
-      >
-        ADD FOOD
-      </button>
-    </div>
-  );
+          ) : (
+            <div className="meal-history-page__empty-state">
+              <p>No meals logged yet</p>
+            </div>
+          )}
+          
+          <button 
+            className="meal-history-page__add-food-btn"
+            onClick={() => handleAddFood(mealType)}
+          >
+            ADD FOOD
+          </button>
+        </div>
+        
+        <MealDetailModal
+          meal={selectedMeal}
+          isOpen={!!selectedMeal}
+          onClose={() => setSelectedMeal(null)}
+        />
+      </>
+    );
+  };
 
   return (
     <div className="meal-history-page">
@@ -248,8 +362,18 @@ const MealHistoryPage = () => {
 
           {/* Calendar */}
           <div className="meal-history-page__calendar">
-            {/* Month/Year Header - Left aligned with dropdown */}
+            {/* Month/Year Header with Navigation */}
             <div className="meal-history-page__calendar-header">
+              <button 
+                className="meal-history-page__nav-arrow meal-history-page__nav-arrow--left"
+                onClick={goToPreviousWeek}
+                aria-label="Previous week"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              
               <div className="meal-history-page__month-year">
                 <span className="meal-history-page__month-year-text">
                   {getCurrentMonthYear()}
@@ -258,6 +382,16 @@ const MealHistoryPage = () => {
                   <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
+
+              <button 
+                className="meal-history-page__nav-arrow meal-history-page__nav-arrow--right"
+                onClick={goToNextWeek}
+                aria-label="Next week"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
             </div>
 
             {/* Days of Week */}
@@ -269,24 +403,31 @@ const MealHistoryPage = () => {
               ))}
             </div>
 
-            {/* Single Row of Dates */}
-            <div className="meal-history-page__dates-row">
-              {getCurrentWeekDates().map((dateInfo, index) => (
-                <div
-                  key={index}
-                  className={`meal-history-page__date-cell ${
-                    isToday(dateInfo.fullDate) ? 'meal-history-page__date-cell--today' : ''
-                  } ${
-                    isSelectedDate(dateInfo.fullDate) ? 'meal-history-page__date-cell--selected' : ''
-                  }`}
-                  onClick={() => handleDateClick(dateInfo.fullDate)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <span className="meal-history-page__date-number">
-                    {dateInfo.date}
-                  </span>
-                </div>
-              ))}
+            {/* Swipeable Row of Dates */}
+            <div 
+              className="meal-history-page__dates-container"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
+              <div className="meal-history-page__dates-row">
+                {getCurrentWeekDates().map((dateInfo, index) => (
+                  <div
+                    key={index}
+                    className={`meal-history-page__date-cell ${
+                      isToday(dateInfo.fullDate) ? 'meal-history-page__date-cell--today' : ''
+                    } ${
+                      isSelectedDate(dateInfo.fullDate) ? 'meal-history-page__date-cell--selected' : ''
+                    }`}
+                    onClick={() => handleDateClick(dateInfo.fullDate)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <span className="meal-history-page__date-number">
+                      {dateInfo.date}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -335,6 +476,160 @@ const MealHistoryPage = () => {
       </div>
 
       <MobileBottomNav />
+      
+      {/* Edit Modal */}
+      {showEditModal && mealToEdit && (
+        <div className="meal-history-page__modal-overlay">
+          <div className="meal-history-page__modal">
+            <h2>Edit Meal</h2>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              handleEditConfirm({
+                meal_name: formData.get('mealName'),
+                ingredients_logged: getIngredientsArray(mealToEdit.ingredients_logged).map((ing, index) => ({
+                  ...ing,
+                  name: formData.get(`ingredient-${index}`),
+                  quantity: parseFloat(formData.get(`quantity-${index}`)) || ing.quantity
+                }))
+              });
+            }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <label htmlFor="mealName" style={{ display: 'block', marginBottom: '0.5rem' }}>
+                  Meal Name
+                </label>
+                <input
+                  type="text"
+                  id="mealName"
+                  name="mealName"
+                  defaultValue={mealToEdit.meal_name || ''}
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    borderRadius: '4px',
+                    border: '1px solid #ccc'
+                  }}
+                />
+              </div>
+              
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem' }}>
+                  Ingredients
+                </label>
+                {getIngredientsArray(mealToEdit.ingredients_logged).map((ingredient, index) => (
+                  <div key={index} style={{ marginBottom: '0.5rem', display: 'flex', gap: '0.5rem' }}>
+                    <input
+                      type="text"
+                      name={`ingredient-${index}`}
+                      defaultValue={ingredient.name || ingredient.item_name}
+                      style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                    />
+                    <input
+                      type="number"
+                      name={`quantity-${index}`}
+                      defaultValue={ingredient.quantity}
+                      step="0.1"
+                      style={{ width: '80px', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                    />
+                    <span style={{ padding: '0.5rem' }}>{ingredient.unit}</span>
+                  </div>
+                ))}
+              </div>
+              
+              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                <button
+                  type="button"
+                  onClick={handleEditCancel}
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    borderRadius: '8px',
+                    border: '1px solid #ccc',
+                    background: 'white',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: '#4fcf61',
+                    color: 'white',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      
+      {/* Delete Modal */}
+      {showDeleteModal && mealToDelete && (
+        <div className="meal-history-page__modal-overlay">
+          <div className="meal-history-page__modal meal-history-page__modal--delete">
+            <h2>Delete Meal?</h2>
+            <p>Are you sure you want to delete "{mealToDelete.meal_name || 'this meal'}"?</p>
+            <p style={{ color: '#666', fontSize: '0.9rem' }}>This action cannot be undone.</p>
+            
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '2rem' }}>
+              <button
+                type="button"
+                onClick={handleDeleteCancel}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#f8f9fa';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'white';
+                }}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '8px',
+                  border: '1px solid #ccc',
+                  background: 'white',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s ease'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteConfirm}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#c82333';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = '#dc3545';
+                }}
+                onMouseDown={(e) => {
+                  e.target.style.background = '#a71d2a';
+                }}
+                onMouseUp={(e) => {
+                  e.target.style.background = '#c82333';
+                }}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: '#dc3545',
+                  color: 'white',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s ease',
+                  fontWeight: '500'
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

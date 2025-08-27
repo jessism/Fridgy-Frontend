@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" fill="#f5f5f5"/>
+  <g transform="translate(200, 200)">
+    <!-- Plate -->
+    <circle cx="0" cy="20" r="80" stroke="#ddd" stroke-width="3" fill="white"/>
+    <circle cx="0" cy="20" r="70" stroke="#e8e8e8" stroke-width="2" fill="none"/>
+    
+    <!-- Fork -->
+    <g transform="translate(-50, -20) rotate(-45)">
+      <rect x="-2" y="0" width="4" height="40" fill="#999"/>
+      <rect x="-8" y="-15" width="2" height="15" fill="#999"/>
+      <rect x="-4" y="-15" width="2" height="15" fill="#999"/>
+      <rect x="0" y="-15" width="2" height="15" fill="#999"/>
+      <rect x="4" y="-15" width="2" height="15" fill="#999"/>
+      <rect x="6" y="-15" width="2" height="15" fill="#999"/>
+    </g>
+    
+    <!-- Knife -->
+    <g transform="translate(50, -20) rotate(45)">
+      <rect x="-2" y="0" width="4" height="40" fill="#999"/>
+      <path d="M -2 -20 L 2 -20 L 4 -10 L 4 0 L -4 0 L -4 -10 Z" fill="#999"/>
+    </g>
+    
+    <!-- Food icon in center -->
+    <circle cx="0" cy="20" r="25" fill="#4fcf61" opacity="0.2"/>
+    <path d="M -10 15 Q 0 5, 10 15 Q 5 25, 0 30 Q -5 25, -10 15" fill="#4fcf61" opacity="0.5"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="200" y="320" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#999">
+    No Photo Available
+  </text>
+</svg>

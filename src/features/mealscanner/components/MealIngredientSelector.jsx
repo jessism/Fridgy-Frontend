@@ -87,7 +87,8 @@ const MealIngredientSelector = () => {
           ingredients: selectedItems,
           imageUrl: location.state?.imageUrl,  // Send URL instead of base64 image
           mealType: mealType,  // Include the selected meal type
-          targetDate: location.state?.targetDate  // Include target date for date-aware logging
+          targetDate: location.state?.targetDate,  // Include target date for date-aware logging
+          mealName: location.state?.mealName  // Include the meal name from AI
         })
       });
 

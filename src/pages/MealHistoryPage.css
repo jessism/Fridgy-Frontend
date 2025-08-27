@@ -49,11 +49,11 @@
   margin-bottom: 0.5rem;
 }
 
-/* Calendar Header - Left aligned like screenshot */
+/* Calendar Header - Now with navigation arrows */
 .meal-history-page__calendar-header {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   margin-bottom: 0.75rem;
 }
 
@@ -62,6 +62,31 @@
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
+}
+
+/* Navigation Arrows */
+.meal-history-page__nav-arrow {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #666;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.meal-history-page__nav-arrow:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.meal-history-page__nav-arrow:active {
+  background-color: #e0e0e0;
 }
 
 .meal-history-page__month-year-text {
@@ -78,8 +103,8 @@
 
 /* Days of Week Header */
 .meal-history-page__days-header {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  display: flex;
+  width: 100%;
   gap: 0;
   margin-bottom: 0.25rem;
 }
@@ -89,39 +114,82 @@
   font-size: 1rem;
   font-weight: 400;
   color: #999;
-  padding: 0.5rem 0;
+  padding: 0.5rem 0.5rem;
+  flex: 1;
+  min-width: calc(100% / 7);
 }
 
-/* Single Row of Dates */
+/* Swipeable Container for Dates */
+.meal-history-page__dates-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.meal-history-page__dates-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Horizontal Row of Dates - Now using Flexbox */
 .meal-history-page__dates-row {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  display: flex;
+  min-width: 100%;
   gap: 0;
+  transition: transform 0.3s ease;
 }
 
 .meal-history-page__date-cell {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem;
+  padding: 0.75rem 0.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  flex: 1;
+  min-width: calc(100% / 7);
+  position: relative;
+  -webkit-tap-highlight-color: rgba(79, 207, 97, 0.1);
 }
 
-.meal-history-page__date-cell--today {
+.meal-history-page__date-cell:hover {
+  background-color: rgba(79, 207, 97, 0.1);
+}
+
+.meal-history-page__date-cell:active {
+  transform: scale(0.95);
+  background-color: rgba(79, 207, 97, 0.2);
+}
+
+.meal-history-page__date-cell--today .meal-history-page__date-number {
+  width: 2.5rem;
+  height: 2.5rem;
   background-color: #e6e6e6;
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .meal-history-page__date-cell--selected {
-  background: linear-gradient(135deg, #81e053 0%, #4fcf61 100%) !important;
-  color: white !important;
-  border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(79, 207, 97, 0.3);
+  background: transparent !important;
 }
 
-.meal-history-page__date-cell--selected:hover {
-  background: linear-gradient(135deg, #6dd842 0%, #3db84f 100%) !important;
+.meal-history-page__date-cell--selected .meal-history-page__date-number {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #81e053 0%, #4fcf61 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.meal-history-page__date-cell--selected:hover .meal-history-page__date-number {
+  background: linear-gradient(135deg, #6dd842 0%, #3db84f 100%);
   box-shadow: 0 3px 12px rgba(79, 207, 97, 0.4);
 }
 
@@ -136,6 +204,46 @@
   justify-content: center;
 }
 
+/* Modal Styles */
+.meal-history-page__modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.meal-history-page__modal {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.meal-history-page__modal--delete {
+  max-width: 400px;
+}
+
+.meal-history-page__modal h2 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.meal-history-page__modal p {
+  margin: 0.5rem 0;
+}
+
 /* Mobile Responsive Styles */
 @media (max-width: 768px) {
   .meal-history-page__main {
@@ -143,61 +251,131 @@
   }
 
   .meal-history-page__container {
-    padding: 0 0.75rem;
+    padding: 0 0.5rem;
   }
 
   .meal-history-page__calendar {
-    padding: 0.125rem 0.75rem;
+    padding: 0.125rem 0.5rem;
     margin-bottom: 0.25rem;
   }
 
   .meal-history-page__calendar-header {
     margin-bottom: 0.5rem;
+    padding: 0 0.25rem;
   }
 
   .meal-history-page__month-year-text {
     font-size: 1.75rem;
   }
 
+  .meal-history-page__nav-arrow {
+    min-width: 28px;
+    min-height: 28px;
+    padding: 0.25rem;
+    -webkit-tap-highlight-color: rgba(102, 102, 102, 0.1);
+  }
+
+  .meal-history-page__nav-arrow:active {
+    transform: scale(0.9);
+  }
+
+  .meal-history-page__days-header {
+    display: flex;
+    width: 100%;
+    margin-bottom: 0.125rem;
+  }
+
   .meal-history-page__day-name {
     font-size: 0.875rem;
     padding: 0.125rem 0;
+    flex: 1;
+    text-align: center;
+    min-width: calc(100% / 7);
+  }
+
+  .meal-history-page__dates-container {
+    padding: 0 0.25rem;
+  }
+
+  .meal-history-page__date-cell {
+    padding: 0.5rem 0.25rem;
+    min-width: calc((100vw - 2rem) / 7); /* Account for container padding */
   }
 
   .meal-history-page__date-number {
     font-size: 1rem;
+    min-width: 1.75rem;
+    min-height: 1.75rem;
+  }
+
+  .meal-history-page__date-cell--selected .meal-history-page__date-number {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .meal-history-page__date-cell--today .meal-history-page__date-number {
+    width: 2rem;
+    height: 2rem;
   }
 
   .meal-history-page__header {
     margin-bottom: 0.125rem;
     padding-top: 0.125rem;
   }
-
-  .meal-history-page__days-header {
-    margin-bottom: 0.125rem;
-  }
 }
 
 /* Extra small screens */
 @media (max-width: 480px) {
-  .meal-history-page__calendar {
-    padding: 0.75rem;
+  .meal-history-page__container {
+    padding: 0 0.25rem;
   }
 
-  .meal-history-page__month-year {
-    font-size: 1.125rem;
+  .meal-history-page__calendar {
+    padding: 0.125rem 0.25rem;
+  }
+
+  .meal-history-page__calendar-header {
+    padding: 0 0.125rem;
   }
 
   .meal-history-page__month-year-text {
-    font-size: 1.125rem;
+    font-size: 1.5rem;
+  }
+
+  .meal-history-page__nav-arrow {
+    min-width: 24px;
+    min-height: 24px;
+    padding: 0.125rem;
   }
 
   .meal-history-page__day-name {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
+    min-width: calc((100vw - 1rem) / 7);
   }
 
-  .meal-history-page__calendar-cell {
-    font-size: 0.8rem;
+  .meal-history-page__dates-container {
+    padding: 0 0.125rem;
+  }
+
+  .meal-history-page__date-cell {
+    padding: 0.375rem 0.125rem;
+    min-width: calc((100vw - 1rem) / 7);
+  }
+
+  .meal-history-page__date-number {
+    font-size: 0.9rem;
+    min-width: 1.5rem;
+    min-height: 1.5rem;
+  }
+
+  .meal-history-page__date-cell--selected .meal-history-page__date-number {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .meal-history-page__date-cell--today .meal-history-page__date-number {
+    width: 1.75rem;
+    height: 1.75rem;
   }
 }
 
@@ -244,26 +422,24 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
-.meal-history-page__meal-item {
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #f5f5f5;
+/* Meal Grid Layout */
+.meal-history-page__meal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
-.meal-history-page__meal-item:last-of-type {
-  border-bottom: none;
+/* Empty State */
+.meal-history-page__empty-state {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #999;
+  font-size: 0.95rem;
 }
 
-.meal-history-page__meal-name {
-  font-size: 1rem;
-  font-weight: 500;
-  color: #333;
-  margin-bottom: 0.25rem;
-}
-
-.meal-history-page__meal-ingredients {
-  font-size: 0.875rem;
-  color: #666;
-  line-height: 1.4;
+.meal-history-page__empty-state p {
+  margin: 0;
 }
 
 .meal-history-page__add-food-btn {
@@ -337,8 +513,25 @@
     font-size: 1rem;
   }
 
+  .meal-history-page__meal-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
   .meal-history-page__add-food-btn {
     padding: 0.625rem;
     font-size: 0.8125rem;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .meal-history-page__meal-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.625rem;
+  }
+
+  .meal-history-page__meal-section {
+    padding: 0.75rem;
   }
 }
