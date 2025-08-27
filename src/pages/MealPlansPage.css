@@ -119,14 +119,6 @@
   margin-bottom: 3rem;
 }
 
-.meal-plans-page__section-subtitle {
-  font-size: 1rem;
-  color: #666;
-  margin: 0 0 2rem 0;
-  line-height: 1.6;
-  max-width: 600px;
-}
-
 .meal-plans-page__section-header {
   display: flex;
   justify-content: space-between;
@@ -322,34 +314,6 @@
   .meal-plans-page__toggle-btn {
     min-width: 200px;
   }
-}
-
-/* Meal Card Stats Styles */
-.meal-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.stat-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.8;
-}
-
-.stat-text {
-  font-family: var(--description-font);
-  font-size: 0.9rem;
-  color: #666;
-  font-weight: 500;
 }
 
 /* Very small screens */

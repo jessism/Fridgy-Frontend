@@ -11,6 +11,15 @@ import { ReactComponent as ShopListsIcon } from '../assets/icons/quickaccess/sho
 import { ReactComponent as RecipesIcon } from '../assets/icons/quickaccess/recipes.svg';
 import './HomePage.css';
 
+// Helper function to calculate days until expiry (reused from InventoryPage)
+const getDaysUntilExpiry = (dateString) => {
+  const expiryDate = new Date(dateString);
+  const today = new Date();
+  const diffTime = expiryDate - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays;
+};
+
 const HomePage = () => {
   const { user } = useAuth();
   const { items } = useInventory();
@@ -43,6 +52,21 @@ const HomePage = () => {
   };
 
   const categoryCounts = getCategoryCounts();
+
+  // Get top 2 expiring items
+  const getExpiringItems = () => {
+    if (!items || items.length === 0) return [];
+    
+    return items
+      .filter(item => {
+        const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
+        return daysUntilExpiry >= 0 && daysUntilExpiry <= 3; // Expiring within 3 days
+      })
+      .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate)) // Sort by expiry date (earliest first)
+      .slice(0, 2); // Take only top 2
+  };
+
+  const expiringItems = getExpiringItems();
   
   return (
     <div className="homepage">
@@ -153,41 +177,49 @@ const HomePage = () => {
               Expiring Soon
             </h2>
           </div>
-          <div className="expiring-items">
-            <div className="expiring-item">
-              <div className="item-info">
-                <h4 className="item-name">Greek Yogurt</h4>
-              </div>
-              <div className="expiry-countdown">
-                <span className="days-left">2 days</span>
-              </div>
+          <div className="expiring-content" onClick={() => navigateToPage('/inventory')}>
+            <div className="expiring-items">
+              {expiringItems.length > 0 ? (
+                expiringItems.map((item) => {
+                  const daysLeft = getDaysUntilExpiry(item.expiryDate);
+                  const isUrgent = daysLeft <= 1;
+                  const daysText = daysLeft === 0 ? 'Today' : 
+                                  daysLeft === 1 ? '1 day' : 
+                                  `${daysLeft} days`;
+                  
+                  return (
+                    <div key={item.id} className="expiring-item">
+                      <div className="item-info">
+                        <h4 className="item-name">{item.itemName}</h4>
+                      </div>
+                      <div className="expiry-countdown">
+                        <span className={`days-left${isUrgent ? ' urgent' : ''}`}>
+                          {daysText}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="expiring-item">
+                  <div className="item-info">
+                    <h4 className="item-name">No items expiring soon</h4>
+                    <p className="item-category">Your food is staying fresh!</p>
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="expiring-item">
-              <div className="item-info">
-                <h4 className="item-name">Spinach</h4>
-              </div>
-              <div className="expiry-countdown">
-                <span className="days-left urgent">1 day</span>
-              </div>
-            </div>
-            <div className="expiring-item mobile-hide-item">
-              <div className="item-info">
-                <h4 className="item-name">Bread</h4>
-                <p className="item-category">Pantry</p>
-              </div>
-              <div className="expiry-countdown">
-                <span className="days-left">3 days</span>
-              </div>
-            </div>
-            <div className="expiring-item mobile-hide-item">
-              <div className="item-info">
-                <h4 className="item-name">Milk</h4>
-                <p className="item-category">Fridge</p>
-              </div>
-              <div className="expiry-countdown">
-                <span className="days-left urgent">1 day</span>
-              </div>
-            </div>
+            {expiringItems.length > 0 && (
+              <>
+                <div className="expiring-subtitle">
+                  <p>They are still good. See how to use them in Meals.</p>
+                </div>
+                <div className="expiring-reminders">
+                  <span className="reminder-text">+{expiringItems.length} reminders</span>
+                  <div className="reminder-arrow">→</div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>

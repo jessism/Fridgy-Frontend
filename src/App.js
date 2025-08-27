@@ -12,7 +12,9 @@ import MealPlansPage from './pages/MealPlansPage';
 import { AIRecipePage } from './features/ai-recipes';
 import ShoppingListPage from './pages/ShoppingListPage';
 import ProfilePage from './pages/ProfilePage';
+import MealHistoryPage from './pages/MealHistoryPage';
 import BatchCamera from './features/batchcamera/components/BatchCamera';
+import { MealCameraInterface, MealIngredientSelector } from './features/mealscanner';
 
 function App() {
   return (
@@ -53,9 +55,24 @@ function App() {
               <ProfilePage />
             </AuthGuard>
           } />
+          <Route path="/meal-history" element={
+            <AuthGuard>
+              <MealHistoryPage />
+            </AuthGuard>
+          } />
           <Route path="/batchcamera" element={
             <AuthGuard>
               <BatchCamera />
+            </AuthGuard>
+          } />
+          <Route path="/mealscanner" element={
+            <AuthGuard>
+              <MealCameraInterface />
+            </AuthGuard>
+          } />
+          <Route path="/mealscanner/ingredients" element={
+            <AuthGuard>
+              <MealIngredientSelector />
             </AuthGuard>
           } />
         </Routes>

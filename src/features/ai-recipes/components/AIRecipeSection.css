@@ -1,31 +1,17 @@
-/* AI Recipe Section Styles */
-.ai-recipe-section {
-  margin: 2rem 0;
-}
-
-/* Section Header */
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+/* AI Recipe Text Section - Streamlined */
+.ai-recipe-text-section {
   margin-bottom: 1.5rem;
-  gap: 1rem;
 }
 
-.header-content {
-  flex: 1;
-}
-
-.section-title {
+.ai-recipe-title {
   font-family: var(--header-font);
-  font-size: 2.5rem;
+  font-size: 1.125rem;
   color: var(--header-color);
   font-weight: 700;
   margin: 0 0 0.5rem 0;
 }
 
-
-.section-description {
+.ai-recipe-description {
   color: #6b7280;
   font-size: 1rem;
   margin: 0;
@@ -116,20 +102,20 @@
   overflow: visible;
 }
 
-/* Duplicated AI Access Section - Same as Log Your Meal but taller */
+/* AI Access Section - Double height */
 .meal-plans-page__ai-access {
-  background: linear-gradient(135deg, #9ee76d, #81e053);
+  background: linear-gradient(135deg, #4fcf61, #81e053);
   border-radius: 12px;
-  padding: 3rem 1.25rem;
+  padding: 2rem 1.25rem;
   margin-bottom: 2rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(158, 231, 109, 0.2);
+  box-shadow: 0 2px 8px rgba(76, 207, 97, 0.2);
 }
 
 .meal-plans-page__ai-access:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(158, 231, 109, 0.3);
+  box-shadow: 0 4px 12px rgba(76, 207, 97, 0.3);
 }
 
 .meal-plans-page__ai-access-item {

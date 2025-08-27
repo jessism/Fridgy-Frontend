@@ -1,12 +1,32 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './MobileBottomNav.css';
 
 const MobileBottomNav = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const isActiveTab = (path) => {
     return location.pathname === path;
+  };
+
+  const handlePlusButtonClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleLogGrocery = () => {
+    setIsModalOpen(false);
+    navigate('/batchcamera');
+  };
+
+  const handleLogMeal = () => {
+    setIsModalOpen(false);
+    navigate('/mealscanner');
   };
 
   const navItems = [
@@ -65,26 +85,81 @@ const MobileBottomNav = () => {
   ];
 
   return (
-    <nav className="mobile-bottom-nav">
-      <div className="nav-container">
-        {navItems.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={`nav-tab ${isActiveTab(item.path) ? 'active' : ''} ${item.isAddButton ? 'add-button' : ''}`}
-          >
-            <div className="nav-icon">
-              {item.icon}
+    <>
+      <nav className="mobile-bottom-nav">
+        <div className="nav-container">
+          {navItems.map((item) => {
+            if (item.isAddButton) {
+              return (
+                <button
+                  key={item.path}
+                  onClick={handlePlusButtonClick}
+                  className="nav-tab add-button"
+                >
+                  <div className="nav-icon">
+                    {item.icon}
+                  </div>
+                  {item.label && (
+                    <span className="nav-label">
+                      {item.label}
+                    </span>
+                  )}
+                </button>
+              );
+            }
+            
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`nav-tab ${isActiveTab(item.path) ? 'active' : ''}`}
+              >
+                <div className="nav-icon">
+                  {item.icon}
+                </div>
+                {item.label && (
+                  <span className="nav-label">
+                    {item.label}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+
+      {/* Bottom Slide-Up Modal */}
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-handle"></div>
             </div>
-            {item.label && (
-              <span className="nav-label">
-                {item.label}
-              </span>
-            )}
-          </Link>
-        ))}
-      </div>
-    </nav>
+            <div className="modal-options">
+              <button className="modal-option" onClick={handleLogGrocery}>
+                <div className="modal-option-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M9 11H5a2 2 0 0 0-2 2v3c0 1.1.9 2 2 2h4m6-6h4a2 2 0 0 1 2 2v3c0 1.1-.9 2-2 2h-4m-6 0V9a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2z"/>
+                    <path d="M1 15h22"/>
+                  </svg>
+                </div>
+                <span className="modal-option-label">Scan Grocery</span>
+              </button>
+              
+              <button className="modal-option" onClick={handleLogMeal}>
+                <div className="modal-option-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M16.2 7.8l-2 6.3-6.3 2 2-6.3 6.3-2z"/>
+                  </svg>
+                </div>
+                <span className="modal-option-label">Scan Meal</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

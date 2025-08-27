@@ -1,0 +1,344 @@
+/* Meal History Page Styles - Mobile First Design */
+
+.meal-history-page {
+  min-height: 100vh;
+  background-color: #fafafa;
+  padding-bottom: 80px; /* Space for mobile bottom nav */
+}
+
+.meal-history-page__main {
+  padding-top: 20px; /* Much smaller space for desktop navbar */
+  min-height: calc(100vh - 80px);
+}
+
+.meal-history-page__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Header with back button */
+.meal-history-page__header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.25rem;
+  padding-top: 0.25rem;
+}
+
+.meal-history-page__back-button {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #333;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.meal-history-page__back-button:hover {
+  background-color: #f0f0f0;
+}
+
+/* Calendar Container */
+.meal-history-page__calendar {
+  background: transparent;
+  padding: 0.25rem 1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Calendar Header - Left aligned like screenshot */
+.meal-history-page__calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.meal-history-page__month-year {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.meal-history-page__month-year-text {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  letter-spacing: -0.02em;
+}
+
+.meal-history-page__month-year svg {
+  color: #333;
+  margin-left: 0.25rem;
+}
+
+/* Days of Week Header */
+.meal-history-page__days-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0;
+  margin-bottom: 0.25rem;
+}
+
+.meal-history-page__day-name {
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #999;
+  padding: 0.5rem 0;
+}
+
+/* Single Row of Dates */
+.meal-history-page__dates-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0;
+}
+
+.meal-history-page__date-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.meal-history-page__date-cell--today {
+  background-color: #e6e6e6;
+  border-radius: 50%;
+}
+
+.meal-history-page__date-cell--selected {
+  background: linear-gradient(135deg, #81e053 0%, #4fcf61 100%) !important;
+  color: white !important;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(79, 207, 97, 0.3);
+}
+
+.meal-history-page__date-cell--selected:hover {
+  background: linear-gradient(135deg, #6dd842 0%, #3db84f 100%) !important;
+  box-shadow: 0 3px 12px rgba(79, 207, 97, 0.4);
+}
+
+.meal-history-page__date-number {
+  font-size: 1.125rem;
+  font-weight: 400;
+  color: #333;
+  min-width: 2rem;
+  min-height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .meal-history-page__main {
+    padding-top: 10px; /* Minimal space for mobile */
+  }
+
+  .meal-history-page__container {
+    padding: 0 0.75rem;
+  }
+
+  .meal-history-page__calendar {
+    padding: 0.125rem 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .meal-history-page__calendar-header {
+    margin-bottom: 0.5rem;
+  }
+
+  .meal-history-page__month-year-text {
+    font-size: 1.75rem;
+  }
+
+  .meal-history-page__day-name {
+    font-size: 0.875rem;
+    padding: 0.125rem 0;
+  }
+
+  .meal-history-page__date-number {
+    font-size: 1rem;
+  }
+
+  .meal-history-page__header {
+    margin-bottom: 0.125rem;
+    padding-top: 0.125rem;
+  }
+
+  .meal-history-page__days-header {
+    margin-bottom: 0.125rem;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .meal-history-page__calendar {
+    padding: 0.75rem;
+  }
+
+  .meal-history-page__month-year {
+    font-size: 1.125rem;
+  }
+
+  .meal-history-page__month-year-text {
+    font-size: 1.125rem;
+  }
+
+  .meal-history-page__day-name {
+    font-size: 0.7rem;
+  }
+
+  .meal-history-page__calendar-cell {
+    font-size: 0.8rem;
+  }
+}
+
+/* Selected Date Header */
+.meal-history-page__selected-date-header {
+  padding: 1rem 1rem 0.5rem;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 1rem;
+}
+
+.meal-history-page__selected-date-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+/* Daily Meal Log View Styles */
+.meal-history-page__date-header {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin-left: 1rem;
+}
+
+.meal-history-page__meals-container {
+  padding: 1rem 0;
+}
+
+.meal-history-page__meal-section {
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+}
+
+.meal-history-page__meal-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.meal-history-page__meal-item {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.meal-history-page__meal-item:last-of-type {
+  border-bottom: none;
+}
+
+.meal-history-page__meal-name {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+
+.meal-history-page__meal-ingredients {
+  font-size: 0.875rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+.meal-history-page__add-food-btn {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  background: transparent;
+  border: none;
+  color: #007bff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-align: left;
+}
+
+.meal-history-page__add-food-btn:hover {
+  background-color: #f8f9fa;
+}
+
+.meal-history-page__loading {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-size: 1rem;
+}
+
+.meal-history-page__error {
+  text-align: center;
+  padding: 2rem;
+  color: #d32f2f;
+  font-size: 1rem;
+}
+
+.meal-history-page__error button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #4fcf61;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.meal-history-page__error button:hover {
+  background-color: #3db84f;
+}
+
+/* Mobile adjustments for meal log view */
+@media (max-width: 768px) {
+  .meal-history-page__selected-date-header {
+    padding: 0.75rem 0.75rem 0.5rem;
+  }
+
+  .meal-history-page__selected-date-text {
+    font-size: 1.125rem;
+  }
+
+  .meal-history-page__date-header {
+    font-size: 1.125rem;
+  }
+
+  .meal-history-page__meal-section {
+    margin-bottom: 0.75rem;
+    padding: 0.875rem;
+  }
+
+  .meal-history-page__meal-title {
+    font-size: 1rem;
+  }
+
+  .meal-history-page__add-food-btn {
+    padding: 0.625rem;
+    font-size: 0.8125rem;
+  }
+}

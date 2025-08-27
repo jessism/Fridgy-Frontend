@@ -21,7 +21,9 @@ const useRecipes = () => {
 
   // Get token from localStorage
   const getToken = () => {
-    return localStorage.getItem('fridgy_token');
+    const token = localStorage.getItem('fridgy_token');
+    console.log('🔑 DEBUG: Token check:', token ? 'Token exists' : 'No token found');
+    return token;
   };
 
   // API request helper with authentication
@@ -50,7 +52,10 @@ const useRecipes = () => {
 
   // Fetch recipe suggestions based on user's inventory
   const fetchSuggestions = useCallback(async (options = {}) => {
+    console.log('🍽️ DEBUG: fetchSuggestions called', { user: user?.id, inventoryCount: inventoryItems?.length });
+    
     if (!user) {
+      console.log('❌ DEBUG: No user found, cannot fetch suggestions');
       setSuggestions([]);
       setLoading(false);
       return;
@@ -108,7 +113,9 @@ const useRecipes = () => {
         minMatch: minMatch.toString()
       });
       
+      console.log('📡 DEBUG: Making API request to:', `${API_BASE_URL}/recipes/suggestions?${queryParams}`);
       const response = await apiRequest(`/recipes/suggestions?${queryParams}`);
+      console.log('📡 DEBUG: API response received:', { success: response.success, suggestions: response.suggestions?.length });
       
       if (response.success) {
         console.log('✅ Recipe suggestions fetched successfully:', response.suggestions.length, 'recipes');

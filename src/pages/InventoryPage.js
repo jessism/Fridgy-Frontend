@@ -167,16 +167,7 @@ const InventoryPage = () => {
     if (!inventoryItems) return [];
     
     switch (activeFilter) {
-      case 'expiring-soon':
-        return inventoryItems.filter(item => {
-          const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
-          return daysUntilExpiry >= 0 && daysUntilExpiry <= 3;
-        });
-      case 'expired':
-        return inventoryItems.filter(item => {
-          const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
-          return daysUntilExpiry < 0;
-        });
+      case 'by-expiration':
       case 'by-category':
       case 'all':
       default:
@@ -184,29 +175,66 @@ const InventoryPage = () => {
     }
   };
 
-  // Group items by category when "By Category" filter is active
+  // Group items by category or expiration status
   const getGroupedItems = () => {
     const filtered = getFilteredItems();
-    if (activeFilter !== 'by-category') {
-      return { ungrouped: filtered };
+    
+    if (activeFilter === 'by-category') {
+      const grouped = {};
+      filtered.forEach(item => {
+        const category = item.category || 'Uncategorized';
+        if (!grouped[category]) {
+          grouped[category] = [];
+        }
+        grouped[category].push(item);
+      });
+      
+      // Sort categories alphabetically
+      const sortedGrouped = {};
+      Object.keys(grouped).sort().forEach(category => {
+        sortedGrouped[category] = grouped[category];
+      });
+      
+      return sortedGrouped;
     }
     
-    const grouped = {};
-    filtered.forEach(item => {
-      const category = item.category || 'Uncategorized';
-      if (!grouped[category]) {
-        grouped[category] = [];
-      }
-      grouped[category].push(item);
-    });
+    if (activeFilter === 'by-expiration') {
+      const grouped = {
+        'Expired': [],
+        'Expiring Soon': [],
+        'Good': []
+      };
+      
+      filtered.forEach(item => {
+        const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
+        const { status } = getExpiryStatus(daysUntilExpiry);
+        
+        if (grouped[status]) {
+          grouped[status].push(item);
+        } else {
+          // Default to Good for any unrecognized status
+          grouped['Good'].push(item);
+        }
+      });
+      
+      // Sort items within each group by expiry date (earliest first)
+      Object.keys(grouped).forEach(status => {
+        grouped[status].sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+      });
+      
+      // Return in priority order, but only include groups that have items
+      const priorityOrder = ['Expired', 'Expiring Soon', 'Good'];
+      const sortedGrouped = {};
+      priorityOrder.forEach(status => {
+        if (grouped[status].length > 0) {
+          sortedGrouped[status] = grouped[status];
+        }
+      });
+      
+      return sortedGrouped;
+    }
     
-    // Sort categories alphabetically
-    const sortedGrouped = {};
-    Object.keys(grouped).sort().forEach(category => {
-      sortedGrouped[category] = grouped[category];
-    });
-    
-    return sortedGrouped;
+    return { ungrouped: filtered };
   };
 
   const filteredItems = getFilteredItems();
@@ -316,34 +344,31 @@ const InventoryPage = () => {
               display: 'flex',
               gap: '0.75rem',
               marginBottom: '1.5rem',
-              overflowX: 'auto',
-              paddingBottom: '0.5rem',
-              alignItems: 'center',
-              WebkitOverflowScrolling: 'touch'
+              alignItems: 'center'
             }}>
               {[
                 { key: 'all', label: 'All' },
                 { key: 'by-category', label: 'Category' },
-                { key: 'expiring-soon', label: 'Expiring' },
-                { key: 'expired', label: 'Expired' }
+                { key: 'by-expiration', label: 'Expiration' }
               ].map((filter) => (
                 <button
                   key={filter.key}
                   onClick={() => setActiveFilter(filter.key)}
                   style={{
-                    padding: '0.75rem 1.25rem',
-                    borderRadius: '12px',
-                    border: activeFilter === filter.key ? '1px solid var(--primary-green)' : '1px solid #e0e0e0',
+                    padding: '12px 24px',
+                    borderRadius: '25px',
+                    border: activeFilter === filter.key ? 'none' : '1px solid #e0e0e0',
                     background: activeFilter === filter.key ? 'var(--primary-green)' : 'white',
                     color: activeFilter === filter.key ? 'white' : '#666',
                     cursor: 'pointer',
-                    fontSize: '0.9rem',
-                    fontWeight: activeFilter === filter.key ? '600' : '500',
-                    transition: 'all 0.2s ease',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    transition: 'all 0.3s ease',
                     outline: 'none',
                     whiteSpace: 'nowrap',
                     minWidth: 'fit-content',
-                    flexShrink: 0
+                    flexShrink: 0,
+                    boxShadow: activeFilter === filter.key ? '0 4px 15px rgba(129, 224, 83, 0.3)' : 'none'
                   }}
                   onMouseEnter={(e) => {
                     if (activeFilter !== filter.key) {
@@ -561,11 +586,11 @@ const InventoryPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {activeFilter === 'by-category' ? (
-                    // Grouped by category
+                  {(activeFilter === 'by-category' || activeFilter === 'by-expiration') ? (
+                    // Grouped view
                     Object.entries(groupedItems).map(([category, items]) => (
                       <React.Fragment key={category}>
-                        {/* Category header row */}
+                        {/* Group header row */}
                         <tr style={{
                           backgroundColor: '#f8f9fa',
                           borderTop: '2px solid #e9ecef'
@@ -581,7 +606,7 @@ const InventoryPage = () => {
                             {category}
                           </td>
                         </tr>
-                        {/* Category items */}
+                        {/* Group items */}
                         {items.map((item) => {
                           const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
                           return (
@@ -850,11 +875,11 @@ const InventoryPage = () => {
           {/* Inventory Cards - Mobile */}
           {!loading && !error && inventoryItems.length > 0 && filteredItems.length > 0 && (
             <div className="inventory-page__mobile-cards">
-              {activeFilter === 'by-category' ? (
-                // Grouped by category
+              {(activeFilter === 'by-category' || activeFilter === 'by-expiration') ? (
+                // Grouped view
                 Object.entries(groupedItems).map(([category, items]) => (
                   <div key={category}>
-                    {/* Category header */}
+                    {/* Group header */}
                     <h3 style={{
                       margin: '1.5rem 0 1rem 0',
                       padding: '0.5rem 1rem',
@@ -869,7 +894,7 @@ const InventoryPage = () => {
                     }}>
                       {category}
                     </h3>
-                    {/* Category items */}
+                    {/* Group items */}
                     {items.map((item) => {
                       const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
                       const { status, urgency } = getExpiryStatus(daysUntilExpiry);

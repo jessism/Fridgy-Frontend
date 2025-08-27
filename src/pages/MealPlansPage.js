@@ -91,7 +91,12 @@ const MealPlansPage = () => {
   };
 
   const renderRecipeCard = (recipe, isPreference = false) => (
-    <div key={recipe.id} className="meal-card">
+    <div 
+      key={recipe.id} 
+      className="meal-card"
+      onClick={() => handleCookNow(recipe)}
+      style={{ cursor: 'pointer' }}
+    >
       <div className="meal-image">
         <span className={`stock-badge ${recipe.inStock ? '' : 'out-of-stock'}`}>
           • {recipe.inStock ? 'In stock' : 'Missing items'}
@@ -106,12 +111,6 @@ const MealPlansPage = () => {
       </div>
       <div className="meal-info">
         <h3 className="meal-title">{recipe.title}</h3>
-        <button 
-          className={`cook-btn ${isPreference ? 'outlined' : ''}`}
-          onClick={() => handleCookNow(recipe)}
-        >
-          Cook Now
-        </button>
         <div className="meal-stats">
           <div className="stat-item">
             <span className="stat-icon">
@@ -124,7 +123,7 @@ const MealPlansPage = () => {
               <CookTimeIcon size={20} color="#81e053" />
             </span>
             <span className="stat-text">
-              {recipe.cookingTime ? `Cook time: ${recipe.cookingTime} minutes` : 'Cook time: varies'}
+              {recipe.readyInMinutes ? `Cook time: ${recipe.readyInMinutes} minutes` : 'Cook time: varies'}
             </span>
           </div>
         </div>
@@ -170,8 +169,13 @@ const MealPlansPage = () => {
     </div>
   );
   const handleLogMeal = () => {
-    // Navigate to camera or meal logging functionality
-    navigate('/batchcamera');
+    // Navigate to meal scanner
+    navigate('/mealscanner');
+  };
+
+  const handleViewMealLogs = () => {
+    // Navigate to meal history page
+    navigate('/meal-history');
   };
 
   return (
@@ -189,11 +193,23 @@ const MealPlansPage = () => {
           {/* Quick Access Section */}
           <div className="meal-plans-page__quick-access">
             <div className="meal-plans-page__quick-access-item" onClick={handleLogMeal}>
-              <div className="meal-plans-page__quick-access-icon">
+              <div className="meal-plans-page__quick-access-icon meal-plans-page__quick-access-icon--small">
                 +
               </div>
               <div className="meal-plans-page__quick-access-label">
-                Log your meal
+                Scan your meal
+              </div>
+            </div>
+            
+            <div className="meal-plans-page__quick-access-item" onClick={handleViewMealLogs}>
+              <div className="meal-plans-page__quick-access-icon meal-plans-page__quick-access-icon--small">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                  <polyline points="12,6 12,12 16,14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <div className="meal-plans-page__quick-access-label">
+                View meal history
               </div>
             </div>
           </div>
@@ -233,7 +249,7 @@ const MealPlansPage = () => {
               marginBottom: '1.5rem'
             }}>
               <h2 className="meal-plans-page__section-title">
-                Inspired by<br />your preference
+                Cook what you have
               </h2>
               {!loading && suggestions.length > 0 && (
                 <button
@@ -303,9 +319,7 @@ const MealPlansPage = () => {
           </div>
           
           {/* AI Recipe Section */}
-          <div className="meal-plans-page__section">
-            <AIRecipeSection />
-          </div>
+          <AIRecipeSection />
         </div>
       </div>
       
