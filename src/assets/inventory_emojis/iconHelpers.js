@@ -190,13 +190,32 @@ export const getItemIconIcons8 = (category, itemName = '', props = {}) => {
  * @returns {string} - Formatted quantity string
  */
 export const formatQuantity = (quantity) => {
-  if (!quantity) return 'N/A';
+  if (!quantity && quantity !== 0) return 'N/A';
   
   // If it's already a string with units, return as is
   if (typeof quantity === 'string' && /[a-zA-Z]/.test(quantity)) {
     return quantity;
   }
   
-  // If it's just a number, add 'qty' prefix
-  return `${quantity}`;
+  // Convert to number if it's a string
+  const numQty = typeof quantity === 'string' ? parseFloat(quantity) : quantity;
+  
+  // Smart formatting for common fractions
+  if (numQty === 0.5) return '½';
+  if (numQty === 0.25) return '¼';
+  if (numQty === 0.75) return '¾';
+  if (numQty === 0.33 || numQty === 0.333) return '⅓';
+  if (numQty === 0.67 || numQty === 0.667) return '⅔';
+  if (numQty === 0.125) return '⅛';
+  if (numQty === 0.375) return '⅜';
+  if (numQty === 0.625) return '⅝';
+  if (numQty === 0.875) return '⅞';
+  
+  // For other decimals, show with 2 decimal places if needed
+  if (numQty % 1 !== 0) {
+    return numQty.toFixed(2).replace(/\.?0+$/, ''); // Remove trailing zeros
+  }
+  
+  // For whole numbers, return as is
+  return numQty.toString();
 };

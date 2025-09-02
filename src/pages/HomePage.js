@@ -599,14 +599,14 @@ const HomePage = () => {
             </div>
             <div 
               className="analytics-item"
-              onClick={() => navigateToPage('/analytics/meals')}
+              onClick={() => navigateToPage('/meal-history')}
             >
               <div className="analytics-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M3 13h8v8H3zM13 3h8v8h-8zM13 13h8v8h-8zM3 3h8v8H3z"/>
                 </svg>
               </div>
-              <span className="analytics-label">Meal Usage</span>
+              <span className="analytics-label">Meals Analytics</span>
             </div>
           </div>
         </div>

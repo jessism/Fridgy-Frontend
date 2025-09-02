@@ -901,6 +901,12 @@ const InventoryPage = () => {
                             <div className="inventory-page__card-details-row">
                               <span className="inventory-page__card-text-info">
                                 Qty: {formattedQuantity}
+                                {/* Show partial indicator for fractional quantities */}
+                                {item.quantity && item.quantity % 1 !== 0 && (
+                                  <span style={{ color: '#FF9800', fontSize: '0.85em', marginLeft: '4px' }}>
+                                    (partial)
+                                  </span>
+                                )}
                                 {item.weight_equivalent && (
                                   <span style={{ color: '#888', fontSize: '0.9em' }}>
                                     {' '}({item.weight_equivalent} {item.weight_unit})
@@ -999,6 +1005,12 @@ const InventoryPage = () => {
                         <div className="inventory-page__card-details-row">
                           <span className="inventory-page__card-text-info">
                             Qty: {formattedQuantity}
+                            {/* Show partial indicator for fractional quantities */}
+                            {item.quantity && item.quantity % 1 !== 0 && (
+                              <span style={{ color: '#FF9800', fontSize: '0.85em', marginLeft: '4px' }}>
+                                (partial)
+                              </span>
+                            )}
                             {item.weight_equivalent && (
                               <span style={{ color: '#888', fontSize: '0.9em' }}>
                                 {' '}({item.weight_equivalent} {item.weight_unit})

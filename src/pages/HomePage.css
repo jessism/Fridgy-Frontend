@@ -526,7 +526,7 @@
   color: var(--header-color);
   margin-top: 0.5rem;
   margin-bottom: 0;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 500;
   letter-spacing: 0.5px;
 }
@@ -692,7 +692,7 @@
   }
 
   .category-card h3 {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     margin-top: 0.5rem;
   }
 
@@ -764,7 +764,7 @@
 
   .category-card h3 {
     margin-top: 0.6rem;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
 
   .category-count {
@@ -1064,7 +1064,7 @@
 .quick-access-label {
   font-family: var(--header-font);
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 500;
   text-align: left;
   line-height: 1.2;
   align-self: flex-start;
@@ -1154,7 +1154,7 @@
 .analytics-label {
   font-family: var(--header-font);
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 500;
   text-align: left;
   line-height: 1.2;
   align-self: flex-start;
