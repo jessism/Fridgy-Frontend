@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import MealTypeSelector from './MealTypeSelector';
+import DeductionSuccessModal from '../../../components/modals/DeductionSuccessModal';
+import '../../../components/modals/DeductionSuccessModal.css';
 import '../styles/MealScanner.css';
 import '../styles/MealTypeSelector.css';
 
@@ -13,6 +15,8 @@ const MealIngredientSelector = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showMealTypeSelector, setShowMealTypeSelector] = useState(false);
+  const [showDeductionModal, setShowDeductionModal] = useState(false);
+  const [deductionResults, setDeductionResults] = useState(null);
 
   // Debug logging for state changes
   useEffect(() => {
@@ -106,15 +110,9 @@ const MealIngredientSelector = () => {
       const data = await response.json();
 
       if (data.success) {
-        // Navigate back to the appropriate location
-        if (location.state?.returnTo) {
-          navigate(location.state.returnTo, { 
-            state: { returnDate: location.state.returnDate } 
-          });
-        } else {
-          // Default to inventory if no return location specified
-          navigate('/inventory');
-        }
+        // Store deduction results and show modal
+        setDeductionResults(data.results);
+        setShowDeductionModal(true);
       } else {
         throw new Error(data.error || 'Failed to log meal');
       }
@@ -216,22 +214,22 @@ const MealIngredientSelector = () => {
       onSelectMealType={handleMealTypeSelected}
     />
     
-    {/* Temporary debug modal - always visible for testing */}
-    {showMealTypeSelector && (
-      <div style={{
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        backgroundColor: 'red',
-        color: 'white',
-        padding: '20px',
-        zIndex: 99999,
-        border: '3px solid yellow'
-      }}>
-        DEBUG: Modal should be visible! State is: {showMealTypeSelector.toString()}
-      </div>
-    )}
+    {/* Deduction Success Modal */}
+    <DeductionSuccessModal
+      isOpen={showDeductionModal}
+      onClose={() => {
+        setShowDeductionModal(false);
+        // Navigate after modal closes
+        if (location.state?.returnTo) {
+          navigate(location.state.returnTo, { 
+            state: { returnDate: location.state.returnDate } 
+          });
+        } else {
+          navigate('/inventory');
+        }
+      }}
+      deductionResults={deductionResults}
+    />
     </>
   );
 };

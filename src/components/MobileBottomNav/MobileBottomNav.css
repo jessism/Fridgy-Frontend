@@ -18,7 +18,7 @@
   grid-template-columns: repeat(5, 1fr);
   max-width: 100%;
   margin: 0 auto;
-  padding: 8px 0;
+  padding: 4px 0;
 }
 
 .nav-tab {
@@ -26,11 +26,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 6px 4px;
+  padding: 4px 4px;
   text-decoration: none;
   color: #9CA3AF; /* Clean grey color */
   transition: all 0.2s ease;
-  min-height: 60px;
+  min-height: 48px;
   position: relative;
 }
 
@@ -40,7 +40,7 @@
 }
 
 .nav-tab.active {
-  color: var(--primary-green);
+  color: var(--black-light);
 }
 
 .nav-tab.active .nav-icon {
@@ -50,7 +50,7 @@
 .nav-icon {
   width: 24px;
   height: 24px;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   transition: transform 0.2s ease;
   line-height: 1;
   display: flex;
@@ -73,23 +73,10 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Active state indicator */
-.nav-tab.active::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  background: var(--primary-green);
-  border-radius: 50%;
-}
-
 /* Special styling for the add button (green circle with plus) */
 .nav-tab.add-button {
   position: relative;
-  top: -8px; /* Raise it slightly above other tabs */
+  top: -4px; /* Raise it slightly above other tabs */
   outline: none;
   border: none;
   box-shadow: none;
@@ -103,17 +90,15 @@
 }
 
 .nav-tab.add-button .nav-icon {
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   margin-bottom: 0;
   border-radius: 50%;
-  box-shadow: 0 4px 16px rgba(129, 224, 83, 0.3);
   transition: all 0.3s ease;
 }
 
 .nav-tab.add-button:hover .nav-icon {
   transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(129, 224, 83, 0.4);
 }
 
 .nav-tab.add-button:active .nav-icon {
@@ -144,26 +129,26 @@
   }
   
   .nav-tab {
-    min-height: 56px;
-    padding: 4px 2px;
+    min-height: 44px;
+    padding: 3px 2px;
   }
 }
 
 /* Landscape mobile */
 @media (max-width: 768px) and (orientation: landscape) {
   .mobile-bottom-nav {
-    padding-bottom: 4px;
+    padding-bottom: 2px;
   }
   
   .nav-tab {
-    min-height: 50px;
-    padding: 4px 2px;
+    min-height: 40px;
+    padding: 2px 2px;
   }
   
   .nav-icon {
     width: 20px;
     height: 20px;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
   }
   
   .nav-label {

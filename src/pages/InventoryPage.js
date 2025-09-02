@@ -901,6 +901,11 @@ const InventoryPage = () => {
                             <div className="inventory-page__card-details-row">
                               <span className="inventory-page__card-text-info">
                                 Qty: {formattedQuantity}
+                                {item.weight_equivalent && (
+                                  <span style={{ color: '#888', fontSize: '0.9em' }}>
+                                    {' '}({item.weight_equivalent} {item.weight_unit})
+                                  </span>
+                                )}
                               </span>
                               <span className="inventory-page__card-text-info">
                                 {item.category}
@@ -994,6 +999,11 @@ const InventoryPage = () => {
                         <div className="inventory-page__card-details-row">
                           <span className="inventory-page__card-text-info">
                             Qty: {formattedQuantity}
+                            {item.weight_equivalent && (
+                              <span style={{ color: '#888', fontSize: '0.9em' }}>
+                                {' '}({item.weight_equivalent} {item.weight_unit})
+                              </span>
+                            )}
                           </span>
                           <span className="inventory-page__card-text-info">
                             {item.category}

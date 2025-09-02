@@ -190,6 +190,7 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
             quantity: item.quantity,
             category: item.category,
             expiration_date: item.expiryDate,
+            total_weight_oz: item.total_weight_oz || null, // Include weight data from AI
             user_id: user.id
           }))
         }),
