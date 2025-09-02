@@ -244,6 +244,7 @@ const InventoryPage = () => {
       return sortedGrouped;
     }
     
+    
     return { ungrouped: filtered };
   };
 
