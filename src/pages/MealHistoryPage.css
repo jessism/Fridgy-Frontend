@@ -62,6 +62,17 @@
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+}
+
+.meal-history-page__month-year:hover {
+  background-color: rgba(79, 207, 97, 0.1);
+}
+
+.meal-history-page__month-year:active {
+  transform: scale(0.98);
 }
 
 /* Navigation Arrows */
@@ -417,7 +428,7 @@
   font-size: 1.125rem;
   font-weight: 600;
   color: #333;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #f0f0f0;
 }
@@ -427,7 +438,7 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 /* Individual meal item (line-based) */
@@ -582,25 +593,15 @@
   font-weight: 500;
 }
 
-/* Empty State */
-.meal-history-page__empty-state {
-  text-align: center;
-  padding: 2rem 1rem;
-  color: #999;
-  font-size: 0.95rem;
-}
-
-.meal-history-page__empty-state p {
-  margin: 0;
-}
+/* Empty State - Removed completely for cleaner design */
 
 .meal-history-page__add-food-btn {
   width: 100%;
   padding: 0.75rem;
-  margin-top: 1rem;
+  margin-top: 0.25rem;
   background: transparent;
   border: none;
-  color: #007bff;
+  color: #4fcf61;
   font-size: 0.875rem;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -610,7 +611,7 @@
 }
 
 .meal-history-page__add-food-btn:hover {
-  background-color: #f8f9fa;
+  background-color: rgba(79, 207, 97, 0.1);
 }
 
 .meal-history-page__loading {
@@ -711,5 +712,228 @@
 
   .meal-history-page__meal-section {
     padding: 0.75rem;
+  }
+}
+
+/* Month Calendar Modal Styles */
+.meal-history-page__month-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease;
+  padding: 1rem;
+}
+
+.meal-history-page__month-modal {
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 400px;
+  padding: 1.5rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Month Modal Header */
+.meal-history-page__month-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.meal-history-page__month-modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.meal-history-page__month-nav-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #666;
+}
+
+.meal-history-page__month-nav-btn:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.meal-history-page__month-nav-btn:active {
+  background-color: #e0e0e0;
+}
+
+/* Weekdays Header */
+.meal-history-page__month-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0;
+  margin-bottom: 0.5rem;
+}
+
+.meal-history-page__month-weekday {
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #666;
+  padding: 0.5rem 0;
+}
+
+/* Calendar Grid */
+.meal-history-page__month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.meal-history-page__month-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  color: #333;
+  position: relative;
+}
+
+.meal-history-page__month-day:not(.meal-history-page__month-day--empty):hover {
+  background-color: rgba(79, 207, 97, 0.1);
+}
+
+.meal-history-page__month-day:not(.meal-history-page__month-day--empty):active {
+  background-color: rgba(79, 207, 97, 0.15);
+}
+
+.meal-history-page__month-day--empty {
+  cursor: default;
+  visibility: hidden;
+}
+
+.meal-history-page__month-day--today {
+  background-color: #e6e6e6;
+  font-weight: 600;
+}
+
+.meal-history-page__month-day--selected {
+  background: linear-gradient(135deg, #81e053 0%, #4fcf61 100%);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(79, 207, 97, 0.3);
+}
+
+.meal-history-page__month-day--selected:hover {
+  background: linear-gradient(135deg, #6dd842 0%, #3db84f 100%);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.4);
+}
+
+/* Today Button */
+.meal-history-page__month-modal-footer {
+  display: flex;
+  justify-content: center;
+  padding-top: 1rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.meal-history-page__month-today-btn {
+  padding: 0.625rem 2rem;
+  background: #4fcf61;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.meal-history-page__month-today-btn:hover {
+  background: #3db84f;
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3);
+}
+
+.meal-history-page__month-today-btn:active {
+  box-shadow: 0 2px 6px rgba(79, 207, 97, 0.2);
+}
+
+/* Mobile adjustments for month calendar */
+@media (max-width: 768px) {
+  .meal-history-page__month-modal {
+    max-width: 340px;
+    padding: 1.25rem;
+  }
+  
+  .meal-history-page__month-modal-title {
+    font-size: 1.125rem;
+  }
+  
+  .meal-history-page__month-nav-btn {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .meal-history-page__month-weekday {
+    font-size: 0.8125rem;
+    padding: 0.375rem 0;
+  }
+  
+  .meal-history-page__month-day {
+    font-size: 0.875rem;
+  }
+  
+  .meal-history-page__month-today-btn {
+    padding: 0.5rem 1.5rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .meal-history-page__month-modal {
+    max-width: 300px;
+    padding: 1rem;
+  }
+  
+  .meal-history-page__month-modal-header {
+    margin-bottom: 1rem;
+  }
+  
+  .meal-history-page__month-modal-title {
+    font-size: 1rem;
+  }
+  
+  .meal-history-page__month-nav-btn {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .meal-history-page__month-weekday {
+    font-size: 0.75rem;
+  }
+  
+  .meal-history-page__month-day {
+    font-size: 0.8125rem;
   }
 }

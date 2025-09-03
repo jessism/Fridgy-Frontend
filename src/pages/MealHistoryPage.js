@@ -19,6 +19,8 @@ const MealHistoryPage = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showMonthCalendar, setShowMonthCalendar] = useState(false); // Month calendar modal state
+  const [calendarMonth, setCalendarMonth] = useState(new Date()); // Track which month is displayed in calendar
   
   // Edit/Delete modal states
   const [showEditModal, setShowEditModal] = useState(false);
@@ -384,13 +386,174 @@ const MealHistoryPage = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Handle date selection from month calendar
+  const handleMonthCalendarDateSelect = (date) => {
+    // Update selected date
+    setSelectedDate(date);
+    
+    // Calculate week offset to show the week containing the selected date
+    const today = new Date();
+    const todayWeekStart = new Date(today);
+    todayWeekStart.setDate(today.getDate() - today.getDay()); // Start of current week
+    
+    const selectedWeekStart = new Date(date);
+    selectedWeekStart.setDate(date.getDate() - date.getDay()); // Start of selected date's week
+    
+    // Calculate difference in weeks
+    const diffTime = selectedWeekStart.getTime() - todayWeekStart.getTime();
+    const diffWeeks = Math.round(diffTime / (7 * 24 * 60 * 60 * 1000));
+    
+    setCurrentWeekOffset(diffWeeks);
+    
+    // Fetch meals for the selected date
+    fetchMealsForDate(date);
+    
+    // Close the modal
+    setShowMonthCalendar(false);
+  };
+
+  // Month Calendar Modal Component
+  const MonthCalendarModal = () => {
+    const getDaysInMonth = (date) => {
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const daysInMonth = lastDay.getDate();
+      const startingDayOfWeek = firstDay.getDay();
+      
+      const days = [];
+      
+      // Add empty cells for days before month starts
+      for (let i = 0; i < startingDayOfWeek; i++) {
+        days.push(null);
+      }
+      
+      // Add all days of the month
+      for (let i = 1; i <= daysInMonth; i++) {
+        days.push(new Date(year, month, i));
+      }
+      
+      // Pad with empty cells to always have 42 cells (6 rows * 7 columns)
+      while (days.length < 42) {
+        days.push(null);
+      }
+      
+      return days;
+    };
+    
+    const navigateMonth = (direction) => {
+      const newMonth = new Date(calendarMonth);
+      newMonth.setMonth(newMonth.getMonth() + direction);
+      setCalendarMonth(newMonth);
+    };
+    
+    const goToToday = () => {
+      const today = new Date();
+      setCalendarMonth(today);
+      handleMonthCalendarDateSelect(today);
+    };
+    
+    const formatMonthYear = () => {
+      const monthName = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ][calendarMonth.getMonth()];
+      return `${monthName} ${calendarMonth.getFullYear()}`;
+    };
+    
+    const isToday = (date) => {
+      if (!date) return false;
+      const today = new Date();
+      return date.getDate() === today.getDate() &&
+             date.getMonth() === today.getMonth() &&
+             date.getFullYear() === today.getFullYear();
+    };
+    
+    const isSelectedDate = (date) => {
+      if (!date) return false;
+      return date.getDate() === selectedDate.getDate() &&
+             date.getMonth() === selectedDate.getMonth() &&
+             date.getFullYear() === selectedDate.getFullYear();
+    };
+    
+    const days = getDaysInMonth(calendarMonth);
+    
+    return (
+      <div className="meal-history-page__month-modal-overlay" onClick={() => setShowMonthCalendar(false)}>
+        <div className="meal-history-page__month-modal" onClick={(e) => e.stopPropagation()}>
+          {/* Modal Header */}
+          <div className="meal-history-page__month-modal-header">
+            <button 
+              className="meal-history-page__month-nav-btn"
+              onClick={() => navigateMonth(-1)}
+              aria-label="Previous month"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            
+            <h2 className="meal-history-page__month-modal-title">{formatMonthYear()}</h2>
+            
+            <button 
+              className="meal-history-page__month-nav-btn"
+              onClick={() => navigateMonth(1)}
+              aria-label="Next month"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
+          
+          {/* Days of week header */}
+          <div className="meal-history-page__month-weekdays">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+              <div key={day} className="meal-history-page__month-weekday">{day}</div>
+            ))}
+          </div>
+          
+          {/* Calendar Grid */}
+          <div className="meal-history-page__month-grid">
+            {days.map((date, index) => (
+              <div
+                key={`cell-${index}`}
+                className={`meal-history-page__month-day ${
+                  !date ? 'meal-history-page__month-day--empty' : ''
+                } ${
+                  isToday(date) ? 'meal-history-page__month-day--today' : ''
+                } ${
+                  isSelectedDate(date) ? 'meal-history-page__month-day--selected' : ''
+                }`}
+                onClick={() => date && handleMonthCalendarDateSelect(date)}
+              >
+                {date && date.getDate()}
+              </div>
+            ))}
+          </div>
+          
+          {/* Today Button */}
+          <div className="meal-history-page__month-modal-footer">
+            <button
+              className="meal-history-page__month-today-btn"
+              onClick={goToToday}
+            >
+              Today
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Meal Category Section Component
   const MealCategorySection = ({ title, meals, mealType }) => {
     return (
       <div className="meal-history-page__meal-section">
         <h3 className="meal-history-page__meal-title">{title}</h3>
         
-        {meals && meals.length > 0 ? (
+        {meals && meals.length > 0 && (
           <div className="meal-history-page__meal-list">
             {meals.map((meal) => (
               <div key={meal.id} className="meal-history-page__meal-item">
@@ -439,10 +602,6 @@ const MealHistoryPage = () => {
               </div>
             ))}
           </div>
-        ) : (
-          <div className="meal-history-page__empty-state">
-            <p>No meals logged yet</p>
-          </div>
         )}
         
         <button 
@@ -489,7 +648,13 @@ const MealHistoryPage = () => {
                 </svg>
               </button>
               
-              <div className="meal-history-page__month-year">
+              <div 
+                className="meal-history-page__month-year"
+                onClick={() => {
+                  setCalendarMonth(new Date(selectedDate));
+                  setShowMonthCalendar(true);
+                }}
+              >
                 <span className="meal-history-page__month-year-text">
                   {getCurrentMonthYear()}
                 </span>
@@ -752,6 +917,9 @@ const MealHistoryPage = () => {
           </div>
         </div>
       )}
+      
+      {/* Month Calendar Modal */}
+      {showMonthCalendar && <MonthCalendarModal />}
     </div>
   );
 };

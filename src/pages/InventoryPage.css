@@ -5,6 +5,11 @@
   position: relative;
 }
 
+/* Hide scrollbar for filter pills container */
+.inventory-page__filter-pills::-webkit-scrollbar {
+  display: none;
+}
+
 /* Title Styling to match MealPlansPage */
 .inventory-page__title {
   font-family: var(--header-font);
@@ -175,9 +180,30 @@
     margin: 0;
   }
   
+  /* Card wrapper for swipe functionality */
+  .inventory-page__mobile-card-wrapper {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Delete background that shows on swipe */
+  .inventory-page__mobile-card-delete-bg {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(to left, #ff4444, #ff6666);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 20px;
+    z-index: 1;
+  }
+  
   /* Compact horizontal card layout - borderless design */
   .inventory-page__mobile-card {
-    background: transparent;
+    background: white;
     padding: 1rem 0.25rem;
     transition: all 0.2s ease;
     display: flex;
@@ -187,6 +213,13 @@
     position: relative;
     overflow: visible;
     border-bottom: 1px solid #f0f0f0;
+    z-index: 2;
+  }
+  
+  /* Swipeable card styles */
+  .inventory-page__mobile-card-swipeable {
+    will-change: transform;
+    touch-action: pan-y;
   }
   
   .inventory-page__mobile-card:last-child {
@@ -325,6 +358,7 @@
     top: 50%;
     right: -0.75rem;
     transform: translateY(-50%);
+    z-index: 1002;
   }
   
   .inventory-page__card-menu-btn {

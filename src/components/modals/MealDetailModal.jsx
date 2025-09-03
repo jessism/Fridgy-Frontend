@@ -170,7 +170,7 @@ const MealDetailModal = ({ meal, isOpen, onClose }) => {
             <h2 className="meal-modal__title">{getMealName()}</h2>
             <div className="meal-modal__meta">
               <span className="meal-modal__type">
-                {getMealTypeIcon()} {meal.meal_type}
+                {meal.meal_type}
               </span>
               {getTotalCalories() && (
                 <span className="meal-modal__calories">{getTotalCalories()}</span>
