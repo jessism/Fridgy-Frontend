@@ -52,14 +52,40 @@ const RecipeDetailModal = ({
   const getDescription = () => {
     if (!recipe?.summary) return 'A delicious recipe worth trying.';
     
-    // Remove HTML tags and limit to 2 sentences
+    // Remove HTML tags
     const cleanSummary = recipe.summary
       .replace(/<[^>]*>/g, '')
       .replace(/&[^;]+;/g, ' ')
       .trim();
     
-    const sentences = cleanSummary.split(/[.!?]+/).filter(s => s.trim().length > 0);
-    return sentences.slice(0, 2).join('. ') + (sentences.length > 0 ? '.' : '');
+    // Filter out sentences containing serving/cost info and other unwanted phrases
+    const sentences = cleanSummary
+      .split(/[.!?]+/)
+      .filter(s => {
+        const sentence = s.trim().toLowerCase();
+        // Remove sentences about servings, costs, and other unwanted phrases
+        return sentence.length > 0 && 
+               !sentence.includes('serves') && 
+               !sentence.includes('serving') &&
+               !sentence.includes('per serving') &&
+               !sentence.includes('costs') &&
+               !sentence.includes('cents per') &&
+               !sentence.includes('watching your figure') &&
+               !sentence.includes('figure') &&
+               !sentence.includes('recipe serves') &&
+               !sentence.includes('this recipe');
+      });
+    
+    // Return only first sentence, and truncate if too long
+    if (sentences.length > 0) {
+      let firstSentence = sentences[0].trim();
+      // Limit to roughly 100 characters for 1-2 lines
+      if (firstSentence.length > 100) {
+        firstSentence = firstSentence.substring(0, 97) + '...';
+      }
+      return firstSentence + '.';
+    }
+    return 'A delicious recipe worth trying.';
   };
 
   const handleOverlayClick = (e) => {
@@ -164,30 +190,36 @@ const RecipeDetailModal = ({
                 />
               </div>
 
-              {/* Description and Pills Below Image */}
+              {/* Description and Info Text Below Image */}
               <div className="recipe-meta-info">
                 <div className="recipe-description">
                   <p>{getDescription()}</p>
                 </div>
 
-                <div className="recipe-pills">
-                  <div className="recipe-pill cook-time-pill">
-                    <span className="pill-icon">⏱️</span>
-                    <span className="pill-text">{getCookTime()}</span>
+                <div className="recipe-info-text">
+                  <div className="info-text-item">
+                    <span className="info-text-icon">⏱</span>
+                    <span className="info-text">{getCookTime()}</span>
                   </div>
-                  {getSpecialAttributes().map((attribute, index) => (
-                    <div key={index} className="recipe-pill special-pill">
-                      <span className="pill-text">{attribute}</span>
+                  {getSpecialAttributes().slice(0, 2).map((attribute, index) => (
+                    <div key={index} className="info-text-item">
+                      <span className="info-text">{attribute}</span>
                     </div>
                   ))}
                 </div>
 
-                {recipe.servings && (
-                  <div className="recipe-servings">
-                    <span className="servings-icon">👥</span>
-                    <span>Serves {recipe.servings}</span>
+                {/* Action Buttons */}
+                <div className="recipe-action-buttons">
+                  <div className="servings-display">
+                    {recipe.servings || 2} servings
                   </div>
-                )}
+                  <button 
+                    className="save-recipe-action-btn"
+                    onClick={() => console.log('Save recipe placeholder')}
+                  >
+                    Save recipe
+                  </button>
+                </div>
               </div>
 
               {/* Two Column Section Below Photo: Ingredients Left, Instructions Right */}

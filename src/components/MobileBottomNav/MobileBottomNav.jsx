@@ -64,8 +64,8 @@ const MobileBottomNav = () => {
       path: '/batchcamera',
       icon: (
         <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <circle cx="14" cy="14" r="12" fill="#81e053" stroke="none"/>
-          <path d="M14 9V19M9 14H19" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+          <circle cx="14" cy="14" r="13" fill="#81e053" stroke="none"/>
+          <path d="M14 10V18M10 14H18" stroke="white" strokeWidth="0.8" strokeLinecap="round"/>
         </svg>
       ),
       label: '',
