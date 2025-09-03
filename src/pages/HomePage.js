@@ -66,7 +66,21 @@ const HomePage = () => {
       .slice(0, 2); // Take only top 2
   };
 
+  // Get expired items (for fallback display)
+  const getExpiredItems = () => {
+    if (!items || items.length === 0) return [];
+    
+    return items
+      .filter(item => {
+        const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
+        return daysUntilExpiry < 0; // Already expired
+      })
+      .sort((a, b) => new Date(b.expiryDate) - new Date(a.expiryDate)) // Sort by expiry date (most recently expired first)
+      .slice(0, 2); // Take only top 2
+  };
+
   const expiringItems = getExpiringItems();
+  const expiredItems = getExpiredItems();
   
   return (
     <div className="homepage">
@@ -174,12 +188,15 @@ const HomePage = () => {
         <div className="container">
           <div className="section-header">
             <h2 className="section-title">
-              Expiring Soon
+              {expiringItems.length > 0 ? 'Expiring Soon' : 
+               expiredItems.length > 0 ? 'Need Attention' : 
+               'Expiring Soon'}
             </h2>
           </div>
           <div className="expiring-content" onClick={() => navigateToPage('/inventory')}>
             <div className="expiring-items">
               {expiringItems.length > 0 ? (
+                // Show expiring items (priority 1)
                 expiringItems.map((item) => {
                   const daysLeft = getDaysUntilExpiry(item.expiryDate);
                   const isUrgent = daysLeft <= 1;
@@ -200,7 +217,29 @@ const HomePage = () => {
                     </div>
                   );
                 })
+              ) : expiredItems.length > 0 ? (
+                // Show expired items (priority 2)
+                expiredItems.map((item) => {
+                  const daysExpired = Math.abs(getDaysUntilExpiry(item.expiryDate));
+                  const daysText = daysExpired === 0 ? 'Expired today' :
+                                  daysExpired === 1 ? '1 day ago' :
+                                  `${daysExpired} days ago`;
+                  
+                  return (
+                    <div key={item.id} className="expiring-item">
+                      <div className="item-info">
+                        <h4 className="item-name">{item.itemName}</h4>
+                      </div>
+                      <div className="expiry-countdown">
+                        <span className="days-left expired">
+                          {daysText}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
               ) : (
+                // Show all fresh message (priority 3)
                 <div className="expiring-item">
                   <div className="item-info">
                     <h4 className="item-name">No items expiring soon</h4>
@@ -216,6 +255,17 @@ const HomePage = () => {
                 </div>
                 <div className="expiring-reminders">
                   <span className="reminder-text">+{expiringItems.length} reminders</span>
+                  <div className="reminder-arrow">→</div>
+                </div>
+              </>
+            )}
+            {expiredItems.length > 0 && expiringItems.length === 0 && (
+              <>
+                <div className="expiring-subtitle expired-subtitle">
+                  <p>Check if these items are still good or dispose of them.</p>
+                </div>
+                <div className="expiring-reminders">
+                  <span className="reminder-text">+{expiredItems.length} expired</span>
                   <div className="reminder-arrow">→</div>
                 </div>
               </>

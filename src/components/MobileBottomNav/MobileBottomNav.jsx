@@ -34,7 +34,12 @@ const MobileBottomNav = () => {
   const navItems = [
     {
       path: '/home',
-      icon: (
+      icon: (isActive) => isActive ? (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <rect x="9" y="12" width="6" height="10" fill="white"/>
+        </svg>
+      ) : (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
           <polyline points="9,22 9,12 15,12 15,22"/>
@@ -44,7 +49,15 @@ const MobileBottomNav = () => {
     },
     {
       path: '/inventory',
-      icon: <ListIcon />,
+      icon: (isActive) => isActive ? (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <rect x="3" y="4" width="18" height="2" rx="1"/>
+          <rect x="3" y="11" width="18" height="2" rx="1"/>
+          <rect x="3" y="18" width="18" height="2" rx="1"/>
+        </svg>
+      ) : (
+        <ListIcon />
+      ),
       label: 'Inventory'
     },
     {
@@ -60,12 +73,25 @@ const MobileBottomNav = () => {
     },
     {
       path: '/meal-plans',
-      icon: <MealsIcon />,
+      icon: (isActive) => isActive ? (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          {/* Fork - filled */}
+          <path d="M7 2v6l2 2v12h-2V10l-2-2V2h2zm0 0h-2v4h2V2zm-2 0h-2v4h2V2zm4 0h-2v4h2V2z" />
+          {/* Knife - filled */}
+          <path d="M17 2v20h2V2h-2zm0 0c2 0 3 1.5 3 3.5S19 9 17 9V2z" />
+        </svg>
+      ) : (
+        <MealsIcon />
+      ),
       label: 'Meals'
     },
     {
       path: '/profile',
-      icon: (
+      icon: (isActive) => isActive ? (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+        </svg>
+      ) : (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
           <circle cx="12" cy="7" r="4"/>
@@ -99,14 +125,15 @@ const MobileBottomNav = () => {
               );
             }
             
+            const isActive = isActiveTab(item.path);
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`nav-tab ${isActiveTab(item.path) ? 'active' : ''}`}
+                className={`nav-tab ${isActive ? 'active' : ''}`}
               >
                 <div className="nav-icon">
-                  {item.icon}
+                  {typeof item.icon === 'function' ? item.icon(isActive) : item.icon}
                 </div>
                 {item.label && (
                   <span className="nav-label">

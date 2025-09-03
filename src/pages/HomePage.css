@@ -939,6 +939,18 @@
   background: rgba(255, 71, 87, 0.1);
 }
 
+/* Expired items styles */
+.days-left.expired {
+  color: #ff4757;
+  background: rgba(255, 71, 87, 0.15);
+  font-weight: 700;
+}
+
+.expired-subtitle p {
+  color: #ff4757;
+  font-weight: 500;
+}
+
 /* SHOPPING LIST SECTION */
 .shopping-list {
   padding: 0;
@@ -2361,6 +2373,7 @@ h2.section-title::after {
   line-height: 1.6;
   color: #64748b;
   margin: 0;
+  text-align: left;
 }
 
 /* Modern Pill Badges */
