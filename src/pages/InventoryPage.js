@@ -5,6 +5,7 @@ import MobileBottomNav from '../components/MobileBottomNav';
 import { EditIcon, DeleteIcon } from '../components/icons';
 import useInventory from '../hooks/useInventory';
 import { getItemIconIcons8, getExpiryStatus, formatQuantity } from '../assets/inventory_emojis/iconHelpers.js';
+import IngredientImage from '../components/IngredientImage';
 import './InventoryPage.css';
 
 const InventoryPage = () => {
@@ -962,9 +963,6 @@ const InventoryPage = () => {
                     {items.map((item) => {
                       const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
                       const { status, urgency } = getExpiryStatus(daysUntilExpiry);
-                      const itemIcon = getItemIconIcons8(item.category, item.itemName, { 
-                        size: 48
-                      });
                       const formattedQuantity = formatQuantity(item.quantity);
                       
                       const getStatusPillClass = (urgency) => {
@@ -1033,9 +1031,14 @@ const InventoryPage = () => {
                               transition: !isSwiping || swipedItemId !== item.id ? 'transform 0.3s ease' : 'none'
                             }}
                           >
-                            {/* Left: Emoji icon */}
+                            {/* Left: Ingredient image */}
                             <div className="inventory-page__card-icon">
-                              {itemIcon}
+                              <IngredientImage 
+                                item={item}
+                                size={64}
+                                className="inventory-page__card-image"
+                                fallbackToIcon={true}
+                              />
                             </div>
                             
                             {/* Right: Content */}
@@ -1121,9 +1124,6 @@ const InventoryPage = () => {
                 filteredItems.map((item) => {
                   const daysUntilExpiry = getDaysUntilExpiry(item.expiryDate);
                   const { status, urgency } = getExpiryStatus(daysUntilExpiry);
-                  const itemIcon = getItemIconIcons8(item.category, item.itemName, { 
-                    size: 48
-                  });
                   const formattedQuantity = formatQuantity(item.quantity);
                   
                   const getStatusPillClass = (urgency) => {
@@ -1192,9 +1192,14 @@ const InventoryPage = () => {
                           transition: !isSwiping || swipedItemId !== item.id ? 'transform 0.3s ease' : 'none'
                         }}
                       >
-                        {/* Left: Emoji icon */}
+                        {/* Left: Ingredient image */}
                         <div className="inventory-page__card-icon">
-                          {itemIcon}
+                          <IngredientImage 
+                            item={item}
+                            size={64}
+                            className="inventory-page__card-image"
+                            fallbackToIcon={true}
+                          />
                         </div>
                         
                         {/* Right: Content */}

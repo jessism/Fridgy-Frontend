@@ -63,23 +63,6 @@
   }
 }
 
-/* Recipe Number Badge */
-.recipe-number-badge {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 0.9rem;
-  backdrop-filter: blur(4px);
-}
 
 /* Difficulty Badge */
 .difficulty-badge {
@@ -136,8 +119,9 @@
   gap: 6px;
 }
 
-.meta-icon {
-  font-size: 0.9rem;
+.meta-icon-svg {
+  color: #9ca3af;
+  stroke-width: 2;
 }
 
 .meta-text {
@@ -146,21 +130,6 @@
   font-weight: 500;
 }
 
-/* Dietary Badges */
-.dietary-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 16px;
-}
-
-.dietary-badge {
-  color: white;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
 
 /* Key Ingredients */
 .key-ingredients {
@@ -197,15 +166,13 @@
 
 
 
-/* Action Buttons */
+/* Action Button */
 .recipe-actions {
   display: flex;
-  gap: 12px;
   margin-top: auto;
 }
 
-.btn-primary,
-.btn-secondary {
+.btn-primary {
   border: none;
   border-radius: 8px;
   padding: 12px 16px;
@@ -217,10 +184,10 @@
   align-items: center;
   gap: 6px;
   justify-content: center;
+  width: 100%;
 }
 
 .view-recipe-btn {
-  flex: 1;
   background: var(--primary-green);
   color: white;
 }
@@ -228,22 +195,6 @@
 .view-recipe-btn:hover {
   background: var(--primary-green-dark);
   transform: translateY(-1px);
-}
-
-.save-recipe-btn {
-  background: #f8fafc;
-  color: #4b5563;
-  border: 1px solid #e2e8f0;
-  min-width: 80px;
-}
-
-.save-recipe-btn:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-}
-
-.save-icon {
-  font-size: 0.9rem;
 }
 
 /* Responsive Design */
@@ -264,13 +215,7 @@
     gap: 12px;
   }
   
-  .recipe-actions {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .btn-primary,
-  .btn-secondary {
+  .btn-primary {
     width: 100%;
   }
 }

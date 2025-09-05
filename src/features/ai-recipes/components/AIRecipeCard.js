@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './AIRecipeCard.css';
+import { Clock, Users } from 'lucide-react';
 
 const AIRecipeCard = ({ recipe, index = 0, onViewFullRecipe }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -66,10 +67,6 @@ const AIRecipeCard = ({ recipe, index = 0, onViewFullRecipe }) => {
           loading="lazy"
         />
         
-        {/* Recipe Number Badge */}
-        <div className="recipe-number-badge">
-          {index + 1}
-        </div>
 
         {/* Difficulty Badge */}
         <div 
@@ -91,14 +88,14 @@ const AIRecipeCard = ({ recipe, index = 0, onViewFullRecipe }) => {
         {/* Recipe Meta */}
         <div className="recipe-meta">
           <div className="meta-item">
-            <span className="meta-icon">⏱️</span>
+            <Clock className="meta-icon-svg" size={16} />
             <span className="meta-text">
               {formatTime(recipe.prep_time, recipe.cook_time, recipe.total_time)}
             </span>
           </div>
           
           <div className="meta-item">
-            <span className="meta-icon">👥</span>
+            <Users className="meta-icon-svg" size={16} />
             <span className="meta-text">{recipe.servings} serving{recipe.servings > 1 ? 's' : ''}</span>
           </div>
           
@@ -109,20 +106,6 @@ const AIRecipeCard = ({ recipe, index = 0, onViewFullRecipe }) => {
           )}
         </div>
 
-        {/* Dietary Badges */}
-        {dietaryBadges.length > 0 && (
-          <div className="dietary-badges">
-            {dietaryBadges.map((badge, idx) => (
-              <span 
-                key={idx} 
-                className="dietary-badge"
-                style={{ backgroundColor: badge.color }}
-              >
-                {badge.label}
-              </span>
-            ))}
-          </div>
-        )}
 
         {/* Key Ingredients */}
         {recipe.key_ingredients && recipe.key_ingredients.length > 0 && (
@@ -144,24 +127,13 @@ const AIRecipeCard = ({ recipe, index = 0, onViewFullRecipe }) => {
         )}
 
 
-        {/* Action Buttons */}
+        {/* Action Button */}
         <div className="recipe-actions">
           <button 
             className="btn-primary view-recipe-btn"
             onClick={() => onViewFullRecipe && onViewFullRecipe(recipe)}
           >
             View Full Recipe
-          </button>
-          
-          <button 
-            className="btn-secondary save-recipe-btn"
-            onClick={() => {
-              // TODO: Implement save to favorites
-              console.log('Save recipe:', recipe);
-            }}
-          >
-            <span className="save-icon">🔖</span>
-            Save
           </button>
         </div>
       </div>

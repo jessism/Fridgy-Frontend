@@ -1,0 +1,162 @@
+.ingredient-image {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%; /* Perfect circle */
+  overflow: hidden;
+  background: #f8f9fa;
+  position: relative;
+}
+
+/* Photo variant - real PNG images */
+.ingredient-image--photo {
+  padding: 0; /* Remove padding */
+  box-shadow: none; /* Remove shadow */
+}
+
+.ingredient-image--photo img {
+  border-radius: 0; /* No border radius on image */
+  transition: transform 0.2s ease;
+  width: 60%; /* Much smaller to show colored circle prominently */
+  height: 60%;
+  object-fit: contain;
+}
+
+.ingredient-image--photo:hover img {
+  transform: scale(1.05);
+}
+
+/* Icon variant - SVG fallback */
+.ingredient-image--icon {
+  /* Background color will be set by category classes */
+}
+
+/* Loading state */
+.ingredient-image--loading {
+  background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+}
+
+.ingredient-image__spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #e9ecef;
+  border-top: 3px solid var(--primary-green);
+  border-radius: 50%;
+  animation: ingredient-image-spin 1s linear infinite;
+}
+
+@keyframes ingredient-image-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Placeholder variant */
+.ingredient-image--placeholder {
+  background: #fce4ec; /* Default pink for placeholder */
+  color: #adb5bd;
+}
+
+/* Category-based background colors */
+.ingredient-image--green-bg {
+  background: #e8f5e9 !important; /* Light green for fruits/vegetables */
+}
+
+.ingredient-image--blue-bg {
+  background: #e3f2fd !important; /* Light blue for dairy */
+}
+
+.ingredient-image--red-bg {
+  background: #ffebee !important; /* Light red/pink for protein */
+}
+
+.ingredient-image--yellow-bg {
+  background: #fffde7 !important; /* Light yellow for grains */
+}
+
+.ingredient-image--pink-bg {
+  background: #fce4ec !important; /* Light pink for others */
+}
+
+.ingredient-image__placeholder-icon {
+  font-size: 24px;
+  opacity: 0.5;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .ingredient-image {
+    border-radius: 50%; /* Keep circle on mobile */
+  }
+  
+  .ingredient-image--photo {
+    padding: 0;
+    box-shadow: none;
+  }
+  
+  .ingredient-image--photo img {
+    border-radius: 0;
+  }
+  
+  /* Disable hover effects on mobile */
+  .ingredient-image--photo:hover img {
+    transform: none;
+  }
+}
+
+/* High-resolution display support */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .ingredient-image--photo {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Dark mode support (if needed) */
+@media (prefers-color-scheme: dark) {
+  /* Keep light backgrounds even in dark mode for consistency */
+  .ingredient-image--green-bg {
+    background: #e8f5e9 !important;
+  }
+  
+  .ingredient-image--blue-bg {
+    background: #e3f2fd !important;
+  }
+  
+  .ingredient-image--red-bg {
+    background: #ffebee !important;
+  }
+  
+  .ingredient-image--yellow-bg {
+    background: #fffde7 !important;
+  }
+  
+  .ingredient-image--pink-bg {
+    background: #fce4ec !important;
+  }
+  
+  .ingredient-image__spinner {
+    border-color: #34495e;
+    border-top-color: var(--primary-green);
+  }
+}
+
+/* Size variations */
+.ingredient-image--small {
+  width: 32px;
+  height: 32px;
+}
+
+.ingredient-image--medium {
+  width: 48px;
+  height: 48px;
+}
+
+.ingredient-image--large {
+  width: 64px;
+  height: 64px;
+}
+
+.ingredient-image--xlarge {
+  width: 96px;
+  height: 96px;
+}

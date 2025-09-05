@@ -240,7 +240,16 @@
     flex-shrink: 0;
   }
   
-  /* SVG icon styling - larger icons */
+  /* Real ingredient image styling */
+  .inventory-page__card-image {
+    width: 64px !important;
+    height: 64px !important;
+    border-radius: 50%; /* Make it circular */
+    overflow: hidden;
+    box-shadow: none; /* Remove shadow */
+  }
+  
+  /* SVG icon styling - larger icons (fallback) */
   .inventory-page__card-icon svg {
     width: 40px;
     height: 40px;
@@ -248,7 +257,7 @@
     stroke-width: 1.5;
   }
   
-  /* Emoji icon styling - larger emojis */
+  /* Emoji icon styling - larger emojis (fallback) */
   .inventory-page__card-icon {
     font-size: 2.5rem;
   }
