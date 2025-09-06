@@ -8,6 +8,13 @@ import appLogo from '../assets/images/Logo.png';
 import { ReactComponent as AddToFridgeIcon } from '../assets/icons/quickaccess/add-to-fridge.svg';
 import { ReactComponent as MyFridgeIcon } from '../assets/icons/quickaccess/my-fridge.svg';
 import { ReactComponent as ShopListsIcon } from '../assets/icons/quickaccess/shop-lists.svg';
+// Food group icons
+import proteinIcon from '../assets/images/food-groups/foodgroup_protein.png';
+import dairyIcon from '../assets/images/food-groups/foodgroup_dairy.png';
+import veggiesIcon from '../assets/images/food-groups/foodgroup_veggies.png';
+import fruitsIcon from '../assets/images/food-groups/foodgroup_fruits.png';
+import grainsIcon from '../assets/images/food-groups/foodgroup_carb.png';
+import fatsIcon from '../assets/images/food-groups/foodgroup_fats.png';
 import { ReactComponent as RecipesIcon } from '../assets/icons/quickaccess/recipes.svg';
 import './HomePage.css';
 
@@ -135,7 +142,7 @@ const HomePage = () => {
             <div className="category-card">
               <div className="category-count">{categoryCounts['Protein']}</div>
               <div className="category-image">
-                <span className="food-emoji">🍖</span>
+                <img src={proteinIcon} alt="Protein" className="food-group-icon" />
               </div>
               <h3>Protein</h3>
             </div>
@@ -143,7 +150,7 @@ const HomePage = () => {
             <div className="category-card">
               <div className="category-count">{categoryCounts['Dairy']}</div>
               <div className="category-image">
-                <span className="food-emoji">🧀</span>
+                <img src={dairyIcon} alt="Dairy" className="food-group-icon" />
               </div>
               <h3>Dairy</h3>
             </div>
@@ -151,7 +158,7 @@ const HomePage = () => {
             <div className="category-card">
               <div className="category-count">{categoryCounts['Vegetables']}</div>
               <div className="category-image">
-                <span className="food-emoji">🥬</span>
+                <img src={veggiesIcon} alt="Vegetables" className="food-group-icon" />
               </div>
               <h3>Vegetables</h3>
             </div>
@@ -159,7 +166,7 @@ const HomePage = () => {
             <div className="category-card">
               <div className="category-count">{categoryCounts['Fruits']}</div>
               <div className="category-image">
-                <span className="food-emoji">🍊</span>
+                <img src={fruitsIcon} alt="Fruits" className="food-group-icon" />
               </div>
               <h3>Fruits</h3>
             </div>
@@ -167,7 +174,7 @@ const HomePage = () => {
             <div className="category-card">
               <div className="category-count">{categoryCounts['Grains']}</div>
               <div className="category-image">
-                <span className="food-emoji">🍞</span>
+                <img src={grainsIcon} alt="Grains" className="food-group-icon" />
               </div>
               <h3>Grains</h3>
             </div>
@@ -175,7 +182,7 @@ const HomePage = () => {
             <div className="category-card">
               <div className="category-count">{categoryCounts['Fats and Oils']}</div>
               <div className="category-image">
-                <span className="food-emoji">🥥</span>
+                <img src={fatsIcon} alt="Fats and Oils" className="food-group-icon" />
               </div>
               <h3>Fats and Oils</h3>
             </div>

@@ -521,6 +521,12 @@
   font-size: 2.5rem;
 }
 
+.food-group-icon {
+  width: 85%;
+  height: 85%;
+  object-fit: contain;
+}
+
 .category-card h3 {
   font-family: var(--header-font);
   color: var(--header-color);

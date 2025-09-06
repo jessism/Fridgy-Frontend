@@ -63,10 +63,9 @@
   text-align: center;
 }
 
-/* Camera Container - Reduced Height */
+/* Camera Container - Expanded Height */
 .camera-v2__container {
-  flex: 0 0 auto;
-  height: 60vh;
+  flex: 1;
   position: relative;
   display: flex;
   align-items: center;
@@ -74,6 +73,7 @@
   background: white;
   overflow: hidden;
   margin: 0 1rem;
+  margin-bottom: 0;
 }
 
 .camera-v2__video {
@@ -124,68 +124,8 @@
   background: var(--primary-green-dark);
 }
 
-/* Instructions Section */
-.camera-v2__instructions {
-  position: relative;
-  padding: 1rem 2rem 0.75rem;
-  background: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  margin-top: 0.5rem;
-}
-
-.camera-v2__instruction-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--header-color);
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-.camera-v2__instruction-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  max-width: 400px;
-  width: 100%;
-}
-
-.camera-v2__instruction-item {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 1rem;
-  text-align: left;
-}
-
-.camera-v2__instruction-item:last-child {
-  margin-bottom: 0;
-}
-
-.camera-v2__instruction-number {
-  background: var(--primary-green);
-  color: white;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-right: 0.75rem;
-  flex-shrink: 0;
-}
-
-.camera-v2__instruction-text {
-  font-size: 0.95rem;
-  color: #666;
-  line-height: 1.3;
-  margin: 0;
-  padding-top: 0.1rem;
-}
+/* Instructions Section - Removed */
+/* Instructions have been removed to maximize camera view area */
 
 /* Photo Thumbnail Stack - Bottom Right */
 .camera-v2__thumbnail-stack {
@@ -463,37 +403,41 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(255, 255, 255, 0.95);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 1002;
-  color: white;
+  color: #333;
 }
 
 .camera-v2__analyzing-icon {
-  font-size: 3rem;
+  width: 100px;
+  height: 100px;
   margin-bottom: 1rem;
-  animation: spin 1s linear infinite;
+  animation: wave 1s ease-in-out infinite;
+  transform-origin: center bottom;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+@keyframes wave {
+  0%, 100% { transform: rotate(-10deg); }
+  50% { transform: rotate(10deg); }
 }
 
 .camera-v2__analyzing-text {
   font-size: 1.2rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
+  color: #333;
 }
 
 .camera-v2__analyzing-subtext {
   font-size: 1rem;
-  opacity: 0.8;
+  opacity: 0.7;
   text-align: center;
   max-width: 300px;
+  color: #666;
 }
 
 /* Results Section Styles (Modern Card Interface) */
@@ -712,34 +656,7 @@
   }
   
   .camera-v2__container {
-    height: 50vh;
     margin: 0 0.75rem;
-  }
-  
-  .camera-v2__instructions {
-    padding: 1rem 1.25rem 0.5rem;
-    margin-top: -0.5rem;
-  }
-  
-  .camera-v2__instruction-title {
-    font-size: 1rem;
-    margin-bottom: 1rem;
-  }
-  
-  .camera-v2__instruction-item {
-    margin-bottom: 0.75rem;
-  }
-  
-  .camera-v2__instruction-number {
-    width: 22px;
-    height: 22px;
-    font-size: 0.8rem;
-    margin-right: 0.75rem;
-  }
-  
-  .camera-v2__instruction-text {
-    font-size: 0.9rem;
-    line-height: 1.3;
   }
   
   .camera-v2__edit-done {
@@ -808,29 +725,7 @@
 /* Very small screens */
 @media (max-width: 480px) {
   .camera-v2__container {
-    height: 45vh;
     margin: 0 0.5rem;
-  }
-  
-  .camera-v2__instructions {
-    padding: 0.75rem 0.75rem 0.5rem;
-    margin-top: -0.25rem;
-  }
-  
-  .camera-v2__instruction-item {
-    margin-bottom: 0.5rem;
-  }
-  
-  .camera-v2__instruction-number {
-    width: 20px;
-    height: 20px;
-    font-size: 0.7rem;
-    margin-right: 0.5rem;
-  }
-  
-  .camera-v2__instruction-text {
-    font-size: 0.8rem;
-    line-height: 1.2;
   }
   
   .camera-v2__controls {

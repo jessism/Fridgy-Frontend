@@ -18,12 +18,6 @@ const InventoryPage = () => {
   const [itemToEdit, setItemToEdit] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Swipe-to-delete state
-  const [swipedItemId, setSwipedItemId] = useState(null);
-  const [swipeStartX, setSwipeStartX] = useState(0);
-  const [swipeCurrentX, setSwipeCurrentX] = useState(0);
-  const [isSwiping, setIsSwiping] = useState(false);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -151,61 +145,6 @@ const InventoryPage = () => {
     setItemToDelete(item);
     setShowDeleteModal(true);
     setOpenDropdownId(null);
-  };
-  
-  // Swipe-to-delete handlers
-  const handleTouchStart = (e, itemId) => {
-    setSwipeStartX(e.touches[0].clientX);
-    setSwipeCurrentX(e.touches[0].clientX);
-    setSwipedItemId(itemId);
-    setIsSwiping(false);
-  };
-  
-  const handleTouchMove = (e, itemId) => {
-    if (swipedItemId !== itemId) return;
-    
-    const currentX = e.touches[0].clientX;
-    const diff = swipeStartX - currentX;
-    
-    // Only allow left swipes and require minimum distance
-    if (diff > 10) { // Minimum 10px swipe to trigger
-      setSwipeCurrentX(currentX);
-      setIsSwiping(true);
-      e.preventDefault(); // Prevent scrolling while swiping
-    }
-  };
-  
-  const handleTouchEnd = (item) => {
-    if (!isSwiping || swipedItemId !== item.id) {
-      resetSwipe();
-      return;
-    }
-    
-    const swipeDistance = swipeStartX - swipeCurrentX;
-    const cardWidth = window.innerWidth * 0.9; // Approximate card width
-    const threshold = cardWidth * 0.4; // 40% threshold
-    
-    if (swipeDistance > threshold) {
-      // Trigger delete
-      handleDeleteItem(item);
-      resetSwipe();
-    } else {
-      // Snap back
-      resetSwipe();
-    }
-  };
-  
-  const resetSwipe = () => {
-    setSwipedItemId(null);
-    setSwipeStartX(0);
-    setSwipeCurrentX(0);
-    setIsSwiping(false);
-  };
-  
-  const getSwipeTransform = (itemId) => {
-    if (swipedItemId !== itemId || !isSwiping) return 0;
-    const distance = Math.min(swipeStartX - swipeCurrentX, 150); // Max 150px swipe
-    return -distance;
   };
 
   // Handle keyboard events (ESC to close dropdown) and click outside
@@ -977,60 +916,7 @@ const InventoryPage = () => {
 
                       return (
                         <div key={item.id} className="inventory-page__mobile-card-wrapper">
-                          {/* Delete background that shows on swipe */}
-                          <div 
-                            className="inventory-page__mobile-card-delete-bg"
-                            style={{
-                              opacity: isSwiping && swipedItemId === item.id ? 1 : 0,
-                              transition: 'opacity 0.2s ease'
-                            }}
-                          >
-                            <div style={{
-                              width: '40px',
-                              height: '40px',
-                              borderRadius: '50%',
-                              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-                            }}>
-                              <svg 
-                                width="18" 
-                                height="18" 
-                                viewBox="0 0 24 24" 
-                                fill="none" 
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path 
-                                  d="M18 6L6 18" 
-                                  stroke="#ff4444" 
-                                  strokeWidth="2.5" 
-                                  strokeLinecap="round" 
-                                  strokeLinejoin="round"
-                                />
-                                <path 
-                                  d="M6 6L18 18" 
-                                  stroke="#ff4444" 
-                                  strokeWidth="2.5" 
-                                  strokeLinecap="round" 
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                            </div>
-                          </div>
-                          
-                          {/* Swipeable card */}
-                          <div 
-                            className="inventory-page__mobile-card inventory-page__mobile-card-swipeable"
-                            onTouchStart={(e) => handleTouchStart(e, item.id)}
-                            onTouchMove={(e) => handleTouchMove(e, item.id)}
-                            onTouchEnd={() => handleTouchEnd(item)}
-                            style={{
-                              transform: `translateX(${getSwipeTransform(item.id)}px)`,
-                              transition: !isSwiping || swipedItemId !== item.id ? 'transform 0.3s ease' : 'none'
-                            }}
-                          >
+                          <div className="inventory-page__mobile-card">
                             {/* Left: Ingredient image */}
                             <div className="inventory-page__card-icon">
                               <IngredientImage 
@@ -1046,11 +932,13 @@ const InventoryPage = () => {
                             {/* Top: Item name + status pill on same line */}
                             <div className="inventory-page__card-name-row">
                               <h3 className="inventory-page__card-item-name">{item.itemName}</h3>
+                              {/* Status pills temporarily hidden - uncomment to re-enable
                               {urgency !== 'warning' && urgency !== 'good' && (
                                 <span className={`inventory-page__card-status-pill ${getStatusPillClass(urgency)}`}>
                                   {status}
                                 </span>
                               )}
+                              */}
                             </div>
                             
                             {/* Bottom: Details row with quantity and category */}
@@ -1138,60 +1026,7 @@ const InventoryPage = () => {
 
                   return (
                     <div key={item.id} className="inventory-page__mobile-card-wrapper">
-                      {/* Delete background that shows on swipe */}
-                      <div 
-                        className="inventory-page__mobile-card-delete-bg"
-                        style={{
-                          opacity: isSwiping && swipedItemId === item.id ? 1 : 0,
-                          transition: 'opacity 0.2s ease'
-                        }}
-                      >
-                        <div style={{
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '50%',
-                          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-                        }}>
-                          <svg 
-                            width="18" 
-                            height="18" 
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path 
-                              d="M18 6L6 18" 
-                              stroke="#ff4444" 
-                              strokeWidth="2.5" 
-                              strokeLinecap="round" 
-                              strokeLinejoin="round"
-                            />
-                            <path 
-                              d="M6 6L18 18" 
-                              stroke="#ff4444" 
-                              strokeWidth="2.5" 
-                              strokeLinecap="round" 
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </div>
-                      </div>
-                      
-                      {/* Swipeable card */}
-                      <div 
-                        className="inventory-page__mobile-card inventory-page__mobile-card-swipeable"
-                        onTouchStart={(e) => handleTouchStart(e, item.id)}
-                        onTouchMove={(e) => handleTouchMove(e, item.id)}
-                        onTouchEnd={() => handleTouchEnd(item)}
-                        style={{
-                          transform: `translateX(${getSwipeTransform(item.id)}px)`,
-                          transition: !isSwiping || swipedItemId !== item.id ? 'transform 0.3s ease' : 'none'
-                        }}
-                      >
+                      <div className="inventory-page__mobile-card">
                         {/* Left: Ingredient image */}
                         <div className="inventory-page__card-icon">
                           <IngredientImage 
@@ -1207,11 +1042,13 @@ const InventoryPage = () => {
                         {/* Top: Item name + status pill on same line */}
                         <div className="inventory-page__card-name-row">
                           <h3 className="inventory-page__card-item-name">{item.itemName}</h3>
+                          {/* Status pills temporarily hidden - uncomment to re-enable
                           {urgency !== 'warning' && urgency !== 'good' && (
                             <span className={`inventory-page__card-status-pill ${getStatusPillClass(urgency)}`}>
                               {status}
                             </span>
                           )}
+                          */}
                         </div>
                         
                         {/* Bottom: Details row with quantity and category */}

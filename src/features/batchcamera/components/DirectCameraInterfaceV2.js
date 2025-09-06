@@ -4,6 +4,7 @@ import { useAuth } from '../../auth/context/AuthContext';
 import SuccessModal from '../../../components/modals/SuccessModal';
 import { getItemIconIcons8, formatQuantity } from '../../../assets/inventory_emojis/iconHelpers.js';
 import { safeJSONStringify } from '../../../utils/jsonSanitizer';
+import FridgyLogo from '../../../assets/images/Logo.png';
 import './DirectCameraInterfaceV2.css';
 
 const DirectCameraInterfaceV2 = ({ onComplete }) => {
@@ -322,10 +323,14 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
     return (
       <div className="camera-interface-v2">
         <div className="camera-v2__analyzing">
-          <div className="camera-v2__analyzing-icon">🔄</div>
+          <img 
+            src={FridgyLogo} 
+            alt="Fridgy" 
+            className="camera-v2__analyzing-icon" 
+          />
           <div className="camera-v2__analyzing-text">Analyzing Photos...</div>
           <div className="camera-v2__analyzing-subtext">
-            AI is identifying food items and expiration dates
+            Fridgy is identifying food items and expiration dates
           </div>
         </div>
       </div>
@@ -563,24 +568,6 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
             </div>
           </div>
         )}
-      </div>
-
-      {/* Instructions Section */}
-      <div className="camera-v2__instructions">
-        <ul className="camera-v2__instruction-list">
-          <li className="camera-v2__instruction-item">
-            <div className="camera-v2__instruction-number">1</div>
-            <p className="camera-v2__instruction-text">
-              Point the camera to the food item and capture the front.
-            </p>
-          </li>
-          <li className="camera-v2__instruction-item">
-            <div className="camera-v2__instruction-number">2</div>
-            <p className="camera-v2__instruction-text">
-              Find the expiry date and capture for a more accurate log.
-            </p>
-          </li>
-        </ul>
       </div>
 
       {/* Bottom Control Bar */}
