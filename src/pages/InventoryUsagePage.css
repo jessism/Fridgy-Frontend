@@ -7,7 +7,7 @@
 
 /* Page Header */
 .inventory-usage-page .page-header {
-  padding: 1rem 0;
+  padding: 3.5rem 0 1rem 0;
   margin-bottom: 1.5rem;
 }
 
@@ -24,40 +24,20 @@
   margin-bottom: 0.5rem;
 }
 
-.inventory-usage-page .back-button {
-  position: absolute;
-  left: 0;
-  top: 0;
-  background: none;
-  border: none;
-  padding: 0.5rem;
-  cursor: pointer;
-  color: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  transition: background-color 0.2s ease;
-}
-
-.inventory-usage-page .back-button:hover {
-  background-color: #f0f0f0;
-}
 
 .inventory-usage-page .page-title {
   font-size: 2rem;
   font-weight: 700;
-  margin: 0 auto;
+  margin: 0;
   color: #222;
-  text-align: center;
-  width: 100%;
+  text-align: left;
 }
 
 .inventory-usage-page .page-subtitle {
   font-size: 1rem;
   margin: 0;
   color: #666;
-  text-align: center;
+  text-align: left;
 }
 
 /* Date Filter Section */
@@ -100,7 +80,6 @@
   background: white;
   border-radius: 20px;
   padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   text-align: left;
 }
 
@@ -109,6 +88,7 @@
   font-weight: 600;
   color: #222;
   margin: 0 0 1.5rem 0;
+  text-align: left;
 }
 
 .inventory-usage-page .donut-chart-wrapper {
@@ -155,7 +135,6 @@
   background: white;
   border-radius: 16px;
   padding: 1.25rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .inventory-usage-page .analytics-card.full-width {
@@ -228,7 +207,6 @@
   background: white;
   border-radius: 20px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .inventory-usage-page .category-title {
@@ -287,7 +265,6 @@
   background: white;
   border-radius: 20px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .inventory-usage-page .most-used-title {
@@ -349,7 +326,6 @@
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -357,7 +333,6 @@
 
 .inventory-usage-page .metric-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 .inventory-usage-page .metric-header {
@@ -458,7 +433,6 @@
   background: white;
   border-radius: 12px;
   padding: 3rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .inventory-usage-page .coming-soon {
@@ -492,13 +466,10 @@
   }
 
   .inventory-usage-page .page-header {
-    padding: 0.5rem 0;
+    padding: 2.5rem 0 1rem 0;
     margin-bottom: 1rem;
   }
 
-  .inventory-usage-page .back-button {
-    padding: 0.25rem;
-  }
 
   .inventory-usage-page .page-title {
     font-size: 1.5rem;
@@ -516,6 +487,23 @@
   .inventory-usage-page .metrics-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
+  }
+
+  .inventory-usage-page .analytics-cards-container {
+    padding: 0 1rem;
+    gap: 0.75rem;
+  }
+
+  .inventory-usage-page .usage-container {
+    padding: 0 1rem;
+  }
+
+  .inventory-usage-page .category-consumption-container {
+    padding: 0 1rem;
+  }
+
+  .inventory-usage-page .most-used-items-container {
+    padding: 0 1rem;
   }
 
   /* Mobile-specific donut chart adjustments */
@@ -592,7 +580,6 @@
   background: white;
   border-radius: 20px;
   padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   margin-bottom: 1.5rem;
   text-align: center;
 }
@@ -642,7 +629,6 @@
   background: white;
   border-radius: 16px;
   padding: 1.25rem 0.75rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   text-align: center;
   display: flex;
   flex-direction: column;

@@ -1,0 +1,1 @@
+export { default as RecipeCookingConfirmation } from './components/RecipeCookingConfirmation';

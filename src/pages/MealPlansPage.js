@@ -72,15 +72,10 @@ const MealPlansPage = () => {
   };
 
   const handleActuallyCook = async (recipe) => {
-    try {
-      await markRecipeCooked(recipe.id, recipe.extendedIngredients || []);
-      console.log(`✅ Marked ${recipe.title} as cooked`);
-      // TODO: Show success message and refresh suggestions
-      fetchSuggestions(); // Refresh recipes after cooking
-    } catch (error) {
-      console.error('Failed to mark recipe as cooked:', error);
-      // TODO: Show error message
-    }
+    // This is called after recipe is successfully cooked
+    console.log(`✅ Recipe ${recipe.title} was cooked and inventory was deducted`);
+    // Refresh suggestions since inventory has changed
+    fetchSuggestions({ forceRefresh: true });
   };
 
   const handleCloseModal = () => {
@@ -201,6 +196,9 @@ const MealPlansPage = () => {
             </button>
           </div>
           
+          {/* AI Recipe Section - Get perfect match with AI */}
+          <AIRecipeSection />
+          
           {/* Cook What You Have Section - TEMPORARILY HIDDEN */}
           {/* 
           <div className="cook-what-you-have" style={{marginBottom: '4rem'}}>
@@ -227,7 +225,7 @@ const MealPlansPage = () => {
           </div>
           */}
           
-          {/* Inspired by Your Preference Section */}
+          {/* Cook what you have Section */}
           <div className="meal-plans-page__section">
             <div className="meal-plans-page__section-header" style={{ 
               display: 'flex', 
@@ -292,9 +290,6 @@ const MealPlansPage = () => {
               )}
             </div>
           </div>
-          
-          {/* AI Recipe Section */}
-          <AIRecipeSection />
           
           {/* View Meal Analytics Section */}
           <div className="meal-plans-page__analytics-section">

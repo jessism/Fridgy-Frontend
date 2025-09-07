@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import RecipeCookingConfirmation from '../../features/recipe-cooking/components/RecipeCookingConfirmation';
 
 const RecipeDetailModal = ({
   isOpen,
@@ -8,6 +9,7 @@ const RecipeDetailModal = ({
   onCookNow
 }) => {
   const [activeTab, setActiveTab] = useState('ingredients');
+  const [showCookingConfirmation, setShowCookingConfirmation] = useState(false);
   
   if (!isOpen) return null;
 
@@ -97,10 +99,18 @@ const RecipeDetailModal = ({
   };
 
   const handleCookNow = () => {
-    if (onCookNow && recipe) {
+    if (recipe) {
+      setShowCookingConfirmation(true);
+    }
+  };
+
+  const handleCookingComplete = () => {
+    setShowCookingConfirmation(false);
+    onClose();
+    // Optionally call parent's onCookNow if they need to know
+    if (onCookNow) {
       onCookNow(recipe);
     }
-    onClose();
   };
 
   const renderIngredients = () => {
@@ -306,151 +316,161 @@ const RecipeDetailModal = ({
   };
 
   return (
-    <div className="recipe-modal-overlay" onClick={handleOverlayClick}>
-      <div className="recipe-modal">
-        {/* Header with close button */}
-        <div className="recipe-modal-header">
-          <button 
-            className="recipe-modal-close"
-            onClick={onClose}
-            aria-label="Close modal"
-          >
-            ×
-          </button>
-        </div>
+    <>
+      <div className="recipe-modal-overlay" onClick={handleOverlayClick}>
+        <div className="recipe-modal">
+          {/* Header with close button */}
+          <div className="recipe-modal-header">
+            <button 
+              className="recipe-modal-close"
+              onClick={onClose}
+              aria-label="Close modal"
+            >
+              ×
+            </button>
+          </div>
 
-        <div className="recipe-modal-content">
-          {isLoading ? (
-            <div className="recipe-loading">
-              <div className="loading-spinner"></div>
-              <p>Loading recipe details...</p>
-            </div>
-          ) : recipe ? (
-            <div className="recipe-simple-layout">
-              {/* Recipe Title at Top */}
-              <h1 className="recipe-main-title">{recipe.title}</h1>
-              
-              {/* Recipe Image Below Title */}
-              <div className="recipe-image-container">
-                <img 
-                  src={recipe.image || 'https://via.placeholder.com/400x300?text=No+Image'} 
-                  alt={recipe.title}
-                  className="recipe-main-image"
-                  onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/400x300?text=No+Image';
-                  }}
-                />
+          <div className="recipe-modal-content">
+            {isLoading ? (
+              <div className="recipe-loading">
+                <div className="loading-spinner"></div>
+                <p>Loading recipe details...</p>
               </div>
-
-              {/* Description and Info Text Below Image */}
-              <div className="recipe-meta-info">
-                <div className="recipe-description">
-                  <p>{getDescription()}</p>
-                </div>
-
-                <div className="recipe-info-text">
-                  <div className="info-text-item">
-                    <span className="info-text-icon">⏱</span>
-                    <span className="info-text">{getCookTime()}</span>
-                  </div>
-                  {getSpecialAttributes().slice(0, 2).map((attribute, index) => (
-                    <div key={index} className="info-text-item">
-                      <span className="info-text">{attribute}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="recipe-action-buttons">
-                  <div className="servings-display">
-                    {recipe.servings || 2} servings
-                  </div>
-                  <button 
-                    className="save-recipe-action-btn"
-                    onClick={() => console.log('Save recipe placeholder')}
-                  >
-                    Save recipe
-                  </button>
-                </div>
-              </div>
-
-              {/* Tabbed Interface */}
-              <div className="recipe-tabs-container">
-                {/* Tab Navigation */}
-                <div className="recipe-tabs">
-                  <button 
-                    className={`recipe-tab ${activeTab === 'ingredients' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('ingredients')}
-                  >
-                    Ingredients
-                  </button>
-                  <button 
-                    className={`recipe-tab ${activeTab === 'method' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('method')}
-                  >
-                    Method
-                  </button>
-                  <button 
-                    className={`recipe-tab ${activeTab === 'nutrition' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('nutrition')}
-                  >
-                    Nutrition
-                  </button>
-                </div>
+            ) : recipe ? (
+              <div className="recipe-simple-layout">
+                {/* Recipe Title at Top */}
+                <h1 className="recipe-main-title">{recipe.title}</h1>
                 
-                {/* Tab Content */}
-                <div className="recipe-tab-content">
-                  {activeTab === 'ingredients' && (
-                    <div>
-                      <h2 className="section-title">Ingredients</h2>
-                      <div className="ingredients-container">
-                        {renderIngredients()}
+                {/* Recipe Image Below Title */}
+                <div className="recipe-image-container">
+                  <img 
+                    src={recipe.image || 'https://via.placeholder.com/400x300?text=No+Image'} 
+                    alt={recipe.title}
+                    className="recipe-main-image"
+                    onError={(e) => {
+                      e.target.src = 'https://via.placeholder.com/400x300?text=No+Image';
+                    }}
+                  />
+                </div>
+
+                {/* Description and Info Text Below Image */}
+                <div className="recipe-meta-info">
+                  <div className="recipe-description">
+                    <p>{getDescription()}</p>
+                  </div>
+
+                  <div className="recipe-info-text">
+                    <div className="info-text-item">
+                      <span className="info-text-icon">⏱</span>
+                      <span className="info-text">{getCookTime()}</span>
+                    </div>
+                    {getSpecialAttributes().slice(0, 2).map((attribute, index) => (
+                      <div key={index} className="info-text-item">
+                        <span className="info-text">{attribute}</span>
                       </div>
+                    ))}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="recipe-action-buttons">
+                    <div className="servings-display">
+                      {recipe.servings || 2} servings
                     </div>
-                  )}
-                  {activeTab === 'method' && (
-                    <div>
-                      <h2 className="section-title">Instructions</h2>
-                      <div className="instructions-container">
-                        {renderInstructions()}
+                    <button 
+                      className="save-recipe-action-btn"
+                      onClick={() => console.log('Save recipe placeholder')}
+                    >
+                      Save recipe
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tabbed Interface */}
+                <div className="recipe-tabs-container">
+                  {/* Tab Navigation */}
+                  <div className="recipe-tabs">
+                    <button 
+                      className={`recipe-tab ${activeTab === 'ingredients' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('ingredients')}
+                    >
+                      Ingredients
+                    </button>
+                    <button 
+                      className={`recipe-tab ${activeTab === 'method' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('method')}
+                    >
+                      Method
+                    </button>
+                    <button 
+                      className={`recipe-tab ${activeTab === 'nutrition' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('nutrition')}
+                    >
+                      Nutrition
+                    </button>
+                  </div>
+                  
+                  {/* Tab Content */}
+                  <div className="recipe-tab-content">
+                    {activeTab === 'ingredients' && (
+                      <div>
+                        <h2 className="section-title">Ingredients</h2>
+                        <div className="ingredients-container">
+                          {renderIngredients()}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  {activeTab === 'nutrition' && (
-                    <div>
-                      <h2 className="section-title">Nutrition</h2>
-                      {renderNutrition()}
-                    </div>
-                  )}
+                    )}
+                    {activeTab === 'method' && (
+                      <div>
+                        <h2 className="section-title">Instructions</h2>
+                        <div className="instructions-container">
+                          {renderInstructions()}
+                        </div>
+                      </div>
+                    )}
+                    {activeTab === 'nutrition' && (
+                      <div>
+                        <h2 className="section-title">Nutrition</h2>
+                        {renderNutrition()}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ) : (
-            <div className="recipe-error">
-              <p>Failed to load recipe details</p>
+            ) : (
+              <div className="recipe-error">
+                <p>Failed to load recipe details</p>
+              </div>
+            )}
+          </div>
+
+          {/* Footer with action buttons */}
+          {recipe && !isLoading && (
+            <div className="recipe-modal-footer">
+              <button 
+                className="recipe-cancel-button"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <button 
+                className="recipe-cook-button"
+                onClick={handleCookNow}
+              >
+                Cook This Recipe
+              </button>
             </div>
           )}
         </div>
-
-        {/* Footer with action buttons */}
-        {recipe && !isLoading && (
-          <div className="recipe-modal-footer">
-            <button 
-              className="recipe-cancel-button"
-              onClick={onClose}
-            >
-              Cancel
-            </button>
-            <button 
-              className="recipe-cook-button"
-              onClick={handleCookNow}
-            >
-              Cook This Recipe
-            </button>
-          </div>
-        )}
       </div>
-    </div>
+
+      {/* Recipe Cooking Confirmation Modal */}
+      <RecipeCookingConfirmation
+        recipe={recipe}
+        isOpen={showCookingConfirmation}
+        onClose={() => setShowCookingConfirmation(false)}
+        onCookComplete={handleCookingComplete}
+      />
+    </>
   );
 };
 
