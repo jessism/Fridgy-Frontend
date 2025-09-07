@@ -1,0 +1,254 @@
+/* AI Recipe Loading Screen - Full Screen Overlay */
+.ai-recipe-loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 50%, #f0fff8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.ai-recipe-loading-content {
+  text-align: center;
+  max-width: 500px;
+  padding: 2rem;
+}
+
+/* Logo Container and Animation */
+.ai-recipe-loading-logo-container {
+  margin-bottom: 2.5rem;
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ai-recipe-loading-spinner {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border: 4px solid rgba(76, 207, 97, 0.2);
+  border-top: 4px solid var(--primary-green, #4fcf61);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.ai-recipe-loading-logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  filter: drop-shadow(0 2px 8px rgba(76, 207, 97, 0.2));
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Title */
+.ai-recipe-loading-title {
+  font-family: var(--header-font, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--header-color, #1a1a1a);
+  margin: 0 0 2.5rem 0;
+  line-height: 1.3;
+  animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Loading Steps */
+.ai-recipe-loading-steps {
+  margin-bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  align-items: flex-start;
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ai-recipe-loading-step {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  opacity: 0.3;
+  transition: all 0.5s ease;
+  font-size: 1rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.ai-recipe-loading-step.active {
+  opacity: 1;
+  color: #333;
+  animation: stepPulse 0.5s ease-out;
+}
+
+.ai-recipe-loading-step.complete {
+  opacity: 1;
+  color: var(--primary-green, #4fcf61);
+}
+
+@keyframes stepPulse {
+  0% {
+    transform: translateX(-5px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.ai-recipe-loading-step-icon {
+  font-size: 1.25rem;
+  width: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.ai-recipe-loading-step.active .ai-recipe-loading-step-icon {
+  color: var(--primary-green, #4fcf61);
+  animation: iconSpin 1s linear infinite;
+}
+
+.ai-recipe-loading-step.complete .ai-recipe-loading-step-icon {
+  color: var(--primary-green, #4fcf61);
+  animation: checkBounce 0.5s ease-out;
+}
+
+@keyframes iconSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes checkBounce {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.ai-recipe-loading-step-text {
+  text-align: left;
+  font-family: var(--body-font, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif);
+}
+
+/* Loading Dots */
+.ai-recipe-loading-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.ai-recipe-loading-dot {
+  width: 10px;
+  height: 10px;
+  background-color: var(--primary-green, #4fcf61);
+  border-radius: 50%;
+  animation: dotBounce 1.4s ease-in-out infinite;
+}
+
+.ai-recipe-loading-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.ai-recipe-loading-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.ai-recipe-loading-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes dotBounce {
+  0%, 80%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .ai-recipe-loading-content {
+    padding: 1.5rem;
+  }
+  
+  .ai-recipe-loading-logo {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .ai-recipe-loading-title {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .ai-recipe-loading-steps {
+    gap: 1rem;
+  }
+  
+  .ai-recipe-loading-step {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ai-recipe-loading-title {
+    font-size: 1.25rem;
+  }
+  
+  .ai-recipe-loading-step {
+    font-size: 0.9rem;
+  }
+  
+  .ai-recipe-loading-logo {
+    width: 70px;
+    height: 70px;
+  }
+}

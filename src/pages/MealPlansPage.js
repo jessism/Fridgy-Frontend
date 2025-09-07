@@ -288,18 +288,6 @@ const MealPlansPage = () => {
                   {preferenceRecipes.slice(0, 4).map(recipe => 
                     renderRecipeCard(recipe, true)
                   )}
-                  {isFromCache && (
-                    <div style={{
-                      gridColumn: '1 / -1',
-                      textAlign: 'center',
-                      padding: '0.5rem',
-                      fontSize: '0.75rem',
-                      color: '#999',
-                      fontStyle: 'italic'
-                    }}>
-                      ⚡ Recipes loaded instantly from cache
-                    </div>
-                  )}
                 </>
               )}
             </div>

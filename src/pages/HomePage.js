@@ -119,8 +119,20 @@ const HomePage = () => {
       </section>
       */}
 
-      {/* Page Greeting */}
-      <section className="page-greeting">
+      {/* Page Greeting - Desktop only without logo */}
+      <section className="page-greeting desktop-only">
+        <div className="container">
+          <div className="greeting-content desktop-greeting">
+            <div className="greeting-text">
+              <h1 className="greeting-hello">Hello {user?.firstName || 'User'},</h1>
+              <p className="greeting-subtitle">What are you cooking today?</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mobile Page Greeting - With logo */}
+      <section className="page-greeting mobile-only">
         <div className="container">
           <div className="greeting-content">
             <img src={appLogo} alt="Logo" className="greeting-logo" />
@@ -190,14 +202,12 @@ const HomePage = () => {
          </div>
        </section>
 
-      {/* Expiring Soon Section */}
+      {/* Need Attention Section */}
       <section className="expiring-soon">
         <div className="container">
           <div className="section-header">
             <h2 className="section-title">
-              {expiringItems.length > 0 ? 'Expiring Soon' : 
-               expiredItems.length > 0 ? 'Need Attention' : 
-               'Expiring Soon'}
+              Need Attention
             </h2>
           </div>
           <div className="expiring-content" onClick={() => navigateToPage('/inventory')}>
@@ -628,11 +638,14 @@ const HomePage = () => {
               </div>
               <span className="quick-access-label">Shop lists</span>
             </div>
-            <div className="quick-access-item">
+            <div 
+              className="quick-access-item"
+              onClick={() => navigateToPage('/meals')}
+            >
               <div className="quick-access-icon">
                 <RecipesIcon />
               </div>
-              <span className="quick-access-label">Recipes</span>
+              <span className="quick-access-label">Meals</span>
             </div>
           </div>
 

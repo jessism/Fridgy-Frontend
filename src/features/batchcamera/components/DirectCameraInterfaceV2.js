@@ -43,6 +43,14 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
     };
   }, []);
 
+  // Reconnect video stream when returning from edit mode
+  useEffect(() => {
+    if (!editMode && videoRef.current && streamRef.current && isCameraActive) {
+      // Reconnect the stream to the video element
+      videoRef.current.srcObject = streamRef.current;
+    }
+  }, [editMode, isCameraActive]);
+
   const initializeCamera = async () => {
     try {
       const constraints = {
@@ -116,8 +124,13 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
     setEditMode(true);
   };
 
-  const handleCloseEditMode = () => {
+  const handleCloseEditMode = async () => {
     setEditMode(false);
+    // If camera wasn't active or stream is lost, reinitialize
+    if (!isCameraActive || !streamRef.current) {
+      await initializeCamera();
+    }
+    // The useEffect will handle reconnecting the stream to video element
   };
 
   const handleDone = async () => {

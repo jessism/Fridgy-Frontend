@@ -25,7 +25,7 @@ const InventoryPage = () => {
         return '#4CAF50';
       case 'Low Stock':
         return '#FF9800';
-      case 'Expiring Soon':
+      case 'Need Attention':
         return '#FF5722';
       case 'Expired':
         return '#F44336';
@@ -242,7 +242,7 @@ const InventoryPage = () => {
     if (activeFilter === 'by-expiration') {
       const grouped = {
         'Expired': [],
-        'Expiring Soon': [],
+        'Need Attention': [],
         'Good': []
       };
       
@@ -264,7 +264,7 @@ const InventoryPage = () => {
       });
       
       // Return in priority order, but only include groups that have items
-      const priorityOrder = ['Expired', 'Expiring Soon', 'Good'];
+      const priorityOrder = ['Expired', 'Need Attention', 'Good'];
       const sortedGrouped = {};
       priorityOrder.forEach(status => {
         if (grouped[status].length > 0) {

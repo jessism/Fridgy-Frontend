@@ -5,6 +5,7 @@ import MobileBottomNav from '../../../components/MobileBottomNav';
 import RecipeDetailModal from '../../../components/modals/RecipeDetailModal';
 import AIRecipeCard from './AIRecipeCard';
 import AIRecipeQuestionnaire from './AIRecipeQuestionnaire';
+import AIRecipeLoadingScreen from './AIRecipeLoadingScreen';
 import useAIRecipes from '../hooks/useAIRecipes';
 import './AIRecipePage.css';
 
@@ -215,14 +216,6 @@ const AIRecipePage = () => {
             </div>
           )}
           
-          {/* Back button for recipes view */}
-          {hasRecipes && !loading && (
-            <div className="ai-recipe-page__recipes-header">
-              <button className="ai-recipe-page__back-btn" onClick={handleBackToMeals}>
-                ←
-              </button>
-            </div>
-          )}
 
           {/* Error Message */}
           {showError && error && (
@@ -250,51 +243,35 @@ const AIRecipePage = () => {
           )}
 
           {loading && statusMessage && (
-            /* Loading State */
-            <div className="ai-recipe-page__content">
-              <div className="loading-state">
-                <div className="loading-content">
-                  <div className="loading-animation">
-                    <div className="loading-spinner"></div>
-                    <span className="loading-icon">{statusMessage.icon}</span>
-                  </div>
-                  <h3 className="loading-title">{statusMessage.title}</h3>
-                  <p className="loading-message">{statusMessage.message}</p>
-                  
-                  {/* Loading Steps */}
-                  <div className="loading-steps">
-                    <div className="step active">
-                      <span className="step-icon"></span>
-                      <span>Analyzing inventory</span>
-                    </div>
-                    <div className="step active">
-                      <span className="step-icon"></span>
-                      <span>Checking preferences</span>
-                    </div>
-                    <div className="step active">
-                      <span className="step-icon"></span>
-                      <span>Generating recipes</span>
-                    </div>
-                    <div className="step">
-                      <span className="step-icon">📸</span>
-                      <span>Creating images</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            /* Full-screen Loading Overlay */
+            <AIRecipeLoadingScreen />
           )}
 
           {hasRecipes && !loading && (
             /* Recipe Cards */
             <div className="recipes-container-no-border">
               <div className="recipes-header">
+                <button className="ai-recipe-page__back-btn" onClick={handleBackToMeals}>
+                  ←
+                </button>
                 <h2>Your Personalized Recipes</h2>
                 <button 
                   className="btn-regenerate"
                   onClick={handleRegenerateRecipes}
                   disabled={loading}
                 >
+                  <svg 
+                    width="16" 
+                    height="16" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2"
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  >
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
+                  </svg>
                   Generate New Recipes
                 </button>
               </div>

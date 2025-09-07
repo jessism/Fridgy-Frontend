@@ -156,9 +156,10 @@ const MobileBottomNav = () => {
             <div className="modal-options">
               <button className="modal-option" onClick={handleLogGrocery}>
                 <div className="modal-option-icon">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M9 11H5a2 2 0 0 0-2 2v3c0 1.1.9 2 2 2h4m6-6h4a2 2 0 0 1 2 2v3c0 1.1-.9 2-2 2h-4m-6 0V9a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2z"/>
-                    <path d="M1 15h22"/>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                    <circle cx="9" cy="21" r="1"/>
+                    <circle cx="20" cy="21" r="1"/>
                   </svg>
                 </div>
                 <span className="modal-option-label">Scan Grocery</span>
@@ -166,9 +167,9 @@ const MobileBottomNav = () => {
               
               <button className="modal-option" onClick={handleLogMeal}>
                 <div className="modal-option-icon">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M16.2 7.8l-2 6.3-6.3 2 2-6.3 6.3-2z"/>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M11 2v20M11 7h5a4 4 0 0 0 0-5"/>
+                    <path d="M7 2v8l-1.5 1.5a1 1 0 0 0 0 1.4l.3.3a1 1 0 0 0 1.4 0L9 11.4V22"/>
                   </svg>
                 </div>
                 <span className="modal-option-label">Scan Meal</span>

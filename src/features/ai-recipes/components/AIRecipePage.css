@@ -20,7 +20,7 @@
 
 /* Hero Section */
 .ai-recipe-page__hero {
-  text-align: left;
+  text-align: center;
   margin-bottom: 2rem;
   padding-top: 1rem;
 }
@@ -35,6 +35,8 @@
   padding: 0.25rem 0;
   margin-bottom: 0.25rem;
   transition: color 0.2s ease;
+  text-align: left;
+  width: 100%;
 }
 
 .ai-recipe-page__back-btn:hover {
@@ -47,6 +49,7 @@
   color: var(--header-color);
   margin: 0 0 1rem 0;
   font-weight: 700;
+  text-align: center;
 }
 
 .ai-recipe-page__hero-subtitle {
@@ -213,40 +216,52 @@
 
 .recipes-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-top: 0;
-  margin-bottom: 2rem;
-  gap: 1rem;
+  justify-content: space-between;
+  padding: 1.5rem 0;
+  margin-bottom: 2.5rem;
+  position: relative;
 }
 
 .recipes-header h2 {
   font-family: var(--header-font);
-  font-size: 1.8rem;
+  font-size: 2rem;
   color: var(--header-color);
   margin: 0;
   font-weight: 700;
+  flex: 1;
+  text-align: center;
 }
 
 .btn-regenerate {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  display: flex;
+  background: transparent;
+  border: 1.5px solid var(--primary-green, #81e053);
+  color: var(--primary-green, #81e053);
+  border-radius: 20px;
+  padding: 0.5rem 1.25rem;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  color: #4b5563;
+  gap: 0.4rem;
+  font-weight: 500;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
 }
 
+.btn-regenerate svg {
+  transition: transform 0.3s ease;
+}
+
 .btn-regenerate:hover:not(:disabled) {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: rgba(129, 224, 83, 0.08);
+  border-color: var(--primary-green, #81e053);
   transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(129, 224, 83, 0.2);
+}
+
+.btn-regenerate:hover:not(:disabled) svg {
+  transform: rotate(180deg);
 }
 
 .btn-regenerate:disabled {
@@ -337,12 +352,27 @@
   }
 
   .recipes-header {
-    flex-direction: column;
-    align-items: stretch;
+    flex-wrap: wrap;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+  }
+  
+  .recipes-header h2 {
+    font-size: 1.75rem;
+    order: 1;
+    flex: 1;
+    margin-left: 0.5rem;
+  }
+  
+  .ai-recipe-page__back-btn {
+    order: 0;
   }
   
   .btn-regenerate {
-    align-self: flex-start;
+    order: 2;
+    width: 100%;
+    margin-top: 1rem;
+    justify-content: center;
   }
   
   .loading-state {

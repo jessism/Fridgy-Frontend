@@ -5,53 +5,65 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: #000;
-  z-index: 9999;
+  background: white;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 /* Header */
 .meal-camera-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 16px;
+  justify-content: center;
+  padding: 1rem;
   background: white;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
+  min-height: 56px;
+  border-bottom: 1px solid #e0e0e0;
+  position: relative;
 }
 
-.meal-camera-close {
+.meal-camera-back-button {
   background: none;
   border: none;
-  color: #333;
-  padding: 8px;
+  color: var(--header-color, #333);
+  padding: 0.5rem;
+  border-radius: 50%;
   cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  left: 1rem;
+}
+
+.meal-camera-back-button:hover {
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .meal-camera-title {
-  color: #333;
-  font-size: 18px;
+  font-size: 1.25rem;
   font-weight: 600;
+  color: var(--header-color, #333);
   margin: 0;
+  text-align: center;
 }
 
-.meal-camera-spacer {
-  width: 40px;
-}
-
-/* Camera View */
-.meal-camera-view {
+/* Camera Container */
+.meal-camera-container {
   flex: 1;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: white;
   overflow: hidden;
+  margin: 0 1rem;
+  margin-bottom: 0;
 }
 
 .meal-camera-video {
@@ -74,101 +86,82 @@
   object-fit: contain;
 }
 
-/* Camera Overlay */
-.meal-camera-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-}
+/* Camera Overlay - Removed */
+/* Overlay elements have been removed to match grocery scanner UI */
 
-.meal-camera-guide {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 280px;
-  height: 280px;
-}
-
-.meal-camera-corner {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--primary-green);
-}
-
-.meal-camera-corner.top-left {
-  top: 0;
-  left: 0;
-  border-right: none;
-  border-bottom: none;
-}
-
-.meal-camera-corner.top-right {
-  top: 0;
-  right: 0;
-  border-left: none;
-  border-bottom: none;
-}
-
-.meal-camera-corner.bottom-left {
-  bottom: 0;
-  left: 0;
-  border-right: none;
-  border-top: none;
-}
-
-.meal-camera-corner.bottom-right {
-  bottom: 0;
-  right: 0;
-  border-left: none;
-  border-top: none;
-}
-
-/* Controls */
+/* Bottom Control Bar */
 .meal-camera-controls {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 24px 16px 40px;
-  background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.meal-camera-hint {
-  color: white;
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 8px;
-}
-
-.meal-camera-capture {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
   background: white;
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  padding: 4px;
-  cursor: pointer;
-  transition: transform 0.1s ease;
+  padding: 2rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
 }
 
-.meal-camera-capture:active {
+.meal-camera-control-button {
+  background: transparent;
+  border: 1px solid #ccc;
+  color: #666;
+  padding: 0.5rem 1.25rem;
+  border-radius: 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.meal-camera-control-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.meal-camera-control-button:not(:disabled):hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.meal-camera-done-button:not(:disabled) {
+  background: var(--primary-green);
+  color: white;
+  border-color: var(--primary-green);
+}
+
+.meal-camera-capture-button {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px solid var(--primary-green);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.meal-camera-capture-button:hover {
+  border-color: var(--primary-green-dark);
+  transform: scale(1.05);
+}
+
+.meal-camera-capture-button:active {
   transform: scale(0.95);
 }
 
-.meal-camera-capture-inner {
-  width: 100%;
-  height: 100%;
+.meal-camera-capture-button-inner {
+  width: 60px;
+  height: 60px;
+  background: var(--primary-green);
   border-radius: 50%;
-  background: white;
+  transition: all 0.2s ease;
+}
+
+.meal-camera-capture-button:hover .meal-camera-capture-button-inner {
+  background: var(--primary-green-dark);
 }
 
 /* Actions */
@@ -216,6 +209,7 @@
   padding: 12px 24px;
   border-radius: 8px;
   text-align: center;
+  z-index: 20;
 }
 
 /* Spinner */
@@ -444,4 +438,62 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .meal-camera-header {
+    padding: 0.5rem 1rem;
+    min-height: 44px;
+  }
+  
+  .meal-camera-container {
+    margin: 0 0.75rem;
+  }
+  
+  .meal-camera-controls {
+    padding: 1.5rem 1rem;
+  }
+  
+  .meal-camera-capture-button {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .meal-camera-capture-button-inner {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .meal-camera-control-button {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    min-width: 70px;
+  }
+}
+
+@media (max-width: 480px) {
+  .meal-camera-container {
+    margin: 0 0.5rem;
+  }
+  
+  .meal-camera-controls {
+    padding: 1rem 0.75rem;
+  }
+  
+  .meal-camera-capture-button {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .meal-camera-capture-button-inner {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .meal-camera-control-button {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+    min-width: 60px;
+  }
 }

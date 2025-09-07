@@ -15,6 +15,7 @@ import ProfilePageV2 from './pages/ProfilePageV2';
 import AboutYouPage from './pages/AboutYouPage';
 import DietaryPreferencesPage from './pages/DietaryPreferencesPage';
 import MealHistoryPage from './pages/MealHistoryPage';
+import InventoryUsagePage from './pages/InventoryUsagePage';
 import BatchCamera from './features/batchcamera/components/BatchCamera';
 import { MealCameraInterface, MealIngredientSelector } from './features/mealscanner';
 
@@ -70,6 +71,11 @@ function App() {
           <Route path="/meal-history" element={
             <AuthGuard>
               <MealHistoryPage />
+            </AuthGuard>
+          } />
+          <Route path="/analytics/inventory" element={
+            <AuthGuard>
+              <InventoryUsagePage />
             </AuthGuard>
           } />
           <Route path="/batchcamera" element={

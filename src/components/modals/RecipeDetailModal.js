@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const RecipeDetailModal = ({
   isOpen,
@@ -7,6 +7,8 @@ const RecipeDetailModal = ({
   isLoading,
   onCookNow
 }) => {
+  const [activeTab, setActiveTab] = useState('ingredients');
+  
   if (!isOpen) return null;
 
   // Helper function to get cook time
@@ -122,26 +124,36 @@ const RecipeDetailModal = ({
   };
 
   const renderInstructions = () => {
-    if (!recipe?.instructions) return <p>No instructions available</p>;
+    // First check for structured step-by-step instructions
+    if (recipe?.instructionSteps && Array.isArray(recipe.instructionSteps) && recipe.instructionSteps.length > 0) {
+      return recipe.instructionSteps.map((step, index) => (
+        <div key={index} className="instruction-step">
+          <span className="step-number">Step {index + 1}:</span>
+          <span className="step-text">{step}</span>
+        </div>
+      ));
+    }
 
-    // If instructions is a string, try to parse it
-    if (typeof recipe.instructions === 'string') {
+    // Fall back to parsing the instructions string
+    if (recipe?.instructions && typeof recipe.instructions === 'string') {
       // Remove HTML tags and split by periods or line breaks
       const cleanInstructions = recipe.instructions
         .replace(/<[^>]*>/g, '') // Remove HTML tags
         .split(/\.\s+|\n/)
         .filter(step => step.trim().length > 10); // Filter out very short steps
       
-      return cleanInstructions.map((step, index) => (
-        <div key={index} className="instruction-step">
-          <span className="step-number">Step {index + 1}:</span>
-          <span className="step-text">{step.trim()}</span>
-        </div>
-      ));
+      if (cleanInstructions.length > 0) {
+        return cleanInstructions.map((step, index) => (
+          <div key={index} className="instruction-step">
+            <span className="step-number">Step {index + 1}:</span>
+            <span className="step-text">{step.trim()}</span>
+          </div>
+        ));
+      }
     }
 
-    // If instructions is an array
-    if (Array.isArray(recipe.instructions)) {
+    // If instructions is already an array (shouldn't happen with current API)
+    if (recipe?.instructions && Array.isArray(recipe.instructions)) {
       return recipe.instructions.map((step, index) => (
         <div key={index} className="instruction-step">
           <span className="step-number">Step {index + 1}:</span>
@@ -150,7 +162,147 @@ const RecipeDetailModal = ({
       ));
     }
 
-    return <p>Instructions format not supported</p>;
+    return <p>No instructions available</p>;
+  };
+
+  const renderNutrition = () => {
+    if (!recipe?.nutrition) {
+      return (
+        <div className="nutrition-info">
+          <p style={{ textAlign: 'center', color: '#6b7280', fontSize: '0.95rem' }}>
+            Nutrition information not available
+          </p>
+        </div>
+      );
+    }
+
+    const { perServing, caloricBreakdown } = recipe.nutrition;
+
+    return (
+      <div className="nutrition-info">
+        {/* Caloric Section - 50/50 Layout */}
+        {caloricBreakdown && perServing.calories && (
+          <div className="nutrition-caloric-container">
+            {/* Left Side - Total Calories */}
+            <div className="calories-total-section">
+              <div className="calories-big-number">
+                {Math.round(perServing.calories.amount)}
+              </div>
+              <div className="calories-label">calories</div>
+            </div>
+            
+            {/* Right Side - Caloric Breakdown */}
+            <div className="nutrition-caloric-breakdown">
+              <h4 className="breakdown-title">Caloric Breakdown</h4>
+              <div className="breakdown-bars">
+                <div className="breakdown-item">
+                  <span className="breakdown-label">Protein</span>
+                  <div className="breakdown-bar-container">
+                    <div 
+                      className="breakdown-bar protein-bar" 
+                      style={{ width: `${caloricBreakdown.percentProtein}%` }}
+                    />
+                  </div>
+                  <span className="breakdown-percent">{caloricBreakdown.percentProtein}%</span>
+                </div>
+                <div className="breakdown-item">
+                  <span className="breakdown-label">Carbs</span>
+                  <div className="breakdown-bar-container">
+                    <div 
+                      className="breakdown-bar carbs-bar" 
+                      style={{ width: `${caloricBreakdown.percentCarbs}%` }}
+                    />
+                  </div>
+                  <span className="breakdown-percent">{caloricBreakdown.percentCarbs}%</span>
+                </div>
+                <div className="breakdown-item">
+                  <span className="breakdown-label">Fat</span>
+                  <div className="breakdown-bar-container">
+                    <div 
+                      className="breakdown-bar fat-bar" 
+                      style={{ width: `${caloricBreakdown.percentFat}%` }}
+                    />
+                  </div>
+                  <span className="breakdown-percent">{caloricBreakdown.percentFat}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="nutrition-table-header">
+          <h3 className="nutrition-table-title">Nutritional information per serving:</h3>
+        </div>
+
+        {/* Clean Nutrition Table */}
+        <div className="nutrition-table">
+          {perServing.calories && (
+            <div className="nutrition-row">
+              <span className="nutrition-label">Calories</span>
+              <span className="nutrition-value">
+                {Math.round(perServing.calories.amount)}kcal
+              </span>
+            </div>
+          )}
+          
+          {perServing.fat && (
+            <div className="nutrition-row">
+              <span className="nutrition-label">Fat</span>
+              <span className="nutrition-value">{perServing.fat.amount}g</span>
+            </div>
+          )}
+          
+          {perServing.saturatedFat && (
+            <div className="nutrition-row">
+              <span className="nutrition-label">Saturated Fat</span>
+              <span className="nutrition-value">{perServing.saturatedFat.amount}g</span>
+            </div>
+          )}
+          
+          {perServing.fiber && (
+            <div className="nutrition-row">
+              <span className="nutrition-label">Dietary Fibre</span>
+              <span className="nutrition-value">{perServing.fiber.amount}g</span>
+            </div>
+          )}
+          
+          {perServing.carbohydrates && (
+            <div className="nutrition-row">
+              <span className="nutrition-label">Carbohydrates</span>
+              <span className="nutrition-value">{perServing.carbohydrates.amount}g</span>
+            </div>
+          )}
+          
+          {perServing.sugar && (
+            <div className="nutrition-row">
+              <span className="nutrition-label">Sugars</span>
+              <span className="nutrition-value">{perServing.sugar.amount}g</span>
+            </div>
+          )}
+          
+          {perServing.protein && (
+            <div className="nutrition-row">
+              <span className="nutrition-label">Protein</span>
+              <span className="nutrition-value">{perServing.protein.amount}g</span>
+            </div>
+          )}
+          
+          {perServing.sodium && (
+            <div className="nutrition-row">
+              <span className="nutrition-label">Sodium</span>
+              <span className="nutrition-value">{perServing.sodium.amount}mg</span>
+            </div>
+          )}
+          
+          {perServing.cholesterol && (
+            <div className="nutrition-row">
+              <span className="nutrition-label">Cholesterol</span>
+              <span className="nutrition-value">{perServing.cholesterol.amount}mg</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -222,22 +374,54 @@ const RecipeDetailModal = ({
                 </div>
               </div>
 
-              {/* Two Column Section Below Photo: Ingredients Left, Instructions Right */}
-              <div className="recipe-bottom-section">
-                {/* Left Column - Ingredients */}
-                <div className="ingredients-column">
-                  <h2 className="section-title">Ingredients</h2>
-                  <div className="ingredients-container">
-                    {renderIngredients()}
-                  </div>
+              {/* Tabbed Interface */}
+              <div className="recipe-tabs-container">
+                {/* Tab Navigation */}
+                <div className="recipe-tabs">
+                  <button 
+                    className={`recipe-tab ${activeTab === 'ingredients' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('ingredients')}
+                  >
+                    Ingredients
+                  </button>
+                  <button 
+                    className={`recipe-tab ${activeTab === 'method' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('method')}
+                  >
+                    Method
+                  </button>
+                  <button 
+                    className={`recipe-tab ${activeTab === 'nutrition' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('nutrition')}
+                  >
+                    Nutrition
+                  </button>
                 </div>
-
-                {/* Right Column - Instructions */}
-                <div className="instructions-column">
-                  <h2 className="section-title">Instructions</h2>
-                  <div className="instructions-container">
-                    {renderInstructions()}
-                  </div>
+                
+                {/* Tab Content */}
+                <div className="recipe-tab-content">
+                  {activeTab === 'ingredients' && (
+                    <div>
+                      <h2 className="section-title">Ingredients</h2>
+                      <div className="ingredients-container">
+                        {renderIngredients()}
+                      </div>
+                    </div>
+                  )}
+                  {activeTab === 'method' && (
+                    <div>
+                      <h2 className="section-title">Instructions</h2>
+                      <div className="instructions-container">
+                        {renderInstructions()}
+                      </div>
+                    </div>
+                  )}
+                  {activeTab === 'nutrition' && (
+                    <div>
+                      <h2 className="section-title">Nutrition</h2>
+                      {renderNutrition()}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -261,7 +445,7 @@ const RecipeDetailModal = ({
               className="recipe-cook-button"
               onClick={handleCookNow}
             >
-              🍳 Cook This Recipe
+              Cook This Recipe
             </button>
           </div>
         )}

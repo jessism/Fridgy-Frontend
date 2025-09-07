@@ -1,0 +1,724 @@
+/* Inventory Usage Page - Light Theme */
+.inventory-usage-page {
+  min-height: 100vh;
+  background-color: #f5f5f5; /* Light grey background */
+  padding-bottom: 80px; /* Space for mobile bottom nav */
+}
+
+/* Page Header */
+.inventory-usage-page .page-header {
+  padding: 1rem 0;
+  margin-bottom: 1.5rem;
+}
+
+.inventory-usage-page .header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.inventory-usage-page .header-top {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.inventory-usage-page .back-button {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.inventory-usage-page .back-button:hover {
+  background-color: #f0f0f0;
+}
+
+.inventory-usage-page .page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 auto;
+  color: #222;
+  text-align: center;
+  width: 100%;
+}
+
+.inventory-usage-page .page-subtitle {
+  font-size: 1rem;
+  margin: 0;
+  color: #666;
+  text-align: center;
+}
+
+/* Date Filter Section */
+.inventory-usage-page .date-filter-section {
+  max-width: 1200px;
+  margin: 0 auto 1.5rem;
+  padding: 0 1.5rem;
+  text-align: right;
+}
+
+.inventory-usage-page .date-range-dropdown {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: white;
+  transition: all 0.2s ease;
+  min-width: 150px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.inventory-usage-page .date-range-dropdown:hover {
+  border-color: #81e053;
+}
+
+.inventory-usage-page .date-range-dropdown:focus {
+  outline: none;
+  border-color: #81e053;
+  box-shadow: 0 0 0 3px rgba(129, 224, 83, 0.1);
+}
+
+/* Usage Analytics Container */
+.inventory-usage-page .usage-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.inventory-usage-page .usage-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  text-align: left;
+}
+
+.inventory-usage-page .usage-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0 0 1.5rem 0;
+}
+
+.inventory-usage-page .donut-chart-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.inventory-usage-page .donut-svg {
+  display: block;
+}
+
+.inventory-usage-page .donut-content {
+  position: absolute;
+  text-align: center;
+}
+
+.inventory-usage-page .percentage-text {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #222;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.inventory-usage-page .usage-text {
+  font-size: 0.7rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+/* Analytics Cards */
+.inventory-usage-page .analytics-cards-container {
+  max-width: 1200px;
+  margin: 1.5rem auto 0;
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.inventory-usage-page .analytics-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.inventory-usage-page .analytics-card.full-width {
+  grid-column: 1 / -1;
+}
+
+.inventory-usage-page .analytics-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.inventory-usage-page .analytics-card-title {
+  font-size: 0.85rem;
+  color: #999;
+  font-weight: 500;
+}
+
+.inventory-usage-page .analytics-card-icon {
+  font-size: 1.2rem;
+  opacity: 0.6;
+}
+
+.inventory-usage-page .analytics-card-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #222;
+  line-height: 1;
+  margin-bottom: 0.75rem;
+}
+
+.inventory-usage-page .analytics-trend-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.inventory-usage-page .analytics-trend-badge.positive {
+  background-color: rgba(79, 207, 97, 0.15);
+  color: #4fcf61;
+}
+
+.inventory-usage-page .analytics-trend-badge.negative {
+  background-color: rgba(255, 107, 107, 0.15);
+  color: #ff6b6b;
+}
+
+.inventory-usage-page .trend-arrow {
+  font-size: 0.9rem;
+}
+
+.inventory-usage-page .trend-text {
+  font-size: 0.75rem;
+}
+
+/* Category Consumption */
+.inventory-usage-page .category-consumption-container {
+  max-width: 1200px;
+  margin: 1.5rem auto 0;
+  padding: 0 1.5rem;
+}
+
+.inventory-usage-page .category-card {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.inventory-usage-page .category-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0 0 1.5rem 0;
+}
+
+.inventory-usage-page .category-content {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.inventory-usage-page .category-chart-wrapper {
+  flex-shrink: 0;
+}
+
+.inventory-usage-page .category-legend {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.inventory-usage-page .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  white-space: nowrap;
+}
+
+.inventory-usage-page .legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.inventory-usage-page .legend-text {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+  text-align: left;
+}
+
+/* Most Used Items */
+.inventory-usage-page .most-used-items-container {
+  max-width: 1200px;
+  margin: 1.5rem auto 0;
+  padding: 0 1.5rem;
+}
+
+.inventory-usage-page .most-used-card {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.inventory-usage-page .most-used-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0 0 1.5rem 0;
+}
+
+.inventory-usage-page .most-used-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.inventory-usage-page .most-used-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.inventory-usage-page .most-used-item:last-child {
+  border-bottom: none;
+}
+
+.inventory-usage-page .item-name {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.inventory-usage-page .item-stats {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 400;
+}
+
+/* Metrics Section */
+.inventory-usage-page .metrics-section {
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+  padding: 0 1.5rem;
+}
+
+.inventory-usage-page .metrics-container {
+  width: 100%;
+}
+
+.inventory-usage-page .metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Metric Card */
+.inventory-usage-page .metric-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.inventory-usage-page .metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.inventory-usage-page .metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.inventory-usage-page .metric-title {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.inventory-usage-page .metric-icon {
+  font-size: 1.5rem;
+  opacity: 0.8;
+}
+
+.inventory-usage-page .metric-value {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+
+.inventory-usage-page .metric-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #222;
+  line-height: 1;
+}
+
+.inventory-usage-page .metric-unit {
+  font-size: 1.5rem;
+  color: #666;
+  margin-left: 0.25rem;
+}
+
+.inventory-usage-page .metric-unit:first-child {
+  margin-left: 0;
+  margin-right: 0.25rem;
+}
+
+.inventory-usage-page .metric-subtitle {
+  font-size: 0.9rem;
+  color: #999;
+  margin-bottom: 1rem;
+}
+
+.inventory-usage-page .metric-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.inventory-usage-page .metric-trend.positive {
+  background: rgba(129, 224, 83, 0.1);
+  color: #4cb840;
+}
+
+.inventory-usage-page .metric-trend.negative {
+  background: rgba(229, 115, 115, 0.1);
+  color: #e57373;
+}
+
+.inventory-usage-page .trend-arrow {
+  font-size: 1rem;
+}
+
+.inventory-usage-page .trend-value {
+  font-size: 0.85rem;
+}
+
+/* Loading State */
+.inventory-usage-page .loading-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+/* Charts Section */
+.inventory-usage-page .charts-section {
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+  padding: 0 1.5rem;
+}
+
+.inventory-usage-page .charts-container {
+  background: white;
+  border-radius: 12px;
+  padding: 3rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.inventory-usage-page .coming-soon {
+  text-align: center;
+  color: #666;
+}
+
+.inventory-usage-page .coming-soon h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.inventory-usage-page .coming-soon p {
+  font-size: 1rem;
+  color: #999;
+}
+
+/* Mobile Responsive Design */
+@media (max-width: 768px) {
+  /* Show mobile layout, hide desktop */
+  .inventory-usage-page .mobile-metrics-section {
+    display: block;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .inventory-usage-page .desktop-metrics-section {
+    display: none;
+  }
+
+  .inventory-usage-page .page-header {
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+  }
+
+  .inventory-usage-page .back-button {
+    padding: 0.25rem;
+  }
+
+  .inventory-usage-page .page-title {
+    font-size: 1.5rem;
+  }
+
+  .inventory-usage-page .page-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .inventory-usage-page .date-range-select {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .inventory-usage-page .metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Mobile-specific donut chart adjustments */
+  .donut-chart-container {
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .donut-title {
+    font-size: 1.1rem;
+  }
+
+  .donut-chart svg {
+    width: 200px;
+    height: 200px;
+  }
+
+  .donut-percentage {
+    font-size: 2.5rem;
+  }
+
+  .donut-label {
+    font-size: 0.8rem;
+  }
+
+  .mobile-cards-grid {
+    padding: 0;
+  }
+
+  .mobile-metric-card {
+    padding: 1rem 0.5rem;
+  }
+
+  .mobile-metric-value {
+    font-size: 1.5rem;
+  }
+
+  .mobile-metric-label {
+    font-size: 0.75rem;
+  }
+
+  .inventory-usage-page .metric-card {
+    padding: 1.25rem;
+  }
+
+  .inventory-usage-page .metric-number {
+    font-size: 2rem;
+  }
+
+  .inventory-usage-page .charts-container {
+    padding: 2rem 1.5rem;
+  }
+}
+
+/* Tablet Design */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .inventory-usage-page .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile-specific sections - hidden on desktop */
+.inventory-usage-page .mobile-metrics-section {
+  display: none;
+}
+
+/* Desktop-specific sections */
+.inventory-usage-page .desktop-metrics-section {
+  display: block;
+}
+
+/* Donut Chart Styles */
+.donut-chart-container {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.donut-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0 0 1.5rem 0;
+  text-align: left;
+}
+
+.donut-chart {
+  position: relative;
+  display: inline-block;
+}
+
+.donut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.donut-percentage {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #222;
+  line-height: 1;
+}
+
+.donut-label {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+/* Mobile Cards Grid */
+.mobile-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.mobile-metric-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.25rem 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mobile-metric-icon {
+  font-size: 1.5rem;
+  opacity: 0.6;
+}
+
+.mobile-metric-label {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.mobile-metric-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #222;
+  line-height: 1;
+}
+
+/* Animation for cards appearing */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.inventory-usage-page .metric-card {
+  animation: slideInUp 0.4s ease-out backwards;
+}
+
+.inventory-usage-page .metric-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.inventory-usage-page .metric-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.inventory-usage-page .metric-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.inventory-usage-page .metric-card:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+/* Hover effects for interactive elements */
+.inventory-usage-page .metric-card {
+  cursor: pointer;
+  position: relative;
+}
+
+.inventory-usage-page .metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #81e053, #6bc93f);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.inventory-usage-page .metric-card:hover::before {
+  transform: scaleX(1);
+}

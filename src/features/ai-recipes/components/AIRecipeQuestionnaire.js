@@ -375,10 +375,6 @@ const AIRecipeQuestionnaire = ({ onSubmit, loading = false }) => {
               </>
             )}
           </button>
-          
-          <p className="generation-note">
-            This will generate 3 personalized recipes with beautiful photos
-          </p>
         </div>
       </div>
     </div>

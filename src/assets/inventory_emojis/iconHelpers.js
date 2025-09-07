@@ -120,7 +120,7 @@ export const getExpiryStatus = (daysUntilExpiry) => {
   if (daysUntilExpiry < 0) {
     return { status: 'Expired', urgency: 'expired' };
   } else if (daysUntilExpiry <= 4) {
-    return { status: 'Expiring Soon', urgency: 'expiring' };
+    return { status: 'Need Attention', urgency: 'expiring' };
   } else if (daysUntilExpiry <= 7) {
     return { status: 'Good', urgency: 'warning' };
   } else {

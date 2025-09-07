@@ -138,17 +138,16 @@ const MealCameraInterface = () => {
     <div className="meal-camera-interface">
       {/* Header */}
       <div className="meal-camera-header">
-        <button className="meal-camera-close" onClick={handleClose}>
+        <button className="meal-camera-back-button" onClick={handleClose}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M6 18L18 6M6 6l12 12"/>
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
         </button>
-        <h2 className="meal-camera-title">Scan Your Meal</h2>
-        <div className="meal-camera-spacer"></div>
+        <h1 className="meal-camera-title">Scan Your Meal</h1>
       </div>
 
-      {/* Camera View */}
-      <div className="meal-camera-view">
+      {/* Camera Container */}
+      <div className="meal-camera-container">
         {!capturedImage ? (
           <>
             <video 
@@ -158,16 +157,6 @@ const MealCameraInterface = () => {
               className="meal-camera-video"
             />
             <canvas ref={canvasRef} style={{ display: 'none' }} />
-            
-            {/* Camera Overlay */}
-            <div className="meal-camera-overlay">
-              <div className="meal-camera-guide">
-                <div className="meal-camera-corner top-left"></div>
-                <div className="meal-camera-corner top-right"></div>
-                <div className="meal-camera-corner bottom-left"></div>
-                <div className="meal-camera-corner bottom-right"></div>
-              </div>
-            </div>
           </>
         ) : (
           <div className="meal-camera-preview">
@@ -182,18 +171,29 @@ const MealCameraInterface = () => {
         )}
       </div>
 
-      {/* Controls */}
+      {/* Bottom Control Bar */}
       <div className="meal-camera-controls">
         {!capturedImage ? (
           <>
-            <div className="meal-camera-hint">
-              Position your meal within the frame
-            </div>
             <button 
-              className="meal-camera-capture"
+              className="meal-camera-control-button"
+              disabled
+            >
+              Edit
+            </button>
+
+            <button 
+              className="meal-camera-capture-button"
               onClick={capturePhoto}
             >
-              <div className="meal-camera-capture-inner"></div>
+              <div className="meal-camera-capture-button-inner"></div>
+            </button>
+
+            <button 
+              className="meal-camera-control-button meal-camera-done-button"
+              disabled
+            >
+              Done
             </button>
           </>
         ) : (
