@@ -33,6 +33,13 @@ const MealPlansPage = () => {
     refreshSuggestions: refreshEdamamSuggestions
   } = useEdamamTest();
 
+  // Debug Edamam state
+  console.log('🧪 Edamam state:', { 
+    suggestions: edamamSuggestions?.length, 
+    loading: edamamLoading, 
+    error: edamamError 
+  });
+
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState(null);

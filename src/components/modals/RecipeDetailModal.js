@@ -74,6 +74,10 @@ const RecipeDetailModal = ({
                !sentence.includes('per serving') &&
                !sentence.includes('costs') &&
                !sentence.includes('cents per') &&
+               !sentence.includes('$') &&  // Filter out any sentence with dollar signs
+               !sentence.includes('dollar') &&  // Filter out sentences with "dollar"
+               !sentence.includes('price') &&  // Filter out sentences with "price"
+               !sentence.startsWith('for ') &&  // Filter out sentences starting with "For"
                !sentence.includes('watching your figure') &&
                !sentence.includes('figure') &&
                !sentence.includes('recipe serves') &&

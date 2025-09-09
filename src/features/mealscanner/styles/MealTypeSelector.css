@@ -55,20 +55,21 @@
   flex-direction: column;
   align-items: center;
   padding: 24px 16px;
-  background: #F9FAFB;
-  border: 2px solid #E5E7EB;
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1.5px solid rgba(229, 231, 235, 0.6);
+  border-radius: 20px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   min-height: 120px;
   justify-content: center;
+  backdrop-filter: blur(10px);
 }
 
 .meal-type-option:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: var(--meal-color);
-  background: #FFFFFF;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: rgba(229, 231, 235, 0.3);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .meal-type-option:active {
@@ -83,11 +84,13 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 12px;
-  transition: transform 0.2s ease;
+  transition: transform 0.3s ease;
+  opacity: 0.9;
 }
 
 .meal-type-option:hover .meal-type-icon {
-  transform: scale(1.1);
+  transform: scale(1.15);
+  opacity: 1;
 }
 
 .meal-type-icon svg {

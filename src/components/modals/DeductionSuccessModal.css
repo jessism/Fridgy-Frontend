@@ -1,4 +1,4 @@
-/* Deduction Success Modal Styles */
+/* Modern Deduction Success Modal Styles */
 
 .deduction-modal-overlay {
   position: fixed;
@@ -6,222 +6,265 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 10000;
   animation: fadeIn 0.2s ease-out;
-  padding: 16px;
+  padding: 20px;
 }
 
 .deduction-modal {
   background: white;
-  border-radius: 20px;
-  padding: 24px;
-  max-width: 500px;
+  border-radius: 24px;
+  padding: 32px;
+  max-width: 480px;
   width: 100%;
-  max-height: 80vh;
+  max-height: 85vh;
   overflow-y: auto;
   position: relative;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
   animation: slideUpScale 0.3s ease-out;
 }
 
 /* Close button */
 .deduction-modal-close {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 20px;
+  right: 20px;
   background: none;
   border: none;
-  font-size: 24px;
-  color: #999;
+  color: #9CA3AF;
   cursor: pointer;
   padding: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
 }
 
 .deduction-modal-close:hover {
-  background: #f5f5f5;
-  color: #333;
+  background: #F3F4F6;
+  color: #4B5563;
+}
+
+/* Success icon */
+.deduction-success-icon {
+  width: 56px;
+  height: 56px;
+  background: #D1FAE5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  animation: bounceIn 0.5s ease-out 0.2s both;
+}
+
+.deduction-success-icon svg {
+  color: #10B981;
 }
 
 /* Header */
 .deduction-modal-header {
   text-align: center;
-  margin-bottom: 20px;
-}
-
-.deduction-icon {
-  font-size: 48px;
-  margin-bottom: 12px;
-  animation: bounceIn 0.5s ease-out 0.2s both;
+  margin-bottom: 32px;
 }
 
 .deduction-modal-header h2 {
   font-size: 24px;
-  color: #333;
-  margin: 0;
-  font-weight: 600;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
 }
 
-/* Content */
-.deduction-modal-content {
-  margin-bottom: 20px;
-}
-
-.deduction-summary {
-  text-align: center;
-  color: #666;
-  margin-bottom: 20px;
+.deduction-subtitle {
   font-size: 16px;
+  color: #6B7280;
+  margin: 0;
 }
 
-.deduction-summary strong {
-  color: #ff6b35;
-  font-weight: 600;
+/* Content sections */
+.deduction-modal-content {
+  margin-bottom: 24px;
 }
 
-/* Section titles */
-.deduction-section-title {
+.deduction-section {
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.deduction-section.success-section {
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+}
+
+.deduction-section.warning-section {
+  background: #FEF3C7;
+  border: 1px solid #FDE68A;
+}
+
+/* Section header */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.section-icon {
+  width: 20px;
+  height: 20px;
+  color: #10B981;
+}
+
+.section-icon.warning {
+  color: #F59E0B;
+}
+
+.section-title {
   font-size: 14px;
-  color: #333;
-  margin-bottom: 12px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: #374151;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
-.error-title {
-  color: #dc2626;
-}
-
-/* Deduction lists */
-.deduction-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 16px 0;
+/* Deduction items */
+.deduction-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .deduction-item {
   display: flex;
-  align-items: flex-start;
-  padding: 12px;
-  margin-bottom: 8px;
-  border-radius: 12px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  transition: all 0.2s ease;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
 }
 
-.deduction-item.success {
-  border-left: 3px solid #ff6b35;
-  background: linear-gradient(to right, rgba(255, 107, 53, 0.05) 0%, #f9fafb 100%);
-}
-
-.deduction-item.failed {
-  border-left: 3px solid #dc2626;
-  background: linear-gradient(to right, rgba(220, 38, 38, 0.05) 0%, #f9fafb 100%);
-}
-
-/* Indicators */
-.deduction-indicator {
-  font-size: 20px;
-  font-weight: bold;
-  color: #ff6b35;
-  margin-right: 12px;
-  min-width: 20px;
+.item-left {
   display: flex;
   align-items: center;
-  justify-content: center;
-}
-
-.error-indicator {
-  font-size: 18px;
-  font-weight: bold;
-  color: #dc2626;
-  margin-right: 12px;
-  min-width: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Item details */
-.deduction-details {
+  gap: 12px;
   flex: 1;
+}
+
+.item-icon {
+  width: 20px;
+  height: 20px;
+  color: #9CA3AF;
+  flex-shrink: 0;
+}
+
+.item-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .item-name {
-  font-weight: 500;
-  color: #333;
   font-size: 15px;
+  font-weight: 600;
+  color: #111827;
   text-transform: capitalize;
 }
 
-.item-amounts {
-  font-size: 14px;
-  color: #666;
+.item-quantity {
+  font-size: 13px;
+  color: #6B7280;
+}
+
+.item-error {
+  font-size: 13px;
+  color: #F59E0B;
+}
+
+.item-status {
+  font-size: 13px;
+  color: #9CA3AF;
+  font-style: italic;
+}
+
+/* Add to inventory button */
+.add-to-inventory-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.item-amounts strong {
-  color: #ff6b35;
-  font-weight: 600;
-}
-
-.remaining {
-  color: #666;
-}
-
-.depleted {
-  color: #dc2626;
-  font-style: italic;
-}
-
-.error-reason {
+  gap: 6px;
+  padding: 6px 12px;
+  background: white;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 20px;
   font-size: 13px;
-  color: #dc2626;
-  font-style: italic;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-/* Footer */
+.add-to-inventory-btn:hover {
+  background: #F9FAFB;
+  border-color: #D1D5DB;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.add-to-inventory-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Footer buttons */
 .deduction-modal-footer {
   display: flex;
-  justify-content: center;
+  gap: 12px;
+  justify-content: flex-end;
 }
 
-.deduction-ok-button {
-  background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%);
-  color: white;
-  border: none;
-  padding: 12px 40px;
+.deduction-button {
+  padding: 12px 24px;
   border-radius: 12px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+  border: none;
+  min-width: 100px;
 }
 
-.deduction-ok-button:hover {
+.deduction-button.secondary {
+  background: #F3F4F6;
+  color: #374151;
+}
+
+.deduction-button.secondary:hover {
+  background: #E5E7EB;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.deduction-ok-button:active {
+.deduction-button.primary {
+  background: #10B981;
+  color: white;
+}
+
+.deduction-button.primary:hover {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.deduction-button:active {
   transform: translateY(0);
 }
 
@@ -237,7 +280,7 @@
 
 @keyframes slideUpScale {
   from {
-    transform: translateY(20px) scale(0.95);
+    transform: translateY(20px) scale(0.97);
     opacity: 0;
   }
   to {
@@ -251,7 +294,7 @@
     transform: scale(0);
   }
   50% {
-    transform: scale(1.1);
+    transform: scale(1.05);
   }
   100% {
     transform: scale(1);
@@ -259,27 +302,61 @@
 }
 
 /* Mobile responsiveness */
-@media (max-width: 500px) {
+@media (max-width: 520px) {
   .deduction-modal {
-    padding: 20px;
-    max-height: 90vh;
+    padding: 24px;
+    margin: 10px;
   }
   
   .deduction-modal-header h2 {
     font-size: 20px;
   }
   
-  .deduction-icon {
-    font-size: 40px;
+  .deduction-subtitle {
+    font-size: 14px;
   }
   
-  .deduction-item {
-    padding: 10px;
+  .deduction-section {
+    padding: 16px;
   }
   
-  .item-amounts {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
+  .add-to-inventory-btn {
+    font-size: 12px;
+    padding: 5px 10px;
   }
+  
+  .deduction-button {
+    padding: 10px 20px;
+    font-size: 14px;
+    min-width: 80px;
+  }
+  
+  .item-name {
+    font-size: 14px;
+  }
+  
+  .item-quantity,
+  .item-error,
+  .item-status {
+    font-size: 12px;
+  }
+}
+
+/* Scrollbar styling for modal */
+.deduction-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.deduction-modal::-webkit-scrollbar-track {
+  background: #F3F4F6;
+  border-radius: 3px;
+}
+
+.deduction-modal::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 3px;
+}
+
+.deduction-modal::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
 }

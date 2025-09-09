@@ -237,6 +237,7 @@
   z-index: 9999;
   display: flex;
   flex-direction: column;
+  overflow-y: auto; /* Make entire container scrollable */
 }
 
 /* Header */
@@ -248,6 +249,9 @@
   background: white;
   border-bottom: 1px solid #E5E7EB;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 10; /* Ensure header stays on top when scrolling */
 }
 
 .meal-selector-back {
@@ -273,9 +277,8 @@
 
 /* Ingredients List */
 .meal-ingredients-list {
-  flex: 1;
-  overflow-y: auto;
   padding: 16px;
+  /* Removed flex: 1 and overflow-y: auto to let content flow naturally */
 }
 
 .meal-ingredient-item {
@@ -367,6 +370,7 @@
 .meal-preview-image {
   width: 100%;
   max-width: 300px;
+  max-height: 250px; /* Add max height constraint */
   margin: 0 auto;
   border-radius: 12px;
   overflow: hidden;
@@ -375,7 +379,8 @@
 
 .meal-preview-image img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover; /* Ensure image covers the container while maintaining aspect ratio */
   display: block;
 }
 
@@ -396,6 +401,9 @@
   background: white;
   border-top: 1px solid #E5E7EB;
   box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  bottom: 0;
+  z-index: 10; /* Ensure footer stays on top when scrolling */
 }
 
 .meal-selector-count {
@@ -472,6 +480,11 @@
     padding: 0.5rem 1rem;
     min-width: 70px;
   }
+  
+  /* Meal Selector mobile optimizations */
+  .meal-preview-image {
+    max-height: 200px; /* Reduce height on tablets and smaller */
+  }
 }
 
 @media (max-width: 480px) {
@@ -497,5 +510,40 @@
     font-size: 0.8rem;
     padding: 0.5rem 0.75rem;
     min-width: 60px;
+  }
+  
+  /* Further reduce meal preview on small phones */
+  .meal-preview-image {
+    max-height: 180px; /* Even smaller for phones */
+    max-width: 250px;
+  }
+  
+  .meal-preview-section {
+    padding: 12px;
+  }
+}
+
+/* iPhone 11 and similar sized phones (414px width) */
+@media (max-width: 414px) {
+  .meal-preview-image {
+    max-height: 160px; /* Compact height for iPhone 11 */
+    max-width: 220px;
+  }
+  
+  .meal-ingredients-list {
+    padding: 12px;
+  }
+  
+  .meal-ingredient-item {
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+  
+  .meal-selector-header {
+    padding: 12px;
+  }
+  
+  .meal-selector-footer {
+    padding: 12px;
   }
 }

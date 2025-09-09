@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import './DeductionSuccessModal.css';
 
 const DeductionSuccessModal = ({ 
   isOpen, 
   onClose,
-  deductionResults = null
+  deductionResults = null,
+  mealName = 'Your meal'
 }) => {
   // Auto-close after 10 seconds
   useEffect(() => {
@@ -43,71 +45,121 @@ const DeductionSuccessModal = ({
           onClick={onClose}
           title="Close"
         >
-          ✕
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
         </button>
         
+        {/* Success icon */}
+        <div className="deduction-success-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        
+        {/* Header */}
         <div className="deduction-modal-header">
-          <div className="deduction-icon">✅</div>
-          <h2>Meal Logged Successfully!</h2>
+          <h2>Meal Logged 🎉</h2>
+          <p className="deduction-subtitle">{mealName} saved to your history.</p>
         </div>
         
         <div className="deduction-modal-content">
-          {/* Summary */}
-          <p className="deduction-summary">
-            Deducted <strong>{summary.successfulDeductions || 0}</strong> item{summary.successfulDeductions !== 1 ? 's' : ''} from your inventory
-          </p>
-          
-          {/* Successful deductions */}
+          {/* Successful deductions section */}
           {successfulDeductions.length > 0 && (
-            <div className="deduction-items-list">
-              <h4 className="deduction-section-title">Items Deducted:</h4>
-              <ul className="deduction-list">
+            <div className="deduction-section success-section">
+              <div className="section-header">
+                <svg className="section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="16 10 10 16 8 14"/>
+                </svg>
+                <span className="section-title">Deducted from inventory</span>
+              </div>
+              
+              <div className="deduction-items">
                 {successfulDeductions.map((item, index) => (
-                  <li key={index} className="deduction-item success">
-                    <span className="deduction-indicator">−</span>
-                    <div className="deduction-details">
-                      <span className="item-name">{item.itemName || item.ingredient}</span>
-                      <span className="item-amounts">
-                        <strong>−{item.deducted} {item.unit}</strong>
-                        {item.newQuantity > 0 && (
-                          <span className="remaining"> ({item.newQuantity} {item.unit} remaining)</span>
-                        )}
-                        {item.newQuantity === 0 && (
-                          <span className="depleted"> (depleted)</span>
-                        )}
-                      </span>
+                  <div key={index} className="deduction-item">
+                    <div className="item-left">
+                      <svg className="item-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="8" y1="6" x2="21" y2="6"/>
+                        <line x1="8" y1="12" x2="21" y2="12"/>
+                        <line x1="8" y1="18" x2="21" y2="18"/>
+                        <line x1="3" y1="6" x2="3.01" y2="6"/>
+                        <line x1="3" y1="12" x2="3.01" y2="12"/>
+                        <line x1="3" y1="18" x2="3.01" y2="18"/>
+                      </svg>
+                      <div className="item-info">
+                        <span className="item-name">{item.itemName || item.ingredient}</span>
+                        <span className="item-quantity">{item.deducted} {item.unit}</span>
+                      </div>
                     </div>
-                  </li>
+                    <span className="item-status">
+                      {item.newQuantity === 0 ? 'depleted' : ''}
+                    </span>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
           
-          {/* Failed deductions */}
+          {/* Failed deductions section */}
           {failedDeductions.length > 0 && (
-            <div className="deduction-errors-list">
-              <h4 className="deduction-section-title error-title">⚠️ Could not deduct:</h4>
-              <ul className="deduction-list">
+            <div className="deduction-section warning-section">
+              <div className="section-header">
+                <svg className="section-icon warning" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <span className="section-title">Missing from inventory</span>
+              </div>
+              
+              <div className="deduction-items">
                 {failedDeductions.map((item, index) => (
-                  <li key={index} className="deduction-item failed">
-                    <span className="error-indicator">!</span>
-                    <div className="deduction-details">
-                      <span className="item-name">{item.ingredient}</span>
-                      <span className="error-reason">{item.reason || 'Not in inventory'}</span>
+                  <div key={index} className="deduction-item">
+                    <div className="item-left">
+                      <svg className="item-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="8" y1="6" x2="21" y2="6"/>
+                        <line x1="8" y1="12" x2="21" y2="12"/>
+                        <line x1="8" y1="18" x2="21" y2="18"/>
+                        <line x1="3" y1="6" x2="3.01" y2="6"/>
+                        <line x1="3" y1="12" x2="3.01" y2="12"/>
+                        <line x1="3" y1="18" x2="3.01" y2="18"/>
+                      </svg>
+                      <div className="item-info">
+                        <span className="item-name">{item.ingredient}</span>
+                        <span className="item-error">Not in inventory</span>
+                      </div>
                     </div>
-                  </li>
+                    <button className="add-to-inventory-btn">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                      </svg>
+                      Add to inventory
+                    </button>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
         </div>
         
+        {/* Footer buttons */}
         <div className="deduction-modal-footer">
+          {failedDeductions.length > 0 && (
+            <button 
+              className="deduction-button secondary"
+              onClick={() => console.log('Fix items clicked')}
+            >
+              Fix Items
+            </button>
+          )}
           <button 
-            className="deduction-ok-button"
+            className="deduction-button primary"
             onClick={handleOkClick}
           >
-            OK
+            Done
           </button>
         </div>
       </div>
