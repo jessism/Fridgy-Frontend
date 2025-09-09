@@ -381,6 +381,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover; /* Ensure image covers the container while maintaining aspect ratio */
+  object-position: center; /* Center the image to show the middle portion */
   display: block;
 }
 

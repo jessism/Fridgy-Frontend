@@ -6,7 +6,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.7); /* Darker overlay */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -18,10 +18,10 @@
 .deduction-modal {
   background: white;
   border-radius: 24px;
-  padding: 32px;
-  max-width: 480px;
+  padding: 24px;
+  max-width: 460px;
   width: 100%;
-  max-height: 85vh;
+  max-height: 80vh;
   overflow-y: auto;
   position: relative;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
@@ -72,19 +72,19 @@
 /* Header */
 .deduction-modal-header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .deduction-modal-header h2 {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
   color: #111827;
-  margin: 0 0 8px 0;
-  letter-spacing: -0.5px;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.3px;
 }
 
 .deduction-subtitle {
-  font-size: 16px;
+  font-size: 15px;
   color: #6B7280;
   margin: 0;
 }
@@ -95,29 +95,29 @@
 }
 
 .deduction-section {
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 16px;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
 }
 
 .deduction-section.success-section {
-  background: #F0FDF4;
-  border: 1px solid #BBF7D0;
+  background: #E6F7E9;
+  border: 1px solid #B7E9C0;
 }
 
 .deduction-section.warning-section {
-  background: #FEF3C7;
-  border: 1px solid #FDE68A;
+  background: #FFF9E6;
+  border: 1px solid #FFE4A1;
 }
 
 /* Section header */
 .section-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .section-icon {
@@ -142,14 +142,19 @@
 .deduction-items {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .deduction-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 0;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.deduction-item:last-child {
+  border-bottom: none;
 }
 
 .item-left {
@@ -159,11 +164,28 @@
   flex: 1;
 }
 
-.item-icon {
-  width: 20px;
-  height: 20px;
-  color: #9CA3AF;
+/* Circular icon container */
+.item-icon-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #F3F4F6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+}
+
+.item-icon-circle.warning {
+  background: #FEF3C7;
+}
+
+.item-icon-circle svg {
+  color: #6B7280;
+}
+
+.item-icon-circle.warning svg {
+  color: #F59E0B;
 }
 
 .item-info {
@@ -176,17 +198,11 @@
   font-size: 15px;
   font-weight: 600;
   color: #111827;
-  text-transform: capitalize;
 }
 
 .item-quantity {
   font-size: 13px;
   color: #6B7280;
-}
-
-.item-error {
-  font-size: 13px;
-  color: #F59E0B;
 }
 
 .item-status {
@@ -200,13 +216,13 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 8px 14px;
   background: white;
   border: 1.5px solid #E5E7EB;
-  border-radius: 20px;
+  border-radius: 24px;
   font-size: 13px;
   font-weight: 500;
-  color: #374151;
+  color: #6B7280;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -215,6 +231,7 @@
 .add-to-inventory-btn:hover {
   background: #F9FAFB;
   border-color: #D1D5DB;
+  color: #374151;
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
