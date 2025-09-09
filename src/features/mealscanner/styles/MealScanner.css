@@ -169,11 +169,10 @@
   display: flex;
   gap: 16px;
   width: 100%;
-  max-width: 320px;
+  padding: 0 1rem;
 }
 
 .meal-camera-action-btn {
-  flex: 1;
   padding: 14px 24px;
   border-radius: 8px;
   border: none;
@@ -184,11 +183,14 @@
 }
 
 .meal-camera-action-btn.secondary {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
+  flex: 0.3;
+  background: #F3F4F6;
+  color: #6B7280;
+  border: none;
 }
 
 .meal-camera-action-btn.primary {
+  flex: 0.7;
   background: var(--primary-green);
   color: white;
 }
