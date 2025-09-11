@@ -1,0 +1,44 @@
+.onboarding-flow {
+  min-height: 100vh;
+  background: #ffffff;
+  position: relative;
+}
+
+.onboarding-flow__content {
+  padding-top: 100px;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 40px;
+}
+
+.onboarding-flow__screen-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 20px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .onboarding-flow__content {
+    padding-top: 80px;
+    padding-bottom: 20px;
+  }
+  
+  .onboarding-flow__screen-container {
+    padding: 0 16px;
+  }
+}

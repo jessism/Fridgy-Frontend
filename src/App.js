@@ -18,6 +18,7 @@ import MealHistoryPage from './pages/MealHistoryPage';
 import InventoryUsagePage from './pages/InventoryUsagePage';
 import BatchCamera from './features/batchcamera/components/BatchCamera';
 import { MealCameraInterface, MealIngredientSelector } from './features/mealscanner';
+import OnboardingFlow from './features/onboarding/components/OnboardingFlow';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Router>
                   <Routes>
           <Route path="/" element={<NewLandingPage />} />
+          <Route path="/onboarding" element={<OnboardingFlow />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/signin" element={<SignInPage />} />
           <Route path="/home" element={

@@ -76,7 +76,7 @@ const NewLandingPage = () => {
                 </p>
                 
                 <div className="landing-page-v2__cta-button-container">
-                  <Button variant="primary" size="large" href="/signup">
+                  <Button variant="primary" size="large" href="/onboarding">
                     GET STARTED FOR FREE
                   </Button>
                 </div>

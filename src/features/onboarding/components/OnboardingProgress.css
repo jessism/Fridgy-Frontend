@@ -1,0 +1,82 @@
+.onboarding-progress {
+  width: 100%;
+  padding: 20px 24px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #f0f0f0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+.onboarding-progress__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.onboarding-progress__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.onboarding-progress__back-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #999999;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.onboarding-progress__back-btn:hover {
+  color: #666666;
+}
+
+.onboarding-progress__back-btn:focus {
+  outline: none;
+  color: #333333;
+}
+
+.onboarding-progress__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #999999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.onboarding-progress__counter {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666666;
+}
+
+.onboarding-progress__bar {
+  flex: 1;
+  height: 6px;
+  background-color: #e5e5e5;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+  margin-right: 16px;
+}
+
+.onboarding-progress__bar-fill {
+  height: 100%;
+  background-color: #4fcf61;
+  border-radius: 3px;
+  transition: width 0.3s ease-in-out;
+}
+
+@media (max-width: 768px) {
+  .onboarding-progress {
+    padding: 16px 20px;
+  }
+}

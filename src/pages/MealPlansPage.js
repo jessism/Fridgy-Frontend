@@ -4,6 +4,7 @@ import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import useRecipes from '../hooks/useRecipes';
 import useEdamamTest from '../hooks/useEdamamTest';
+import useTastyRecipes from '../hooks/useTastyRecipes';
 import RecipeDetailModal from '../components/modals/RecipeDetailModal';
 import { AIRecipeSection } from '../features/ai-recipes';
 import { IngredientMatchIcon, CookTimeIcon } from '../assets/icons';
@@ -38,6 +39,24 @@ const MealPlansPage = () => {
     suggestions: edamamSuggestions?.length, 
     loading: edamamLoading, 
     error: edamamError 
+  });
+  
+  // Tasty test hook
+  const {
+    suggestions: tastySuggestions,
+    loading: tastyLoading,
+    error: tastyError,
+    clearError: clearTastyError,
+    refreshSuggestions: refreshTastySuggestions,
+    getRecipesWithVideos
+  } = useTastyRecipes();
+  
+  // Debug Tasty state
+  console.log('🍳 Tasty state:', { 
+    suggestions: tastySuggestions?.length, 
+    loading: tastyLoading, 
+    error: tastyError,
+    hasVideos: tastySuggestions?.some(s => s.video_url)
   });
 
   // Modal state
@@ -403,6 +422,103 @@ const MealPlansPage = () => {
               {!edamamLoading && !edamamError && edamamSuggestions.length > 0 && (
                 <>
                   {edamamSuggestions.slice(0, 4).map(recipe => 
+                    renderRecipeCard(recipe, true)
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+          
+          {/* Tasty Recipes Section - Premium quality with videos */}
+          <div className="meal-plans-page__section">
+            <div className="meal-plans-page__section-header" style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'flex-start',
+              marginBottom: '1.5rem'
+            }}>
+              <div>
+                <h2 className="meal-plans-page__section-title">
+                  Tasty Recipes
+                </h2>
+                {tastySuggestions?.some(s => s.video_url) && (
+                  <p style={{ 
+                    fontSize: '0.85rem', 
+                    color: '#666', 
+                    marginTop: '0.25rem' 
+                  }}>
+                    🎥 Includes video tutorials
+                  </p>
+                )}
+              </div>
+              {!tastyLoading && tastySuggestions.length > 0 && (
+                <button
+                  onClick={() => refreshTastySuggestions()}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    background: 'transparent',
+                    border: '1px solid var(--primary-green)',
+                    borderRadius: '20px',
+                    color: 'var(--primary-green)',
+                    fontSize: '0.85rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--primary-green)';
+                    e.currentTarget.style.color = 'white';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.color = 'var(--primary-green)';
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <polyline points="1 20 1 14 7 14"></polyline>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                  </svg>
+                  Refresh
+                </button>
+              )}
+            </div>
+            <div className="meal-plans-page__recipes-grid">
+              {tastyLoading && renderLoadingCards(4)}
+              {tastyError && !tastyLoading && (
+                <div className="error-state" style={{ textAlign: 'center', padding: '2rem' }}>
+                  <h3>Unable to load Tasty recipes</h3>
+                  <p>{tastyError}</p>
+                  <button 
+                    onClick={() => {
+                      clearTastyError();
+                      refreshTastySuggestions();
+                    }}
+                    style={{ 
+                      padding: '0.5rem 1rem', 
+                      backgroundColor: 'var(--primary-green)', 
+                      color: 'white', 
+                      border: 'none', 
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Try Again
+                  </button>
+                </div>
+              )}
+              {!tastyLoading && !tastyError && tastySuggestions.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+                  <p>No Tasty recipe suggestions available.</p>
+                  <p>Configure RAPIDAPI_KEY in Railway to enable Tasty recipes!</p>
+                </div>
+              )}
+              {!tastyLoading && !tastyError && tastySuggestions.length > 0 && (
+                <>
+                  {tastySuggestions.slice(0, 4).map(recipe => 
                     renderRecipeCard(recipe, true)
                   )}
                 </>

@@ -73,22 +73,15 @@ const DeductionSuccessModal = ({
                   <circle cx="12" cy="12" r="10"/>
                   <polyline points="16 10 10 16 8 14"/>
                 </svg>
-                <span className="section-title">Deducted from inventory</span>
+<span className="deducted-section-title">Deducted from inventory</span>
               </div>
               
               <div className="deduction-items">
                 {successfulDeductions.map((item, index) => (
                   <div key={index} className="deduction-item">
-                    <div className="item-left">
-                      <div className="item-icon-circle">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M8 6L21 6M8 12H21M8 18H15" strokeLinecap="round"/>
-                        </svg>
-                      </div>
-                      <div className="item-info">
-                        <span className="item-name">{item.itemName || item.ingredient}</span>
-                        <span className="item-quantity">{item.deducted} {item.unit}</span>
-                      </div>
+                    <div className="item-info">
+                      <span className="item-name">{item.itemName || item.ingredient}</span>
+                      <span className="item-quantity">{item.deducted} {item.unit}</span>
                     </div>
                     <span className="item-status">
                       {item.newQuantity === 0 ? 'depleted' : ''}
@@ -108,21 +101,14 @@ const DeductionSuccessModal = ({
                   <line x1="12" y1="9" x2="12" y2="13"/>
                   <line x1="12" y1="17" x2="12.01" y2="17"/>
                 </svg>
-                <span className="section-title">Missing from inventory</span>
+<span className="missing-section-title">Missing from inventory</span>
               </div>
               
               <div className="deduction-items">
                 {failedDeductions.map((item, index) => (
                   <div key={index} className="deduction-item">
-                    <div className="item-left">
-                      <div className="item-icon-circle warning">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M8 6L21 6M8 12H21M8 18H15" strokeLinecap="round"/>
-                        </svg>
-                      </div>
-                      <div className="item-info">
-                        <span className="item-name">{item.ingredient}</span>
-                      </div>
+                    <div className="item-info">
+                      <span className="item-name">{item.ingredient}</span>
                     </div>
                     <button className="add-to-inventory-btn">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
