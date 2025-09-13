@@ -640,7 +640,7 @@ const HomePage = () => {
             </div>
             <div 
               className="quick-access-item"
-              onClick={() => navigateToPage('/meals')}
+              onClick={() => navigateToPage('/meal-plans')}
             >
               <div className="quick-access-icon">
                 <RecipesIcon />

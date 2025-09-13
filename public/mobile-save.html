@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Save to Fridgy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .success {
+            background: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .error {
+            background: #f44336;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .instructions {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🥗 Save to Fridgy</h1>
+        <p class="subtitle">Save Instagram recipes to your collection</p>
+        
+        <div class="input-group">
+            <label for="url">Instagram Recipe URL:</label>
+            <input 
+                type="url" 
+                id="url" 
+                placeholder="https://www.instagram.com/p/..." 
+                autocomplete="off"
+                autocapitalize="off"
+            >
+        </div>
+        
+        <button id="saveBtn" onclick="saveRecipe()">Save Recipe</button>
+        
+        <details style="margin-top: 15px;">
+            <summary style="cursor: pointer; color: #667eea; font-weight: 500;">Having trouble? Add caption manually</summary>
+            <div class="input-group" style="margin-top: 10px;">
+                <label for="caption">Recipe Caption (optional):</label>
+                <textarea 
+                    id="caption" 
+                    placeholder="Paste the recipe text from Instagram if automatic extraction isn't working..."
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; min-height: 100px; resize: vertical;"
+                ></textarea>
+            </div>
+        </details>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px;">Extracting recipe...</p>
+        </div>
+        
+        <div class="success" id="success">
+            ✅ Recipe saved successfully!
+        </div>
+        
+        <div class="error" id="error">
+            ❌ <span id="errorMsg">Failed to save recipe</span>
+        </div>
+        
+        <div class="instructions">
+            <h3>How to use:</h3>
+            <ol>
+                <li>Copy an Instagram recipe post URL</li>
+                <li>Paste it in the field above</li>
+                <li>Tap "Save Recipe"</li>
+            </ol>
+            <p style="margin-top: 10px;"><strong>Tip:</strong> Add this page to your home screen for quick access!</p>
+        </div>
+    </div>
+    
+    <script>
+        // Get the user's actual token from Fridgy
+        let USER_TOKEN = null;
+        const API_BASE = 'http://192.168.1.72:5000/api';
+        
+        function showError(message) {
+            document.getElementById('errorMsg').textContent = message;
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('success').style.display = 'none';
+        }
+        
+        // Load user's shortcut token on page load
+        window.addEventListener('load', async () => {
+            // Get the Fridgy auth token from localStorage
+            const fridgyToken = localStorage.getItem('fridgy_token');
+            
+            if (!fridgyToken) {
+                showError('Please log into Fridgy first');
+                document.getElementById('saveBtn').disabled = true;
+                // Redirect to login after 2 seconds
+                setTimeout(() => {
+                    window.location.href = 'http://192.168.1.72:3000/signin';
+                }, 2000);
+                return;
+            }
+            
+            // Get the user's shortcut token
+            try {
+                const response = await fetch(`${API_BASE}/shortcuts/setup`, {
+                    headers: {
+                        'Authorization': `Bearer ${fridgyToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    USER_TOKEN = data.token;
+                    console.log('Loaded user token:', USER_TOKEN);
+                } else {
+                    showError('Failed to load user token. Please try logging in again.');
+                    document.getElementById('saveBtn').disabled = true;
+                }
+            } catch (error) {
+                console.error('Error loading token:', error);
+                showError('Connection error. Make sure you\'re on the same WiFi.');
+            }
+            
+            // Check if URL is passed as parameter (for sharing)
+            const urlParams = new URLSearchParams(window.location.search);
+            const sharedUrl = urlParams.get('url');
+            if (sharedUrl) {
+                document.getElementById('url').value = sharedUrl;
+                // Auto-save if URL is provided and token is loaded
+                if (USER_TOKEN) {
+                    setTimeout(() => saveRecipe(), 500);
+                }
+            }
+        });
+        
+        async function saveRecipe() {
+            const urlInput = document.getElementById('url');
+            const captionInput = document.getElementById('caption');
+            const url = urlInput.value.trim();
+            const caption = captionInput.value.trim();
+            
+            if (!url) {
+                showError('Please enter an Instagram URL');
+                return;
+            }
+            
+            if (!url.includes('instagram.com')) {
+                showError('Please enter a valid Instagram URL');
+                return;
+            }
+            
+            // UI updates
+            document.getElementById('saveBtn').disabled = true;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('success').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            
+            try {
+                if (!USER_TOKEN) {
+                    showError('Not logged in. Redirecting to login...');
+                    setTimeout(() => {
+                        window.location.href = 'http://192.168.1.72:3000/signin';
+                    }, 1500);
+                    return;
+                }
+                
+                const requestBody = {
+                    url: url,
+                    token: USER_TOKEN
+                };
+                
+                // Include caption if provided
+                if (caption) {
+                    requestBody.caption = caption;
+                    console.log('Including manual caption in request');
+                }
+                
+                const response = await fetch(`${API_BASE}/shortcuts/import`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Check if it was a partial extraction
+                    if (data.recipe && data.recipe.confidence < 0.5) {
+                        document.getElementById('success').innerHTML = 
+                            '⚠️ Recipe saved with limited information. Please review and edit in your saved recipes.';
+                    } else {
+                        document.getElementById('success').innerHTML = '✅ Recipe saved successfully!';
+                    }
+                    document.getElementById('success').style.display = 'block';
+                    urlInput.value = '';
+                    captionInput.value = ''; // Clear caption field too
+                    
+                    // Optional: Redirect to saved recipes after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = 'http://192.168.1.72:3000/saved-recipes';
+                    }, 2000);
+                } else {
+                    // Show detailed error information
+                    let errorMsg = data.error || 'Failed to save recipe';
+                    
+                    if (data.details) {
+                        if (!data.details.captionFound) {
+                            errorMsg += '\n\nTip: The Instagram caption could not be extracted. Try copying the recipe text and pasting it manually.';
+                        } else if (data.details.captionLength < 100) {
+                            errorMsg += '\n\nTip: The caption appears very short. Make sure the post contains recipe details.';
+                        }
+                        
+                        if (data.details.extractionNotes) {
+                            console.log('Extraction notes:', data.details.extractionNotes);
+                        }
+                    }
+                    
+                    showError(errorMsg);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Connection failed. Make sure you\'re on the same WiFi network.');
+            } finally {
+                document.getElementById('saveBtn').disabled = false;
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

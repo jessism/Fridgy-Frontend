@@ -128,12 +128,6 @@ const FeatureTourScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
           >
             {currentFeature === features.length - 1 ? 'Continue' : 'Next'}
           </button>
-          <button 
-            className="onboarding-btn onboarding-btn--ghost"
-            onClick={onSkip}
-          >
-            Skip Tour
-          </button>
         </div>
       </div>
     </div>

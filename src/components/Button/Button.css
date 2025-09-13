@@ -48,30 +48,31 @@
 
 /* BUTTON VARIANTS */
 
-/* Primary - Green background, white text */
+/* Primary - Green gradient background, white text */
 .button--primary {
-  background: var(--primary-green);
+  background: linear-gradient(135deg, #81e053 0%, #6bc93f 100%);
   color: white;
-  box-shadow: 0 4px 15px rgba(129, 224, 83, 0.3);
+  font-weight: 700;
+  box-shadow: none;
 }
 
 .button--primary:hover:not(:disabled) {
-  background: var(--primary-green-dark);
+  background: linear-gradient(135deg, #6bc93f 0%, #5eb849 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(129, 224, 83, 0.4);
+  box-shadow: none;
 }
 
 /* Secondary - Black background, white text (like your Download App button) */
 .button--secondary {
   background: #222222;
   color: white;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: none;
 }
 
 .button--secondary:hover:not(:disabled) {
   background: #333;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: none;
 }
 
 /* Outline - Transparent background, border */
@@ -86,7 +87,7 @@
   background: var(--primary-green);
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(129, 224, 83, 0.3);
+  box-shadow: none;
 }
 
 /* Ghost - Transparent background, no border */
@@ -106,11 +107,11 @@
   background: white;
   color: #333;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+  box-shadow: none;
 }
 
 .button--light:hover:not(:disabled) {
   background: #f9f9f9;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
 }

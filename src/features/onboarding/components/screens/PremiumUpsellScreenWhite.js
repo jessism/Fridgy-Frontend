@@ -157,20 +157,20 @@ const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep }) 
               padding: '16px 32px',
               fontSize: '18px',
               fontWeight: '600',
-              background: '#4fcf61',
+              background: 'linear-gradient(135deg, #81e053 0%, #6bc93f 100%)',
               color: 'white',
               border: 'none',
-              borderRadius: '12px',
+              borderRadius: '25px',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
               marginBottom: '8px'
             }}
             onMouseOver={(e) => {
-              e.target.style.background = '#45b556';
+              e.target.style.background = 'linear-gradient(135deg, #6bc93f 0%, #5eb849 100%)';
               e.target.style.transform = 'translateY(-1px)';
             }}
             onMouseOut={(e) => {
-              e.target.style.background = '#4fcf61';
+              e.target.style.background = 'linear-gradient(135deg, #81e053 0%, #6bc93f 100%)';
               e.target.style.transform = 'translateY(0)';
             }}
           >

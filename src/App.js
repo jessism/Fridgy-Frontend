@@ -15,10 +15,12 @@ import ProfilePageV2 from './pages/ProfilePageV2';
 import AboutYouPage from './pages/AboutYouPage';
 import DietaryPreferencesPage from './pages/DietaryPreferencesPage';
 import MealHistoryPage from './pages/MealHistoryPage';
+import SavedRecipesPage from './pages/SavedRecipesPage';
 import InventoryUsagePage from './pages/InventoryUsagePage';
 import BatchCamera from './features/batchcamera/components/BatchCamera';
 import { MealCameraInterface, MealIngredientSelector } from './features/mealscanner';
 import OnboardingFlow from './features/onboarding/components/OnboardingFlow';
+import ShortcutSetupPage from './pages/ShortcutSetupPage';
 
 function App() {
   return (
@@ -73,6 +75,16 @@ function App() {
           <Route path="/meal-history" element={
             <AuthGuard>
               <MealHistoryPage />
+            </AuthGuard>
+          } />
+          <Route path="/saved-recipes" element={
+            <AuthGuard>
+              <SavedRecipesPage />
+            </AuthGuard>
+          } />
+          <Route path="/shortcuts/setup" element={
+            <AuthGuard>
+              <ShortcutSetupPage />
             </AuthGuard>
           } />
           <Route path="/analytics/inventory" element={

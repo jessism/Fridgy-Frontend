@@ -264,8 +264,8 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
     setEditableResults(null);
     setShowConfirmation(false);
     
-    // Navigate back to home
-    navigate('/home');
+    // Navigate to inventory page to see the newly added items
+    navigate('/inventory');
   };
 
   // Editable item functions

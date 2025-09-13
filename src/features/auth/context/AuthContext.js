@@ -83,7 +83,9 @@ export const AuthProvider = ({ children }) => {
           // Verify token with backend and get user data
           const response = await apiRequest('/auth/me');
           if (response.success) {
-            setUser(response.user);
+            // Include token in user object for API calls
+            const userWithToken = { ...response.user, token };
+            setUser(userWithToken);
             localStorage.setItem('fridgy_user', JSON.stringify(response.user));
           } else {
             removeToken();
@@ -130,9 +132,11 @@ export const AuthProvider = ({ children }) => {
       if (response.success) {
         // Store token and user data
         setToken(response.token);
-        setUser(response.user);
+        // Include token in user object for API calls
+        const userWithToken = { ...response.user, token: response.token };
+        setUser(userWithToken);
         localStorage.setItem('fridgy_user', JSON.stringify(response.user));
-        return response.user;
+        return userWithToken;
       } else {
         throw new Error(response.error || 'Signup failed');
       }
@@ -166,9 +170,11 @@ export const AuthProvider = ({ children }) => {
       if (response.success) {
         // Store token and user data
         setToken(response.token);
-        setUser(response.user);
+        // Include token in user object for API calls
+        const userWithToken = { ...response.user, token: response.token };
+        setUser(userWithToken);
         localStorage.setItem('fridgy_user', JSON.stringify(response.user));
-        return response.user;
+        return userWithToken;
       } else {
         throw new Error(response.error || 'Login failed');
       }

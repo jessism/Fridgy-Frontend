@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import useRecipes from '../hooks/useRecipes';
-import useEdamamTest from '../hooks/useEdamamTest';
+// import useEdamamTest from '../hooks/useEdamamTest';
 import useTastyRecipes from '../hooks/useTastyRecipes';
 import RecipeDetailModal from '../components/modals/RecipeDetailModal';
 import { AIRecipeSection } from '../features/ai-recipes';
@@ -25,27 +25,28 @@ const MealPlansPage = () => {
     refreshSuggestions
   } = useRecipes();
   
-  // Edamam test hook
-  const {
-    suggestions: edamamSuggestions,
-    loading: edamamLoading,
-    error: edamamError,
-    clearError: clearEdamamError,
-    refreshSuggestions: refreshEdamamSuggestions
-  } = useEdamamTest();
+  // Edamam test hook - COMMENTED OUT
+  // const {
+  //   suggestions: edamamSuggestions,
+  //   loading: edamamLoading,
+  //   error: edamamError,
+  //   clearError: clearEdamamError,
+  //   refreshSuggestions: refreshEdamamSuggestions
+  // } = useEdamamTest();
 
-  // Debug Edamam state
-  console.log('🧪 Edamam state:', { 
-    suggestions: edamamSuggestions?.length, 
-    loading: edamamLoading, 
-    error: edamamError 
-  });
+  // Debug Edamam state - COMMENTED OUT
+  // console.log('🧪 Edamam state:', { 
+  //   suggestions: edamamSuggestions?.length, 
+  //   loading: edamamLoading, 
+  //   error: edamamError 
+  // });
   
   // Tasty test hook
   const {
     suggestions: tastySuggestions,
     loading: tastyLoading,
     error: tastyError,
+    noUserOrInventory: tastyNoUserOrInventory,
     clearError: clearTastyError,
     refreshSuggestions: refreshTastySuggestions,
     getRecipesWithVideos
@@ -95,18 +96,18 @@ const MealPlansPage = () => {
       setIsLoadingRecipe(true);
       setRecipeError(null);
       
-      // Check if this is an Edamam recipe
-      if (recipe._source === 'edamam') {
-        // Edamam recipes already have all details from the initial fetch
-        console.log('📖 Using pre-fetched Edamam recipe data');
-        setSelectedRecipe(recipe);
-        setIsLoadingRecipe(false);
-      } else {
+      // Check if this is an Edamam recipe - COMMENTED OUT
+      // if (recipe._source === 'edamam') {
+      //   // Edamam recipes already have all details from the initial fetch
+      //   console.log('📖 Using pre-fetched Edamam recipe data');
+      //   setSelectedRecipe(recipe);
+      //   setIsLoadingRecipe(false);
+      // } else {
         // Spoonacular recipes need a detail fetch
         const detailedRecipe = await fetchRecipeDetails(recipe.id);
         setSelectedRecipe(detailedRecipe);
         setIsLoadingRecipe(false);
-      }
+      // }
     } catch (error) {
       console.error('Failed to fetch recipe details:', error);
       setRecipeError(error.message);
@@ -117,17 +118,18 @@ const MealPlansPage = () => {
 
   const handleActuallyCook = async (recipe) => {
     // This is called after recipe is successfully cooked
-    if (recipe._source === 'edamam') {
-      console.log(`🧪 Edamam recipe ${recipe.title} was viewed (inventory deduction not implemented yet)`);
-      // For now, just close the modal for Edamam recipes
-      // TODO: Implement inventory deduction for Edamam recipes
-      alert('This is an Edamam test recipe. Inventory deduction is not yet implemented for Edamam recipes.');
-      handleCloseModal();
-    } else {
+    // Edamam handling COMMENTED OUT
+    // if (recipe._source === 'edamam') {
+    //   console.log(`🧪 Edamam recipe ${recipe.title} was viewed (inventory deduction not implemented yet)`);
+    //   // For now, just close the modal for Edamam recipes
+    //   // TODO: Implement inventory deduction for Edamam recipes
+    //   alert('This is an Edamam test recipe. Inventory deduction is not yet implemented for Edamam recipes.');
+    //   handleCloseModal();
+    // } else {
       console.log(`✅ Recipe ${recipe.title} was cooked and inventory was deducted`);
       // Refresh suggestions since inventory has changed
       fetchSuggestions({ forceRefresh: true });
-    }
+    // }
   };
 
   const handleCloseModal = () => {
@@ -277,7 +279,8 @@ const MealPlansPage = () => {
           </div>
           */}
           
-          {/* Cook what you have Section */}
+          {/* Cook what you have Section - COMMENTED OUT */}
+          {/*
           <div className="meal-plans-page__section">
             <div className="meal-plans-page__section-header" style={{ 
               display: 'flex', 
@@ -316,6 +319,7 @@ const MealPlansPage = () => {
                   title={isFromCache ? 'Recipes loaded from cache. Click to get fresh suggestions.' : 'Get new recipe suggestions'}
                 >
                   {/* Refresh icon */}
+                  {/*
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M21 2v6h-6M3 22v-6h6M21 8c-1.5-4.5-6-7-11-7-6 0-11 5-11 11M3 16c1.5 4.5 6 7 11 7 6 0 11-5 11-11" 
                           stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -342,9 +346,10 @@ const MealPlansPage = () => {
               )}
             </div>
           </div>
+          */}
           
-          {/* Edamam test Section - Identical to Cook what you have */}
-          <div className="meal-plans-page__section">
+          {/* Edamam test Section - COMMENTED OUT */}
+          {/* <div className="meal-plans-page__section">
             <div className="meal-plans-page__section-header" style={{ 
               display: 'flex', 
               justifyContent: 'space-between', 
@@ -427,7 +432,7 @@ const MealPlansPage = () => {
                 </>
               )}
             </div>
-          </div>
+          </div> */}
           
           {/* Tasty Recipes Section - Premium quality with videos */}
           <div className="meal-plans-page__section">
@@ -510,13 +515,76 @@ const MealPlansPage = () => {
                   </button>
                 </div>
               )}
-              {!tastyLoading && !tastyError && tastySuggestions.length === 0 && (
+              {!tastyLoading && tastySuggestions.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
-                  <p>No Tasty recipe suggestions available.</p>
-                  <p>Configure RAPIDAPI_KEY in Railway to enable Tasty recipes!</p>
+                  {tastyError === 'no_user' && (
+                    <>
+                      <p>Please log in to see Tasty recipe suggestions.</p>
+                      <button
+                        onClick={() => navigate('/auth')}
+                        style={{
+                          background: '#4fcf61',
+                          color: 'white',
+                          border: 'none',
+                          padding: '0.5rem 1rem',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          marginTop: '0.5rem'
+                        }}
+                      >
+                        Log In
+                      </button>
+                    </>
+                  )}
+                  {tastyError === 'no_inventory' && (
+                    <>
+                      <p>Add items to your inventory to get Tasty recipe suggestions!</p>
+                      <button
+                        onClick={() => navigate('/batchcamera')}
+                        style={{
+                          background: '#4fcf61',
+                          color: 'white',
+                          border: 'none',
+                          padding: '0.5rem 1rem',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          marginTop: '0.5rem'
+                        }}
+                      >
+                        Add Items
+                      </button>
+                    </>
+                  )}
+                  {!tastyError && (
+                    <>
+                      <p>No Tasty recipe suggestions found for your current inventory.</p>
+                      <button
+                        onClick={() => refreshTastySuggestions()}
+                        style={{
+                          background: '#4fcf61',
+                          color: 'white',
+                          border: 'none',
+                          padding: '0.5rem 1rem',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          marginTop: '0.5rem'
+                        }}
+                      >
+                        Try Again
+                      </button>
+                    </>
+                  )}
+                  {tastyError && !['no_user', 'no_inventory'].includes(tastyError) && (
+                    <>
+                      <p>Unable to load Tasty recipes: {tastyError}</p>
+                      <p style={{ fontSize: '0.9em', color: '#999', marginTop: '0.5rem' }}>
+                        This might be due to API configuration. Check if RAPIDAPI_KEY is properly set.
+                      </p>
+                    </>
+                  )}
                 </div>
               )}
-              {!tastyLoading && !tastyError && tastySuggestions.length > 0 && (
+              {!tastyLoading && !['no_user', 'no_inventory'].includes(tastyError) && tastySuggestions.length > 0 && (
                 <>
                   {tastySuggestions.slice(0, 4).map(recipe => 
                     renderRecipeCard(recipe, true)
@@ -526,6 +594,25 @@ const MealPlansPage = () => {
             </div>
           </div>
           
+          {/* Your Saved Recipes Section */}
+          <div className="meal-plans-page__analytics-section">
+            {/* Text Section */}
+            <div className="meal-plans-page__analytics-text-section">
+              <h2 className="meal-plans-page__section-title">Your saved recipes</h2>
+              <p className="meal-plans-page__section-subtitle">Access your favorite recipes anytime</p>
+            </div>
+            
+            {/* View Saved Recipes - Full Width */}
+            <div className="meal-plans-page__view-history" onClick={() => navigate('/saved-recipes')}>
+              <div className="meal-plans-page__history-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <span className="meal-plans-page__history-label">View saved recipes</span>
+            </div>
+          </div>
+
           {/* View Meal Analytics Section */}
           <div className="meal-plans-page__analytics-section">
             {/* Text Section - Same structure as AI section */}

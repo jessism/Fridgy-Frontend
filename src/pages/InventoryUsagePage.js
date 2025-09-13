@@ -3,26 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import { useAuth } from '../features/auth/context/AuthContext';
+import useInventoryAnalytics from '../hooks/useInventoryAnalytics';
 import './InventoryUsagePage.css';
 
 const InventoryUsagePage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [dateRange, setDateRange] = useState('7'); // Default to last 7 days
-  const [isLoading, setIsLoading] = useState(false);
+  const [dateRange, setDateRange] = useState('30'); // Default to last 30 days
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [analyticsData, setAnalyticsData] = useState({
-    itemsConsumed: 0,
-    itemsWasted: 0,
-    valueSaved: 0,
-    usagePercentage: 0,
-    previousPeriod: {
-      itemsConsumed: 0,
-      itemsWasted: 0,
-      valueSaved: 0,
-      usagePercentage: 0
-    }
-  });
+  
+  const { 
+    analyticsData, 
+    isLoading, 
+    error, 
+    changeDateRange 
+  } = useInventoryAnalytics(parseInt(dateRange));
+
 
   // Handle window resize
   useEffect(() => {
@@ -34,57 +30,10 @@ const InventoryUsagePage = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Mock data for now - will be replaced with API call
-  useEffect(() => {
-    // Simulate loading
-    setIsLoading(true);
-    setTimeout(() => {
-      // Mock data based on date range
-      const mockData = {
-        '7': {
-          itemsConsumed: 42,
-          itemsWasted: 3,
-          valueSaved: 65.80,
-          usagePercentage: 93,
-          previousPeriod: {
-            itemsConsumed: 38,
-            itemsWasted: 5,
-            valueSaved: 52.30,
-            usagePercentage: 88
-          }
-        },
-        '30': {
-          itemsConsumed: 142,
-          itemsWasted: 13,
-          valueSaved: 218.90,
-          usagePercentage: 91,
-          previousPeriod: {
-            itemsConsumed: 128,
-            itemsWasted: 19,
-            valueSaved: 195.40,
-            usagePercentage: 87
-          }
-        },
-        '90': {
-          itemsConsumed: 387,
-          itemsWasted: 41,
-          valueSaved: 612.50,
-          usagePercentage: 90,
-          previousPeriod: {
-            itemsConsumed: 362,
-            itemsWasted: 48,
-            valueSaved: 580.20,
-            usagePercentage: 88
-          }
-        }
-      };
-      setAnalyticsData(mockData[dateRange]);
-      setIsLoading(false);
-    }, 500);
-  }, [dateRange]);
-
   const handleDateRangeChange = (e) => {
-    setDateRange(e.target.value);
+    const newRange = e.target.value;
+    setDateRange(newRange);
+    changeDateRange(parseInt(newRange));
   };
 
   const handleBackClick = () => {
@@ -130,48 +79,85 @@ const InventoryUsagePage = () => {
     );
   };
 
-  // Donut Chart Component
-  const DonutChart = ({ percentage, label }) => {
-    const circumference = 2 * Math.PI * 90; // radius = 90
-    const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
-    const wastedPercentage = 100 - percentage;
+  // Category color mapping
+  const categoryColors = {
+    'Vegetables': '#4fcf61',
+    'Dairy': '#4A90E2',
+    'Protein': '#50C878',
+    'Grains': '#FF9F43',
+    'Fruits': '#FF6B6B',
+    'Other': '#9B59B6'
+  };
 
+  // Convert category breakdown to chart data
+  const getCategoryChartData = () => {
+    if (!analyticsData.categoryBreakdown || Object.keys(analyticsData.categoryBreakdown).length === 0) {
+      return [];
+    }
+
+    return Object.entries(analyticsData.categoryBreakdown)
+      .sort(([,a], [,b]) => b - a) // Sort by percentage descending
+      .map(([category, percentage]) => ({
+        category,
+        percentage,
+        color: categoryColors[category] || categoryColors.Other
+      }));
+  };
+
+  // Calculate SVG path for donut chart segments
+  const getDonutSegments = () => {
+    const categoryData = getCategoryChartData();
+    if (categoryData.length === 0) return [];
+
+    const radius = 60;
+    const centerX = 80;
+    const centerY = 80;
+    let currentAngle = -90; // Start at top
+
+    return categoryData.map((item) => {
+      const startAngle = currentAngle;
+      const angleSize = (item.percentage / 100) * 360;
+      const endAngle = currentAngle + angleSize;
+      
+      const startRadians = (startAngle * Math.PI) / 180;
+      const endRadians = (endAngle * Math.PI) / 180;
+      
+      const largeArcFlag = angleSize > 180 ? 1 : 0;
+      
+      const x1 = centerX + radius * Math.cos(startRadians);
+      const y1 = centerY + radius * Math.sin(startRadians);
+      const x2 = centerX + radius * Math.cos(endRadians);
+      const y2 = centerY + radius * Math.sin(endRadians);
+      
+      const pathData = `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
+      
+      currentAngle = endAngle;
+      
+      return {
+        ...item,
+        pathData
+      };
+    });
+  };
+
+  if (error) {
     return (
-      <div className="donut-chart-container">
-        <h2 className="donut-title">This Month</h2>
-        <div className="donut-chart">
-          <svg width="240" height="240" viewBox="0 0 240 240">
-            {/* Background circle (wasted - red) */}
-            <circle
-              cx="120"
-              cy="120"
-              r="90"
-              fill="none"
-              stroke="#ff6b6b"
-              strokeWidth="30"
-            />
-            {/* Foreground arc (used - green) */}
-            <circle
-              cx="120"
-              cy="120"
-              r="90"
-              fill="none"
-              stroke="#4fcf61"
-              strokeWidth="30"
-              strokeDasharray={strokeDasharray}
-              strokeDashoffset="0"
-              transform="rotate(-90 120 120)"
-              style={{ transition: 'stroke-dasharray 0.5s ease' }}
-            />
-          </svg>
-          <div className="donut-center">
-            <div className="donut-percentage">{percentage}%</div>
-            <div className="donut-label">{label}</div>
+      <div className="inventory-usage-page">
+        <AppNavBar />
+        <div className="page-header">
+          <div className="header-content">
+            <h1 className="page-title">Inventory Usage</h1>
+            <p className="page-subtitle" style={{ color: '#ff6b6b' }}>
+              {error === 'Authentication required. Please log in again.' 
+                ? 'Please log in to view your analytics.'
+                : 'Unable to load analytics data. Please try again later.'}
+            </p>
           </div>
         </div>
+        <MobileBottomNav />
       </div>
     );
-  };
+  }
 
   return (
     <div className="inventory-usage-page">
@@ -188,12 +174,13 @@ const InventoryUsagePage = () => {
         </div>
       </div>
 
-      {/* Date Range Dropdown - Left aligned */}
+      {/* Date Range Dropdown */}
       <div className="date-filter-section">
         <select 
           className="date-range-dropdown"
           value={dateRange}
           onChange={handleDateRangeChange}
+          disabled={isLoading}
         >
           <option value="7">Last 7 days</option>
           <option value="30">Last 30 days</option>
@@ -204,7 +191,9 @@ const InventoryUsagePage = () => {
       {/* Usage Analytics Container */}
       <div className="usage-container">
         <div className="usage-card">
-          <h3 className="usage-title">This Month</h3>
+          <h3 className="usage-title">
+            {isLoading ? 'Loading...' : `Last ${dateRange} Days`}
+          </h3>
           <div className="donut-chart-wrapper">
             <svg width="200" height="200" viewBox="0 0 200 200" className="donut-svg">
               {/* Background circle (wasted - red) */}
@@ -231,7 +220,9 @@ const InventoryUsagePage = () => {
               />
             </svg>
             <div className="donut-content">
-              <div className="percentage-text">{analyticsData.usagePercentage}%</div>
+              <div className="percentage-text">
+                {isLoading ? '...' : `${analyticsData.usagePercentage}%`}
+              </div>
               <div className="usage-text">used before expiry</div>
             </div>
           </div>
@@ -244,10 +235,19 @@ const InventoryUsagePage = () => {
           <div className="analytics-card-header">
             <span className="analytics-card-title">Items Consumed</span>
           </div>
-          <div className="analytics-card-value">{analyticsData.itemsConsumed}</div>
-          <div className="analytics-trend-badge positive">
-            <span className="trend-arrow">↗</span>
-            <span className="trend-text">+9.4% vs prev</span>
+          <div className="analytics-card-value">
+            {isLoading ? '...' : analyticsData.itemsConsumed}
+          </div>
+          <div className={`analytics-trend-badge ${
+            calculateTrend(analyticsData.itemsConsumed, analyticsData.previousPeriod.itemsConsumed).direction === 'up' 
+              ? 'positive' : 'negative'
+          }`}>
+            <span className="trend-arrow">
+              {calculateTrend(analyticsData.itemsConsumed, analyticsData.previousPeriod.itemsConsumed).direction === 'up' ? '↗' : '↘'}
+            </span>
+            <span className="trend-text">
+              {calculateTrend(analyticsData.itemsConsumed, analyticsData.previousPeriod.itemsConsumed).value}% vs prev
+            </span>
           </div>
         </div>
         
@@ -255,10 +255,19 @@ const InventoryUsagePage = () => {
           <div className="analytics-card-header">
             <span className="analytics-card-title">Items Wasted</span>
           </div>
-          <div className="analytics-card-value">{analyticsData.itemsWasted}</div>
-          <div className="analytics-trend-badge negative">
-            <span className="trend-arrow">↘</span>
-            <span className="trend-text">-18% vs prev</span>
+          <div className="analytics-card-value">
+            {isLoading ? '...' : analyticsData.itemsWasted}
+          </div>
+          <div className={`analytics-trend-badge ${
+            calculateTrend(analyticsData.itemsWasted, analyticsData.previousPeriod.itemsWasted).direction === 'down' 
+              ? 'positive' : 'negative'
+          }`}>
+            <span className="trend-arrow">
+              {calculateTrend(analyticsData.itemsWasted, analyticsData.previousPeriod.itemsWasted).direction === 'up' ? '↗' : '↘'}
+            </span>
+            <span className="trend-text">
+              {calculateTrend(analyticsData.itemsWasted, analyticsData.previousPeriod.itemsWasted).value}% vs prev
+            </span>
           </div>
         </div>
       </div>
@@ -269,10 +278,19 @@ const InventoryUsagePage = () => {
           <div className="analytics-card-header">
             <span className="analytics-card-title">Est. Value Saved</span>
           </div>
-          <div className="analytics-card-value">${analyticsData.valueSaved.toFixed(2)}</div>
-          <div className="analytics-trend-badge positive">
-            <span className="trend-arrow">↗</span>
-            <span className="trend-text">+25.8% vs prev</span>
+          <div className="analytics-card-value">
+            {isLoading ? '...' : `$${analyticsData.valueSaved.toFixed(2)}`}
+          </div>
+          <div className={`analytics-trend-badge ${
+            calculateTrend(analyticsData.valueSaved, analyticsData.previousPeriod.valueSaved).direction === 'up' 
+              ? 'positive' : 'negative'
+          }`}>
+            <span className="trend-arrow">
+              {calculateTrend(analyticsData.valueSaved, analyticsData.previousPeriod.valueSaved).direction === 'up' ? '↗' : '↘'}
+            </span>
+            <span className="trend-text">
+              {calculateTrend(analyticsData.valueSaved, analyticsData.previousPeriod.valueSaved).value}% vs prev
+            </span>
           </div>
         </div>
       </div>
@@ -283,91 +301,47 @@ const InventoryUsagePage = () => {
           <h3 className="category-title">Consumption by Category</h3>
           <div className="category-content">
             <div className="category-chart-wrapper">
-              <svg width="160" height="160" viewBox="0 0 160 160" className="category-donut">
-                {/* Vegetables - 35% - Green */}
-                <circle
-                  cx="80"
-                  cy="80"
-                  r="60"
-                  fill="none"
-                  stroke="#4fcf61"
-                  strokeWidth="24"
-                  strokeDasharray={`${(35 / 100) * (2 * Math.PI * 60)} ${2 * Math.PI * 60}`}
-                  strokeDashoffset="0"
-                  transform="rotate(-90 80 80)"
-                />
-                {/* Dairy - 21% - Blue */}
-                <circle
-                  cx="80"
-                  cy="80"
-                  r="60"
-                  fill="none"
-                  stroke="#4A90E2"
-                  strokeWidth="24"
-                  strokeDasharray={`${(21 / 100) * (2 * Math.PI * 60)} ${2 * Math.PI * 60}`}
-                  strokeDashoffset={`-${(35 / 100) * (2 * Math.PI * 60)}`}
-                  transform="rotate(-90 80 80)"
-                />
-                {/* Protein - 18% - Teal */}
-                <circle
-                  cx="80"
-                  cy="80"
-                  r="60"
-                  fill="none"
-                  stroke="#50C878"
-                  strokeWidth="24"
-                  strokeDasharray={`${(18 / 100) * (2 * Math.PI * 60)} ${2 * Math.PI * 60}`}
-                  strokeDashoffset={`-${((35 + 21) / 100) * (2 * Math.PI * 60)}`}
-                  transform="rotate(-90 80 80)"
-                />
-                {/* Grains - 15% - Orange */}
-                <circle
-                  cx="80"
-                  cy="80"
-                  r="60"
-                  fill="none"
-                  stroke="#FF9F43"
-                  strokeWidth="24"
-                  strokeDasharray={`${(15 / 100) * (2 * Math.PI * 60)} ${2 * Math.PI * 60}`}
-                  strokeDashoffset={`-${((35 + 21 + 18) / 100) * (2 * Math.PI * 60)}`}
-                  transform="rotate(-90 80 80)"
-                />
-                {/* Fruits - 11% - Red */}
-                <circle
-                  cx="80"
-                  cy="80"
-                  r="60"
-                  fill="none"
-                  stroke="#FF6B6B"
-                  strokeWidth="24"
-                  strokeDasharray={`${(11 / 100) * (2 * Math.PI * 60)} ${2 * Math.PI * 60}`}
-                  strokeDashoffset={`-${((35 + 21 + 18 + 15) / 100) * (2 * Math.PI * 60)}`}
-                  transform="rotate(-90 80 80)"
-                />
-              </svg>
+              {!isLoading && getCategoryChartData().length > 0 ? (
+                <svg width="160" height="160" viewBox="0 0 160 160" className="category-donut">
+                  {getDonutSegments().map((segment, index) => (
+                    <path
+                      key={segment.category}
+                      d={segment.pathData}
+                      fill={segment.color}
+                      stroke="#ffffff"
+                      strokeWidth="2"
+                    />
+                  ))}
+                </svg>
+              ) : (
+                <div style={{ 
+                  width: '160px', 
+                  height: '160px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  color: '#666',
+                  fontSize: '0.9rem'
+                }}>
+                  {isLoading ? 'Loading...' : 'No data'}
+                </div>
+              )}
             </div>
             
             <div className="category-legend">
-              <div className="legend-item">
-                <div className="legend-color" style={{backgroundColor: '#4fcf61'}}></div>
-                <span className="legend-text">Veg.: 35%</span>
-              </div>
-              <div className="legend-item">
-                <div className="legend-color" style={{backgroundColor: '#4A90E2'}}></div>
-                <span className="legend-text">Dairy: 21%</span>
-              </div>
-              <div className="legend-item">
-                <div className="legend-color" style={{backgroundColor: '#50C878'}}></div>
-                <span className="legend-text">Protein: 18%</span>
-              </div>
-              <div className="legend-item">
-                <div className="legend-color" style={{backgroundColor: '#FF9F43'}}></div>
-                <span className="legend-text">Grains: 15%</span>
-              </div>
-              <div className="legend-item">
-                <div className="legend-color" style={{backgroundColor: '#FF6B6B'}}></div>
-                <span className="legend-text">Fruits: 11%</span>
-              </div>
+              {!isLoading && getCategoryChartData().map((item, index) => (
+                <div key={item.category} className="legend-item">
+                  <div className="legend-color" style={{backgroundColor: item.color}}></div>
+                  <span className="legend-text">{item.category}: {item.percentage}%</span>
+                </div>
+              ))}
+              {(isLoading || getCategoryChartData().length === 0) && (
+                <div className="legend-item">
+                  <span className="legend-text" style={{ color: '#666' }}>
+                    {isLoading ? 'Loading categories...' : 'No consumption data available'}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -378,26 +352,25 @@ const InventoryUsagePage = () => {
         <div className="most-used-card">
           <h3 className="most-used-title">Most Used Items</h3>
           <div className="most-used-list">
-            <div className="most-used-item">
-              <span className="item-name">Milk</span>
-              <span className="item-stats">7× • 2d avg</span>
-            </div>
-            <div className="most-used-item">
-              <span className="item-name">Bananas</span>
-              <span className="item-stats">6× • 3d avg</span>
-            </div>
-            <div className="most-used-item">
-              <span className="item-name">Eggs</span>
-              <span className="item-stats">5× • 4d avg</span>
-            </div>
-            <div className="most-used-item">
-              <span className="item-name">Chicken</span>
-              <span className="item-stats">4× • 2d avg</span>
-            </div>
-            <div className="most-used-item">
-              <span className="item-name">Bread</span>
-              <span className="item-stats">3× • 3d avg</span>
-            </div>
+            {!isLoading && analyticsData.mostUsedItems && analyticsData.mostUsedItems.length > 0 ? (
+              analyticsData.mostUsedItems.map((item, index) => (
+                <div key={index} className="most-used-item">
+                  <span className="item-name">{item.itemName}</span>
+                  <span className="item-stats">
+                    {item.count}× {item.avgDays > 0 ? `• ${item.avgDays}d avg` : ''}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="most-used-item">
+                <span className="item-name" style={{ color: '#666' }}>
+                  {isLoading ? 'Loading...' : 'No usage data available'}
+                </span>
+                <span className="item-stats">
+                  {!isLoading && 'Start scanning meals to see data'}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>

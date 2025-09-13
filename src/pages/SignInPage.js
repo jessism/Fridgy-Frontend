@@ -86,7 +86,7 @@ const SignInPage = () => {
       <div className="signup-right">
         <div className="signup-form-container">
           <div className="signup-header">
-            <Link to="/signup" className="signin-link">Don't have an account? Sign up →</Link>
+            <Link to="/onboarding" className="signin-link">Don't have an account? Sign up →</Link>
           </div>
           
           <div className="signup-form-wrapper">
@@ -137,7 +137,7 @@ const SignInPage = () => {
                 className="signup-button"
                 disabled={isLoading}
               >
-                {isLoading ? 'Signing in...' : 'Sign in →'}
+                {isLoading ? 'Signing in...' : 'Sign in'}
               </button>
             </form>
 

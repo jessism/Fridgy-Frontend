@@ -18,6 +18,28 @@ const InventoryPage = () => {
   const [itemToEdit, setItemToEdit] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('inventory'); // New state for tab navigation
+  
+  // Shopping List States - Initialize from localStorage
+  const [shoppingLists, setShoppingLists] = useState(() => {
+    const savedLists = localStorage.getItem('shoppingLists');
+    return savedLists ? JSON.parse(savedLists) : [];
+  });
+  const [showCreateListModal, setShowCreateListModal] = useState(false);
+  const [newListName, setNewListName] = useState('');
+  const [selectedListId, setSelectedListId] = useState(null);
+  const [itemInput, setItemInput] = useState('');
+  const [itemQuantity, setItemQuantity] = useState('');
+  const [editingListId, setEditingListId] = useState(null);
+  const [editingListNameId, setEditingListNameId] = useState(null);
+  const [tempListName, setTempListName] = useState('');
+  const [showBottomSheet, setShowBottomSheet] = useState(false);
+  const [bottomSheetListId, setBottomSheetListId] = useState(null);
+
+  // Save shopping lists to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('shoppingLists', JSON.stringify(shoppingLists));
+  }, [shoppingLists]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -281,6 +303,173 @@ const InventoryPage = () => {
   const filteredItems = getFilteredItems();
   const groupedItems = getGroupedItems();
 
+  // Shopping List Handlers
+  const handleCreateNewList = () => {
+    setShowCreateListModal(true);
+    setNewListName('');
+  };
+
+  const handleModalConfirm = () => {
+    if (newListName.trim()) {
+      const newList = {
+        id: Date.now().toString(),
+        name: newListName,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        items: []
+      };
+
+      // Add the list and immediately enter edit mode
+      setShoppingLists([...shoppingLists, newList]);
+      setSelectedListId(newList.id);
+      setEditingListId(newList.id);
+      setShowCreateListModal(false);
+      setNewListName('');
+      setItemInput('');
+      setItemQuantity('');
+    }
+  };
+
+
+  const handleAddItemToNewList = () => {
+    if (itemInput.trim() && editingListId) {
+      const newItem = {
+        id: Date.now().toString(),
+        name: itemInput,
+        quantity: itemQuantity || '1',
+        category: 'Other',
+        checked: false
+      };
+      
+      // Add item to the existing list
+      setShoppingLists(shoppingLists.map(list => {
+        if (list.id === editingListId) {
+          return {
+            ...list,
+            items: [...list.items, newItem],
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return list;
+      }));
+      
+      setItemInput('');
+      setItemQuantity('');
+    }
+  };
+
+
+  const handleSelectList = (listId) => {
+    // Instead of just viewing, go directly to edit mode
+    setSelectedListId(listId);
+    setEditingListId(listId);
+    setItemInput('');
+    setItemQuantity('');
+  };
+
+  const handleToggleItemCheck = (listId, itemId) => {
+    setShoppingLists(shoppingLists.map(list => {
+      if (list.id === listId) {
+        return {
+          ...list,
+          items: list.items.map(item => 
+            item.id === itemId ? { ...item, checked: !item.checked } : item
+          ),
+          updatedAt: new Date().toISOString()
+        };
+      }
+      return list;
+    }));
+  };
+
+  const handleDeleteList = (listId) => {
+    setShoppingLists(shoppingLists.filter(list => list.id !== listId));
+    setSelectedListId(null);
+  };
+
+  const handleClearCompleted = (listId) => {
+    setShoppingLists(shoppingLists.map(list => {
+      if (list.id === listId) {
+        return {
+          ...list,
+          items: list.items.filter(item => !item.checked),
+          updatedAt: new Date().toISOString()
+        };
+      }
+      return list;
+    }));
+  };
+
+  const handleExitEditMode = () => {
+    setEditingListId(null);
+    setItemInput('');
+    setItemQuantity('');
+  };
+
+  const handleDeleteItemFromList = (listId, itemId) => {
+    setShoppingLists(shoppingLists.map(list => {
+      if (list.id === listId) {
+        return {
+          ...list,
+          items: list.items.filter(item => item.id !== itemId),
+          updatedAt: new Date().toISOString()
+        };
+      }
+      return list;
+    }));
+  };
+
+  const handleStartEditListName = (listId, currentName) => {
+    setEditingListNameId(listId);
+    setTempListName(currentName);
+  };
+
+  const handleSaveListName = () => {
+    if (tempListName.trim() && editingListNameId) {
+      setShoppingLists(shoppingLists.map(list => {
+        if (list.id === editingListNameId) {
+          return {
+            ...list,
+            name: tempListName.trim(),
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return list;
+      }));
+      setEditingListNameId(null);
+      setTempListName('');
+    }
+  };
+
+  const handleCancelEditListName = () => {
+    setEditingListNameId(null);
+    setTempListName('');
+  };
+
+  const handleOpenBottomSheet = (listId) => {
+    setBottomSheetListId(listId);
+    setShowBottomSheet(true);
+  };
+
+  const handleCloseBottomSheet = () => {
+    setShowBottomSheet(false);
+    setBottomSheetListId(null);
+  };
+
+  const handleDeleteListFromSheet = () => {
+    if (bottomSheetListId) {
+      handleDeleteList(bottomSheetListId);
+      handleCloseBottomSheet();
+    }
+  };
+
+  const handleClearCompletedFromSheet = () => {
+    if (bottomSheetListId) {
+      handleClearCompleted(bottomSheetListId);
+      handleCloseBottomSheet();
+    }
+  };
+
   return (
     <div className="inventory-page">
       <AppNavBar />
@@ -291,10 +480,35 @@ const InventoryPage = () => {
           {/* Row 1: Title Only */}
           <div style={{ marginBottom: '1.5rem', marginTop: '0.5rem' }}>
             <h1 className="inventory-page__title">
-              Your Fridge
+              Inventory
             </h1>
           </div>
 
+          {/* Tab Navigation */}
+          <div className="inventory-page__tabs">
+            <button 
+              className={`inventory-page__tab ${activeTab === 'inventory' ? 'active' : ''}`}
+              onClick={() => setActiveTab('inventory')}
+            >
+              Your Fridge
+            </button>
+            <button
+              className={`inventory-page__tab ${activeTab === 'shopping-list' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('shopping-list');
+                setEditingListId(null);
+                setSelectedListId(null);
+                setItemInput('');
+                setItemQuantity('');
+              }}
+            >
+              Shopping List
+            </button>
+          </div>
+
+          {/* Conditional Content Based on Active Tab */}
+          {activeTab === 'inventory' ? (
+            <>
           {/* Row 2: Search Bar + Plus Button */}
           <div className="inventory-page__actions-row">
             {/* Search Bar */}
@@ -1118,6 +1332,262 @@ const InventoryPage = () => {
               )}
             </div>
           )}
+            </>
+          ) : (
+            /* Shopping List Tab Content */
+            <div className="inventory-page__shopping-list-content">
+              {/* Shopping List Header - only show when viewing list of lists */}
+              {!editingListId && !selectedListId && (
+                <div className="inventory-page__shopping-header">
+                  <h2 className="inventory-page__shopping-title">Create your list</h2>
+                  <button
+                    className="inventory-page__add-shopping-list-btn"
+                    onClick={handleCreateNewList}
+                    title="Create new list"
+                  >
+                    +
+                  </button>
+                </div>
+              )}
+
+              {/* Shopping Lists Container */}
+              <div className="inventory-page__lists-container">
+                {editingListId ? (
+                  // Full-page edit mode
+                  (() => {
+                    const editingList = shoppingLists.find(list => list.id === editingListId);
+                    if (!editingList) return null;
+                    
+                    return (
+                      <div className="inventory-page__fullpage-edit">
+                        <div className="inventory-page__edit-header-row">
+                          <button
+                            className="inventory-page__edit-back-btn"
+                            onClick={() => {
+                              setEditingListId(null);
+                              setSelectedListId(null);
+                              setItemInput('');
+                              setItemQuantity('');
+                            }}
+                            title="Back to lists"
+                          >
+                            ←
+                          </button>
+                          {editingListNameId === editingList.id ? (
+                            <input
+                              type="text"
+                              value={tempListName}
+                              onChange={(e) => setTempListName(e.target.value)}
+                              onBlur={handleSaveListName}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleSaveListName();
+                                } else if (e.key === 'Escape') {
+                                  handleCancelEditListName();
+                                }
+                              }}
+                              onFocus={(e) => e.target.select()}
+                              className="inventory-page__edit-page-title inventory-page__edit-page-title--input"
+                              autoFocus
+                            />
+                          ) : (
+                            <h1
+                              className="inventory-page__edit-page-title"
+                              onClick={() => {
+                                handleStartEditListName(editingList.id, editingList.name);
+                              }}
+                              style={{ cursor: 'pointer', userSelect: 'none' }}
+                              title="Click to edit"
+                            >
+                              {editingList.name}
+                            </h1>
+                          )}
+                          <div className="inventory-page__edit-top-actions">
+                            <button
+                              className="inventory-page__add-quick-btn"
+                              onClick={handleAddItemToNewList}
+                              title="Add item"
+                            >
+                              +
+                            </button>
+                            <button
+                              className="inventory-page__menu-btn"
+                              title="Menu"
+                            >
+                              ⋯
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="inventory-page__edit-container">
+                          
+                          {/* Add item input area - modern vertical design */}
+                          <div className="inventory-page__add-new-item">
+                            <div className="inventory-page__new-item-block">
+                              <div className="inventory-page__circle-placeholder"></div>
+                              <div className="inventory-page__input-stack">
+                                <input 
+                                  type="text"
+                                  value={itemInput}
+                                  onChange={(e) => setItemInput(e.target.value)}
+                                  onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                      if (!itemInput.trim()) return;
+                                      if (!itemQuantity.trim()) {
+                                        // Move to quantity field if item is filled but quantity is empty
+                                        document.querySelector('.inventory-page__new-amount-vertical').focus();
+                                      } else {
+                                        handleAddItemToNewList();
+                                      }
+                                    }
+                                  }}
+                                  className="inventory-page__new-item-vertical"
+                                  placeholder=""
+                                  autoFocus
+                                />
+                                <input 
+                                  type="text"
+                                  value={itemQuantity}
+                                  onChange={(e) => setItemQuantity(e.target.value)}
+                                  onKeyPress={(e) => {
+                                    if (e.key === 'Enter' && itemInput.trim()) {
+                                      handleAddItemToNewList();
+                                      // Focus back on the item name field after adding
+                                      setTimeout(() => {
+                                        document.querySelector('.inventory-page__new-item-vertical').focus();
+                                      }, 0);
+                                    }
+                                  }}
+                                  placeholder="Amount"
+                                  className="inventory-page__new-amount-vertical"
+                                />
+                              </div>
+                            </div>
+                            <div className="inventory-page__item-divider"></div>
+                          </div>
+                          
+                          {/* Existing items - modern vertical layout */}
+                          <div className="inventory-page__existing-items">
+                            {[...editingList.items]
+                              .sort((a, b) => {
+                                // Sort by checked status - unchecked items first, checked items last
+                                if (a.checked === b.checked) return 0;
+                                return a.checked ? 1 : -1;
+                              })
+                              .map(item => (
+                              <div key={item.id}>
+                                <div className="inventory-page__existing-item-block">
+                                  <div 
+                                    className={`inventory-page__circle-check ${item.checked ? 'checked' : ''}`}
+                                    onClick={() => handleToggleItemCheck(editingListId, item.id)}
+                                  ></div>
+                                  <div className="inventory-page__item-content">
+                                    <div className={`inventory-page__item-text ${item.checked ? 'checked' : ''}`}>
+                                      {item.name}
+                                    </div>
+                                    <div className={`inventory-page__item-amount ${item.checked ? 'checked' : ''}`}>
+                                      {item.quantity}
+                                    </div>
+                                  </div>
+                                  <button 
+                                    className="inventory-page__remove-btn"
+                                    onClick={() => handleDeleteItemFromList(editingListId, item.id)}
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                                <div className="inventory-page__item-divider"></div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()
+                ) : (
+                  // List view - show all lists
+                  <>
+                    {shoppingLists.length === 0 ? (
+                      // Empty state
+                      <div className="inventory-page__empty-lists">
+                        <div className="inventory-page__empty-icon">🛒</div>
+                        <h3 className="inventory-page__empty-title">No shopping lists yet</h3>
+                        <p className="inventory-page__empty-text">
+                          Create your first shopping list to keep track of items you need to buy
+                        </p>
+                        <button 
+                          className="inventory-page__create-first-btn"
+                          onClick={handleCreateNewList}
+                        >
+                          Create your first list
+                        </button>
+                      </div>
+                    ) : (
+                      // Display shopping list cards
+                      <div className="inventory-page__lists-grid">
+                        {shoppingLists.map((list, index) => {
+                          const completedCount = list.items.filter(item => item.checked).length;
+                          const totalCount = list.items.length;
+
+                          // Pastel color palette - solid colors
+                          const pastelColors = [
+                            '#c3f0ca', // Soft green
+                            '#ffd4e5', // Soft pink
+                            '#d4e5ff', // Soft blue
+                            '#fff9d4', // Soft yellow
+                            '#e5d4ff', // Soft purple
+                            '#ffd4b3', // Soft peach
+                            '#d4ffea', // Soft mint
+                            '#ffd4d4', // Soft coral
+                          ];
+
+                          const cardStyle = {
+                            backgroundColor: pastelColors[index % pastelColors.length]
+                          };
+
+                          return (
+                            <div
+                              key={list.id}
+                              className="inventory-page__list-card"
+                              style={cardStyle}
+                              onClick={() => handleSelectList(list.id)}
+                            >
+                              <div className="inventory-page__list-card-header">
+                                <h3 className="inventory-page__list-name">{list.name}</h3>
+                                <button
+                                  className="inventory-page__list-options-btn"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenBottomSheet(list.id);
+                                  }}
+                                  title="Options"
+                                >
+                                  ⋯
+                                </button>
+                              </div>
+                              <div className="inventory-page__list-stats">
+                                <span className="inventory-page__list-count">
+                                  {totalCount} {totalCount === 1 ? 'item' : 'items'}
+                                </span>
+                                {totalCount > 0 && (
+                                  <span className="inventory-page__list-progress">
+                                    {completedCount}/{totalCount} completed
+                                  </span>
+                                )}
+                              </div>
+                              <div className="inventory-page__list-updated">
+                                Last updated: {new Date(list.updatedAt).toLocaleDateString()}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
       
@@ -1441,7 +1911,162 @@ const InventoryPage = () => {
           </div>
         </div>
       )}
-      
+
+
+      {/* Create Shopping List Modal - Only name input */}
+      {showCreateListModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '2rem',
+            maxWidth: '400px',
+            width: '90%',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+          }}>
+            <h3 style={{
+                  margin: '0 0 1.5rem 0',
+                  fontSize: '1.5rem',
+                  fontWeight: '600',
+                  color: '#333'
+                }}>
+                  Create New Shopping List
+                </h3>
+
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label style={{
+                    display: 'block',
+                    marginBottom: '0.5rem',
+                    fontWeight: '500',
+                    color: '#555'
+                  }}>
+                    List Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newListName}
+                    onChange={(e) => setNewListName(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && newListName.trim()) {
+                        handleModalConfirm();
+                      }
+                    }}
+                    placeholder="e.g., Weekly Groceries"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid #ddd',
+                      borderRadius: '8px',
+                      fontSize: '1rem'
+                    }}
+                    autoFocus
+                  />
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  gap: '1rem',
+                  justifyContent: 'flex-end'
+                }}>
+                  <button
+                    onClick={() => {
+                      setShowCreateListModal(false);
+                      setNewListName('');
+                    }}
+                    style={{
+                      padding: '0.75rem 1.5rem',
+                      backgroundColor: '#f8f9fa',
+                      border: '1px solid #ddd',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '1rem'
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleModalConfirm}
+                    disabled={!newListName.trim()}
+                    style={{
+                      padding: '0.75rem 1.5rem',
+                      backgroundColor: newListName.trim() ? 'var(--primary-green)' : '#ccc',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: newListName.trim() ? 'pointer' : 'not-allowed',
+                      fontSize: '1rem'
+                    }}
+                  >
+                    Create & Continue
+                  </button>
+                </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom Sheet for List Options */}
+      {showBottomSheet && (
+        <>
+          <div
+            className="inventory-page__bottom-sheet-overlay"
+            onClick={handleCloseBottomSheet}
+          />
+          <div
+            className={`inventory-page__bottom-sheet ${showBottomSheet ? 'active' : ''}`}
+            style={{
+              backgroundColor: (() => {
+                const listIndex = shoppingLists.findIndex(list => list.id === bottomSheetListId);
+                const pastelColors = [
+                  '#c3f0ca', // Soft green
+                  '#ffd4e5', // Soft pink
+                  '#d4e5ff', // Soft blue
+                  '#fff9d4', // Soft yellow
+                  '#e5d4ff', // Soft purple
+                  '#ffd4b3', // Soft peach
+                  '#d4ffea', // Soft mint
+                  '#ffd4d4', // Soft coral
+                ];
+                return pastelColors[listIndex % pastelColors.length];
+              })()
+            }}
+          >
+            <div className="inventory-page__bottom-sheet-handle" />
+            <div className="inventory-page__bottom-sheet-content">
+              <h2 className="inventory-page__bottom-sheet-title">
+                {shoppingLists.find(list => list.id === bottomSheetListId)?.name}
+              </h2>
+
+              <button
+                className="inventory-page__bottom-sheet-option"
+                onClick={handleDeleteListFromSheet}
+              >
+                <span className="inventory-page__bottom-sheet-option-text">DELETE ALL</span>
+                <span className="inventory-page__bottom-sheet-option-icon">🗑️</span>
+              </button>
+
+              <button
+                className="inventory-page__bottom-sheet-option"
+                onClick={handleClearCompletedFromSheet}
+              >
+                <span className="inventory-page__bottom-sheet-option-text">CLEAR COMPLETED</span>
+                <span className="inventory-page__bottom-sheet-option-icon">✓</span>
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
       <MobileBottomNav />
     </div>
   );

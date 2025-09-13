@@ -10,13 +10,26 @@ const useTastyRecipes = () => {
   const [tastySuggestions, setTastySuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [noUserOrInventory, setNoUserOrInventory] = useState(false);
 
   const fetchTastySuggestions = useCallback(async (options = {}) => {
-    if (!user || !inventoryItems || inventoryItems.length === 0) {
-      console.log('🍳 Skipping Tasty test - no user or inventory');
+    if (!user) {
+      console.log('🍳 Skipping Tasty test - no user logged in');
       setTastySuggestions([]);
+      setNoUserOrInventory(true);
+      setError('no_user');
       return;
     }
+
+    if (!inventoryItems || inventoryItems.length === 0) {
+      console.log('🍳 Skipping Tasty test - no inventory items');
+      setTastySuggestions([]);
+      setNoUserOrInventory(true);
+      setError('no_inventory');
+      return;
+    }
+
+    setNoUserOrInventory(false);
     
     try {
       setLoading(true);
@@ -83,6 +96,7 @@ const useTastyRecipes = () => {
     suggestions: tastySuggestions,
     loading,
     error,
+    noUserOrInventory,
     fetchSuggestions: fetchTastySuggestions,
     getHighMatchRecipes,
     getRecipesWithVideos,

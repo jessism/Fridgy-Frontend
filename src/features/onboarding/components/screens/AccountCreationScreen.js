@@ -50,7 +50,7 @@ const AccountCreationScreen = ({ data, updateData, onComplete, onBack, loading, 
   };
 
   return (
-    <div className="onboarding-screen">
+    <div className="onboarding-screen onboarding-screen--account">
       <div className="onboarding-screen__content">
         <h1 className="onboarding-screen__title">
           Create your account
@@ -60,7 +60,7 @@ const AccountCreationScreen = ({ data, updateData, onComplete, onBack, loading, 
           You're one step away from your personalized experience!
         </p>
         
-        <form onSubmit={handleSubmit} style={{ marginTop: '32px' }}>
+        <form onSubmit={handleSubmit} className="account-form">
           {error && (
             <div style={{
               background: '#fee',
@@ -168,10 +168,11 @@ const AccountCreationScreen = ({ data, updateData, onComplete, onBack, loading, 
             <input
               type="checkbox"
               id="terms"
+              className="terms-checkbox"
               style={{ marginTop: '2px' }}
               defaultChecked
             />
-            <label htmlFor="terms" style={{ fontSize: '14px', color: '#666', lineHeight: '1.5' }}>
+            <label htmlFor="terms" style={{ fontSize: '12px', color: '#999', lineHeight: '1.4' }}>
               I agree to the Terms of Service and Privacy Policy. I also agree to receive product updates and marketing communications.
             </label>
           </div>
@@ -182,14 +183,10 @@ const AccountCreationScreen = ({ data, updateData, onComplete, onBack, loading, 
               className="onboarding-btn onboarding-btn--primary onboarding-btn--large"
               disabled={loading}
             >
-              {loading ? 'Creating Account...' : 'Complete Setup'}
+              {loading ? 'Creating Account...' : "Let's go"}
             </button>
           </div>
         </form>
-        
-        <p className="onboarding-screen__note">
-          🔒 Your data is secure and encrypted
-        </p>
       </div>
     </div>
   );
