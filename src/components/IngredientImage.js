@@ -17,9 +17,11 @@ const IngredientImage = ({
   // Function to get category-based color class
   const getCategoryColorClass = (category) => {
     const cat = category?.toLowerCase() || '';
-    
-    if (cat.includes('fruit') || cat.includes('vegetable')) {
-      return 'ingredient-image--green-bg';
+
+    if (cat.includes('fruit')) {
+      return 'ingredient-image--fruit-green-bg';
+    } else if (cat.includes('vegetable')) {
+      return 'ingredient-image--vegetable-green-bg';
     } else if (cat.includes('dairy')) {
       return 'ingredient-image--blue-bg';
     } else if (cat.includes('protein') || cat.includes('meat') || cat.includes('fish')) {

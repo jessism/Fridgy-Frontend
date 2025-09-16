@@ -158,13 +158,31 @@ const AppNavBar = () => {
             {isProfileDropdownOpen && (
               <div className="profile-dropdown-menu">
                 <div className="profile-dropdown-options">
-                  <button 
+                  <button
+                    className="profile-dropdown-option"
+                    onClick={() => {
+                      setIsProfileDropdownOpen(false);
+                      navigate('/import');
+                    }}
+                  >
+                    Import Recipe
+                  </button>
+                  <button
+                    className="profile-dropdown-option"
+                    onClick={() => {
+                      setIsProfileDropdownOpen(false);
+                      navigate('/saved-recipes');
+                    }}
+                  >
+                    My Cookbook
+                  </button>
+                  <button
                     className="profile-dropdown-option"
                     onClick={handleAccountSettings}
                   >
                     Account Settings
                   </button>
-                  <button 
+                  <button
                     className="profile-dropdown-option"
                     onClick={handleLogout}
                   >

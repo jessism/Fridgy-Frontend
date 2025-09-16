@@ -6,7 +6,8 @@ const RecipeDetailModal = ({
   onClose,
   recipe,
   isLoading,
-  onCookNow
+  onCookNow,
+  customActionLabel
 }) => {
   const [activeTab, setActiveTab] = useState('ingredients');
   const [showCookingConfirmation, setShowCookingConfirmation] = useState(false);
@@ -138,7 +139,22 @@ const RecipeDetailModal = ({
   };
 
   const renderInstructions = () => {
-    // First check for structured step-by-step instructions
+    // First check for analyzedInstructions format (from Instagram imports)
+    if (recipe?.analyzedInstructions &&
+        Array.isArray(recipe.analyzedInstructions) &&
+        recipe.analyzedInstructions.length > 0 &&
+        recipe.analyzedInstructions[0].steps &&
+        Array.isArray(recipe.analyzedInstructions[0].steps) &&
+        recipe.analyzedInstructions[0].steps.length > 0) {
+      return recipe.analyzedInstructions[0].steps.map((step, index) => (
+        <div key={index} className="instruction-step">
+          <span className="step-number">Step {step.number || index + 1}:</span>
+          <span className="step-text">{step.step}</span>
+        </div>
+      ));
+    }
+
+    // Second check for structured step-by-step instructions
     if (recipe?.instructionSteps && Array.isArray(recipe.instructionSteps) && recipe.instructionSteps.length > 0) {
       return recipe.instructionSteps.map((step, index) => (
         <div key={index} className="instruction-step">
@@ -450,17 +466,19 @@ const RecipeDetailModal = ({
           {/* Footer with action buttons */}
           {recipe && !isLoading && (
             <div className="recipe-modal-footer">
-              <button 
-                className="recipe-cancel-button"
-                onClick={onClose}
-              >
-                Cancel
-              </button>
-              <button 
+              {!customActionLabel && (
+                <button
+                  className="recipe-cancel-button"
+                  onClick={onClose}
+                >
+                  Cancel
+                </button>
+              )}
+              <button
                 className="recipe-cook-button"
-                onClick={handleCookNow}
+                onClick={customActionLabel ? () => onCookNow(recipe) : handleCookNow}
               >
-                Cook This Recipe
+                {customActionLabel || "Cook This Recipe"}
               </button>
             </div>
           )}

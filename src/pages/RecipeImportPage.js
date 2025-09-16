@@ -1,0 +1,522 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import './RecipeImportPage.css';
+
+const RecipeImportPage = () => {
+  const [importUrl, setImportUrl] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState('');
+  const [error, setError] = useState('');
+  const [extractedRecipe, setExtractedRecipe] = useState(null);
+  const [showManualForm, setShowManualForm] = useState(false);
+  const [manualCaption, setManualCaption] = useState('');
+  const [showCaptionInput, setShowCaptionInput] = useState(false);
+  const [apifyLoading, setApifyLoading] = useState(false);
+  const [apifyUsage, setApifyUsage] = useState(null);
+  const [showVideoPreview, setShowVideoPreview] = useState(false);
+  const [videoUrl, setVideoUrl] = useState(null);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if came from iOS Shortcut with URL parameter
+    const params = new URLSearchParams(location.search);
+    const url = params.get('url');
+
+    if (url && url.includes('instagram.com')) {
+      console.log('[RecipeImport] Detected Instagram URL from shortcut:', url);
+      setImportUrl(url);
+      setStatus('🎉 Recipe detected from Instagram!');
+      // Auto-import after 1 second
+      setTimeout(() => handleImport(url), 1000);
+    }
+
+    // Check clipboard for Instagram URL (optional enhancement)
+    checkClipboard();
+
+    // Fetch Apify usage stats
+    fetchApifyUsage();
+  }, [location]);
+
+  const checkClipboard = async () => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        const text = await navigator.clipboard.readText();
+        if (text && text.includes('instagram.com') && !importUrl) {
+          console.log('[RecipeImport] Found Instagram URL in clipboard:', text);
+          setImportUrl(text);
+          setStatus('📋 Found Instagram link in your clipboard!');
+        }
+      }
+    } catch (err) {
+      // Clipboard access denied or not available
+      console.log('[RecipeImport] Clipboard access not available');
+    }
+  };
+
+  const fetchApifyUsage = async () => {
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      if (!token) return;
+
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${apiUrl}/recipes/apify-usage`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setApifyUsage(data.usage);
+        console.log('[RecipeImport] Apify usage:', data.usage);
+      }
+    } catch (error) {
+      console.log('[RecipeImport] Could not fetch Apify usage:', error);
+    }
+  };
+
+  const handleImport = async (url) => {
+    // Validate URL
+    const urlToImport = url || importUrl;
+    if (!urlToImport || !urlToImport.includes('instagram.com')) {
+      setError('Please enter a valid Instagram URL');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setStatus('🔄 Extracting recipe from Instagram...');
+
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      if (!token) {
+        setError('Please sign in to import recipes');
+        navigate('/signin');
+        return;
+      }
+
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${apiUrl}/recipes/import-instagram`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          url: urlToImport,
+          manualCaption: manualCaption || undefined
+        })
+      });
+
+      const data = await response.json();
+      console.log('[RecipeImport] Import response:', data);
+
+      if (data.success && data.recipe) {
+        setStatus('✅ Recipe imported successfully!');
+        setExtractedRecipe(data.recipe);
+
+        // Show success for 2 seconds then redirect
+        setTimeout(() => {
+          navigate('/saved-recipes');
+        }, 2000);
+      } else if (data.requiresManualCaption) {
+        // Need manual caption input
+        setStatus('📋 Could not fetch caption automatically. Please paste it below.');
+        setShowCaptionInput(true);
+        setError('');
+      } else if (data.requiresManualInput) {
+        setStatus('📝 Need your help to complete the recipe...');
+        setExtractedRecipe(data.partialRecipe);
+        setShowManualForm(true);
+      } else {
+        setError(data.error || 'Failed to import recipe. Please try manual entry.');
+        setShowManualForm(true);
+      }
+    } catch (error) {
+      console.error('[RecipeImport] Import error:', error);
+      setError('Failed to connect to server. Please try again.');
+      setShowManualForm(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApifyImport = async () => {
+    // Validate URL
+    if (!importUrl || !importUrl.includes('instagram.com')) {
+      setError('Please enter a valid Instagram URL');
+      return;
+    }
+
+    setApifyLoading(true);
+    setError('');
+    setStatus('🎥 Extracting recipe with video analysis...');
+    setShowVideoPreview(false);
+    setVideoUrl(null);
+
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      if (!token) {
+        setError('Please sign in to import recipes');
+        navigate('/signin');
+        return;
+      }
+
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${apiUrl}/recipes/import-instagram-apify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          url: importUrl
+        })
+      });
+
+      const data = await response.json();
+      console.log('[RecipeImport] Apify import response:', data);
+
+      if (data.success && data.recipe) {
+        setStatus('✅ Recipe imported successfully with video analysis!');
+        setExtractedRecipe(data.recipe);
+
+        // Update usage stats
+        if (data.usage) {
+          setApifyUsage(data.usage);
+        }
+
+        // Show video preview if available
+        if (data.recipe.video_url) {
+          setVideoUrl(data.recipe.video_url);
+          setShowVideoPreview(true);
+        }
+
+        // Show success for 2 seconds then redirect
+        setTimeout(() => {
+          navigate('/saved-recipes');
+        }, 2000);
+      } else if (data.limitExceeded) {
+        setError(`Monthly limit reached (${data.usage?.used}/${data.usage?.limit}). Please use standard import.`);
+        setApifyUsage(data.usage);
+      } else if (data.requiresManualInput) {
+        setStatus('📝 Need your help to complete the recipe...');
+        setExtractedRecipe(data.partialRecipe);
+        if (data.videoUrl) {
+          setVideoUrl(data.videoUrl);
+          setShowVideoPreview(true);
+        }
+        setShowManualForm(true);
+      } else if (data.fallbackAvailable) {
+        setError(data.error || 'Premium import failed. Try standard import.');
+      } else {
+        setError(data.error || 'Failed to import recipe with video analysis.');
+      }
+    } catch (error) {
+      console.error('[RecipeImport] Apify import error:', error);
+      setError('Premium import service unavailable. Please try standard import.');
+    } finally {
+      setApifyLoading(false);
+    }
+  };
+
+  const handleManualSave = async (recipeData) => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+      const response = await fetch(`${apiUrl}/saved-recipes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          ...recipeData,
+          source_type: 'instagram',
+          source_url: importUrl,
+          import_method: 'manual'
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setStatus('✅ Recipe saved successfully!');
+        setTimeout(() => navigate('/saved-recipes'), 1500);
+      } else {
+        setError('Failed to save recipe. Please try again.');
+      }
+    } catch (error) {
+      console.error('[RecipeImport] Save error:', error);
+      setError('Failed to save recipe. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="recipe-import-page">
+      <div className="recipe-import-page__container">
+        {/* Header */}
+        <div className="recipe-import-page__header">
+          <button
+            className="recipe-import-page__back-button"
+            onClick={() => navigate('/saved-recipes')}
+          >
+            ← Back
+          </button>
+          <h1>Import Recipe from Instagram</h1>
+          <button
+            className="recipe-import-page__close-button"
+            onClick={() => navigate(-1)}
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
+
+        {/* Status Messages */}
+        {status && !error && (
+          <div className="recipe-import-page__status recipe-import-page__status--info">
+            {status}
+          </div>
+        )}
+
+        {error && (
+          <div className="recipe-import-page__status recipe-import-page__status--error">
+            {error}
+          </div>
+        )}
+
+        {/* Import Form */}
+        {!showManualForm && (
+          <div className="recipe-import-page__form">
+            <div className="recipe-import-page__input-group">
+              <label htmlFor="url">Instagram URL</label>
+              <input
+                id="url"
+                type="url"
+                placeholder="https://www.instagram.com/p/..."
+                value={importUrl}
+                onChange={(e) => setImportUrl(e.target.value)}
+                disabled={loading}
+                className="recipe-import-page__input"
+              />
+              <small className="recipe-import-page__help">
+                Paste an Instagram post or reel URL containing a recipe
+              </small>
+            </div>
+
+            {/* Manual Caption Input (shows when auto-fetch fails) */}
+            {showCaptionInput && (
+              <div className="recipe-import-page__input-group">
+                <label htmlFor="caption">
+                  Instagram Caption
+                  <span className="recipe-import-page__required">*</span>
+                </label>
+                <textarea
+                  id="caption"
+                  placeholder="Please paste the recipe text/caption from the Instagram post here..."
+                  value={manualCaption}
+                  onChange={(e) => setManualCaption(e.target.value)}
+                  disabled={loading}
+                  className="recipe-import-page__input recipe-import-page__textarea"
+                  rows="8"
+                />
+                <small className="recipe-import-page__help">
+                  Copy the caption from Instagram that contains the recipe ingredients and instructions
+                </small>
+              </div>
+            )}
+
+            {/* Standard import button hidden - using only Apify import
+            <button
+              onClick={() => handleImport(importUrl)}
+              disabled={loading || !importUrl || (showCaptionInput && !manualCaption)}
+              className="recipe-import-page__button recipe-import-page__button--primary"
+            >
+              {loading ? 'Importing...' : showCaptionInput ? 'Import with Caption' : 'Import Recipe'}
+            </button>
+            */}
+
+            <button
+              onClick={handleApifyImport}
+              disabled={apifyLoading || loading || !importUrl || (apifyUsage && apifyUsage.remaining === 0)}
+              className="recipe-import-page__button recipe-import-page__button--apify"
+              title="Premium import with video analysis for better recipe extraction"
+            >
+              {apifyLoading ? (
+                <span>🎥 Analyzing video...</span>
+              ) : (
+                <>
+                  <span>Import with Video Analysis ✨</span>
+                  {apifyUsage && (
+                    <span className="recipe-import-page__usage-badge">
+                      ({apifyUsage.remaining}/{apifyUsage.limit} left)
+                    </span>
+                  )}
+                </>
+              )}
+            </button>
+
+            {showVideoPreview && videoUrl && (
+              <div className="recipe-import-page__video-preview">
+                <p>📹 Video analyzed for enhanced recipe extraction</p>
+                <video
+                  src={videoUrl}
+                  controls
+                  className="recipe-import-page__video"
+                  style={{ maxWidth: '100%', height: 'auto', marginTop: '10px' }}
+                />
+              </div>
+            )}
+
+            <div className="recipe-import-page__divider">
+              <span>OR</span>
+            </div>
+
+            <button
+              onClick={() => setShowManualForm(true)}
+              disabled={loading}
+              className="recipe-import-page__button recipe-import-page__button--secondary"
+            >
+              Enter Recipe Manually
+            </button>
+          </div>
+        )}
+
+        {/* Manual Form (simplified for now) */}
+        {showManualForm && !loading && (
+          <div className="recipe-import-page__manual-form">
+            <h2>Enter Recipe Details</h2>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              const recipe = {
+                title: formData.get('title'),
+                summary: formData.get('summary'),
+                extendedIngredients: [],
+                analyzedInstructions: [{
+                  name: '',
+                  steps: [{
+                    number: 1,
+                    step: formData.get('instructions')
+                  }]
+                }],
+                readyInMinutes: parseInt(formData.get('time')) || 30,
+                servings: parseInt(formData.get('servings')) || 4
+              };
+              handleManualSave(recipe);
+            }}>
+              <div className="recipe-import-page__input-group">
+                <label htmlFor="title">Recipe Title *</label>
+                <input
+                  id="title"
+                  name="title"
+                  type="text"
+                  required
+                  defaultValue={extractedRecipe?.title || ''}
+                  className="recipe-import-page__input"
+                />
+              </div>
+
+              <div className="recipe-import-page__input-group">
+                <label htmlFor="summary">Description</label>
+                <textarea
+                  id="summary"
+                  name="summary"
+                  rows="3"
+                  defaultValue={extractedRecipe?.summary || ''}
+                  className="recipe-import-page__input"
+                />
+              </div>
+
+              <div className="recipe-import-page__input-row">
+                <div className="recipe-import-page__input-group">
+                  <label htmlFor="time">Time (minutes)</label>
+                  <input
+                    id="time"
+                    name="time"
+                    type="number"
+                    defaultValue={extractedRecipe?.readyInMinutes || 30}
+                    className="recipe-import-page__input"
+                  />
+                </div>
+
+                <div className="recipe-import-page__input-group">
+                  <label htmlFor="servings">Servings</label>
+                  <input
+                    id="servings"
+                    name="servings"
+                    type="number"
+                    defaultValue={extractedRecipe?.servings || 4}
+                    className="recipe-import-page__input"
+                  />
+                </div>
+              </div>
+
+              <div className="recipe-import-page__input-group">
+                <label htmlFor="instructions">Instructions</label>
+                <textarea
+                  id="instructions"
+                  name="instructions"
+                  rows="6"
+                  placeholder="Enter cooking instructions..."
+                  className="recipe-import-page__input"
+                />
+              </div>
+
+              <div className="recipe-import-page__button-group">
+                <button
+                  type="button"
+                  onClick={() => setShowManualForm(false)}
+                  className="recipe-import-page__button recipe-import-page__button--secondary"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="recipe-import-page__button recipe-import-page__button--primary"
+                >
+                  Save Recipe
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Loading Spinner */}
+        {loading && (
+          <div className="recipe-import-page__loading">
+            <div className="recipe-import-page__spinner"></div>
+            <p>Processing your recipe...</p>
+          </div>
+        )}
+
+        {/* Instructions */}
+        <div className="recipe-import-page__instructions">
+          <h3>How to import from Instagram:</h3>
+          <ol>
+            <li>Find a recipe post or reel on Instagram</li>
+            <li>Tap the share button (paper airplane icon)</li>
+            <li>Copy the link</li>
+            <li>Paste it above and click Import</li>
+          </ol>
+
+          <p className="recipe-import-page__note">
+            <strong>Tip:</strong> For best results, use posts where the recipe is in the caption.
+            Video-only recipes may require manual entry.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default RecipeImportPage;

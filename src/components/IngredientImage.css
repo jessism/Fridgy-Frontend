@@ -58,7 +58,15 @@
 
 /* Category-based background colors */
 .ingredient-image--green-bg {
-  background: #e8f5e9 !important; /* Light green for fruits/vegetables */
+  background: #e8f5e9 !important; /* Light green for fruits/vegetables (legacy) */
+}
+
+.ingredient-image--fruit-green-bg {
+  background: #e8f5e8 !important; /* Lighter, softer green for fruits */
+}
+
+.ingredient-image--vegetable-green-bg {
+  background: #f0f9f0 !important; /* Soft, pastel green for vegetables */
 }
 
 .ingredient-image--blue-bg {
@@ -116,6 +124,14 @@
   /* Keep light backgrounds even in dark mode for consistency */
   .ingredient-image--green-bg {
     background: #e8f5e9 !important;
+  }
+
+  .ingredient-image--fruit-green-bg {
+    background: #e8f5e8 !important;
+  }
+
+  .ingredient-image--vegetable-green-bg {
+    background: #f0f9f0 !important;
   }
   
   .ingredient-image--blue-bg {

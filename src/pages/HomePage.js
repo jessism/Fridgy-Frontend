@@ -629,9 +629,9 @@ const HomePage = () => {
               </div>
               <span className="quick-access-label">My fridge</span>
             </div>
-            <div 
+            <div
               className="quick-access-item"
-              onClick={() => navigateToPage('/shopping-list')}
+              onClick={() => navigateToPage('/inventory/shopping-list')}
             >
               <div className="quick-access-icon">
                 <ShopListsIcon />

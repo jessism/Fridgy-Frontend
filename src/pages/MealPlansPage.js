@@ -434,11 +434,12 @@ const MealPlansPage = () => {
             </div>
           </div> */}
           
-          {/* Tasty Recipes Section - Premium quality with videos */}
+          {/* Tasty Recipes Section - Premium quality with videos - COMMENTED OUT */}
+          {/*
           <div className="meal-plans-page__section">
-            <div className="meal-plans-page__section-header" style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
+            <div className="meal-plans-page__section-header" style={{
+              display: 'flex',
+              justifyContent: 'space-between',
               alignItems: 'flex-start',
               marginBottom: '1.5rem'
             }}>
@@ -447,10 +448,10 @@ const MealPlansPage = () => {
                   Tasty Recipes
                 </h2>
                 {tastySuggestions?.some(s => s.video_url) && (
-                  <p style={{ 
-                    fontSize: '0.85rem', 
-                    color: '#666', 
-                    marginTop: '0.25rem' 
+                  <p style={{
+                    fontSize: '0.85rem',
+                    color: '#666',
+                    marginTop: '0.25rem'
                   }}>
                     🎥 Includes video tutorials
                   </p>
@@ -497,16 +498,16 @@ const MealPlansPage = () => {
                 <div className="error-state" style={{ textAlign: 'center', padding: '2rem' }}>
                   <h3>Unable to load Tasty recipes</h3>
                   <p>{tastyError}</p>
-                  <button 
+                  <button
                     onClick={() => {
                       clearTastyError();
                       refreshTastySuggestions();
                     }}
-                    style={{ 
-                      padding: '0.5rem 1rem', 
-                      backgroundColor: 'var(--primary-green)', 
-                      color: 'white', 
-                      border: 'none', 
+                    style={{
+                      padding: '0.5rem 1rem',
+                      backgroundColor: 'var(--primary-green)',
+                      color: 'white',
+                      border: 'none',
                       borderRadius: '4px',
                       cursor: 'pointer'
                     }}
@@ -586,14 +587,15 @@ const MealPlansPage = () => {
               )}
               {!tastyLoading && !['no_user', 'no_inventory'].includes(tastyError) && tastySuggestions.length > 0 && (
                 <>
-                  {tastySuggestions.slice(0, 4).map(recipe => 
+                  {tastySuggestions.slice(0, 4).map(recipe =>
                     renderRecipeCard(recipe, true)
                   )}
                 </>
               )}
             </div>
           </div>
-          
+          */}
+
           {/* Your Saved Recipes Section */}
           <div className="meal-plans-page__analytics-section">
             {/* Text Section */}
@@ -617,7 +619,7 @@ const MealPlansPage = () => {
           <div className="meal-plans-page__analytics-section">
             {/* Text Section - Same structure as AI section */}
             <div className="meal-plans-page__analytics-text-section">
-              <h2 className="meal-plans-page__section-title">View meal analytics</h2>
+              <h2 className="meal-plans-page__section-title">View meal history</h2>
               <p className="meal-plans-page__section-subtitle">Track your eating patterns and meal preferences over time</p>
             </div>
             

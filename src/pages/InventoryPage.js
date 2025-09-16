@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import { EditIcon, DeleteIcon } from '../components/icons';
@@ -8,9 +8,10 @@ import { getItemIconIcons8, getExpiryStatus, formatQuantity } from '../assets/in
 import IngredientImage from '../components/IngredientImage';
 import './InventoryPage.css';
 
-const InventoryPage = () => {
+const InventoryPage = ({ defaultTab }) => {
   const { items: inventoryItems, loading, error, refreshInventory, deleteItem, updateItem } = useInventory();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [openDropdownId, setOpenDropdownId] = useState(null);
@@ -18,7 +19,7 @@ const InventoryPage = () => {
   const [itemToEdit, setItemToEdit] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('inventory'); // New state for tab navigation
+  const [activeTab, setActiveTab] = useState(defaultTab || 'inventory'); // New state for tab navigation
   
   // Shopping List States - Initialize from localStorage
   const [shoppingLists, setShoppingLists] = useState(() => {
@@ -35,6 +36,18 @@ const InventoryPage = () => {
   const [tempListName, setTempListName] = useState('');
   const [showBottomSheet, setShowBottomSheet] = useState(false);
   const [bottomSheetListId, setBottomSheetListId] = useState(null);
+
+  // Handle tab switching based on props and URL changes
+  useEffect(() => {
+    // Handle direct navigation or prop changes
+    if (defaultTab) {
+      setActiveTab(defaultTab);
+    } else if (location.pathname === '/inventory/shopping-list') {
+      setActiveTab('shopping-list');
+    } else if (location.pathname === '/inventory') {
+      setActiveTab('inventory');
+    }
+  }, [location, defaultTab]);
 
   // Save shopping lists to localStorage whenever they change
   useEffect(() => {
@@ -95,6 +108,39 @@ const InventoryPage = () => {
     } else {
       return 'inventory-page__card-shelf-life--fresh';
     }
+  };
+
+  const getCategoryColor = (category) => {
+    // Define category-specific colors with very pastel backgrounds and subtle text
+    const categoryColors = {
+      'Fruits': { bg: '#fff5e6', text: '#8b6914' },           // Very soft peach
+      'Vegetables': { bg: '#f0f9f0', text: '#4a6741' },       // Very soft green
+      'Protein': { bg: '#fff0f0', text: '#8b4561' },          // Very soft pink
+      'Dairy': { bg: '#f5f0f7', text: '#6b4c7a' },           // Very soft purple
+      'Grains': { bg: '#fff7e6', text: '#8b6332' },          // Very soft orange
+      'Beverages': { bg: '#f0f7ff', text: '#4a6b8b' },       // Very soft blue
+      'Snacks': { bg: '#fffcf0', text: '#8b7d4a' },          // Very soft yellow
+      'Condiments': { bg: '#fff0f2', text: '#8b4a56' },      // Very soft coral
+      'Pantry': { bg: '#f7f0ff', text: '#6b4a8b' },          // Very soft lavender
+      'Frozen': { bg: '#f0faff', text: '#4a7a8b' },          // Very soft cyan
+      'Other': { bg: '#f5f5f5', text: '#666666' },           // Very soft gray
+      'Uncategorized': { bg: '#f5f5f5', text: '#666666' }    // Very soft gray
+    };
+
+    // Return the specific color for the category, or default gray if not found
+    return categoryColors[category] || categoryColors['Other'];
+  };
+
+  const getExpirationColor = (status) => {
+    // Define expiration status colors with very pastel backgrounds
+    const statusColors = {
+      'Expired': { bg: '#fff0f0', text: '#8b4561' },          // Very soft red
+      'Need Attention': { bg: '#fff8f0', text: '#8b6914' },   // Very soft orange
+      'Good': { bg: '#f0f9f0', text: '#4a6741' }             // Very soft green
+    };
+
+    // Return the specific color for the status, or default to Good if not found
+    return statusColors[status] || statusColors['Good'];
   };
 
 
@@ -475,7 +521,7 @@ const InventoryPage = () => {
       <AppNavBar />
 
       {/* Inventory Content */}
-      <div style={{paddingTop: '100px', minHeight: '100vh', background: 'white'}}>
+      <div style={{paddingTop: '60px', minHeight: '100vh', background: 'white'}}>
         <div className="container" style={{maxWidth: '1200px', margin: '0 auto', padding: '1rem 1rem', overflow: 'visible'}}>
           {/* Row 1: Title Only */}
           <div style={{ marginBottom: '1.5rem', marginTop: '0.5rem' }}>
@@ -488,7 +534,10 @@ const InventoryPage = () => {
           <div className="inventory-page__tabs">
             <button 
               className={`inventory-page__tab ${activeTab === 'inventory' ? 'active' : ''}`}
-              onClick={() => setActiveTab('inventory')}
+              onClick={() => {
+                setActiveTab('inventory');
+                navigate('/inventory');
+              }}
             >
               Your Fridge
             </button>
@@ -496,6 +545,7 @@ const InventoryPage = () => {
               className={`inventory-page__tab ${activeTab === 'shopping-list' ? 'active' : ''}`}
               onClick={() => {
                 setActiveTab('shopping-list');
+                navigate('/inventory/shopping-list');
                 setEditingListId(null);
                 setSelectedListId(null);
                 setItemInput('');
@@ -810,18 +860,22 @@ const InventoryPage = () => {
                       <React.Fragment key={category}>
                         {/* Group header row */}
                         <tr style={{
-                          backgroundColor: '#f8f9fa',
+                          backgroundColor: activeFilter === 'by-category'
+                            ? getCategoryColor(category).bg
+                            : getExpirationColor(category).bg,
                           borderTop: '2px solid #e9ecef'
                         }}>
                           <td colSpan="7" style={{
                             padding: '0.75rem 1rem',
                             fontWeight: '600',
                             fontSize: '1rem',
-                            color: '#495057',
+                            color: activeFilter === 'by-category'
+                              ? getCategoryColor(category).text
+                              : getExpirationColor(category).text,
                             textTransform: 'uppercase',
                             letterSpacing: '0.5px'
                           }}>
-                            {category}
+                            {category} ({items.length})
                           </td>
                         </tr>
                         {/* Group items */}
@@ -1101,16 +1155,20 @@ const InventoryPage = () => {
                     <h3 style={{
                       margin: '1.5rem 0 1rem 0',
                       padding: '0.5rem 1rem',
-                      background: '#f8f9fa',
+                      background: activeFilter === 'by-category'
+                        ? getCategoryColor(category).bg
+                        : getExpirationColor(category).bg,
                       borderRadius: '8px',
                       fontSize: '1rem',
                       fontWeight: '600',
-                      color: '#495057',
+                      color: activeFilter === 'by-category'
+                        ? getCategoryColor(category).text
+                        : getExpirationColor(category).text,
                       textTransform: 'uppercase',
                       letterSpacing: '0.5px',
                       border: '1px solid #e9ecef'
                     }}>
-                      {category}
+                      {category} ({items.length})
                     </h3>
                     {/* Group items */}
                     {items.map((item) => {

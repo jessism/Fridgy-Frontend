@@ -230,7 +230,7 @@
 .hero-subtitle {
   font-family: var(--description-font);
   font-size: 1.2rem;
-  color: #B3B3B3;
+  color: #616161;
   margin-bottom: 0.5rem;
   line-height: 1.6;
 }
@@ -542,7 +542,7 @@
   width: 80px;
   height: 80px;
   background: rgba(158, 231, 109, 0.3);
-  border-radius: 50%;
+  border-radius: 12px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -914,7 +914,7 @@
 }
 
 .expiring-content {
-  background: #fbfbfb;
+  background: #f7f7f7;
   border-radius: 16px;
   padding: 1rem;
   margin-top: 0.5rem;
@@ -1057,7 +1057,7 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 1rem 1rem 1.5rem 1rem;
-  background: #fbfbfb;
+  background: #f7f7f7;
   border-radius: 16px;
   text-decoration: none;
   color: var(--header-color);
@@ -1170,7 +1170,7 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 1rem 1rem 1.5rem 1rem;
-  background: #fbfbfb;
+  background: #f7f7f7;
   border-radius: 16px;
   text-decoration: none;
   color: var(--header-color);

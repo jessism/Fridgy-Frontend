@@ -16,8 +16,10 @@ import AboutYouPage from './pages/AboutYouPage';
 import DietaryPreferencesPage from './pages/DietaryPreferencesPage';
 import MealHistoryPage from './pages/MealHistoryPage';
 import SavedRecipesPage from './pages/SavedRecipesPage';
+import RecipeImportPage from './pages/RecipeImportPage';
 import InventoryUsagePage from './pages/InventoryUsagePage';
 import BatchCamera from './features/batchcamera/components/BatchCamera';
+import RecipeScannerCamera from './features/recipe-scanner/components/RecipeScannerCamera';
 import { MealCameraInterface, MealIngredientSelector } from './features/mealscanner';
 import OnboardingFlow from './features/onboarding/components/OnboardingFlow';
 import ShortcutSetupPage from './pages/ShortcutSetupPage';
@@ -39,7 +41,12 @@ function App() {
           } />
           <Route path="/inventory" element={
             <AuthGuard>
-              <InventoryPage />
+              <InventoryPage defaultTab="inventory" />
+            </AuthGuard>
+          } />
+          <Route path="/inventory/shopping-list" element={
+            <AuthGuard>
+              <InventoryPage defaultTab="shopping-list" />
             </AuthGuard>
           } />
           <Route path="/meal-plans" element={
@@ -82,6 +89,11 @@ function App() {
               <SavedRecipesPage />
             </AuthGuard>
           } />
+          <Route path="/import" element={
+            <AuthGuard>
+              <RecipeImportPage />
+            </AuthGuard>
+          } />
           <Route path="/shortcuts/setup" element={
             <AuthGuard>
               <ShortcutSetupPage />
@@ -95,6 +107,11 @@ function App() {
           <Route path="/batchcamera" element={
             <AuthGuard>
               <BatchCamera />
+            </AuthGuard>
+          } />
+          <Route path="/recipe-scanner" element={
+            <AuthGuard>
+              <RecipeScannerCamera />
             </AuthGuard>
           } />
           <Route path="/mealscanner" element={
