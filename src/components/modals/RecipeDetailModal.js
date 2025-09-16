@@ -11,6 +11,34 @@ const RecipeDetailModal = ({
 }) => {
   const [activeTab, setActiveTab] = useState('ingredients');
   const [showCookingConfirmation, setShowCookingConfirmation] = useState(false);
+
+  // API base URL for proxy
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+  // Helper function to check if URL needs proxying (copied from SavedRecipesPage)
+  const needsProxy = (url) => {
+    return url &&
+           (url.includes('cdninstagram.com') ||
+            url.includes('instagram.com') ||
+            url.includes('fbcdn.net') ||
+            url.includes('instagram.')) &&
+           !url.includes('URL_OF_IMAGE') &&
+           !url.includes('example.com') &&
+           url !== 'URL of image';
+  };
+
+  // Helper function to get the correct image URL (copied from SavedRecipesPage)
+  const getImageUrl = () => {
+    if (!recipe) return 'https://via.placeholder.com/400x300?text=No+Image';
+
+    // Get the base image URL with fallback to image_urls
+    const baseImageUrl = recipe.image || recipe.image_urls?.[0] || 'https://via.placeholder.com/400x300?text=No+Image';
+
+    // Use proxy for Instagram images, direct URL for others
+    return needsProxy(baseImageUrl)
+      ? `${API_BASE_URL}/proxy-image?url=${encodeURIComponent(baseImageUrl)}`
+      : baseImageUrl;
+  };
   
   if (!isOpen) return null;
 
@@ -363,12 +391,33 @@ const RecipeDetailModal = ({
                 
                 {/* Recipe Image Below Title */}
                 <div className="recipe-image-container">
-                  <img 
-                    src={recipe.image || 'https://via.placeholder.com/400x300?text=No+Image'} 
+                  <img
+                    src={getImageUrl()}
                     alt={recipe.title}
                     className="recipe-main-image"
                     onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/400x300?text=No+Image';
+                      console.error('[RecipeDetailModal] Image failed to load:', {
+                        recipeId: recipe.id,
+                        title: recipe.title,
+                        failedUrl: e.target.src,
+                        sourceType: recipe.source_type,
+                        hasImage: !!recipe.image,
+                        hasImageUrls: !!recipe.image_urls,
+                        imageUrlsLength: recipe.image_urls?.length
+                      });
+                      // Fallback to placeholder if image fails
+                      if (e.target.src !== 'https://via.placeholder.com/400x300?text=No+Image') {
+                        e.target.src = 'https://via.placeholder.com/400x300?text=No+Image';
+                      }
+                    }}
+                    onLoad={(e) => {
+                      if (recipe.source_type === 'instagram') {
+                        console.log('[RecipeDetailModal] Instagram image loaded successfully:', {
+                          recipeId: recipe.id,
+                          title: recipe.title,
+                          loadedUrl: e.target.src.substring(0, 100) + '...'
+                        });
+                      }
                     }}
                   />
                 </div>
