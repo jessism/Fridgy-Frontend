@@ -24,6 +24,7 @@ import RecipeScannerCamera from './features/recipe-scanner/components/RecipeScan
 import { MealCameraInterface, MealIngredientSelector } from './features/mealscanner';
 import OnboardingFlow from './features/onboarding/components/OnboardingFlow';
 import ShortcutSetupPage from './pages/ShortcutSetupPage';
+import JoinShoppingList from './components/JoinShoppingList';
 
 function App() {
   return (
@@ -133,6 +134,11 @@ function App() {
           <Route path="/mealscanner/ingredients" element={
             <AuthGuard>
               <MealIngredientSelector />
+            </AuthGuard>
+          } />
+          <Route path="/join/:shareCode" element={
+            <AuthGuard>
+              <JoinShoppingList />
             </AuthGuard>
           } />
         </Routes>

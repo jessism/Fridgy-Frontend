@@ -7,6 +7,7 @@ import useRecipes from '../hooks/useRecipes';
 import useTastyRecipes from '../hooks/useTastyRecipes';
 import RecipeDetailModal from '../components/modals/RecipeDetailModal';
 import MealDetailModal from '../components/modals/MealDetailModal.jsx';
+import RecipeCreationModal from '../components/modals/RecipeCreationModal';
 import { AIRecipeSection } from '../features/ai-recipes';
 import { IngredientMatchIcon, CookTimeIcon } from '../assets/icons';
 import './MealPlansPage.css';
@@ -83,6 +84,9 @@ const MealPlansPage = ({ defaultTab }) => {
 
   // Meal detail modal state - using original .jsx modal
   const [selectedMeal, setSelectedMeal] = useState(null);
+
+  // Recipe creation modal state
+  const [showRecipeCreationModal, setShowRecipeCreationModal] = useState(false);
 
   // API base URL
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -666,6 +670,40 @@ const MealPlansPage = ({ defaultTab }) => {
             <>
               {/* Recipes Tab Content */}
 
+              {/* My Uploaded Recipes Section */}
+              <div className="meal-plans-page__uploaded-section">
+                <div className="meal-plans-page__section-header-with-action">
+                  <div>
+                    <h2 className="meal-plans-page__section-title">My uploaded recipes</h2>
+                  </div>
+                  <button
+                    className="meal-plans-page__add-button"
+                    onClick={() => setShowRecipeCreationModal(true)}
+                  >
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                      <circle cx="16" cy="16" r="14" fill="var(--primary-green)"/>
+                      <path d="M16 10V22M10 16H22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                  </button>
+                </div>
+                <div className="meal-plans-page__uploaded-container-wrapper">
+                  <div className="meal-plans-page__uploaded-container-left">
+                    <div
+                      className="meal-plans-page__uploaded-container"
+                      onClick={() => setShowRecipeCreationModal(true)}
+                    >
+                      <div className="meal-plans-page__plus-icon">+</div>
+                    </div>
+                    <p className="meal-plans-page__container-label">Create your recipe</p>
+                  </div>
+                  <div className="meal-plans-page__uploaded-container-right">
+                    <div className="meal-plans-page__uploaded-container">
+                      {/* Empty container for future uploaded recipes */}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Your Saved Recipes Section */}
               <div className="meal-plans-page__analytics-section">
                 {/* Text Section */}
@@ -676,10 +714,14 @@ const MealPlansPage = ({ defaultTab }) => {
                       <p className="meal-plans-page__section-subtitle">Access your favorite recipes anytime</p>
                     </div>
                     <button
-                      className="meal-plans-page__view-more-btn"
-                      onClick={() => navigate('/saved-recipes')}
+                      className="meal-plans-page__import-add-button"
+                      onClick={() => navigate('/import')}
+                      title="Import recipe"
                     >
-                      View more
+                      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <circle cx="16" cy="16" r="14" fill="var(--primary-green)"/>
+                        <path d="M16 10V22M10 16H22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -709,9 +751,19 @@ const MealPlansPage = ({ defaultTab }) => {
                     </div>
                   </div>
                 ) : savedRecipes.length > 0 ? (
-                  <div className="meal-plans-page__saved-recipes-grid">
-                    {savedRecipes.slice(0, 2).map(recipe => renderSavedRecipeCard(recipe, true))}
-                  </div>
+                  <>
+                    <div className="meal-plans-page__saved-recipes-grid">
+                      {savedRecipes.slice(0, 2).map(recipe => renderSavedRecipeCard(recipe, true))}
+                    </div>
+                    <div className="meal-plans-page__view-more-container">
+                      <button
+                        className="meal-plans-page__view-more-btn-bottom"
+                        onClick={() => navigate('/saved-recipes')}
+                      >
+                        View more
+                      </button>
+                    </div>
+                  </>
                 ) : (
                   renderSavedRecipesEmptyState()
                 )}
@@ -1084,6 +1136,12 @@ const MealPlansPage = ({ defaultTab }) => {
         isOpen={!!selectedMeal}
         onClose={handleCloseMealDetailModal}
         meal={selectedMeal}
+      />
+
+      {/* Recipe Creation Modal */}
+      <RecipeCreationModal
+        isOpen={showRecipeCreationModal}
+        onClose={() => setShowRecipeCreationModal(false)}
       />
     </div>
   );

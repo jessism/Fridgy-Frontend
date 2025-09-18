@@ -213,63 +213,6 @@ const SavedRecipesPage = () => {
             </div>
           </div>
 
-          {/* Your own recipe section */}
-          <div className="saved-recipes-page__custom-section">
-            <div className="saved-recipes-page__section-header">
-              <h2 className="saved-recipes-page__section-title">My uploaded recipe</h2>
-              <button
-                className="saved-recipes-page__add-button"
-                onClick={() => setShowCreationModal(true)}
-              >
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                  <circle cx="16" cy="16" r="14" fill="var(--primary-green)"/>
-                  <path d="M16 10V22M10 16H22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </button>
-            </div>
-            <div className="saved-recipes-page__custom-container-wrapper">
-              <div className="saved-recipes-page__custom-container-left">
-                <div className="saved-recipes-page__custom-container">
-                  <div className="saved-recipes-page__plus-icon">+</div>
-                </div>
-                <p className="saved-recipes-page__container-label">Create your recipe</p>
-              </div>
-              <div className="saved-recipes-page__custom-container-right">
-                {scannedRecipes.length > 0 ? (
-                  <div
-                    className="saved-recipes-page__custom-container saved-recipes-page__scanned-recipe"
-                    onClick={() => {
-                      setSelectedRecipe(scannedRecipes[0]);
-                      setShowDetail(true);
-                    }}
-                  >
-                    <img
-                      src={scannedRecipes[0].image || scannedRecipes[0].image_urls?.[0] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c'}
-                      alt={scannedRecipes[0].title}
-                      className="saved-recipes-page__scanned-thumbnail"
-                      onError={(e) => {
-                        console.error('[SavedRecipes] Scanned recipe image failed to load:', {
-                          recipeId: scannedRecipes[0].id,
-                          title: scannedRecipes[0].title,
-                          failedUrl: e.target.src,
-                          sourceType: scannedRecipes[0].source_type
-                        });
-                        if (e.target.src !== 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c') {
-                          e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
-                        }
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className="saved-recipes-page__custom-container">
-                    {/* Empty container when no scanned recipes */}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-
           {/* Your imported recipe section */}
           <div className="saved-recipes-page__import-section">
             <div className="saved-recipes-page__section-header">

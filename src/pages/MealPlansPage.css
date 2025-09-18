@@ -205,6 +205,117 @@
   }
 }
 
+/* My Uploaded Recipes Section */
+.meal-plans-page__uploaded-section {
+  margin-bottom: 2rem;
+}
+
+.meal-plans-page__uploaded-container-wrapper {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.meal-plans-page__uploaded-container-left,
+.meal-plans-page__uploaded-container-right {
+  flex: 1;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+}
+
+.meal-plans-page__uploaded-container {
+  background-color: white;
+  border: 2px solid #4fcf61;
+  border-radius: 12px;
+  min-height: 100px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.meal-plans-page__uploaded-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.meal-plans-page__plus-icon {
+  color: #4fcf61;
+  font-size: 3rem;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.meal-plans-page__container-label {
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+.meal-plans-page__add-button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.meal-plans-page__add-button:hover {
+  transform: scale(1.1);
+}
+
+.meal-plans-page__add-button svg {
+  display: block;
+}
+
+/* Import add button */
+.meal-plans-page__import-add-button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.meal-plans-page__import-add-button:hover {
+  transform: scale(1.1);
+}
+
+.meal-plans-page__import-add-button svg {
+  display: block;
+}
+
+/* View more button container */
+.meal-plans-page__view-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.meal-plans-page__view-more-btn-bottom {
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  transition: color 0.2s ease;
+}
+
+.meal-plans-page__view-more-btn-bottom:hover {
+  color: #000;
+  text-decoration: underline;
+}
+
 /* Saved Recipe Card */
 .meal-plans-page__saved-recipe-card {
   background: white;

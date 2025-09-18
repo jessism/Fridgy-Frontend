@@ -61,14 +61,14 @@ const ShoppingListSection = () => {
 
   // Load full list details when selecting a list
   useEffect(() => {
-    if (selectedListId && !editingListId) {
+    if (selectedListId) {
       getList(selectedListId).then(list => {
         setSelectedList(list);
       }).catch(err => {
         console.error('Failed to load list:', err);
       });
     }
-  }, [selectedListId, editingListId, getList]);
+  }, [selectedListId, getList]);
 
   const handleCreateList = async () => {
     if (newListName.trim()) {
