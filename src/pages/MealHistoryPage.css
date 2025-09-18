@@ -444,7 +444,7 @@
 /* Individual meal item (line-based) */
 .meal-history-page__meal-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   padding: 0.875rem 0;
   border-bottom: 1px solid #f0f0f0;
@@ -473,25 +473,68 @@
 
 /* Meal info container */
 .meal-history-page__meal-info {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
+/* Meal header row - contains name and pill */
+.meal-history-page__meal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
 /* Meal name styling */
 .meal-history-page__meal-name {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 500;
   color: #333;
   margin: 0;
   line-height: 1.3;
+  flex: 1;
 }
 
-/* Meal calories styling */
+/* Meal calories styling - now underneath the name */
 .meal-history-page__meal-calories {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   color: #666;
   font-weight: 400;
+  display: block;
+  margin-top: 0.125rem;
+}
+
+/* Meal type pills */
+.meal-history-page__meal-type-pill {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.meal-history-page__meal-type-pill--dine-out {
+  background-color: #F3E8FF;
+  color: #8B5CF6;
+}
+
+.meal-history-page__meal-type-pill--eat-in {
+  background-color: #E8F5E9;
+  color: #4CAF50;
+}
+
+/* Right side container for pill and menu */
+.meal-history-page__meal-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 /* Meal menu (3-dot) container */

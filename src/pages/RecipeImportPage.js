@@ -222,6 +222,118 @@ const RecipeImportPage = () => {
     }
   };
 
+  const handleMultiModalImport = async () => {
+    if (!importUrl) {
+      setError('Please enter an Instagram URL');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setExtractedRecipe(null);
+
+    // Show progress message
+    const progressMessages = [
+      '📝 Analyzing caption text...',
+      '🎥 Processing video frames...',
+      '🎤 Extracting audio narration...',
+      '🧠 Synthesizing all sources...'
+    ];
+
+    let messageIndex = 0;
+    const progressInterval = setInterval(() => {
+      if (messageIndex < progressMessages.length) {
+        setError(''); // Clear error to use for status
+        // Using a temporary status display
+        const statusEl = document.querySelector('.recipe-import-page__error');
+        if (statusEl) {
+          statusEl.textContent = progressMessages[messageIndex];
+          statusEl.style.color = '#4fcf61';
+        }
+        messageIndex++;
+      }
+    }, 1500);
+
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      if (!token) {
+        clearInterval(progressInterval);
+        setError('Please sign in to import recipes');
+        navigate('/signin');
+        return;
+      }
+
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${apiUrl}/recipes/multi-modal-extract`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ url: importUrl })
+      });
+
+      clearInterval(progressInterval);
+      const data = await response.json();
+
+      if (data.success && data.recipe) {
+        console.log('[MultiModal] Recipe extracted successfully');
+        setExtractedRecipe(data.recipe);
+
+        // Show success message
+        const statusEl = document.querySelector('.recipe-import-page__error');
+        if (statusEl) {
+          statusEl.textContent = `✅ Recipe extracted with ${Math.round((data.confidence || 0.85) * 100)}% confidence!`;
+          statusEl.style.color = '#4fcf61';
+        }
+
+        // Auto-save after 2 seconds
+        setTimeout(() => {
+          handleSaveExtractedRecipe(data.recipe);
+        }, 2000);
+      } else {
+        setError(data.error || 'Failed to extract recipe. Please try again.');
+      }
+    } catch (error) {
+      clearInterval(progressInterval);
+      console.error('[MultiModal] Error:', error);
+      setError('Failed to extract recipe. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveExtractedRecipe = async (recipe) => {
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+      const response = await fetch(`${apiUrl}/recipes/save`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          recipe: recipe,
+          source_url: importUrl,
+          import_method: 'multi-modal',
+          confidence: 0.85
+        })
+      });
+
+      if (response.ok) {
+        // Navigate to saved recipes
+        navigate('/saved-recipes');
+      } else {
+        setError('Failed to save recipe. Please try again.');
+      }
+    } catch (error) {
+      console.error('[MultiModal] Save error:', error);
+      setError('Failed to save recipe. Please try again.');
+    }
+  };
+
   const handleManualSave = async (recipeData) => {
     setLoading(true);
     setError('');
@@ -345,25 +457,45 @@ const RecipeImportPage = () => {
             </button>
             */}
 
-            <button
-              onClick={handleApifyImport}
-              disabled={apifyLoading || loading || !importUrl || (apifyUsage && apifyUsage.remaining === 0)}
-              className="recipe-import-page__button recipe-import-page__button--apify"
-              title="Premium import with video analysis for better recipe extraction"
-            >
-              {apifyLoading ? (
-                <span>🎥 Analyzing video...</span>
-              ) : (
-                <>
-                  <span>Import with Video Analysis ✨</span>
-                  {apifyUsage && (
-                    <span className="recipe-import-page__usage-badge">
-                      ({apifyUsage.remaining}/{apifyUsage.limit} left)
-                    </span>
-                  )}
-                </>
-              )}
-            </button>
+            {/* Import Buttons */}
+            <div className="recipe-import-page__button-group">
+              <button
+                onClick={handleApifyImport}
+                disabled={apifyLoading || loading || !importUrl || (apifyUsage && apifyUsage.remaining === 0)}
+                className="recipe-import-page__button recipe-import-page__button--apify"
+                title="Premium import with video analysis for better recipe extraction"
+              >
+                {apifyLoading ? (
+                  <span>🎥 Analyzing video...</span>
+                ) : (
+                  <>
+                    <span>Standard Import (Tiered) ✨</span>
+                    {apifyUsage && (
+                      <span className="recipe-import-page__usage-badge">
+                        ({apifyUsage.remaining}/{apifyUsage.limit} left)
+                      </span>
+                    )}
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={handleMultiModalImport}
+                className="recipe-import-page__button recipe-import-page__button--multimodal"
+                title="Advanced extraction using caption, video, and audio analysis"
+                disabled={loading || !importUrl}
+              >
+                {loading ? (
+                  <span>🔄 Analyzing...</span>
+                ) : (
+                  <>
+                    <span>🎬 Try Multi-Modal Import</span>
+                    <span className="recipe-import-page__badge recipe-import-page__badge--beta">NEW</span>
+                  </>
+                )}
+              </button>
+            </div>
+
 
             {showVideoPreview && videoUrl && (
               <div className="recipe-import-page__video-preview">

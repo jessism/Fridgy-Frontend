@@ -110,6 +110,7 @@ const InventoryUsagePage = () => {
     if (categoryData.length === 0) return [];
 
     const radius = 60;
+    const innerRadius = 30; // Inner radius for donut hole
     const centerX = 80;
     const centerY = 80;
     let currentAngle = -90; // Start at top
@@ -118,21 +119,34 @@ const InventoryUsagePage = () => {
       const startAngle = currentAngle;
       const angleSize = (item.percentage / 100) * 360;
       const endAngle = currentAngle + angleSize;
-      
+
       const startRadians = (startAngle * Math.PI) / 180;
       const endRadians = (endAngle * Math.PI) / 180;
-      
+
       const largeArcFlag = angleSize > 180 ? 1 : 0;
-      
+
+      // Outer arc points
       const x1 = centerX + radius * Math.cos(startRadians);
       const y1 = centerY + radius * Math.sin(startRadians);
       const x2 = centerX + radius * Math.cos(endRadians);
       const y2 = centerY + radius * Math.sin(endRadians);
-      
-      const pathData = `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
-      
+
+      // Inner arc points
+      const x3 = centerX + innerRadius * Math.cos(endRadians);
+      const y3 = centerY + innerRadius * Math.sin(endRadians);
+      const x4 = centerX + innerRadius * Math.cos(startRadians);
+      const y4 = centerY + innerRadius * Math.sin(startRadians);
+
+      const pathData = `
+        M ${x1} ${y1}
+        A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}
+        L ${x3} ${y3}
+        A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${x4} ${y4}
+        Z
+      `;
+
       currentAngle = endAngle;
-      
+
       return {
         ...item,
         pathData
@@ -196,13 +210,13 @@ const InventoryUsagePage = () => {
           </h3>
           <div className="donut-chart-wrapper">
             <svg width="200" height="200" viewBox="0 0 200 200" className="donut-svg">
-              {/* Background circle (wasted - red) */}
+              {/* Background circle (wasted - transparent green) */}
               <circle
                 cx="100"
                 cy="100"
                 r="75"
                 fill="none"
-                stroke="#FF6B6B"
+                stroke="rgba(79, 207, 97, 0.3)"
                 strokeWidth="30"
               />
               {/* Foreground arc (used - green) */}

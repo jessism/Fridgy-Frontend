@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import useRecipes from '../hooks/useRecipes';
 // import useEdamamTest from '../hooks/useEdamamTest';
 import useTastyRecipes from '../hooks/useTastyRecipes';
 import RecipeDetailModal from '../components/modals/RecipeDetailModal';
+import MealDetailModal from '../components/modals/MealDetailModal.jsx';
 import { AIRecipeSection } from '../features/ai-recipes';
 import { IngredientMatchIcon, CookTimeIcon } from '../assets/icons';
 import './MealPlansPage.css';
 
-const MealPlansPage = () => {
+const MealPlansPage = ({ defaultTab }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     suggestions,
     loading,
@@ -24,6 +26,19 @@ const MealPlansPage = () => {
     clearError,
     refreshSuggestions
   } = useRecipes();
+
+  // Tab state management
+  const [activeTab, setActiveTab] = useState(defaultTab || 'meals');
+
+  // Saved recipes state
+  const [savedRecipes, setSavedRecipes] = useState([]);
+  const [savedRecipesLoading, setSavedRecipesLoading] = useState(true);
+  const [savedRecipesError, setSavedRecipesError] = useState(null);
+
+  // Recent meals state
+  const [recentMeals, setRecentMeals] = useState([]);
+  const [recentMealsLoading, setRecentMealsLoading] = useState(true);
+  const [recentMealsError, setRecentMealsError] = useState(null);
   
   // Edamam test hook - COMMENTED OUT
   // const {
@@ -66,12 +81,129 @@ const MealPlansPage = () => {
   const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
   const [recipeError, setRecipeError] = useState(null);
 
+  // Meal detail modal state - using original .jsx modal
+  const [selectedMeal, setSelectedMeal] = useState(null);
+
+  // API base URL
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+  // Fetch saved recipes function
+  const fetchSavedRecipes = async () => {
+    try {
+      setSavedRecipesLoading(true);
+      setSavedRecipesError(null);
+
+      const token = localStorage.getItem('fridgy_token');
+      if (!token) {
+        setSavedRecipes([]);
+        setSavedRecipesLoading(false);
+        return;
+      }
+
+      const params = new URLSearchParams({
+        limit: 2
+      });
+
+      const response = await fetch(`${API_BASE_URL}/saved-recipes?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          setSavedRecipes([]);
+          setSavedRecipesLoading(false);
+          return;
+        }
+        throw new Error('Failed to fetch saved recipes');
+      }
+
+      const data = await response.json();
+      setSavedRecipes(data.recipes || []);
+    } catch (error) {
+      console.error('Error fetching saved recipes:', error);
+      setSavedRecipesError(error.message);
+      setSavedRecipes([]);
+    } finally {
+      setSavedRecipesLoading(false);
+    }
+  };
+
+  // Fetch recent meals function
+  const fetchRecentMeals = async () => {
+    try {
+      console.log('🍽️ [MealPlans] Fetching recent meals...');
+      setRecentMealsLoading(true);
+      setRecentMealsError(null);
+
+      const token = localStorage.getItem('fridgy_token');
+      if (!token) {
+        console.log('🍽️ [MealPlans] No token found');
+        setRecentMeals([]);
+        setRecentMealsLoading(false);
+        return;
+      }
+
+      console.log('🍽️ [MealPlans] Calling API:', `${API_BASE_URL}/meals/history`);
+      const response = await fetch(`${API_BASE_URL}/meals/history`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      console.log('🍽️ [MealPlans] Response status:', response.status);
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.log('🍽️ [MealPlans] Unauthorized - clearing meals');
+          setRecentMeals([]);
+          setRecentMealsLoading(false);
+          return;
+        }
+        throw new Error(`Failed to fetch recent meals: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('🍽️ [MealPlans] API response:', data);
+      console.log('🍽️ [MealPlans] Meals found:', data.meals?.length || 0);
+
+      // Get the 2 most recent meals
+      const recentMealsData = (data.meals || []).slice(0, 2);
+      console.log('🍽️ [MealPlans] Setting recent meals:', recentMealsData);
+      setRecentMeals(recentMealsData);
+    } catch (error) {
+      console.error('🍽️ [MealPlans] Error fetching recent meals:', error);
+      setRecentMealsError(error.message);
+      setRecentMeals([]);
+    } finally {
+      setRecentMealsLoading(false);
+    }
+  };
+
+  // Handle tab switching based on props and URL changes
+  useEffect(() => {
+    if (defaultTab) {
+      setActiveTab(defaultTab);
+    } else if (location.pathname === '/meal-plans/recipes') {
+      setActiveTab('recipes');
+    } else if (location.pathname === '/meal-plans') {
+      setActiveTab('meals');
+    }
+  }, [location, defaultTab]);
+
   useEffect(() => {
     // Fetch recipe suggestions when component mounts
     fetchSuggestions({
       limit: 8, // Reduced total recipes
       ranking: 1 // Maximize used ingredients
     });
+
+    // Fetch saved recipes
+    fetchSavedRecipes();
+
+    // Fetch recent meals
+    fetchRecentMeals();
   }, [fetchSuggestions]);
 
 
@@ -227,6 +359,210 @@ const MealPlansPage = () => {
     navigate('/meal-history');
   };
 
+  const handleViewRecipeDetails = (recipe) => {
+    // Convert saved recipe to the format expected by the modal
+    const recipeForModal = {
+      id: recipe.id,
+      title: recipe.title,
+      image: recipe.image || recipe.image_urls?.[0],
+      readyInMinutes: recipe.readyInMinutes,
+      servings: recipe.servings,
+      instructions: recipe.instructions || [],
+      ingredients: recipe.ingredients || [],
+      sourceUrl: recipe.source_url,
+      sourceName: recipe.source_name || 'Saved Recipe'
+    };
+
+    setSelectedRecipe(recipeForModal);
+    setIsModalOpen(true);
+  };
+
+  // Render saved recipe card
+  const renderSavedRecipeCard = (recipe, showDetails = false) => {
+    // Helper function to check if URL needs proxying
+    const needsProxy = (url) => {
+      return url &&
+             (url.includes('cdninstagram.com') ||
+              url.includes('instagram.com') ||
+              url.includes('fbcdn.net') ||
+              url.includes('instagram.')) &&
+             !url.includes('URL_OF_IMAGE') &&
+             !url.includes('example.com') &&
+             url !== 'URL of image';
+    };
+
+    // Get the base image URL
+    const baseImageUrl = recipe.image || recipe.image_urls?.[0] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+
+    // Use proxy for Instagram images, direct URL for others
+    const imageUrl = needsProxy(baseImageUrl)
+      ? `${API_BASE_URL}/proxy-image?url=${encodeURIComponent(baseImageUrl)}`
+      : baseImageUrl;
+
+    const handleClick = () => {
+      if (showDetails) {
+        // Show recipe details in modal
+        handleViewRecipeDetails(recipe);
+      } else {
+        // Navigate to saved recipes page
+        navigate('/saved-recipes');
+      }
+    };
+
+    return (
+      <div
+        key={recipe.id}
+        className="meal-plans-page__saved-recipe-card"
+        onClick={handleClick}
+      >
+        <div className="meal-plans-page__saved-recipe-image">
+          <img
+            src={imageUrl}
+            alt={recipe.title}
+            onError={(e) => {
+              if (e.target.src !== 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c') {
+                e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+              }
+            }}
+          />
+          {recipe.source_type === 'instagram' && (
+            <div className="meal-plans-page__saved-recipe-badge">
+              <span>Instagram</span>
+            </div>
+          )}
+        </div>
+        <div className="meal-plans-page__saved-recipe-content">
+          <h3 className="meal-plans-page__saved-recipe-title">{recipe.title}</h3>
+          {recipe.source_author && (
+            <p className="meal-plans-page__saved-recipe-author">@{recipe.source_author}</p>
+          )}
+          <div className="meal-plans-page__saved-recipe-meta">
+            {recipe.readyInMinutes && (
+              <span>⏱️ {recipe.readyInMinutes} min</span>
+            )}
+            {recipe.servings && (
+              <span>🍽️ {recipe.servings} servings</span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Render empty state for saved recipes
+  const renderSavedRecipesEmptyState = () => (
+    <div
+      className="meal-plans-page__saved-recipes-empty"
+      onClick={() => navigate('/saved-recipes')}
+    >
+      <div className="meal-plans-page__saved-recipes-empty-container">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="14" fill="none" stroke="var(--primary-green)" strokeWidth="2"/>
+          <path d="M16 10V22M10 16H22" stroke="var(--primary-green)" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+      </div>
+      <p className="meal-plans-page__saved-recipes-empty-text">Start saving your recipe</p>
+    </div>
+  );
+
+  // Helper function to format meal date
+  const formatMealDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = now - date;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      return 'Today';
+    } else if (diffDays === 1) {
+      return 'Yesterday';
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago`;
+    } else if (diffDays < 14) {
+      return '1 week ago';
+    } else if (diffDays < 30) {
+      const weeks = Math.floor(diffDays / 7);
+      return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
+    } else if (diffDays < 365) {
+      const months = Math.floor(diffDays / 30);
+      return `${months} month${months > 1 ? 's' : ''} ago`;
+    } else {
+      // For meals older than a year, show the actual date
+      return date.toLocaleDateString();
+    }
+  };
+
+  // Handle meal card click to show detail modal
+  const handleMealCardClick = (meal) => {
+    setSelectedMeal(meal);
+  };
+
+  const handleCloseMealDetailModal = () => {
+    setSelectedMeal(null);
+  };
+
+  // Render meal card
+  const renderMealCard = (meal) => {
+    console.log('🍽️ [MealCard] Meal data:', meal);
+    console.log('🍽️ [MealCard] Photo URL:', meal.meal_photo_url);
+
+    const imageUrl = meal.meal_photo_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+
+    return (
+      <div
+        key={meal.id}
+        className="meal-plans-page__saved-recipe-card"
+        onClick={() => handleMealCardClick(meal)}
+      >
+        <div className="meal-plans-page__saved-recipe-image">
+          <img
+            src={imageUrl}
+            alt={meal.meal_name || 'Logged meal'}
+            onError={(e) => {
+              if (e.target.src !== 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c') {
+                e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+              }
+            }}
+          />
+          {meal.meal_type && (
+            <div className="meal-plans-page__saved-recipe-badge">
+              <span>{meal.meal_type}</span>
+            </div>
+          )}
+        </div>
+        <div className="meal-plans-page__saved-recipe-content">
+          <h3 className="meal-plans-page__saved-recipe-title">
+            {meal.meal_name || 'Home-cooked meal'}
+          </h3>
+          <p className="meal-plans-page__saved-recipe-author">
+            {formatMealDate(meal.logged_at)}
+          </p>
+          <div className="meal-plans-page__saved-recipe-meta">
+            {meal.ingredients_logged && (
+              <span>{meal.ingredients_logged.length} ingredients</span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Render empty state for recent meals
+  const renderRecentMealsEmptyState = () => (
+    <div
+      className="meal-plans-page__saved-recipes-empty"
+      onClick={() => navigate('/mealscanner')}
+    >
+      <div className="meal-plans-page__saved-recipes-empty-container">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="14" fill="none" stroke="var(--primary-green)" strokeWidth="2"/>
+          <path d="M16 10V22M10 16H22" stroke="var(--primary-green)" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+      </div>
+      <p className="meal-plans-page__saved-recipes-empty-text">Start logging your meals</p>
+    </div>
+  );
+
   return (
     <div className="meal-plans-page">
       <AppNavBar />
@@ -239,20 +575,153 @@ const MealPlansPage = () => {
             <h1 className="meal-plans-page__hero-title">Meals</h1>
           </div>
 
-          {/* Scan Your Meal Section Header */}
-          <div className="meal-plans-page__scan-header">
-            <h2 className="meal-plans-page__scan-title">Scan your meal</h2>
-            <button className="meal-plans-page__scan-button" onClick={handleLogMeal}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" strokeWidth="2"/>
-                <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" strokeWidth="2"/>
-              </svg>
+          {/* Tab Navigation */}
+          <div className="meal-plans-page__tabs">
+            <button
+              className={`meal-plans-page__tab ${activeTab === 'meals' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('meals');
+                navigate('/meal-plans');
+              }}
+            >
+              Meals
+            </button>
+            <button
+              className={`meal-plans-page__tab ${activeTab === 'recipes' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('recipes');
+                navigate('/meal-plans/recipes');
+              }}
+            >
+              Recipes
             </button>
           </div>
-          
-          {/* AI Recipe Section - Get perfect match with AI */}
-          <AIRecipeSection />
-          
+
+          {/* Conditional Content Based on Active Tab */}
+          {activeTab === 'meals' ? (
+            <>
+              {/* Scan Your Meal Section Header */}
+              <div className="meal-plans-page__scan-header">
+                <h2 className="meal-plans-page__scan-title">Scan your meal</h2>
+                <button className="meal-plans-page__scan-button" onClick={handleLogMeal}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" strokeWidth="2"/>
+                    <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" strokeWidth="2"/>
+                  </svg>
+                </button>
+              </div>
+
+              {/* View Meal History Section */}
+              <div className="meal-plans-page__analytics-section">
+                {/* Text Section */}
+                <div className="meal-plans-page__analytics-text-section">
+                  <div className="meal-plans-page__section-header-with-action">
+                    <div>
+                      <h2 className="meal-plans-page__section-title">View meal history</h2>
+                      <p className="meal-plans-page__section-subtitle">Track your eating patterns and meal preferences over time</p>
+                    </div>
+                    <button
+                      className="meal-plans-page__view-more-btn"
+                      onClick={() => navigate('/meal-history')}
+                    >
+                      View more
+                    </button>
+                  </div>
+                </div>
+
+                {/* Meal Cards or Empty State */}
+                {recentMealsLoading ? (
+                  <div className="meal-plans-page__saved-recipes-loading">
+                    <div className="meal-plans-page__saved-recipes-grid">
+                      <div className="meal-plans-page__saved-recipe-card loading">
+                        <div className="meal-plans-page__saved-recipe-image">
+                          <div className="loading-placeholder" style={{ height: '120px' }}></div>
+                        </div>
+                        <div className="meal-plans-page__saved-recipe-content">
+                          <div className="loading-placeholder" style={{ height: '16px', marginBottom: '8px' }}></div>
+                          <div className="loading-placeholder" style={{ height: '12px' }}></div>
+                        </div>
+                      </div>
+                      <div className="meal-plans-page__saved-recipe-card loading">
+                        <div className="meal-plans-page__saved-recipe-image">
+                          <div className="loading-placeholder" style={{ height: '120px' }}></div>
+                        </div>
+                        <div className="meal-plans-page__saved-recipe-content">
+                          <div className="loading-placeholder" style={{ height: '16px', marginBottom: '8px' }}></div>
+                          <div className="loading-placeholder" style={{ height: '12px' }}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : recentMeals.length > 0 ? (
+                  <div className="meal-plans-page__saved-recipes-grid">
+                    {recentMeals.slice(0, 2).map(meal => renderMealCard(meal))}
+                  </div>
+                ) : (
+                  renderRecentMealsEmptyState()
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Recipes Tab Content */}
+
+              {/* Your Saved Recipes Section */}
+              <div className="meal-plans-page__analytics-section">
+                {/* Text Section */}
+                <div className="meal-plans-page__analytics-text-section">
+                  <div className="meal-plans-page__section-header-with-action">
+                    <div>
+                      <h2 className="meal-plans-page__section-title">Your saved recipes</h2>
+                      <p className="meal-plans-page__section-subtitle">Access your favorite recipes anytime</p>
+                    </div>
+                    <button
+                      className="meal-plans-page__view-more-btn"
+                      onClick={() => navigate('/saved-recipes')}
+                    >
+                      View more
+                    </button>
+                  </div>
+                </div>
+
+                {/* Recipe Cards or Empty State */}
+                {savedRecipesLoading ? (
+                  <div className="meal-plans-page__saved-recipes-loading">
+                    <div className="meal-plans-page__saved-recipes-grid">
+                      <div className="meal-plans-page__saved-recipe-card loading">
+                        <div className="meal-plans-page__saved-recipe-image">
+                          <div className="loading-placeholder" style={{ height: '120px' }}></div>
+                        </div>
+                        <div className="meal-plans-page__saved-recipe-content">
+                          <div className="loading-placeholder" style={{ height: '16px', marginBottom: '8px' }}></div>
+                          <div className="loading-placeholder" style={{ height: '12px' }}></div>
+                        </div>
+                      </div>
+                      <div className="meal-plans-page__saved-recipe-card loading">
+                        <div className="meal-plans-page__saved-recipe-image">
+                          <div className="loading-placeholder" style={{ height: '120px' }}></div>
+                        </div>
+                        <div className="meal-plans-page__saved-recipe-content">
+                          <div className="loading-placeholder" style={{ height: '16px', marginBottom: '8px' }}></div>
+                          <div className="loading-placeholder" style={{ height: '12px' }}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : savedRecipes.length > 0 ? (
+                  <div className="meal-plans-page__saved-recipes-grid">
+                    {savedRecipes.slice(0, 2).map(recipe => renderSavedRecipeCard(recipe, true))}
+                  </div>
+                ) : (
+                  renderSavedRecipesEmptyState()
+                )}
+              </div>
+
+              {/* AI Recipe Section - Get perfect match with AI */}
+              <AIRecipeSection />
+            </>
+          )}
+
           {/* Cook What You Have Section - TEMPORARILY HIDDEN */}
           {/* 
           <div className="cook-what-you-have" style={{marginBottom: '4rem'}}>
@@ -596,44 +1065,6 @@ const MealPlansPage = () => {
           </div>
           */}
 
-          {/* Your Saved Recipes Section */}
-          <div className="meal-plans-page__analytics-section">
-            {/* Text Section */}
-            <div className="meal-plans-page__analytics-text-section">
-              <h2 className="meal-plans-page__section-title">Your saved recipes</h2>
-              <p className="meal-plans-page__section-subtitle">Access your favorite recipes anytime</p>
-            </div>
-            
-            {/* View Saved Recipes - Full Width */}
-            <div className="meal-plans-page__view-history" onClick={() => navigate('/saved-recipes')}>
-              <div className="meal-plans-page__history-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <span className="meal-plans-page__history-label">View saved recipes</span>
-            </div>
-          </div>
-
-          {/* View Meal Analytics Section */}
-          <div className="meal-plans-page__analytics-section">
-            {/* Text Section - Same structure as AI section */}
-            <div className="meal-plans-page__analytics-text-section">
-              <h2 className="meal-plans-page__section-title">View meal history</h2>
-              <p className="meal-plans-page__section-subtitle">Track your eating patterns and meal preferences over time</p>
-            </div>
-            
-            {/* View Meal History - Full Width */}
-            <div className="meal-plans-page__view-history" onClick={handleViewMealLogs}>
-              <div className="meal-plans-page__history-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                  <polyline points="12,6 12,12 16,14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <span className="meal-plans-page__history-label">View meal history</span>
-            </div>
-          </div>
         </div>
       </div>
       
@@ -646,6 +1077,13 @@ const MealPlansPage = () => {
         recipe={selectedRecipe}
         isLoading={isLoadingRecipe}
         onCookNow={handleActuallyCook}
+      />
+
+      {/* Meal Detail Modal */}
+      <MealDetailModal
+        isOpen={!!selectedMeal}
+        onClose={handleCloseMealDetailModal}
+        meal={selectedMeal}
       />
     </div>
   );

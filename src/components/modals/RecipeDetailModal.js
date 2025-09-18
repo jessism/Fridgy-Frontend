@@ -176,8 +176,9 @@ const RecipeDetailModal = ({
         recipe.analyzedInstructions[0].steps.length > 0) {
       return recipe.analyzedInstructions[0].steps.map((step, index) => (
         <div key={index} className="instruction-step">
-          <span className="step-number">Step {step.number || index + 1}:</span>
-          <span className="step-text">{step.step}</span>
+          <span className="step-text">
+            <strong>Step {step.number || index + 1}:</strong> {step.step}
+          </span>
         </div>
       ));
     }
@@ -186,8 +187,9 @@ const RecipeDetailModal = ({
     if (recipe?.instructionSteps && Array.isArray(recipe.instructionSteps) && recipe.instructionSteps.length > 0) {
       return recipe.instructionSteps.map((step, index) => (
         <div key={index} className="instruction-step">
-          <span className="step-number">Step {index + 1}:</span>
-          <span className="step-text">{step}</span>
+          <span className="step-text">
+            <strong>Step {index + 1}:</strong> {step}
+          </span>
         </div>
       ));
     }
@@ -203,8 +205,9 @@ const RecipeDetailModal = ({
       if (cleanInstructions.length > 0) {
         return cleanInstructions.map((step, index) => (
           <div key={index} className="instruction-step">
-            <span className="step-number">Step {index + 1}:</span>
-            <span className="step-text">{step.trim()}</span>
+            <span className="step-text">
+              <strong>Step {index + 1}:</strong> {step.trim()}
+            </span>
           </div>
         ));
       }
@@ -214,8 +217,9 @@ const RecipeDetailModal = ({
     if (recipe?.instructions && Array.isArray(recipe.instructions)) {
       return recipe.instructions.map((step, index) => (
         <div key={index} className="instruction-step">
-          <span className="step-number">Step {index + 1}:</span>
-          <span className="step-text">{step}</span>
+          <span className="step-text">
+            <strong>Step {index + 1}:</strong> {step}
+          </span>
         </div>
       ));
     }
@@ -234,10 +238,39 @@ const RecipeDetailModal = ({
       );
     }
 
-    const { perServing, caloricBreakdown } = recipe.nutrition;
+    const { perServing, caloricBreakdown, isAIEstimated, confidence } = recipe.nutrition;
 
     return (
       <div className="nutrition-info">
+        {/* AI Estimation Badge */}
+        {isAIEstimated && (
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '1rem',
+            padding: '0.5rem',
+            backgroundColor: '#f0f9ff',
+            borderRadius: '8px',
+            border: '1px solid #e0f2fe'
+          }}>
+            <span style={{
+              fontSize: '0.875rem',
+              color: '#0284c7',
+              fontWeight: 500
+            }}>
+              🤖 AI-Estimated Nutrition
+            </span>
+            {confidence && (
+              <span style={{
+                fontSize: '0.75rem',
+                color: '#64748b',
+                marginLeft: '0.5rem'
+              }}>
+                ({Math.round(confidence * 100)}% confidence)
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Caloric Section - 50/50 Layout */}
         {caloricBreakdown && perServing.calories && (
           <div className="nutrition-caloric-container">

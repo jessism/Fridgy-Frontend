@@ -17,6 +17,7 @@ import DietaryPreferencesPage from './pages/DietaryPreferencesPage';
 import MealHistoryPage from './pages/MealHistoryPage';
 import SavedRecipesPage from './pages/SavedRecipesPage';
 import RecipeImportPage from './pages/RecipeImportPage';
+import MultiModalImportPage from './pages/MultiModalImportPage';
 import InventoryUsagePage from './pages/InventoryUsagePage';
 import BatchCamera from './features/batchcamera/components/BatchCamera';
 import RecipeScannerCamera from './features/recipe-scanner/components/RecipeScannerCamera';
@@ -52,6 +53,11 @@ function App() {
           <Route path="/meal-plans" element={
             <AuthGuard>
               <MealPlansPage />
+            </AuthGuard>
+          } />
+          <Route path="/meal-plans/recipes" element={
+            <AuthGuard>
+              <MealPlansPage defaultTab="recipes" />
             </AuthGuard>
           } />
           <Route path="/ai-recipes" element={
@@ -92,6 +98,11 @@ function App() {
           <Route path="/import" element={
             <AuthGuard>
               <RecipeImportPage />
+            </AuthGuard>
+          } />
+          <Route path="/import/multi-modal" element={
+            <AuthGuard>
+              <MultiModalImportPage />
             </AuthGuard>
           } />
           <Route path="/shortcuts/setup" element={

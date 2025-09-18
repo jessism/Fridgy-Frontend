@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import MealTypeSelector from './MealTypeSelector';
 import '../styles/MealScanner.css';
 
 const MealCameraInterface = () => {
@@ -12,6 +13,8 @@ const MealCameraInterface = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
+  const [showMealTypeModal, setShowMealTypeModal] = useState(false);
+  const [isDineOutMode, setIsDineOutMode] = useState(false);
 
   // Start camera on mount
   useEffect(() => {
@@ -134,6 +137,63 @@ const MealCameraInterface = () => {
     navigate(-1);
   };
 
+  const handleDineOut = () => {
+    setIsDineOutMode(true);
+    setShowMealTypeModal(true);
+  };
+
+  const handleMealTypeSelect = async (mealType) => {
+    setShowMealTypeModal(false);
+
+    if (!isDineOutMode) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Convert base64 to blob
+      const response = await fetch(capturedImage);
+      const blob = await response.blob();
+
+      // Create form data
+      const formData = new FormData();
+      formData.append('image', blob, 'meal.jpg');
+      formData.append('mealType', mealType);
+
+      // Get auth token
+      const token = localStorage.getItem('fridgy_token');
+
+      // Send to backend for dine-out meal logging
+      const apiResponse = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/meals/dine-out`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const data = await apiResponse.json();
+
+      if (data.success) {
+        // Navigate back with success message
+        navigate(-1, {
+          state: {
+            message: 'Meal successfully logged!',
+            returnDate: location.state?.targetDate || new Date().toISOString()
+          }
+        });
+      } else {
+        throw new Error(data.error || 'Failed to log dine-out meal');
+      }
+    } catch (err) {
+      console.error('Error logging dine-out meal:', err);
+      setError('Failed to log meal. Please try again.');
+    } finally {
+      setIsLoading(false);
+      setIsDineOutMode(false);
+    }
+  };
+
   return (
     <div className="meal-camera-interface">
       {/* Header */}
@@ -198,30 +258,54 @@ const MealCameraInterface = () => {
           </>
         ) : (
           <div className="meal-camera-actions">
-            <button 
+            <button
               className="meal-camera-action-btn secondary"
               onClick={retakePhoto}
               disabled={isLoading}
             >
               Retake
             </button>
-            <button 
+            <button
               className="meal-camera-action-btn primary"
               onClick={analyzeMeal}
               disabled={isLoading}
             >
-              {isLoading ? (
+              {isLoading && !isDineOutMode ? (
                 <>
                   <span className="meal-camera-spinner"></span>
                   Analyzing...
                 </>
               ) : (
-                'Analyze Meal'
+                'Eat in'
+              )}
+            </button>
+            <button
+              className="meal-camera-action-btn dine-out"
+              onClick={handleDineOut}
+              disabled={isLoading}
+            >
+              {isLoading && isDineOutMode ? (
+                <>
+                  <span className="meal-camera-spinner"></span>
+                  Logging...
+                </>
+              ) : (
+                'Dine out'
               )}
             </button>
           </div>
         )}
       </div>
+
+      {/* Meal Type Modal */}
+      <MealTypeSelector
+        isOpen={showMealTypeModal}
+        onClose={() => {
+          setShowMealTypeModal(false);
+          setIsDineOutMode(false);
+        }}
+        onSelectMealType={handleMealTypeSelect}
+      />
     </div>
   );
 };

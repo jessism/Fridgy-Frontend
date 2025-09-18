@@ -117,6 +117,12 @@ const MealDetailModal = ({ meal, isOpen, onClose }) => {
   // Calculate total calories
   const getTotalCalories = () => {
     const ingredients = getIngredients();
+
+    // For dine-out meals, check if we have calorie information stored
+    if (meal.is_dine_out && ingredients.length === 1 && ingredients[0].name === 'Total Calories') {
+      return `~${ingredients[0].calories} calories`;
+    }
+
     const total = ingredients.reduce((sum, item) => {
       return sum + (item.calories || 0);
     }, 0);
@@ -167,42 +173,49 @@ const MealDetailModal = ({ meal, isOpen, onClose }) => {
         
         <div className="meal-modal__content">
           <div className="meal-modal__header">
-            <h2 className="meal-modal__title">{getMealName()}</h2>
+            <h2 className="meal-modal__title">
+              {meal.is_dine_out ? '🍴 ' : ''}{getMealName()}
+            </h2>
             <div className="meal-modal__meta">
               <span className="meal-modal__type">
                 {meal.meal_type}
               </span>
+              {meal.is_dine_out && (
+                <span className="meal-modal__dine-out-badge">Dine Out</span>
+              )}
               {getTotalCalories() && (
                 <span className="meal-modal__calories">{getTotalCalories()}</span>
               )}
             </div>
             <p className="meal-modal__date">{formatDateTime(meal.logged_at)}</p>
           </div>
-          
-          <div className="meal-modal__ingredients-section">
-            <h3 className="meal-modal__section-title">Ingredients</h3>
-            {getIngredients().length > 0 ? (
-              <ul className="meal-modal__ingredients-list">
-                {getIngredients().map((ingredient, index) => (
-                  <li key={index} className="meal-modal__ingredient">
-                    <span className="meal-modal__ingredient-name">
-                      {ingredient.name || ingredient.item_name || 'Unknown'}
-                    </span>
-                    <span className="meal-modal__ingredient-quantity">
-                      {ingredient.quantity} {ingredient.unit}
-                      {ingredient.calories && (
-                        <span className="meal-modal__ingredient-calories">
-                          ({ingredient.calories} cal)
-                        </span>
-                      )}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="meal-modal__no-ingredients">No ingredients recorded</p>
-            )}
-          </div>
+
+          {!meal.is_dine_out && (
+            <div className="meal-modal__ingredients-section">
+              <h3 className="meal-modal__section-title">Ingredients</h3>
+              {getIngredients().length > 0 ? (
+                <ul className="meal-modal__ingredients-list">
+                  {getIngredients().map((ingredient, index) => (
+                    <li key={index} className="meal-modal__ingredient">
+                      <span className="meal-modal__ingredient-name">
+                        {ingredient.name || ingredient.item_name || 'Unknown'}
+                      </span>
+                      <span className="meal-modal__ingredient-quantity">
+                        {ingredient.quantity} {ingredient.unit}
+                        {ingredient.calories && (
+                          <span className="meal-modal__ingredient-calories">
+                            ({ingredient.calories} cal)
+                          </span>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="meal-modal__no-ingredients">No ingredients recorded</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

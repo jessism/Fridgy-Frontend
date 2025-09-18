@@ -1532,6 +1532,157 @@ const InventoryPage = ({ defaultTab }) => {
 
 
       {/* Removed old shopping list modals - now handled by ShoppingListSection component */}
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '2rem',
+            maxWidth: '400px',
+            width: '90%',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+          }}>
+            <h3 style={{
+                  margin: '0 0 1.5rem 0',
+                  fontSize: '1.5rem',
+                  fontWeight: '600',
+                  color: '#333'
+                }}>
+                  Create New Shopping List
+                </h3>
+
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label style={{
+                    display: 'block',
+                    marginBottom: '0.5rem',
+                    fontWeight: '500',
+                    color: '#555'
+                  }}>
+                    List Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newListName}
+                    onChange={(e) => setNewListName(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && newListName.trim()) {
+                        handleModalConfirm();
+                      }
+                    }}
+                    placeholder="e.g., Weekly Groceries"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid #ddd',
+                      borderRadius: '8px',
+                      fontSize: '1rem'
+                    }}
+                    autoFocus
+                  />
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  gap: '1rem',
+                  justifyContent: 'flex-end'
+                }}>
+                  <button
+                    onClick={() => {
+                      setShowCreateListModal(false);
+                      setNewListName('');
+                    }}
+                    style={{
+                      padding: '0.75rem 1.5rem',
+                      backgroundColor: '#f8f9fa',
+                      border: '1px solid #ddd',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '1rem'
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleModalConfirm}
+                    disabled={!newListName.trim()}
+                    style={{
+                      padding: '0.75rem 1.5rem',
+                      backgroundColor: newListName.trim() ? 'var(--primary-green)' : '#ccc',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: newListName.trim() ? 'pointer' : 'not-allowed',
+                      fontSize: '1rem'
+                    }}
+                  >
+                    Create & Continue
+                  </button>
+                </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom Sheet for List Options */}
+      {showBottomSheet && (
+        <>
+          <div
+            className="inventory-page__bottom-sheet-overlay"
+            onClick={handleCloseBottomSheet}
+          />
+          <div
+            className={`inventory-page__bottom-sheet ${showBottomSheet ? 'active' : ''}`}
+            style={{
+              backgroundColor: (() => {
+                const listIndex = shoppingLists.findIndex(list => list.id === bottomSheetListId);
+                const pastelColors = [
+                  '#c3f0ca', // Soft green
+                  '#ffd4e5', // Soft pink
+                  '#d4e5ff', // Soft blue
+                  '#fff9d4', // Soft yellow
+                  '#e5d4ff', // Soft purple
+                  '#ffd4b3', // Soft peach
+                  '#d4ffea', // Soft mint
+                  '#ffd4d4', // Soft coral
+                ];
+                return pastelColors[listIndex % pastelColors.length];
+              })()
+            }}
+          >
+            <div className="inventory-page__bottom-sheet-handle" />
+            <div className="inventory-page__bottom-sheet-content">
+              <h2 className="inventory-page__bottom-sheet-title">
+                {shoppingLists.find(list => list.id === bottomSheetListId)?.name}
+              </h2>
+
+              <button
+                className="inventory-page__bottom-sheet-option"
+                onClick={handleDeleteListFromSheet}
+              >
+                <span className="inventory-page__bottom-sheet-option-text">DELETE ALL</span>
+                <span className="inventory-page__bottom-sheet-option-icon">🗑️</span>
+              </button>
+
+              <button
+                className="inventory-page__bottom-sheet-option"
+                onClick={handleClearCompletedFromSheet}
+              >
+                <span className="inventory-page__bottom-sheet-option-text">CLEAR COMPLETED</span>
+                <span className="inventory-page__bottom-sheet-option-icon">✓</span>
+              </button>
+            </div>
+          </div>
+        </>
+      )}
 
       <MobileBottomNav />
     </div>

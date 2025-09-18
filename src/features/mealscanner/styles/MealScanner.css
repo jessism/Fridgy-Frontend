@@ -167,31 +167,36 @@
 /* Actions */
 .meal-camera-actions {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
   padding: 0 1rem;
+  justify-content: space-between;
 }
 
 .meal-camera-action-btn {
-  padding: 14px 24px;
+  padding: 14px 20px;
   border-radius: 8px;
   border: none;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  flex: 1;
 }
 
 .meal-camera-action-btn.secondary {
-  flex: 0.3;
   background: #F3F4F6;
   color: #6B7280;
   border: none;
 }
 
 .meal-camera-action-btn.primary {
-  flex: 0.7;
   background: var(--primary-green);
+  color: white;
+}
+
+.meal-camera-action-btn.dine-out {
+  background: #8B5CF6;
   color: white;
 }
 

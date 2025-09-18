@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import { EditIcon, DeleteIcon } from '../components/icons';
-import MealDetailModal from '../components/modals/MealDetailModal';
+import MealDetailModal from '../components/modals/MealDetailModal.jsx';
 import './MealHistoryPage.css';
 
 const MealHistoryPage = () => {
@@ -332,15 +332,20 @@ const MealHistoryPage = () => {
   // Calculate total calories
   const getTotalCalories = (meal) => {
     try {
-      const ingredients = typeof meal.ingredients_logged === 'string' 
-        ? JSON.parse(meal.ingredients_logged) 
+      const ingredients = typeof meal.ingredients_logged === 'string'
+        ? JSON.parse(meal.ingredients_logged)
         : meal.ingredients_logged;
-      
+
       if (Array.isArray(ingredients)) {
+        // For dine-out meals, check if we have calorie information stored
+        if (meal.is_dine_out && ingredients.length === 1 && ingredients[0].name === 'Total Calories') {
+          return `${ingredients[0].calories} calories`;
+        }
+
         const total = ingredients.reduce((sum, item) => {
           return sum + (item.calories || 0);
         }, 0);
-        return total > 0 ? `~${total} calories` : null;
+        return total > 0 ? `${total} calories` : null;
       }
     } catch (error) {
       console.error('Error calculating calories:', error);
@@ -559,45 +564,55 @@ const MealHistoryPage = () => {
               <div key={meal.id} className="meal-history-page__meal-item">
                 <div className="meal-history-page__meal-content" onClick={() => handleMealNameClick(meal)}>
                   <div className="meal-history-page__meal-info">
-                    <h4 className="meal-history-page__meal-name">{getMealName(meal)}</h4>
+                    <div className="meal-history-page__meal-header">
+                      <h4 className="meal-history-page__meal-name">
+                        {getMealName(meal)}
+                      </h4>
+                    </div>
                     {getTotalCalories(meal) && (
                       <span className="meal-history-page__meal-calories">{getTotalCalories(meal)}</span>
                     )}
                   </div>
                 </div>
-                
-                {/* 3-dot menu */}
-                <div className="meal-history-page__meal-menu">
-                  <button 
-                    className="meal-history-page__meal-menu-btn"
-                    onClick={() => handleDropdownToggle(meal.id)}
-                    aria-label="Meal options"
-                  >
-                    ⋮
-                  </button>
+
+                <div className="meal-history-page__meal-right">
+                  <span className={`meal-history-page__meal-type-pill ${meal.is_dine_out ? 'meal-history-page__meal-type-pill--dine-out' : 'meal-history-page__meal-type-pill--eat-in'}`}>
+                    {meal.is_dine_out ? 'Dine Out' : 'Eat In'}
+                  </span>
+
+                  {/* 3-dot menu */}
+                  <div className="meal-history-page__meal-menu">
+                    <button
+                      className="meal-history-page__meal-menu-btn"
+                      onClick={() => handleDropdownToggle(meal.id)}
+                      aria-label="Meal options"
+                    >
+                      ⋮
+                    </button>
                   
-                  {/* Dropdown menu */}
-                  {openDropdownId === meal.id && (
-                    <>
-                      <div className="meal-history-page__dropdown-overlay" onClick={handleDropdownClose}></div>
-                      <div className="meal-history-page__dropdown-menu">
-                        <button 
-                          className="meal-history-page__dropdown-option"
-                          onClick={() => handleEditMealFromDropdown(meal)}
-                        >
-                          <EditIcon />
-                          <span>Edit</span>
-                        </button>
-                        <button 
-                          className="meal-history-page__dropdown-option"
-                          onClick={() => handleDeleteMealFromDropdown(meal)}
-                        >
-                          <DeleteIcon />
-                          <span>Delete</span>
-                        </button>
-                      </div>
-                    </>
-                  )}
+                    {/* Dropdown menu */}
+                    {openDropdownId === meal.id && (
+                      <>
+                        <div className="meal-history-page__dropdown-overlay" onClick={handleDropdownClose}></div>
+                        <div className="meal-history-page__dropdown-menu">
+                          <button
+                            className="meal-history-page__dropdown-option"
+                            onClick={() => handleEditMealFromDropdown(meal)}
+                          >
+                            <EditIcon />
+                            <span>Edit</span>
+                          </button>
+                          <button
+                            className="meal-history-page__dropdown-option"
+                            onClick={() => handleDeleteMealFromDropdown(meal)}
+                          >
+                            <DeleteIcon />
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

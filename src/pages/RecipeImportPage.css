@@ -5,6 +5,129 @@
   padding-bottom: 80px; /* Space for mobile nav */
 }
 
+/* Multi-Modal Import Styles */
+.recipe-import-page__button-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.recipe-import-page__button--multimodal {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  position: relative;
+  padding: 12px 20px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.recipe-import-page__button--multimodal:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.recipe-import-page__badge--beta {
+  background: #ff6b6b;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: bold;
+  margin-left: 8px;
+  vertical-align: super;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.recipe-import-page__extraction-progress {
+  margin-top: 24px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.recipe-import-page__extraction-progress h3 {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  color: #495057;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.recipe-import-page__progress-stages {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.recipe-import-page__progress-stage {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.recipe-import-page__progress-stage--pending {
+  color: #adb5bd;
+  border: 1px solid #e9ecef;
+}
+
+.recipe-import-page__progress-stage--active {
+  color: #667eea;
+  border: 1px solid #667eea;
+  background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(102, 126, 234, 0) 100%);
+  animation: slideIn 0.5s ease;
+}
+
+.recipe-import-page__progress-stage--complete {
+  color: #4fcf61;
+  border: 1px solid #4fcf61;
+  background: rgba(79, 207, 97, 0.05);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.recipe-import-page__spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .recipe-import-page__container {
   max-width: 600px;
   margin: 0 auto;

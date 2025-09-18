@@ -398,7 +398,7 @@ const SavedRecipesPage = () => {
                       />
                       {recipe.source_type === 'instagram' && (
                         <div className="saved-recipes-page__source-badge">
-                          <span>📷 Instagram</span>
+                          <span>Instagram</span>
                         </div>
                       )}
                     </div>

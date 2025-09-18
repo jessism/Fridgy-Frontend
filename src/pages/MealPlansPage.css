@@ -114,6 +114,51 @@
   line-height: 1.2;
 }
 
+/* Tab Navigation Styles */
+.meal-plans-page__tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e0e0e0;
+  position: relative;
+  width: 100%;
+}
+
+.meal-plans-page__tab {
+  background: none;
+  border: none;
+  padding: 0.75rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #999;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s ease;
+  font-family: var(--primary-font);
+  flex: 1;
+  text-align: center;
+}
+
+.meal-plans-page__tab:hover {
+  color: #333;
+}
+
+.meal-plans-page__tab.active {
+  color: #333;
+  font-weight: 600;
+}
+
+.meal-plans-page__tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: #333;
+  border-radius: 2px 2px 0 0;
+}
+
 /* Analytics Section */
 .meal-plans-page__analytics-section {
   margin-bottom: 2rem;
@@ -121,6 +166,171 @@
 
 .meal-plans-page__analytics-text-section {
   margin-bottom: 1.5rem;
+}
+
+.meal-plans-page__section-header-with-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.meal-plans-page__view-more-btn {
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.meal-plans-page__view-more-btn:hover {
+  color: #000;
+  text-decoration: underline;
+}
+
+/* Saved Recipes Grid */
+.meal-plans-page__saved-recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 769px) {
+  .meal-plans-page__saved-recipes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Saved Recipe Card */
+.meal-plans-page__saved-recipe-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.meal-plans-page__saved-recipe-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.meal-plans-page__saved-recipe-image {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  overflow: hidden;
+  background: #f0f0f0;
+}
+
+.meal-plans-page__saved-recipe-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.meal-plans-page__saved-recipe-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.meal-plans-page__saved-recipe-content {
+  padding: 0.75rem;
+}
+
+.meal-plans-page__saved-recipe-title {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.meal-plans-page__saved-recipe-author {
+  font-size: 0.75rem;
+  color: #666;
+  margin: 0 0 0.5rem 0;
+}
+
+.meal-plans-page__saved-recipe-meta {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: #666;
+  flex-wrap: wrap;
+}
+
+.meal-plans-page__saved-recipe-meta span {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Empty State */
+.meal-plans-page__saved-recipes-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.meal-plans-page__saved-recipes-empty:hover {
+  transform: translateY(-1px);
+}
+
+.meal-plans-page__saved-recipes-empty-container {
+  width: 80px;
+  height: 80px;
+  border: 2px solid var(--primary-green);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+}
+
+.meal-plans-page__saved-recipes-empty:hover .meal-plans-page__saved-recipes-empty-container {
+  background: rgba(129, 224, 83, 0.1);
+  transform: scale(1.05);
+}
+
+.meal-plans-page__saved-recipes-empty-text {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+  text-align: center;
+}
+
+/* Loading State */
+.meal-plans-page__saved-recipe-card.loading {
+  pointer-events: none;
+}
+
+.loading-placeholder {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading-shimmer 1.5s infinite;
+  border-radius: 4px;
 }
 
 .meal-plans-page__section-header {
@@ -238,6 +448,56 @@
     max-width: calc(100vw - 3rem);
     scroll-snap-align: center;
     flex-shrink: 0;
+  }
+
+  /* Mobile styles for saved recipes */
+  .meal-plans-page__saved-recipes-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .meal-plans-page__saved-recipe-image {
+    height: 100px;
+  }
+
+  .meal-plans-page__saved-recipe-content {
+    padding: 0.5rem;
+  }
+
+  .meal-plans-page__saved-recipe-title {
+    font-size: 0.85rem;
+  }
+
+  .meal-plans-page__saved-recipe-author {
+    font-size: 0.7rem;
+  }
+
+  .meal-plans-page__saved-recipe-meta {
+    font-size: 0.7rem;
+    gap: 0.25rem;
+  }
+
+  .meal-plans-page__saved-recipes-empty {
+    padding: 1.5rem;
+  }
+
+  .meal-plans-page__saved-recipes-empty-container {
+    width: 60px;
+    height: 60px;
+  }
+
+  .meal-plans-page__saved-recipes-empty-text {
+    font-size: 0.85rem;
+  }
+
+  /* Mobile tab styles */
+  .meal-plans-page__tabs {
+    gap: 0;
+  }
+
+  .meal-plans-page__tab {
+    font-size: 1rem;
+    flex: 1;
   }
 }
 
