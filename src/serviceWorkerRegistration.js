@@ -145,27 +145,46 @@ export async function requestNotificationPermission() {
 // Subscribe to push notifications
 export async function subscribeToPush() {
   try {
+    console.log('Starting push subscription process...');
     const registration = await navigator.serviceWorker.ready;
+    console.log('Service worker registration:', registration);
 
     // Check if push is supported
     if (!registration.pushManager) {
-      console.log('Push notifications not supported');
+      console.error('Push notifications not supported by this browser');
       return null;
     }
 
     // Get the server's public VAPID key
-    const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/push/vapid-public-key`);
-    const { publicKey } = await response.json();
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+    console.log('Fetching VAPID key from:', `${apiUrl}/push/vapid-public-key`);
+
+    const response = await fetch(`${apiUrl}/push/vapid-public-key`);
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('Failed to fetch VAPID key:', error);
+      return null;
+    }
+
+    const { publicKey, error } = await response.json();
+    if (error) {
+      console.error('Server error getting VAPID key:', error);
+      return null;
+    }
+    console.log('VAPID public key received:', publicKey ? 'Yes' : 'No');
 
     // Subscribe to push notifications
+    console.log('Creating push subscription with VAPID key...');
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(publicKey)
     });
+    console.log('Push subscription created:', subscription);
 
     return subscription;
   } catch (error) {
     console.error('Failed to subscribe to push notifications:', error);
+    console.error('Error details:', error.message, error.stack);
     return null;
   }
 }

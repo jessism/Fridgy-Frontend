@@ -74,9 +74,10 @@ const NotificationSettings = () => {
 
       // Subscribe to push notifications
       const subscription = await subscribeToPush();
+      console.log('Push subscription result:', subscription);
 
       if (!subscription) {
-        setMessage('Failed to subscribe to notifications');
+        setMessage('Failed to subscribe to notifications - check console for details');
         setIsLoading(false);
         return;
       }
@@ -96,7 +97,9 @@ const NotificationSettings = () => {
         setIsSubscribed(true);
         setMessage('Successfully subscribed to notifications!');
       } else {
-        setMessage('Failed to save subscription');
+        const errorData = await response.json();
+        console.error('Subscription failed:', errorData);
+        setMessage(`Failed: ${errorData.message || errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Subscribe error:', error);
