@@ -112,8 +112,8 @@ const AppNavBar = () => {
           >
             Inventory
           </Link>
-          <Link 
-            to="/meal-plans" 
+          <Link
+            to="/meal-plans/recipes"
             className={`nav-link ${isActiveLink('/meal-plans') ? 'active' : ''}`}
           >
             Meals

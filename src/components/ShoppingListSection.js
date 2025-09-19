@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import useShoppingLists from '../hooks/useShoppingLists';
 import ShareListModal from './modals/ShareListModal';
+import JoinListModal from './modals/JoinListModal';
 import './ShoppingListSection.css';
 
 const ShoppingListSection = () => {
@@ -26,15 +27,20 @@ const ShoppingListSection = () => {
   const [editingListId, setEditingListId] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newListName, setNewListName] = useState('');
-  const [itemInput, setItemInput] = useState('');
   const [itemQuantity, setItemQuantity] = useState('');
   const [itemCategory, setItemCategory] = useState('Other');
   const [showShareModal, setShowShareModal] = useState(false);
   const [listToShare, setListToShare] = useState(null);
+  const [showJoinModal, setShowJoinModal] = useState(false);
   const [showBottomSheet, setShowBottomSheet] = useState(false);
   const [bottomSheetListId, setBottomSheetListId] = useState(null);
   const [editingListNameId, setEditingListNameId] = useState(null);
   const [tempListName, setTempListName] = useState('');
+  const [togglingItemId, setTogglingItemId] = useState(null); // Track which item is being toggled
+
+  // Refs for direct DOM access - instant operations
+  const itemNameInputRef = useRef(null);
+  const itemAmountInputRef = useRef(null);
 
   // Categories for dropdown
   const categories = ['Other', 'Fruits', 'Vegetables', 'Dairy', 'Protein', 'Grains', 'Beverages', 'Snacks'];
@@ -70,10 +76,87 @@ const ShoppingListSection = () => {
     }
   }, [selectedListId, getList]);
 
+  // Auto-refresh shared lists when returning to app
+  useEffect(() => {
+    // Only for shared lists
+    if (!selectedList?.shopping_list_members || selectedList.shopping_list_members.length <= 1) {
+      return;
+    }
+
+    let lastRefresh = Date.now();
+
+    const handleVisibilityChange = () => {
+      // When user returns to the app/tab
+      if (document.visibilityState === 'visible') {
+        const timeSinceRefresh = Date.now() - lastRefresh;
+
+        // Only refresh if been away for 30+ seconds
+        if (timeSinceRefresh > 30000) {
+          console.log('Refreshing shared list after returning to app');
+          getList(selectedListId).then(list => {
+            setSelectedList(list);
+            lastRefresh = Date.now();
+            // Also refresh the main lists to update counts
+            fetchLists();
+          }).catch(err => {
+            console.error('Failed to refresh list on return:', err);
+          });
+        }
+      }
+    };
+
+    // Listen for both visibility change and focus events
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleVisibilityChange);
+    };
+  }, [selectedList, selectedListId, getList, fetchLists]);
+
+  // Auto-refresh list counts when returning to main list view
+  useEffect(() => {
+    // Only when viewing the main list (not inside a specific list)
+    if (selectedListId || editingListId) {
+      return;
+    }
+
+    let lastRefresh = Date.now();
+
+    const handleMainViewVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        const timeSinceRefresh = Date.now() - lastRefresh;
+
+        // Refresh if been away for 30+ seconds
+        if (timeSinceRefresh > 30000) {
+          console.log('Refreshing list counts after returning to app');
+          fetchLists();
+          lastRefresh = Date.now();
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleMainViewVisibilityChange);
+    window.addEventListener('focus', handleMainViewVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleMainViewVisibilityChange);
+      window.removeEventListener('focus', handleMainViewVisibilityChange);
+    };
+  }, [selectedListId, editingListId, fetchLists]);
+
   const handleCreateList = async () => {
     if (newListName.trim()) {
       try {
+        // Get the best color for the new list
+        const newColorIndex = getNextAvailableColor();
+
         const newList = await createList(newListName);
+
+        // Store the color assignment for this new list
+        storeListColor(newList.id, newColorIndex);
+
         setNewListName('');
         setShowCreateModal(false);
         // Immediately enter edit mode for the new list
@@ -86,39 +169,113 @@ const ShoppingListSection = () => {
   };
 
   const handleAddItem = async () => {
-    if (itemInput.trim() && editingListId) {
+    // Read directly from DOM refs - no state delay
+    const tempName = itemNameInputRef.current?.value?.trim();
+    const tempAmount = itemAmountInputRef.current?.value?.trim() || '1';
+
+    if (tempName && editingListId) {
+      // Clear inputs via DOM - instant, no React re-render
+      if (itemNameInputRef.current) itemNameInputRef.current.value = '';
+      if (itemAmountInputRef.current) itemAmountInputRef.current.value = '';
+
+      // Keep focus on name input - no blur/focus cycle
+      itemNameInputRef.current?.focus();
+
+      // Generate temporary ID for instant UI update
+      const tempId = `temp_${Date.now()}_${Math.random()}`;
+      const tempItem = {
+        id: tempId,
+        name: tempName,
+        quantity: tempAmount,
+        unit: '',
+        category: 'Other',
+        is_checked: false
+      };
+
+      // Add temporary item for instant feedback
+      setSelectedList(prevList => ({
+        ...prevList,
+        shopping_list_items: [tempItem, ...(prevList.shopping_list_items || [])]
+      }));
+
       try {
-        await addItem(editingListId, {
-          name: itemInput,
-          quantity: itemQuantity || '1',
-          category: itemCategory
+        // Make API call and wait for real item with database ID
+        const realItem = await addItem(editingListId, {
+          name: tempName,
+          quantity: tempAmount,
+          category: 'Other'
         });
 
-        // Refresh the list
-        const updatedList = await getList(editingListId);
-        setSelectedList(updatedList);
-
-        // Clear inputs
-        setItemInput('');
-        setItemQuantity('');
-        setItemCategory('Other');
+        // Replace temporary item with real item from backend
+        if (realItem) {
+          setSelectedList(prevList => ({
+            ...prevList,
+            shopping_list_items: prevList.shopping_list_items.map(item =>
+              item.id === tempId ? realItem : item
+            )
+          }));
+          console.log('Item added successfully with ID:', realItem.id);
+        }
       } catch (err) {
-        alert('Failed to add item. Please try again.');
+        // On error, remove the optimistic item and restore inputs
+        console.error('Failed to add item:', err);
+        setSelectedList(prevList => ({
+          ...prevList,
+          shopping_list_items: prevList.shopping_list_items.filter(item => item.id !== tempId)
+        }));
+        // Restore values to DOM refs
+        if (itemNameInputRef.current) itemNameInputRef.current.value = tempName;
+        if (itemAmountInputRef.current) itemAmountInputRef.current.value = tempAmount;
+        alert('Failed to add item. Your input has been restored.');
       }
     }
   };
 
+  // Handle Enter key on item field - move to amount field
+  const handleItemKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      // Move focus to amount field using ref - instant, no DOM search
+      itemAmountInputRef.current?.focus();
+    }
+  };
+
+  // Handle Enter key on amount field - add item
+  const handleAmountKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddItem();
+    }
+  };
+
   const handleToggleItem = async (listId, itemId) => {
+    console.log('handleToggleItem called with:', { listId, itemId });
+
+    // Prevent multiple simultaneous toggles
+    if (togglingItemId === itemId) {
+      console.log('Already toggling this item, ignoring click');
+      return;
+    }
+
+    setTogglingItemId(itemId);
+
     try {
+      console.log('Calling toggleItem...');
       await toggleItem(listId, itemId);
+      console.log('Toggle successful, refreshing list...');
+
       // Refresh the list
       const updatedList = await getList(listId);
+      console.log('Updated list received:', updatedList);
       setSelectedList(updatedList);
 
       // Also refresh the main lists to update counts
       fetchLists();
     } catch (err) {
-      console.error('Failed to toggle item:', err);
+      console.error('Failed to toggle item - Full error:', err);
+      alert(`Failed to toggle item: ${err.message || 'Unknown error'}`);
+    } finally {
+      setTogglingItemId(null);
     }
   };
 
@@ -134,16 +291,14 @@ const ShoppingListSection = () => {
   };
 
   const handleDeleteList = async (listId) => {
-    if (window.confirm('Are you sure you want to delete this list?')) {
-      try {
-        await deleteList(listId);
-        setSelectedListId(null);
-        setSelectedList(null);
-        setEditingListId(null);
-        setShowBottomSheet(false);
-      } catch (err) {
-        alert('Failed to delete list. Only owners can delete lists.');
-      }
+    try {
+      await deleteList(listId);
+      setSelectedListId(null);
+      setSelectedList(null);
+      setEditingListId(null);
+      setShowBottomSheet(false);
+    } catch (err) {
+      alert('Failed to delete list. Only owners can delete lists.');
     }
   };
 
@@ -191,13 +346,157 @@ const ShoppingListSection = () => {
     }
   };
 
-  const getInitials = (name) => {
-    if (!name) return '?';
-    return name.split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+  const getInitials = (firstName, lastName) => {
+    const first = firstName?.charAt(0)?.toUpperCase() || '';
+    const last = lastName?.charAt(0)?.toUpperCase() || '';
+
+    if (first && last) {
+      return first + last;
+    } else if (first) {
+      return first + firstName?.charAt(1)?.toUpperCase() || first;
+    } else if (lastName) {
+      return lastName.substring(0, 2).toUpperCase();
+    }
+    return '?';
+  };
+
+  // Generate consistent avatar color based on user ID
+  const getAvatarColor = (userId) => {
+    const colors = [
+      '#FF6B6B', // Red
+      '#4ECDC4', // Teal
+      '#45B7D1', // Blue
+      '#96CEB4', // Green
+      '#DDA0DD', // Plum
+      '#F4A460', // Sandy
+      '#98D8C8', // Mint
+      '#FFD93D', // Gold
+    ];
+
+    if (!userId) return colors[0];
+
+    // Generate hash from userId for consistent color
+    let hash = 0;
+    const idStr = userId.toString();
+    for (let i = 0; i < idStr.length; i++) {
+      hash = ((hash << 5) - hash + idStr.charCodeAt(i)) & 0xffffffff;
+    }
+
+    return colors[Math.abs(hash) % colors.length];
+  };
+
+  // Helper function to format time ago
+  const formatTimeAgo = (timestamp) => {
+    if (!timestamp) return '';
+
+    const now = new Date();
+    const then = new Date(timestamp);
+    const diffMs = now - then;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return '';
+  };
+
+  // Helper function to get first name from full name
+  const getFirstName = (fullName) => {
+    if (!fullName) return '';
+    return fullName.trim().split(' ')[0];
+  };
+
+  // Color assignment storage key
+  const COLOR_STORAGE_KEY = 'shopping_list_colors';
+
+  // Get stored color assignments
+  const getStoredColors = () => {
+    try {
+      const stored = localStorage.getItem(COLOR_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  };
+
+  // Store color assignment for a list
+  const storeListColor = (listId, colorIndex) => {
+    try {
+      const colors = getStoredColors();
+      colors[listId] = colorIndex;
+      localStorage.setItem(COLOR_STORAGE_KEY, JSON.stringify(colors));
+    } catch (err) {
+      console.warn('Failed to store list color:', err);
+    }
+  };
+
+  // Generate color for new lists avoiding recently used colors
+  const getNextAvailableColor = () => {
+    const totalColors = 6;
+    const myLists = lists.filter(list => list.is_owner === true);
+
+    if (myLists.length === 0) {
+      return 0; // First list gets color 0
+    }
+
+    // Get colors currently in use by existing lists
+    const storedColors = getStoredColors();
+    const usedColors = new Set();
+
+    myLists.forEach(list => {
+      const color = storedColors[list.id] !== undefined
+        ? storedColors[list.id]
+        : getListColorFromId(list.id);
+      usedColors.add(color);
+    });
+
+    // Find first unused color
+    for (let i = 0; i < totalColors; i++) {
+      if (!usedColors.has(i)) {
+        return i;
+      }
+    }
+
+    // If all colors are used, cycle through them
+    return myLists.length % totalColors;
+  };
+
+  // Generate consistent color based on list ID (fallback for lists without stored colors)
+  const getListColorFromId = (listId) => {
+    if (!listId) return 0;
+    // Simple hash function to convert ID to color index
+    let hash = 0;
+    const idStr = listId.toString();
+    for (let i = 0; i < idStr.length; i++) {
+      hash = ((hash << 5) - hash + idStr.charCodeAt(i)) & 0xffffffff;
+    }
+    return Math.abs(hash) % 6;
+  };
+
+  // Main color function - use for all lists
+  const getListColor = (listId) => {
+    const storedColors = getStoredColors();
+
+    // Use stored color if available, otherwise fall back to ID-based color
+    return storedColors[listId] !== undefined
+      ? storedColors[listId]
+      : getListColorFromId(listId);
+  };
+
+  // Helper function to format checked by text
+  const getCheckedByText = (item) => {
+    if (!item.is_checked || !item.checked_by_name) return null;
+
+    const firstName = getFirstName(item.checked_by_name);
+    const timeAgo = formatTimeAgo(item.checked_at);
+
+    if (timeAgo && timeAgo !== '') {
+      return `${firstName} • ${timeAgo}`;
+    }
+    return firstName;
   };
 
   if (loading && lists.length === 0) {
@@ -213,208 +512,328 @@ const ShoppingListSection = () => {
       {/* Shopping List Content */}
       <div className="shopping-list-section__content">
         {/* Show list of lists when not editing */}
-        {!editingListId && !selectedListId && (
-          <>
-            <div className="shopping-list-section__header">
-              <h2 className="shopping-list-section__title">Create your list</h2>
-              <button
-                className="shopping-list-section__add-btn"
-                onClick={() => setShowCreateModal(true)}
-                title="Create new list"
-              >
-                +
-              </button>
-            </div>
+        {!editingListId && !selectedListId && (() => {
+          // Separate lists into owned and shared
+          const myLists = lists.filter(list => list.is_owner === true);
+          const sharedLists = lists.filter(list => list.is_owner === false);
 
-            <div className="shopping-list-section__lists">
-              {lists.length === 0 ? (
-                <div className="shopping-list-section__empty">
-                  <p>No shopping lists yet</p>
-                  <button
-                    className="shopping-list-section__create-first-btn"
-                    onClick={() => setShowCreateModal(true)}
-                  >
-                    Create your first list
-                  </button>
-                </div>
-              ) : (
-                lists.map(list => (
-                  <div key={list.id} className="shopping-list-section__list-card">
-                    <div
-                      className="shopping-list-section__list-main"
-                      onClick={() => {
-                        setSelectedListId(list.id);
-                        setEditingListId(list.id);
-                      }}
-                    >
-                      <h3 className="shopping-list-section__list-name">{list.name}</h3>
-                      <div className="shopping-list-section__list-meta">
-                        <span>{list.total_items || 0} items</span>
-                        {list.checked_items > 0 && (
-                          <span className="shopping-list-section__checked-count">
-                            ({list.checked_items} checked)
-                          </span>
-                        )}
-                        {list.member_count > 1 && (
-                          <span className="shopping-list-section__shared-badge">
-                            👥 Shared
-                          </span>
-                        )}
-                      </div>
-                    </div>
+          return (
+            <>
+              {/* My Lists Section */}
+              <div className="shopping-list-section__header">
+                <h2 className="shopping-list-section__title">My Lists</h2>
+                <button
+                  className="shopping-list-section__add-btn"
+                  onClick={() => setShowCreateModal(true)}
+                  title="Create new list"
+                >
+                  +
+                </button>
+              </div>
+
+              <div className="shopping-list-section__lists">
+                {myLists.length === 0 ? (
+                  <div className="shopping-list-section__empty">
+                    <p>No lists created yet</p>
                     <button
-                      className="shopping-list-section__more-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setBottomSheetListId(list.id);
-                        setShowBottomSheet(true);
-                      }}
+                      className="shopping-list-section__create-first-btn"
+                      onClick={() => setShowCreateModal(true)}
                     >
-                      ⋮
+                      Create your first list
                     </button>
                   </div>
-                ))
-              )}
-            </div>
-          </>
-        )}
+                ) : (
+                  myLists.map((list) => (
+                    <div key={list.id} className={`shopping-list-section__list-card shopping-list-section__list-card--color-${getListColor(list.id)}`}>
+                      <div
+                        className="shopping-list-section__list-main"
+                        onClick={() => {
+                          setSelectedListId(list.id);
+                          setEditingListId(list.id);
+                        }}
+                      >
+                        <h3 className="shopping-list-section__list-name">{list.name}</h3>
+                        <div className="shopping-list-section__list-meta">
+                          <span className="shopping-list-section__meta-item">
+                            {list.total_items || 0} {(list.total_items || 0) === 1 ? 'item' : 'items'}
+                          </span>
+                          {list.checked_items > 0 && (
+                            <span className="shopping-list-section__meta-item shopping-list-section__checked-count">
+                              {list.checked_items} checked
+                            </span>
+                          )}
+                          {list.member_count > 1 && (
+                            <span className="shopping-list-section__shared-badge">
+                              <span className="shopping-list-section__shared-count">{list.member_count}</span> Shared
+                            </span>
+                          )}
+                        </div>
+                        {list.updated_at && (
+                          <div className="shopping-list-section__list-updated">
+                            Last updated: {new Date(list.updated_at).toLocaleString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        className="shopping-list-section__more-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setBottomSheetListId(list.id);
+                          setShowBottomSheet(true);
+                        }}
+                      >
+                        ⋮
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Shared Lists Section */}
+              <div className="shopping-list-section__shared-header">
+                <h2 className="shopping-list-section__title">Shared Lists</h2>
+                <button
+                  className="shopping-list-section__join-header-btn"
+                  onClick={() => setShowJoinModal(true)}
+                  title="Join shared list"
+                >
+                  Join
+                </button>
+              </div>
+
+              <div className="shopping-list-section__lists">
+                {sharedLists.length === 0 ? (
+                  <div className="shopping-list-section__empty">
+                    <p>No shared lists yet</p>
+                    <p className="shopping-list-section__empty-hint">Click "Join" above to join a shared list</p>
+                  </div>
+                ) : (
+                  sharedLists.map((list) => (
+                    <div key={list.id} className={`shopping-list-section__list-card shopping-list-section__list-card--color-${getListColor(list.id)}`}>
+                      <div
+                        className="shopping-list-section__list-main"
+                        onClick={() => {
+                          setSelectedListId(list.id);
+                          setEditingListId(list.id);
+                        }}
+                      >
+                        <h3 className="shopping-list-section__list-name">{list.name}</h3>
+                        <div className="shopping-list-section__list-meta">
+                          <span className="shopping-list-section__meta-item">
+                            {list.total_items || 0} {(list.total_items || 0) === 1 ? 'item' : 'items'}
+                          </span>
+                          {list.checked_items > 0 && (
+                            <span className="shopping-list-section__meta-item shopping-list-section__checked-count">
+                              {list.checked_items} checked
+                            </span>
+                          )}
+                          {list.member_count > 1 && (
+                            <span className="shopping-list-section__shared-badge">
+                              <span className="shopping-list-section__shared-count">{list.member_count}</span> Shared
+                            </span>
+                          )}
+                        </div>
+                        {list.updated_at && (
+                          <div className="shopping-list-section__list-updated">
+                            Last updated: {new Date(list.updated_at).toLocaleString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        className="shopping-list-section__more-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setBottomSheetListId(list.id);
+                          setShowBottomSheet(true);
+                        }}
+                      >
+                        ⋮
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </>
+          );
+        })()}
 
         {/* Edit mode for a list */}
         {editingListId && selectedList && (
           <div className="shopping-list-section__edit-mode">
             <div className="shopping-list-section__edit-header">
               <button
-                className="shopping-list-section__back-btn"
+                className="shopping-list-section__back-icon"
                 onClick={() => {
                   setEditingListId(null);
                   setSelectedListId(null);
                   setSelectedList(null);
                 }}
+                aria-label="Go back"
               >
-                ← Back
+                ←
               </button>
-              {editingListNameId === selectedList.id ? (
-                <div className="shopping-list-section__edit-name">
-                  <input
-                    type="text"
-                    value={tempListName}
-                    onChange={(e) => setTempListName(e.target.value)}
-                    onBlur={handleSaveListName}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSaveListName()}
-                    className="shopping-list-section__name-input"
-                    autoFocus
-                  />
-                </div>
-              ) : (
-                <h2
-                  className="shopping-list-section__edit-title"
-                  onClick={() => {
-                    setEditingListNameId(selectedList.id);
-                    setTempListName(selectedList.name);
-                  }}
+              <h1 className="shopping-list-section__list-title">
+                {selectedList.name}
+              </h1>
+              <div className="shopping-list-section__header-actions">
+                <button
+                  className="shopping-list-section__add-icon"
+                  onClick={() => document.querySelector('.shopping-list-section__item-name-input')?.focus()}
+                  aria-label="Add item"
                 >
-                  {selectedList.name}
-                </h2>
-              )}
-              <button
-                className="shopping-list-section__more-btn"
-                onClick={() => {
-                  setBottomSheetListId(selectedList.id);
-                  setShowBottomSheet(true);
-                }}
-              >
-                ⋮
-              </button>
+                  +
+                </button>
+                <button
+                  className="shopping-list-section__more-icon"
+                  onClick={() => {
+                    setBottomSheetListId(selectedList.id);
+                    setShowBottomSheet(true);
+                  }}
+                  aria-label="More options"
+                >
+                  ⋮
+                </button>
+              </div>
             </div>
 
-            {/* Add item form */}
-            <div className="shopping-list-section__add-item-form">
-              <input
-                type="text"
-                placeholder="Add item..."
-                value={itemInput}
-                onChange={(e) => setItemInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleAddItem()}
-                className="shopping-list-section__item-input"
-              />
-              <input
-                type="text"
-                placeholder="Qty"
-                value={itemQuantity}
-                onChange={(e) => setItemQuantity(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleAddItem()}
-                className="shopping-list-section__quantity-input"
-              />
-              <select
-                value={itemCategory}
-                onChange={(e) => setItemCategory(e.target.value)}
-                className="shopping-list-section__category-select"
-              >
-                {categories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-              <button
-                onClick={handleAddItem}
-                className="shopping-list-section__add-item-btn"
-                disabled={!itemInput.trim()}
-              >
-                Add
-              </button>
+            {/* Add item form at the top */}
+            <div className="shopping-list-section__item-minimal shopping-list-section__item-input">
+              <span className="shopping-list-section__item-circle">○</span>
+              <div className="shopping-list-section__item-info">
+                <input
+                  ref={itemNameInputRef}
+                  type="text"
+                  onKeyPress={handleItemKeyPress}
+                  className="shopping-list-section__item-name-input"
+                  placeholder=""
+                  autoFocus
+                />
+                <input
+                  ref={itemAmountInputRef}
+                  type="text"
+                  onKeyPress={handleAmountKeyPress}
+                  className="shopping-list-section__item-amount-input"
+                  placeholder=""
+                />
+              </div>
             </div>
 
-            {/* Items list */}
-            <div className="shopping-list-section__items">
-              {selectedList.shopping_list_items && selectedList.shopping_list_items.length > 0 ? (
-                selectedList.shopping_list_items.map(item => (
-                  <div key={item.id} className={`shopping-list-section__item ${item.is_checked ? 'checked' : ''}`}>
-                    <input
-                      type="checkbox"
-                      checked={item.is_checked}
-                      onChange={() => handleToggleItem(selectedList.id, item.id)}
-                      className="shopping-list-section__item-checkbox"
-                    />
-                    <div className="shopping-list-section__item-details">
-                      <span className="shopping-list-section__item-name">
-                        {item.name}
+            {/* Items list below the input */}
+            <div className="shopping-list-section__items-clean">
+              {selectedList.shopping_list_items && selectedList.shopping_list_items.length > 0 && (
+                // Sort items: unchecked first, then checked
+                [...selectedList.shopping_list_items]
+                  .sort((a, b) => {
+                    if (a.is_checked === b.is_checked) return 0;
+                    return a.is_checked ? 1 : -1;
+                  })
+                  .map(item => (
+                    <div key={item.id} className={`shopping-list-section__item-minimal ${item.is_checked ? 'shopping-list-section__item-minimal--checked' : ''}`}>
+                      <span
+                        className={`shopping-list-section__item-circle ${item.is_checked ? 'shopping-list-section__item-circle--checked' : ''} ${togglingItemId === item.id ? 'shopping-list-section__item-circle--loading' : ''}`}
+                        onClick={() => handleToggleItem(selectedList.id, item.id)}
+                        style={{ opacity: togglingItemId === item.id ? 0.5 : 1 }}
+                      >
+                        {togglingItemId === item.id ? '⟳' : (item.is_checked ? '✓' : '○')}
                       </span>
-                      {item.quantity && (
-                        <span className="shopping-list-section__item-quantity">
-                          {item.quantity} {item.unit}
-                        </span>
+                      <div className="shopping-list-section__item-info">
+                        <div className="shopping-list-section__item-name-line">
+                          {item.name}
+                        </div>
+                        {item.quantity && (
+                          <div className="shopping-list-section__item-amount-line">
+                            {item.quantity} {item.unit || ''}
+                          </div>
+                        )}
+                      </div>
+                      {/* Show who checked the item in shared lists */}
+                      {selectedList.shopping_list_members && selectedList.shopping_list_members.length > 1 && item.is_checked && item.checked_by_name && (
+                        <div className="shopping-list-section__checked-by">
+                          ✓ by {getCheckedByText(item)}
+                        </div>
                       )}
-                      {item.is_checked && item.checked_by_name && (
-                        <span className="shopping-list-section__checked-by">
-                          ✓ {getInitials(item.checked_by_name)}
-                        </span>
-                      )}
+                      <button
+                        onClick={() => handleDeleteItem(selectedList.id, item.id)}
+                        className="shopping-list-section__item-delete-btn"
+                        aria-label="Remove item"
+                      >
+                        ×
+                      </button>
                     </div>
-                    <span className="shopping-list-section__item-category">
-                      {item.category}
-                    </span>
-                    <button
-                      onClick={() => handleDeleteItem(selectedList.id, item.id)}
-                      className="shopping-list-section__item-delete"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <p className="shopping-list-section__no-items">No items in this list yet</p>
+                  ))
               )}
             </div>
 
             {/* Members section if shared */}
             {selectedList.shopping_list_members && selectedList.shopping_list_members.length > 1 && (
               <div className="shopping-list-section__members">
-                <h4>Shared with:</h4>
-                {selectedList.shopping_list_members.map(member => (
-                  <div key={member.id} className="shopping-list-section__member">
-                    <span>{member.user?.first_name} {member.user?.last_name}</span>
-                    {member.role === 'owner' && <span className="shopping-list-section__owner-badge">Owner</span>}
-                  </div>
-                ))}
+                {/* List Owner Section */}
+                {(() => {
+                  const owner = selectedList.shopping_list_members.find(m => m.role === 'owner');
+                  return owner && (
+                    <div className="shopping-list-section__members-section">
+                      <h5 className="shopping-list-section__members-title">List Owner</h5>
+                      <div className="shopping-list-section__member-row">
+                        <div
+                          className="shopping-list-section__member-avatar shopping-list-section__member-avatar--owner"
+                          style={{ backgroundColor: getAvatarColor(owner.user_id) }}
+                        >
+                          {owner.user?.first_name || owner.user?.last_name ?
+                            getInitials(owner.user?.first_name, owner.user?.last_name) :
+                            ''
+                          }
+                        </div>
+                        <div className="shopping-list-section__member-info">
+                          <div className="shopping-list-section__member-name">
+                            {owner.user?.first_name || 'Unknown'} {owner.user?.last_name || ''}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Collaborators Section */}
+                {(() => {
+                  const collaborators = selectedList.shopping_list_members.filter(m => m.role !== 'owner');
+                  return collaborators.length > 0 && (
+                    <div className="shopping-list-section__members-section">
+                      <h5 className="shopping-list-section__members-title">
+                        Collaborators ({collaborators.length})
+                      </h5>
+                      <div className="shopping-list-section__members-grid">
+                        {collaborators.map(member => (
+                          <div key={member.id} className="shopping-list-section__member-row">
+                            <div
+                              className="shopping-list-section__member-avatar"
+                              style={{ backgroundColor: getAvatarColor(member.user_id) }}
+                            >
+                              {member.user?.first_name || member.user?.last_name ?
+                                getInitials(member.user?.first_name, member.user?.last_name) :
+                                ''
+                              }
+                            </div>
+                            <div className="shopping-list-section__member-info">
+                              <div className="shopping-list-section__member-name">
+                                {member.user?.first_name || 'Unknown'} {member.user?.last_name || ''}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>
@@ -494,6 +913,12 @@ const ShoppingListSection = () => {
           setListToShare(null);
         }}
         onShare={handleShareList}
+      />
+
+      {/* Join List Modal */}
+      <JoinListModal
+        isOpen={showJoinModal}
+        onClose={() => setShowJoinModal(false)}
       />
     </div>
   );

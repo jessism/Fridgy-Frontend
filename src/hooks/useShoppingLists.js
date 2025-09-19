@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 
+// API base URL with fallback
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 const useShoppingLists = () => {
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -19,7 +22,7 @@ const useShoppingLists = () => {
         throw new Error('Not authenticated');
       }
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/shopping-lists`, {
+      const response = await fetch(`${API_BASE_URL}/shopping-lists`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -46,7 +49,7 @@ const useShoppingLists = () => {
       const token = getAuthToken();
       if (!token) throw new Error('Not authenticated');
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/shopping-lists`, {
+      const response = await fetch(`${API_BASE_URL}/shopping-lists`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -69,12 +72,12 @@ const useShoppingLists = () => {
   };
 
   // Get a single shopping list with items
-  const getList = async (listId) => {
+  const getList = useCallback(async (listId) => {
     try {
       const token = getAuthToken();
       if (!token) throw new Error('Not authenticated');
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/shopping-lists/${listId}`, {
+      const response = await fetch(`${API_BASE_URL}/shopping-lists/${listId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -91,7 +94,7 @@ const useShoppingLists = () => {
       console.error('Error fetching shopping list:', err);
       throw err;
     }
-  };
+  }, []);
 
   // Update a shopping list
   const updateList = async (listId, updates) => {
@@ -99,7 +102,7 @@ const useShoppingLists = () => {
       const token = getAuthToken();
       if (!token) throw new Error('Not authenticated');
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/shopping-lists/${listId}`, {
+      const response = await fetch(`${API_BASE_URL}/shopping-lists/${listId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -125,7 +128,7 @@ const useShoppingLists = () => {
       const token = getAuthToken();
       if (!token) throw new Error('Not authenticated');
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/shopping-lists/${listId}`, {
+      const response = await fetch(`${API_BASE_URL}/shopping-lists/${listId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -150,7 +153,7 @@ const useShoppingLists = () => {
       const token = getAuthToken();
       if (!token) throw new Error('Not authenticated');
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/shopping-lists/${listId}/items`, {
+      const response = await fetch(`${API_BASE_URL}/shopping-lists/${listId}/items`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -164,6 +167,7 @@ const useShoppingLists = () => {
       }
 
       const data = await response.json();
+      console.log('[useShoppingLists] Item added successfully:', data.item);
       return data.item;
     } catch (err) {
       console.error('Error adding item:', err);
@@ -177,7 +181,7 @@ const useShoppingLists = () => {
       const token = getAuthToken();
       if (!token) throw new Error('Not authenticated');
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/shopping-lists/${listId}/items/${itemId}`, {
+      const response = await fetch(`${API_BASE_URL}/shopping-lists/${listId}/items/${itemId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -200,11 +204,17 @@ const useShoppingLists = () => {
 
   // Toggle item checked status
   const toggleItem = async (listId, itemId) => {
+    console.log('[useShoppingLists] toggleItem called:', { listId, itemId });
+
     try {
       const token = getAuthToken();
+      console.log('[useShoppingLists] Auth token present:', !!token);
       if (!token) throw new Error('Not authenticated');
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/shopping-lists/${listId}/items/${itemId}/toggle`, {
+      const url = `${API_BASE_URL}/shopping-lists/${listId}/items/${itemId}/toggle`;
+      console.log('[useShoppingLists] Making request to:', url);
+
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -212,14 +222,19 @@ const useShoppingLists = () => {
         }
       });
 
+      console.log('[useShoppingLists] Response status:', response.status);
+
       if (!response.ok) {
-        throw new Error('Failed to toggle item');
+        const errorText = await response.text();
+        console.error('[useShoppingLists] Error response:', errorText);
+        throw new Error(`Failed to toggle item: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('[useShoppingLists] Toggle response data:', data);
       return data.item;
     } catch (err) {
-      console.error('Error toggling item:', err);
+      console.error('[useShoppingLists] Error toggling item:', err);
       throw err;
     }
   };
@@ -230,7 +245,7 @@ const useShoppingLists = () => {
       const token = getAuthToken();
       if (!token) throw new Error('Not authenticated');
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/shopping-lists/${listId}/items/${itemId}`, {
+      const response = await fetch(`${API_BASE_URL}/shopping-lists/${listId}/items/${itemId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -253,7 +268,7 @@ const useShoppingLists = () => {
       const token = getAuthToken();
       if (!token) throw new Error('Not authenticated');
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/shopping-lists/${listId}/clear-completed`, {
+      const response = await fetch(`${API_BASE_URL}/shopping-lists/${listId}/clear-completed`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -279,7 +294,7 @@ const useShoppingLists = () => {
       const token = getAuthToken();
       if (!token) throw new Error('Not authenticated');
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/shopping-lists/${listId}/share`, {
+      const response = await fetch(`${API_BASE_URL}/shopping-lists/${listId}/share`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -306,7 +321,7 @@ const useShoppingLists = () => {
       const token = getAuthToken();
       if (!token) throw new Error('Not authenticated');
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/shopping-lists/join/${shareCode}`, {
+      const response = await fetch(`${API_BASE_URL}/shopping-lists/join/${shareCode}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -332,7 +347,7 @@ const useShoppingLists = () => {
       const token = getAuthToken();
       if (!token) throw new Error('Not authenticated');
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/shopping-lists/${listId}/purchase-to-inventory`, {
+      const response = await fetch(`${API_BASE_URL}/shopping-lists/${listId}/purchase-to-inventory`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -358,7 +373,7 @@ const useShoppingLists = () => {
       const token = getAuthToken();
       if (!token) throw new Error('Not authenticated');
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/shopping-lists/migrate`, {
+      const response = await fetch(`${API_BASE_URL}/shopping-lists/migrate`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

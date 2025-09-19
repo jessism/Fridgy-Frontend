@@ -210,55 +210,7 @@
   margin-bottom: 2rem;
 }
 
-.meal-plans-page__uploaded-container-wrapper {
-  display: flex;
-  gap: 1rem;
-  width: 100%;
-  margin-top: 1rem;
-}
-
-.meal-plans-page__uploaded-container-left,
-.meal-plans-page__uploaded-container-right {
-  flex: 1;
-  width: 50%;
-  display: flex;
-  flex-direction: column;
-}
-
-.meal-plans-page__uploaded-container {
-  background-color: white;
-  border: 2px solid #4fcf61;
-  border-radius: 12px;
-  min-height: 100px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.meal-plans-page__uploaded-container:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.meal-plans-page__plus-icon {
-  color: #4fcf61;
-  font-size: 3rem;
-  font-weight: 300;
-  line-height: 1;
-}
-
-.meal-plans-page__container-label {
-  text-align: center;
-  color: #666;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
-  margin-bottom: 0;
-}
+/* Removed unused green container styles - now using recipe cards */
 
 .meal-plans-page__add-button {
   background: transparent;
@@ -314,6 +266,53 @@
 .meal-plans-page__view-more-btn-bottom:hover {
   color: #000;
   text-decoration: underline;
+}
+
+.meal-plans-page__view-more-btn-top {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  transition: color 0.2s ease;
+}
+
+.meal-plans-page__view-more-btn-top:hover {
+  color: #333;
+  text-decoration: underline;
+}
+
+/* Arrow button for View more */
+.meal-plans-page__view-more-arrow-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+}
+
+.meal-plans-page__view-more-arrow-btn:hover {
+  background: rgba(79, 207, 97, 0.08);
+  transform: translateX(3px);
+}
+
+.meal-plans-page__view-more-arrow-btn:hover svg path {
+  stroke: var(--primary-green, #4fcf61);
+  stroke-width: 2;
+}
+
+.meal-plans-page__view-more-arrow-btn svg {
+  width: 24px;
+  height: 24px;
+  transition: all 0.3s ease;
 }
 
 /* Saved Recipe Card */
@@ -372,6 +371,7 @@
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  text-align: left;
 }
 
 .meal-plans-page__saved-recipe-author {

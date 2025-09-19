@@ -50,6 +50,10 @@ const ProfilePageV2 = () => {
     navigate('/dietary-preferences');
   };
 
+  const handleNotificationSettings = () => {
+    navigate('/notification-settings');
+  };
+
   return (
     <div className="profile-v2">
       {/* Header */}
@@ -103,6 +107,17 @@ const ProfilePageV2 = () => {
             </svg>
           </div>
           <span className="profile-v2__menu-text">Your dietary preferences</span>
+        </div>
+
+        {/* Notification Settings */}
+        <div className="profile-v2__menu-item" onClick={handleNotificationSettings}>
+          <div className="profile-v2__menu-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <span className="profile-v2__menu-text">Notification settings</span>
         </div>
 
         {/* Manage Subscription */}

@@ -461,6 +461,22 @@ const RecipeDetailModal = ({
                     <p>{getDescription()}</p>
                   </div>
 
+                  {/* Instagram Attribution */}
+                  {recipe.source_type === 'instagram' && (recipe.source_author || recipe.source_url) && (
+                    <div className="recipe-instagram-attribution">
+                      {recipe.source_url && (
+                        <a
+                          href={recipe.source_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="recipe-instagram-link"
+                        >
+                          @{recipe.source_author || 'View original post'} →
+                        </a>
+                      )}
+                    </div>
+                  )}
+
                   <div className="recipe-info-text">
                     <div className="info-text-item">
                       <span className="info-text-icon">⏱</span>

@@ -146,13 +146,38 @@
 }
 
 .meal-modal__type {
-  background: var(--primary-green, #4fcf61);
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
+  /* Default modern pastel styling */
+  padding: 0.35rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
   font-weight: 600;
   text-transform: capitalize;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+}
+
+/* Breakfast - Pastel Orange */
+.meal-modal__type--breakfast {
+  background: #FFF3E0;
+  color: #E65100;
+}
+
+/* Lunch - Pastel Green */
+.meal-modal__type--lunch {
+  background: #E8F5E9;
+  color: #2E7D32;
+}
+
+/* Dinner - Pastel Blue */
+.meal-modal__type--dinner {
+  background: #E3F2FD;
+  color: #1565C0;
+}
+
+/* Snack - Pastel Pink */
+.meal-modal__type--snack {
+  background: #FCE4EC;
+  color: #C2185B;
 }
 
 .meal-modal__calories {
@@ -165,12 +190,14 @@
 }
 
 .meal-modal__dine-out-badge {
-  background: #8B5CF6;
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
+  /* Modern pastel purple background with darker purple text */
+  background: #F3E5F5;
+  color: #6A1B9A;
+  padding: 0.35rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
 }
 
 .meal-modal__date {

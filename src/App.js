@@ -14,6 +14,7 @@ import ShoppingListPage from './pages/ShoppingListPage';
 import ProfilePageV2 from './pages/ProfilePageV2';
 import AboutYouPage from './pages/AboutYouPage';
 import DietaryPreferencesPage from './pages/DietaryPreferencesPage';
+import NotificationSettingsPage from './pages/NotificationSettingsPage';
 import MealHistoryPage from './pages/MealHistoryPage';
 import SavedRecipesPage from './pages/SavedRecipesPage';
 import RecipeImportPage from './pages/RecipeImportPage';
@@ -84,6 +85,11 @@ function App() {
           <Route path="/dietary-preferences" element={
             <AuthGuard>
               <DietaryPreferencesPage />
+            </AuthGuard>
+          } />
+          <Route path="/notification-settings" element={
+            <AuthGuard>
+              <NotificationSettingsPage />
             </AuthGuard>
           } />
           <Route path="/meal-history" element={

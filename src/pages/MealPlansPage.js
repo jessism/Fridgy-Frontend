@@ -36,6 +36,10 @@ const MealPlansPage = ({ defaultTab }) => {
   const [savedRecipesLoading, setSavedRecipesLoading] = useState(true);
   const [savedRecipesError, setSavedRecipesError] = useState(null);
 
+  // User uploaded recipes state (physical scans, manual entry, voice)
+  const [userUploadedRecipes, setUserUploadedRecipes] = useState([]);
+  const [userUploadedRecipesLoading, setUserUploadedRecipesLoading] = useState(true);
+
   // Recent meals state
   const [recentMeals, setRecentMeals] = useState([]);
   const [recentMealsLoading, setRecentMealsLoading] = useState(true);
@@ -90,6 +94,57 @@ const MealPlansPage = ({ defaultTab }) => {
 
   // API base URL
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+  // Fetch user uploaded recipes (physical scans, manual entry, voice)
+  const fetchUserUploadedRecipes = async () => {
+    try {
+      setUserUploadedRecipesLoading(true);
+
+      const token = localStorage.getItem('fridgy_token');
+      if (!token) {
+        setUserUploadedRecipes([]);
+        setUserUploadedRecipesLoading(false);
+        return;
+      }
+
+      // Fetch all recipes first
+      const response = await fetch(`${API_BASE_URL}/saved-recipes?limit=50`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          setUserUploadedRecipes([]);
+          setUserUploadedRecipesLoading(false);
+          return;
+        }
+        throw new Error('Failed to fetch uploaded recipes');
+      }
+
+      const data = await response.json();
+
+      // Filter for non-digital sources (manual, scanned, voice, etc.)
+      const uploadedRecipes = (data.recipes || []).filter(recipe => {
+        const sourceType = recipe.source_type?.toLowerCase();
+        // Include manual, scanned, voice, or undefined source types
+        // Exclude digital sources like instagram, facebook, youtube, blog
+        return sourceType === 'manual' ||
+               sourceType === 'scanned' ||
+               sourceType === 'voice' ||
+               sourceType === 'user_created' ||
+               (!sourceType || sourceType === '');
+      });
+
+      setUserUploadedRecipes(uploadedRecipes);
+    } catch (error) {
+      console.error('Error fetching uploaded recipes:', error);
+      setUserUploadedRecipes([]);
+    } finally {
+      setUserUploadedRecipesLoading(false);
+    }
+  };
 
   // Fetch saved recipes function
   const fetchSavedRecipes = async () => {
@@ -205,6 +260,9 @@ const MealPlansPage = ({ defaultTab }) => {
 
     // Fetch saved recipes
     fetchSavedRecipes();
+
+    // Fetch user uploaded recipes
+    fetchUserUploadedRecipes();
 
     // Fetch recent meals
     fetchRecentMeals();
@@ -364,20 +422,9 @@ const MealPlansPage = ({ defaultTab }) => {
   };
 
   const handleViewRecipeDetails = (recipe) => {
-    // Convert saved recipe to the format expected by the modal
-    const recipeForModal = {
-      id: recipe.id,
-      title: recipe.title,
-      image: recipe.image || recipe.image_urls?.[0],
-      readyInMinutes: recipe.readyInMinutes,
-      servings: recipe.servings,
-      instructions: recipe.instructions || [],
-      ingredients: recipe.ingredients || [],
-      sourceUrl: recipe.source_url,
-      sourceName: recipe.source_name || 'Saved Recipe'
-    };
-
-    setSelectedRecipe(recipeForModal);
+    // Pass the recipe directly - it should already have the correct structure from the backend
+    // The backend returns recipes with extendedIngredients, analyzedInstructions, nutrition, etc.
+    setSelectedRecipe(recipe);
     setIsModalOpen(true);
   };
 
@@ -442,10 +489,23 @@ const MealPlansPage = ({ defaultTab }) => {
           )}
           <div className="meal-plans-page__saved-recipe-meta">
             {recipe.readyInMinutes && (
-              <span>⏱️ {recipe.readyInMinutes} min</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="#666" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M12 6V12L15 15" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                {recipe.readyInMinutes} min
+              </span>
             )}
             {recipe.servings && (
-              <span>🍽️ {recipe.servings} servings</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <rect x="5" y="6" width="14" height="13" rx="2" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M10 12h4" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                {recipe.servings} servings
+              </span>
             )}
           </div>
         </div>
@@ -582,15 +642,6 @@ const MealPlansPage = ({ defaultTab }) => {
           {/* Tab Navigation */}
           <div className="meal-plans-page__tabs">
             <button
-              className={`meal-plans-page__tab ${activeTab === 'meals' ? 'active' : ''}`}
-              onClick={() => {
-                setActiveTab('meals');
-                navigate('/meal-plans');
-              }}
-            >
-              Meals
-            </button>
-            <button
               className={`meal-plans-page__tab ${activeTab === 'recipes' ? 'active' : ''}`}
               onClick={() => {
                 setActiveTab('recipes');
@@ -598,6 +649,15 @@ const MealPlansPage = ({ defaultTab }) => {
               }}
             >
               Recipes
+            </button>
+            <button
+              className={`meal-plans-page__tab ${activeTab === 'meals' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('meals');
+                navigate('/meal-plans');
+              }}
+            >
+              Meal log
             </button>
           </div>
 
@@ -628,7 +688,9 @@ const MealPlansPage = ({ defaultTab }) => {
                       className="meal-plans-page__view-more-btn"
                       onClick={() => navigate('/meal-history')}
                     >
-                      View more
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -670,60 +732,39 @@ const MealPlansPage = ({ defaultTab }) => {
             <>
               {/* Recipes Tab Content */}
 
-              {/* My Uploaded Recipes Section */}
-              <div className="meal-plans-page__uploaded-section">
-                <div className="meal-plans-page__section-header-with-action">
-                  <div>
-                    <h2 className="meal-plans-page__section-title">My uploaded recipes</h2>
-                  </div>
-                  <button
-                    className="meal-plans-page__add-button"
-                    onClick={() => setShowRecipeCreationModal(true)}
-                  >
-                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                      <circle cx="16" cy="16" r="14" fill="var(--primary-green)"/>
-                      <path d="M16 10V22M10 16H22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                    </svg>
-                  </button>
-                </div>
-                <div className="meal-plans-page__uploaded-container-wrapper">
-                  <div className="meal-plans-page__uploaded-container-left">
-                    <div
-                      className="meal-plans-page__uploaded-container"
-                      onClick={() => setShowRecipeCreationModal(true)}
-                    >
-                      <div className="meal-plans-page__plus-icon">+</div>
-                    </div>
-                    <p className="meal-plans-page__container-label">Create your recipe</p>
-                  </div>
-                  <div className="meal-plans-page__uploaded-container-right">
-                    <div className="meal-plans-page__uploaded-container">
-                      {/* Empty container for future uploaded recipes */}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
               {/* Your Saved Recipes Section */}
               <div className="meal-plans-page__analytics-section">
                 {/* Text Section */}
                 <div className="meal-plans-page__analytics-text-section">
                   <div className="meal-plans-page__section-header-with-action">
-                    <div>
-                      <h2 className="meal-plans-page__section-title">Your saved recipes</h2>
-                      <p className="meal-plans-page__section-subtitle">Access your favorite recipes anytime</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+                      <h2 className="meal-plans-page__section-title" style={{ margin: 0 }}>Imported recipes</h2>
+                      <button
+                        className="meal-plans-page__import-add-button"
+                        onClick={() => navigate('/import')}
+                        title="Import recipe"
+                        style={{ position: 'relative', top: 'auto', right: 'auto' }}
+                      >
+                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                          <circle cx="16" cy="16" r="14" fill="var(--primary-green)"/>
+                          <path d="M16 10V22M10 16H22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                      </button>
+                      {savedRecipes.length > 0 && (
+                        <button
+                          className="meal-plans-page__view-more-arrow-btn"
+                          onClick={() => navigate('/saved-recipes')}
+                          title="View all saved recipes"
+                          style={{ marginLeft: 'auto' }}
+                        >
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 18l6-6-6-6" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
+                      )}
                     </div>
-                    <button
-                      className="meal-plans-page__import-add-button"
-                      onClick={() => navigate('/import')}
-                      title="Import recipe"
-                    >
-                      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                        <circle cx="16" cy="16" r="14" fill="var(--primary-green)"/>
-                        <path d="M16 10V22M10 16H22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                      </svg>
-                    </button>
                   </div>
+                  <p className="meal-plans-page__section-subtitle">Access your favorite recipes anytime</p>
                 </div>
 
                 {/* Recipe Cards or Empty State */}
@@ -751,21 +792,55 @@ const MealPlansPage = ({ defaultTab }) => {
                     </div>
                   </div>
                 ) : savedRecipes.length > 0 ? (
-                  <>
-                    <div className="meal-plans-page__saved-recipes-grid">
-                      {savedRecipes.slice(0, 2).map(recipe => renderSavedRecipeCard(recipe, true))}
-                    </div>
-                    <div className="meal-plans-page__view-more-container">
-                      <button
-                        className="meal-plans-page__view-more-btn-bottom"
-                        onClick={() => navigate('/saved-recipes')}
-                      >
-                        View more
-                      </button>
-                    </div>
-                  </>
+                  <div className="meal-plans-page__saved-recipes-grid">
+                    {savedRecipes.slice(0, 2).map(recipe => renderSavedRecipeCard(recipe, true))}
+                  </div>
                 ) : (
                   renderSavedRecipesEmptyState()
+                )}
+              </div>
+
+              {/* My Uploaded Recipes Section */}
+              <div className="meal-plans-page__uploaded-section">
+                <div className="meal-plans-page__section-header-with-action">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+                    <h2 className="meal-plans-page__section-title" style={{ margin: 0 }}>Uploaded recipes</h2>
+                    <button
+                      className="meal-plans-page__add-button"
+                      onClick={() => setShowRecipeCreationModal(true)}
+                      style={{ position: 'relative', top: 'auto', right: 'auto' }}
+                    >
+                      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <circle cx="16" cy="16" r="14" fill="var(--primary-green)"/>
+                        <path d="M16 10V22M10 16H22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
+                    </button>
+                    {userUploadedRecipes.length > 0 && (
+                      <button
+                        className="meal-plans-page__view-more-arrow-btn"
+                        onClick={() => navigate('/uploaded-recipes')}
+                        title="View all uploaded recipes"
+                        style={{ marginLeft: 'auto' }}
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                          <path d="M9 18l6-6-6-6" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                </div>
+                {userUploadedRecipesLoading ? (
+                  <div style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>
+                    Loading...
+                  </div>
+                ) : userUploadedRecipes.length > 0 ? (
+                  <div className="meal-plans-page__saved-recipes-grid">
+                    {userUploadedRecipes.slice(0, 4).map(recipe => renderSavedRecipeCard(recipe, true))}
+                  </div>
+                ) : (
+                  <div style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>
+                    <p style={{ marginBottom: '1rem', fontSize: '1rem' }}>Upload your first recipe</p>
+                  </div>
                 )}
               </div>
 

@@ -58,61 +58,9 @@ const ShareListModal = ({ list, isOpen, onClose, onShare }) => {
         </div>
 
         <div className="share-modal__content">
-          {/* Share by Email Section */}
-          <div className="share-modal__section">
-            <label className="share-modal__label">Share with Trackabite users (email):</label>
-            <div className="share-modal__input-group">
-              <input
-                type="text"
-                placeholder="john@example.com, sarah@example.com"
-                value={emails}
-                onChange={(e) => setEmails(e.target.value)}
-                className="share-modal__input"
-                disabled={loading}
-              />
-              <button
-                onClick={handleShareByEmail}
-                disabled={loading || !emails.trim()}
-                className="share-modal__send-button"
-              >
-                {loading ? 'Sending...' : 'Send Invite'}
-              </button>
-            </div>
-            <p className="share-modal__hint">
-              Separate multiple emails with commas
-            </p>
-          </div>
-
-          <div className="share-modal__divider">
-            <span>OR</span>
-          </div>
-
-          {/* Share with Link Section */}
-          <div className="share-modal__section">
-            <label className="share-modal__label">Share with link:</label>
-            <div className="share-modal__link-container">
-              <input
-                type="text"
-                value={shareLink}
-                readOnly
-                className="share-modal__input share-modal__input--readonly"
-                onClick={(e) => e.target.select()}
-              />
-              <button
-                onClick={handleCopyLink}
-                className="share-modal__copy-button"
-              >
-                {copied ? '✓ Copied!' : '📋 Copy'}
-              </button>
-            </div>
-            <p className="share-modal__hint">
-              Anyone with a Trackabite account can join using this link
-            </p>
-          </div>
-
           {/* Share Code Section */}
           <div className="share-modal__section">
-            <label className="share-modal__label">Quick share code:</label>
+            <label className="share-modal__label">Share code:</label>
             <div className="share-modal__code-container">
               <div className="share-modal__code" onClick={handleCopyCode}>
                 {list.share_code}
@@ -120,7 +68,7 @@ const ShareListModal = ({ list, isOpen, onClose, onShare }) => {
               <p className="share-modal__code-hint">Tap to copy</p>
             </div>
             <p className="share-modal__hint">
-              Share this code verbally or via text for easy joining
+              Share this code with others to let them join your list
             </p>
           </div>
 

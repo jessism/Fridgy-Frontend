@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Trackabite",
+  "name": "Trackabite - Smart Food Tracker",
+  "description": "AI-powered food inventory tracker that helps reduce food waste with expiration reminders and smart recipe suggestions",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,16 +11,37 @@
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
   "start_url": ".",
+  "scope": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#4fcf61",
+  "background_color": "#ffffff",
+  "orientation": "portrait",
+  "categories": ["food", "lifestyle", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Add Items",
+      "short_name": "Add",
+      "description": "Quickly add items to your inventory",
+      "url": "/batchcamera",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "View Inventory",
+      "short_name": "Inventory",
+      "description": "Check your current food inventory",
+      "url": "/inventory",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    }
+  ]
 }

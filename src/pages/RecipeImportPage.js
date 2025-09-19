@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import FridgyLogo from '../assets/images/Logo.png';
 import './RecipeImportPage.css';
 
 const RecipeImportPage = () => {
@@ -15,6 +16,7 @@ const RecipeImportPage = () => {
   const [apifyUsage, setApifyUsage] = useState(null);
   const [showVideoPreview, setShowVideoPreview] = useState(false);
   const [videoUrl, setVideoUrl] = useState(null);
+  const [isTimeoutError, setIsTimeoutError] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -231,6 +233,7 @@ const RecipeImportPage = () => {
     setLoading(true);
     setError('');
     setExtractedRecipe(null);
+    setIsTimeoutError(false);
 
     // Show progress message
     const progressMessages = [
@@ -275,6 +278,7 @@ const RecipeImportPage = () => {
 
       clearInterval(progressInterval);
       const data = await response.json();
+      console.log('[MultiModal] Response data:', data); // Log the actual response to see errors
 
       if (data.success && data.recipe) {
         console.log('[MultiModal] Recipe extracted successfully');
@@ -292,7 +296,18 @@ const RecipeImportPage = () => {
           handleSaveExtractedRecipe(data.recipe);
         }, 2000);
       } else {
-        setError(data.error || 'Failed to extract recipe. Please try again.');
+        console.error('[MultiModal] Extraction failed:', data);
+
+        // Handle timeout errors specially
+        if (data.isTimeout) {
+          setError(data.error || 'Instagram is taking longer than usual. Please try again.');
+          setIsTimeoutError(true);
+          // Keep the URL populated for easy retry
+          // The URL is already in the state, so no need to change it
+        } else {
+          setError(data.error || 'Failed to extract recipe. Please try again.');
+          setIsTimeoutError(false);
+        }
       }
     } catch (error) {
       clearInterval(progressInterval);
@@ -372,6 +387,27 @@ const RecipeImportPage = () => {
     }
   };
 
+  // Show full-screen loading animation when processing
+  if (loading || apifyLoading) {
+    return (
+      <div className="recipe-import-page__loading-screen">
+        <div className="recipe-import-page__loading-content">
+          <img
+            src={FridgyLogo}
+            alt="Fridgy"
+            className="recipe-import-page__analyzing-icon"
+          />
+          <div className="recipe-import-page__loading-title">
+            Importing your recipe...
+          </div>
+          <div className="recipe-import-page__loading-subtitle">
+            Fridgy is analyzing the Instagram post
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="recipe-import-page">
       <div className="recipe-import-page__container">
@@ -381,16 +417,11 @@ const RecipeImportPage = () => {
             className="recipe-import-page__back-button"
             onClick={() => navigate('/saved-recipes')}
           >
-            ← Back
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </button>
           <h1>Import Recipe from Instagram</h1>
-          <button
-            className="recipe-import-page__close-button"
-            onClick={() => navigate(-1)}
-            aria-label="Close"
-          >
-            ×
-          </button>
         </div>
 
         {/* Status Messages */}
@@ -403,6 +434,26 @@ const RecipeImportPage = () => {
         {error && (
           <div className="recipe-import-page__status recipe-import-page__status--error">
             {error}
+            {isTimeoutError && (
+              <button
+                className="recipe-import-page__retry-button"
+                onClick={handleMultiModalImport}
+                style={{
+                  display: 'block',
+                  marginTop: '10px',
+                  padding: '8px 16px',
+                  backgroundColor: '#4fcf61',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+              >
+                Try Again
+              </button>
+            )}
           </div>
         )}
 
@@ -410,7 +461,7 @@ const RecipeImportPage = () => {
         {!showManualForm && (
           <div className="recipe-import-page__form">
             <div className="recipe-import-page__input-group">
-              <label htmlFor="url">Instagram URL</label>
+              <label htmlFor="url" style={{ textAlign: 'center', display: 'block' }}>Instagram URL</label>
               <input
                 id="url"
                 type="url"
@@ -420,7 +471,7 @@ const RecipeImportPage = () => {
                 disabled={loading}
                 className="recipe-import-page__input"
               />
-              <small className="recipe-import-page__help">
+              <small className="recipe-import-page__help" style={{ textAlign: 'center', display: 'block' }}>
                 Paste an Instagram post or reel URL containing a recipe
               </small>
             </div>
@@ -457,45 +508,21 @@ const RecipeImportPage = () => {
             </button>
             */}
 
-            {/* Import Buttons */}
+            {/* Import Button */}
             <div className="recipe-import-page__button-group">
               <button
-                onClick={handleApifyImport}
-                disabled={apifyLoading || loading || !importUrl || (apifyUsage && apifyUsage.remaining === 0)}
-                className="recipe-import-page__button recipe-import-page__button--apify"
-                title="Premium import with video analysis for better recipe extraction"
-              >
-                {apifyLoading ? (
-                  <span>🎥 Analyzing video...</span>
-                ) : (
-                  <>
-                    <span>Standard Import (Tiered) ✨</span>
-                    {apifyUsage && (
-                      <span className="recipe-import-page__usage-badge">
-                        ({apifyUsage.remaining}/{apifyUsage.limit} left)
-                      </span>
-                    )}
-                  </>
-                )}
-              </button>
-
-              <button
                 onClick={handleMultiModalImport}
-                className="recipe-import-page__button recipe-import-page__button--multimodal"
-                title="Advanced extraction using caption, video, and audio analysis"
+                className="recipe-import-page__button recipe-import-page__button--primary"
+                title="Import recipe from Instagram"
                 disabled={loading || !importUrl}
               >
                 {loading ? (
                   <span>🔄 Analyzing...</span>
                 ) : (
-                  <>
-                    <span>🎬 Try Multi-Modal Import</span>
-                    <span className="recipe-import-page__badge recipe-import-page__badge--beta">NEW</span>
-                  </>
+                  <span>Import Recipe</span>
                 )}
               </button>
             </div>
-
 
             {showVideoPreview && videoUrl && (
               <div className="recipe-import-page__video-preview">
@@ -508,18 +535,6 @@ const RecipeImportPage = () => {
                 />
               </div>
             )}
-
-            <div className="recipe-import-page__divider">
-              <span>OR</span>
-            </div>
-
-            <button
-              onClick={() => setShowManualForm(true)}
-              disabled={loading}
-              className="recipe-import-page__button recipe-import-page__button--secondary"
-            >
-              Enter Recipe Manually
-            </button>
           </div>
         )}
 
@@ -623,29 +638,6 @@ const RecipeImportPage = () => {
           </div>
         )}
 
-        {/* Loading Spinner */}
-        {loading && (
-          <div className="recipe-import-page__loading">
-            <div className="recipe-import-page__spinner"></div>
-            <p>Processing your recipe...</p>
-          </div>
-        )}
-
-        {/* Instructions */}
-        <div className="recipe-import-page__instructions">
-          <h3>How to import from Instagram:</h3>
-          <ol>
-            <li>Find a recipe post or reel on Instagram</li>
-            <li>Tap the share button (paper airplane icon)</li>
-            <li>Copy the link</li>
-            <li>Paste it above and click Import</li>
-          </ol>
-
-          <p className="recipe-import-page__note">
-            <strong>Tip:</strong> For best results, use posts where the recipe is in the caption.
-            Video-only recipes may require manual entry.
-          </p>
-        </div>
       </div>
     </div>
   );

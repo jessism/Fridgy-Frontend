@@ -174,10 +174,10 @@ const MealDetailModal = ({ meal, isOpen, onClose }) => {
         <div className="meal-modal__content">
           <div className="meal-modal__header">
             <h2 className="meal-modal__title">
-              {meal.is_dine_out ? '🍴 ' : ''}{getMealName()}
+              {getMealName()}
             </h2>
             <div className="meal-modal__meta">
-              <span className="meal-modal__type">
+              <span className={`meal-modal__type meal-modal__type--${meal.meal_type}`}>
                 {meal.meal_type}
               </span>
               {meal.is_dine_out && (

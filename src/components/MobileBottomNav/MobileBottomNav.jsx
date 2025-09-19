@@ -72,7 +72,7 @@ const MobileBottomNav = () => {
       isAddButton: true
     },
     {
-      path: '/meal-plans',
+      path: '/meal-plans/recipes',
       icon: (isActive) => isActive ? (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
           {/* Fork - filled */}

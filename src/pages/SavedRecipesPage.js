@@ -16,6 +16,7 @@ const SavedRecipesPage = () => {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
   const [showCreationModal, setShowCreationModal] = useState(false);
+  const [deletingRecipeId, setDeletingRecipeId] = useState(null);
   
   useEffect(() => {
     fetchRecipes();
@@ -142,27 +143,58 @@ const SavedRecipesPage = () => {
   };
   
   const handleDeleteRecipe = async (recipeId, event) => {
+    console.log('[Delete] Button clicked for recipe:', recipeId);
     event.stopPropagation();
-    if (!window.confirm('Delete this recipe from your cookbook?')) return;
-    
+
+    // Prevent multiple clicks
+    if (deletingRecipeId === recipeId) {
+      console.log('[Delete] Already deleting this recipe, ignoring click');
+      return;
+    }
+
+    console.log('[Delete] Deleting recipe immediately...');
+    setDeletingRecipeId(recipeId); // Show loading state
+
     try {
       const token = localStorage.getItem('fridgy_token');
-      const response = await fetch(`${API_BASE_URL}/saved-recipes/${recipeId}`, {
+      console.log('[Delete] Token exists:', !!token);
+
+      const url = `${API_BASE_URL}/saved-recipes/${recipeId}`;
+      console.log('[Delete] Making DELETE request to:', url);
+
+      const response = await fetch(url, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
+      console.log('[Delete] Response status:', response.status);
+      console.log('[Delete] Response ok:', response.ok);
+
       if (response.ok) {
+        console.log('[Delete] Recipe deleted successfully');
         setRecipes(prevRecipes => prevRecipes.filter(r => r.id !== recipeId));
         if (selectedRecipe?.id === recipeId) {
           setShowDetail(false);
           setSelectedRecipe(null);
         }
+      } else {
+        // Log detailed error information
+        const errorText = await response.text();
+        console.error('[Delete] Server error:', response.status, errorText);
+        alert(`Failed to delete recipe: ${response.status} - ${errorText || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error('Error deleting recipe:', error);
+      console.error('[Delete] Exception caught:', error);
+      console.error('[Delete] Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+      alert(`Failed to delete recipe: ${error.message}`);
+    } finally {
+      setDeletingRecipeId(null); // Reset loading state
     }
   };
   
@@ -193,32 +225,28 @@ const SavedRecipesPage = () => {
       <div className="saved-recipes-page__main">
         <div className="saved-recipes-page__container">
           {/* Header */}
-          <div className="saved-recipes-page__header">
-            <button
-              className="saved-recipes-page__back-button"
-              onClick={() => navigate('/meal-plans')}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            <h1 className="saved-recipes-page__title">My recipe</h1>
-            <div className="saved-recipes-page__header-actions">
+          <div className="saved-recipes-page__header" style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '0.5rem 0 1rem 0', marginTop: '-1rem', marginLeft: '-0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginBottom: '1rem' }}>
+              <button
+                className="saved-recipes-page__back-button"
+                onClick={() => navigate('/meal-plans/recipes')}
+                style={{ marginRight: '0.5rem', marginLeft: '-0.5rem' }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <h1 className="saved-recipes-page__title" style={{ margin: 0, textAlign: 'left' }}>Imported recipes</h1>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%', justifyContent: 'flex-end' }}>
               <button
                 className="saved-recipes-page__setup-button"
                 onClick={() => navigate('/shortcuts/setup')}
               >
                 Setup Shortcut
               </button>
-            </div>
-          </div>
-
-          {/* Your imported recipe section */}
-          <div className="saved-recipes-page__import-section">
-            <div className="saved-recipes-page__section-header">
-              <h2 className="saved-recipes-page__section-title">My imported recipe</h2>
               <button
-                className="saved-recipes-page__add-button"
+                className="saved-recipes-page__add-button-header"
                 onClick={() => navigate('/import')}
               >
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
@@ -228,6 +256,7 @@ const SavedRecipesPage = () => {
               </button>
             </div>
           </div>
+
 
           {/* Content */}
           {loading ? (
@@ -354,10 +383,23 @@ const SavedRecipesPage = () => {
                       
                       <div className="saved-recipes-page__recipe-meta">
                         {recipe.readyInMinutes && (
-                          <span>⏱️ {recipe.readyInMinutes} min</span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <circle cx="12" cy="12" r="10" stroke="#666" strokeWidth="2" strokeLinecap="round"/>
+                              <path d="M12 6V12L15 15" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            {recipe.readyInMinutes} min
+                          </span>
                         )}
                         {recipe.servings && (
-                          <span>🍽️ {recipe.servings} servings</span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              <rect x="5" y="6" width="14" height="13" rx="2" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M10 12h4" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            {recipe.servings} servings
+                          </span>
                         )}
                       </div>
                       
@@ -377,15 +419,21 @@ const SavedRecipesPage = () => {
                           )}
                         </button>
                         <button
-                          className="saved-recipes-page__delete-btn"
+                          className={`saved-recipes-page__delete-btn ${deletingRecipeId === recipe.id ? 'deleting' : ''}`}
                           onClick={(e) => handleDeleteRecipe(recipe.id, e)}
+                          disabled={deletingRecipeId === recipe.id}
+                          title={deletingRecipeId === recipe.id ? 'Deleting...' : 'Delete recipe'}
                         >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="3,6 5,6 21,6"/>
-                            <path d="M19,6v14a2,2 0 0,1-2,2H7a2,2 0 0,1-2-2V6m3,0V4a2,2 0 0,1,2-2h4a2,2 0 0,1,2,2v2"/>
-                            <line x1="10" y1="11" x2="10" y2="17"/>
-                            <line x1="14" y1="11" x2="14" y2="17"/>
-                          </svg>
+                          {deletingRecipeId === recipe.id ? (
+                            <div className="saved-recipes-page__spinner-small">...</div>
+                          ) : (
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="3,6 5,6 21,6"/>
+                              <path d="M19,6v14a2,2 0 0,1-2,2H7a2,2 0 0,1-2-2V6m3,0V4a2,2 0 0,1,2-2h4a2,2 0 0,1,2,2v2"/>
+                              <line x1="10" y1="11" x2="10" y2="17"/>
+                              <line x1="14" y1="11" x2="14" y2="17"/>
+                            </svg>
+                          )}
                         </button>
                       </div>
                     </div>

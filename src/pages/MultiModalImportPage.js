@@ -109,6 +109,15 @@ const MultiModalImportPage = () => {
 
       if (data.success && data.recipe) {
         setStatus(`✅ Recipe extracted with ${Math.round(data.confidence * 100)}% confidence!`);
+        console.log('[MultiModal] Extracted recipe with source_author:', data.recipe.source_author);
+        console.log('[MultiModal] Full recipe object:', {
+          title: data.recipe.title,
+          source_author: data.recipe.source_author,
+          source_type: data.recipe.source_type,
+          source_url: data.recipe.source_url,
+          hasIngredients: !!data.recipe.extendedIngredients,
+          hasInstructions: !!data.recipe.analyzedInstructions
+        });
         setExtractedRecipe(data.recipe);
         setConfidence(data.confidence);
         setProcessingTime(data.processingTime);
@@ -144,6 +153,21 @@ const MultiModalImportPage = () => {
       const token = localStorage.getItem('fridgy_token');
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
+      // Ensure source_author is preserved in the recipe
+      const recipeToSave = {
+        ...extractedRecipe,
+        source_author: extractedRecipe.source_author || null,
+        source_type: 'instagram' // Ensure source_type is set for multi-modal imports
+      };
+
+      console.log('[MultiModal] Saving recipe with source_author:', recipeToSave.source_author);
+      console.log('[MultiModal] Full recipe being saved:', {
+        title: recipeToSave.title,
+        source_author: recipeToSave.source_author,
+        source_type: recipeToSave.source_type,
+        source_url: importUrl
+      });
+
       const response = await fetch(`${apiUrl}/recipes/save`, {
         method: 'POST',
         headers: {
@@ -151,7 +175,7 @@ const MultiModalImportPage = () => {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          recipe: extractedRecipe,
+          recipe: recipeToSave,
           source_url: importUrl,
           import_method: 'multi-modal',
           confidence: confidence
