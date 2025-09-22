@@ -28,7 +28,7 @@
   justify-content: center;
   padding: 4px 4px;
   text-decoration: none;
-  color: #9CA3AF; /* Clean grey color */
+  color: #333; /* Softer dark gray instead of pure black */
   transition: all 0.2s ease;
   min-height: 48px;
   position: relative;
@@ -40,7 +40,7 @@
 }
 
 .nav-tab.active {
-  color: var(--black-light);
+  color: var(--primary-green);
 }
 
 .nav-tab.active .nav-icon {

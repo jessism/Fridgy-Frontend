@@ -5,7 +5,6 @@ import MobileBottomNav from '../components/MobileBottomNav';
 import { useAuth } from '../features/auth/context/AuthContext';
 import useInventory from '../hooks/useInventory';
 import IOSInstallPrompt from '../components/IOSInstallPrompt';
-import appLogo from '../assets/images/Logo.png';
 import { ReactComponent as AddToFridgeIcon } from '../assets/icons/quickaccess/add-to-fridge.svg';
 import { ReactComponent as MyFridgeIcon } from '../assets/icons/quickaccess/my-fridge.svg';
 import { ReactComponent as ShopListsIcon } from '../assets/icons/quickaccess/shop-lists.svg';
@@ -129,7 +128,7 @@ const HomePage = () => {
       {/* Page Greeting - Desktop only without logo */}
       <section className="page-greeting desktop-only">
         <div className="container">
-          <div className="greeting-content desktop-greeting">
+          <div className="greeting-content desktop-greeting left-aligned">
             <div className="greeting-text">
               <h1 className="greeting-hello">Hello {user?.firstName || 'User'},</h1>
               <p className="greeting-subtitle">What are you cooking today?</p>
@@ -138,11 +137,10 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Mobile Page Greeting - With logo */}
+      {/* Mobile Page Greeting - Without logo */}
       <section className="page-greeting mobile-only">
         <div className="container">
-          <div className="greeting-content">
-            <img src={appLogo} alt="Logo" className="greeting-logo" />
+          <div className="greeting-content left-aligned">
             <div className="greeting-text">
               <h1 className="greeting-hello">Hello {user?.firstName || 'User'},</h1>
               <p className="greeting-subtitle">What are you cooking today?</p>

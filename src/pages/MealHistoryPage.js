@@ -189,7 +189,12 @@ const MealHistoryPage = () => {
   };
 
   // Handle date click in calendar
-  const handleDateClick = async (dateObj) => {
+  const handleDateClick = async (dateObj, event) => {
+    // Prevent any default behavior or event bubbling
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     setSelectedDate(dateObj);
     await fetchMealsForDate(dateObj);
   };
@@ -531,7 +536,20 @@ const MealHistoryPage = () => {
                 } ${
                   isSelectedDate(date) ? 'meal-history-page__month-day--selected' : ''
                 }`}
-                onClick={() => date && handleMonthCalendarDateSelect(date)}
+                onClick={(e) => {
+                  if (date) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleMonthCalendarDateSelect(date);
+                  }
+                }}
+                onTouchEnd={(e) => {
+                  if (date) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleMonthCalendarDateSelect(date);
+                  }
+                }}
               >
                 {date && date.getDate()}
               </div>
@@ -714,7 +732,11 @@ const MealHistoryPage = () => {
                     } ${
                       isSelectedDate(dateInfo.fullDate) ? 'meal-history-page__date-cell--selected' : ''
                     }`}
-                    onClick={() => handleDateClick(dateInfo.fullDate)}
+                    onClick={(e) => handleDateClick(dateInfo.fullDate, e)}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      handleDateClick(dateInfo.fullDate, e);
+                    }}
                     style={{ cursor: 'pointer' }}
                   >
                     <span className="meal-history-page__date-number">

@@ -800,13 +800,13 @@
 }
 
 .shopping-list-section__add-icon {
-  color: #ff6b6b;
+  color: #4fcf61;
   font-size: 28px;
   font-weight: 400;
 }
 
 .shopping-list-section__add-icon:hover {
-  background: rgba(255, 107, 107, 0.08);
+  background: rgba(79, 207, 97, 0.08);
   transform: scale(1.05);
 }
 
@@ -894,6 +894,7 @@
 /* Minimal Items List */
 .shopping-list-section__items-clean {
   padding: 0 20px 12px;
+  transition: all 0.3s ease;
 }
 
 .shopping-list-section__item-clean {
@@ -1003,7 +1004,7 @@
   align-items: flex-start;
   padding: 8px 0;
   gap: 16px;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.4s ease, box-shadow 0.2s ease;
 }
 
 .shopping-list-section__item-minimal--checked {
@@ -1030,6 +1031,8 @@
 .shopping-list-section__item-input {
   padding-bottom: 20px;
   margin-bottom: 8px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .shopping-list-section__item-circle {
@@ -1089,10 +1092,50 @@
   font-weight: 400;
 }
 
+.shopping-list-section__item-name-line--editable {
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.shopping-list-section__item-name-line--editable:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
 .shopping-list-section__item-amount-line {
   font-size: 16px;
-  color: #ff6b6b;
+  color: #4fcf61;
   font-weight: 400;
+}
+
+.shopping-list-section__item-amount-line--editable {
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.shopping-list-section__item-amount-line--editable:hover {
+  background-color: rgba(79, 207, 97, 0.08);
+}
+
+/* Style the "Add quantity" placeholder */
+.shopping-list-section__item-amount-line--editable:has-text("Add quantity") {
+  color: #bbb;
+  font-style: italic;
+}
+
+/* Disable editing for checked items */
+.shopping-list-section__item-minimal--checked .shopping-list-section__item-name-line--editable,
+.shopping-list-section__item-minimal--checked .shopping-list-section__item-amount-line--editable {
+  cursor: default;
+  pointer-events: none;
+}
+
+.shopping-list-section__item-minimal--checked .shopping-list-section__item-name-line--editable:hover,
+.shopping-list-section__item-minimal--checked .shopping-list-section__item-amount-line--editable:hover {
+  background-color: transparent;
 }
 
 .shopping-list-section__item-delete-btn {
@@ -1158,7 +1201,7 @@
   border: none;
   padding: 0;
   font-size: 16px;
-  color: #ff6b6b;
+  color: #4fcf61;
   font-weight: 400;
   background: transparent;
   outline: none;

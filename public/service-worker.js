@@ -47,11 +47,44 @@ self.addEventListener('activate', event => {
 
 // Fetch event - serve from cache when offline
 self.addEventListener('fetch', event => {
-  // Skip non-GET requests
-  if (event.request.method !== 'GET') return;
+  // Skip non-GET requests (except auth refresh)
+  if (event.request.method !== 'GET') {
+    // Special handling for auth refresh requests
+    if (event.request.url.includes('/api/auth/refresh') && event.request.method === 'POST') {
+      event.respondWith(
+        fetch(event.request).catch(error => {
+          console.error('[Service Worker] Auth refresh failed:', error);
+          throw error;
+        })
+      );
+    }
+    return;
+  }
 
-  // Skip API requests from cache
+  // Skip API requests from cache (except auth endpoints for better persistence)
   if (event.request.url.includes('/api/')) {
+    // Cache successful auth responses
+    if (event.request.url.includes('/api/auth/me')) {
+      event.respondWith(
+        fetch(event.request)
+          .then(response => {
+            // Cache successful auth verification
+            if (response.ok) {
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME).then(cache => {
+                cache.put(event.request, responseToCache);
+              });
+            }
+            return response;
+          })
+          .catch(() => {
+            // If offline, return cached auth response
+            return caches.match(event.request);
+          })
+      );
+      return;
+    }
+    // For other API requests, just fetch
     return fetch(event.request);
   }
 

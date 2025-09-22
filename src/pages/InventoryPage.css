@@ -29,6 +29,24 @@
   width: 100%;
 }
 
+/* Content Container for Swipe Navigation */
+.inventory-page__content-container {
+  width: 100%;
+  touch-action: pan-x; /* Allow horizontal panning for swipe */
+  -webkit-user-select: none; /* Prevent text selection during swipe on Safari */
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Mobile-specific enhancements for swipe */
+@media (max-width: 768px) {
+  .inventory-page__content-container {
+    touch-action: pan-x; /* Enable horizontal swipe, disable vertical scroll during swipe */
+    overflow-x: hidden; /* Prevent horizontal scroll */
+  }
+}
+
 .inventory-page__tab {
   background: none;
   border: none;
@@ -93,9 +111,9 @@
   width: 100%;
   height: 44px;
   padding: 0 16px 0 48px;
-  border: 1px solid #e8e8e8;
+  border: none;
   border-radius: 22px;
-  background: #ffffff;
+  background: #f5f5f5;
   font-size: 0.95rem;
   color: #333;
   outline: none;
@@ -104,9 +122,8 @@
 }
 
 .inventory-page__search-input:focus {
-  border-color: #d0d0d0;
-  background: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  background: #f0f0f0;
+  box-shadow: none;
 }
 
 .inventory-page__search-input::placeholder {

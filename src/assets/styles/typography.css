@@ -1,12 +1,21 @@
 /* GOOGLE FONTS IMPORT */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Raleway:wght@300;400;500;600;700&family=Lato:wght@300;400;700;900&display=swap');
 
 /* TYPOGRAPHY SYSTEM */
 :root {
   /* Font Families */
-  --header-font: 'DM Sans', sans-serif;
-  --description-font: 'DM Sans', sans-serif;
-  
+  --header-font: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --description-font: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+
+  /* SF Pro Font Stack (Apple System Font) */
+  --sf-pro-font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+
+  /* Raleway Font */
+  --raleway-font: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+
+  /* Lato Font */
+  --lato-font: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+
   /* Font Colors */
   --header-color: #222222;
   --description-color: #222222;
@@ -49,10 +58,11 @@
 /* HEADING STYLES */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--header-font);
-  font-weight: var(--font-bold);
+  font-weight: 500;
   color: var(--header-color);
   margin-bottom: 1rem;
   line-height: var(--leading-tight);
+  letter-spacing: 0.02em;
 }
 
 h1 {
@@ -93,16 +103,131 @@ p {
   h1 {
     font-size: clamp(2rem, 4vw, 2.5rem);
   }
-  
+
   h2 {
     font-size: clamp(1.75rem, 3.5vw, 2rem);
   }
-  
+
   h3 {
     font-size: clamp(1.5rem, 3vw, 1.75rem);
   }
-  
+
   p {
     font-size: var(--text-sm);
   }
+}
+
+/* FONT PREFERENCE CLASSES */
+
+/* DM Sans - Default Font */
+.font-dm-sans {
+  --header-font: 'DM Sans', sans-serif;
+  --description-font: 'DM Sans', sans-serif;
+}
+
+.font-dm-sans body {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+}
+
+/* SF Pro - Apple System Font */
+.font-sf-pro {
+  --header-font: var(--sf-pro-font);
+  --description-font: var(--sf-pro-font);
+}
+
+.font-sf-pro body {
+  font-family: var(--sf-pro-font);
+  letter-spacing: -0.01em;
+}
+
+.font-sf-pro h1,
+.font-sf-pro h2,
+.font-sf-pro h3,
+.font-sf-pro h4,
+.font-sf-pro h5,
+.font-sf-pro h6 {
+  font-family: var(--sf-pro-font);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.font-sf-pro p,
+.font-sf-pro span,
+.font-sf-pro div,
+.font-sf-pro button,
+.font-sf-pro input,
+.font-sf-pro textarea,
+.font-sf-pro select,
+.font-sf-pro label {
+  font-family: var(--sf-pro-font);
+}
+
+/* Raleway - Elegant & Thin */
+.font-raleway {
+  --header-font: var(--raleway-font);
+  --description-font: var(--raleway-font);
+}
+
+.font-raleway body {
+  font-family: var(--raleway-font);
+  letter-spacing: 0.01em;
+}
+
+.font-raleway h1,
+.font-raleway h2,
+.font-raleway h3,
+.font-raleway h4,
+.font-raleway h5,
+.font-raleway h6 {
+  font-family: var(--raleway-font);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.font-raleway p,
+.font-raleway span,
+.font-raleway div,
+.font-raleway button,
+.font-raleway input,
+.font-raleway textarea,
+.font-raleway select,
+.font-raleway label {
+  font-family: var(--raleway-font);
+  font-weight: 400;
+}
+
+/* Lato - Friendly & Warm */
+.font-lato {
+  --header-font: var(--lato-font);
+  --description-font: var(--lato-font);
+}
+
+.font-lato body {
+  font-family: var(--lato-font);
+  letter-spacing: 0;
+}
+
+.font-lato h1,
+.font-lato h2,
+.font-lato h3,
+.font-lato h4,
+.font-lato h5,
+.font-lato h6 {
+  font-family: var(--lato-font);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.font-lato p,
+.font-lato span,
+.font-lato div,
+.font-lato button,
+.font-lato input,
+.font-lato textarea,
+.font-lato select,
+.font-lato label {
+  font-family: var(--lato-font);
+  font-weight: 400;
 }

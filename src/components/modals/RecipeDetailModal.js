@@ -648,17 +648,17 @@ const RecipeDetailModal = ({
           {recipe && !isLoading && (
             <div className="recipe-modal-footer">
               <button
+                className="recipe-cook-button"
+                onClick={customActionLabel ? () => onCookNow(recipe) : handleCookNow}
+              >
+                {customActionLabel || "Cook This Recipe"}
+              </button>
+              <button
                 className="recipe-add-items-button"
                 onClick={handleAddToShoppingList}
                 disabled={getIngredientsCount() === 0}
               >
                 Add {getIngredientsCount()} items
-              </button>
-              <button
-                className="recipe-cook-button"
-                onClick={customActionLabel ? () => onCookNow(recipe) : handleCookNow}
-              >
-                {customActionLabel || "Cook This Recipe"}
               </button>
             </div>
           )}

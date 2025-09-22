@@ -1,11 +1,23 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { safeJSONStringify } from '../../../utils/jsonSanitizer';
+import pwaAuthStorage from '../../../utils/pwaAuthStorage';
 
 // Create the authentication context
 const AuthContext = createContext();
 
 // API base URL - adjust for your backend
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+// Detect if running as PWA
+const isPWA = () => {
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true ||
+    document.referrer.includes('android-app://') ||
+    window.matchMedia('(display-mode: fullscreen)').matches ||
+    window.matchMedia('(display-mode: minimal-ui)').matches
+  );
+};
 
 // Custom hook to use the auth context
 export const useAuth = () => {
@@ -31,24 +43,43 @@ const validateName = (name) => {
   return nameRegex.test(name.trim());
 };
 
-// Token management functions
-const getToken = () => {
-  return localStorage.getItem('fridgy_token');
+// Token management functions - now async to support PWA storage
+const getToken = async () => {
+  // Use PWA storage for better persistence
+  return await pwaAuthStorage.getToken();
 };
 
-const setToken = (token) => {
-  localStorage.setItem('fridgy_token', token);
+const getRefreshToken = async () => {
+  return await pwaAuthStorage.getRefreshToken();
 };
 
-const removeToken = () => {
-  localStorage.removeItem('fridgy_token');
-  localStorage.removeItem('fridgy_user');
+const setTokens = async (token, refreshToken, expiresIn) => {
+  await pwaAuthStorage.setToken(token);
+  if (refreshToken) {
+    await pwaAuthStorage.setRefreshToken(refreshToken);
+  }
+  if (expiresIn) {
+    const expiry = Date.now() + (expiresIn * 1000);
+    await pwaAuthStorage.setTokenExpiry(expiry);
+  }
+};
+
+const removeTokens = async () => {
+  await pwaAuthStorage.clearAuth();
+};
+
+const setUserData = async (user) => {
+  await pwaAuthStorage.setUser(user);
+};
+
+const getUserData = async () => {
+  return await pwaAuthStorage.getUser();
 };
 
 // API request helper
-const apiRequest = async (endpoint, options = {}) => {
+const apiRequest = async (endpoint, options = {}, retryWithRefresh = true) => {
   const url = `${API_BASE_URL}${endpoint}`;
-  const token = getToken();
+  const token = await getToken();
   
   const config = {
     headers: {
@@ -63,6 +94,35 @@ const apiRequest = async (endpoint, options = {}) => {
   const data = await response.json();
 
   if (!response.ok) {
+    // If token expired and we have a refresh token, try to refresh
+    if (response.status === 401 && retryWithRefresh) {
+      const refreshToken = await getRefreshToken();
+      if (refreshToken) {
+        try {
+          // Try to refresh the token
+          const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: safeJSONStringify({ refreshToken, isPWA: isPWA() })
+          });
+
+          if (refreshResponse.ok) {
+            const refreshData = await refreshResponse.json();
+            await setTokens(
+              refreshData.token,
+              refreshData.refreshToken,
+              refreshData.expiresIn
+            );
+            await setUserData(refreshData.user);
+
+            // Retry the original request with new token
+            return apiRequest(endpoint, options, false);
+          }
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+        }
+      }
+    }
     throw new Error(data.error || `HTTP error! status: ${response.status}`);
   }
 
@@ -73,33 +133,190 @@ const apiRequest = async (endpoint, options = {}) => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const refreshTimeoutRef = useRef(null);
+  const isInitializedRef = useRef(false);
+
+  // Schedule token refresh before expiry
+  const scheduleTokenRefresh = useCallback(async () => {
+    // Clear any existing timeout
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
+    }
+
+    const expiry = await pwaAuthStorage.getTokenExpiry();
+    if (!expiry) return;
+
+    // Refresh 5 minutes before expiry
+    const refreshTime = expiry - Date.now() - (5 * 60 * 1000);
+    if (refreshTime > 0) {
+      refreshTimeoutRef.current = setTimeout(async () => {
+        const refreshToken = await getRefreshToken();
+        if (refreshToken) {
+          try {
+            const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: safeJSONStringify({ refreshToken, isPWA: isPWA() })
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              await setTokens(data.token, data.refreshToken, data.expiresIn);
+              await setUserData(data.user);
+              setUser({ ...data.user, token: data.token });
+              scheduleTokenRefresh(); // Schedule next refresh
+            }
+          } catch (error) {
+            console.error('Auto token refresh failed:', error);
+          }
+        }
+      }, refreshTime);
+    }
+  }, []);
 
   // Check for existing user session on app load
   useEffect(() => {
     const initializeAuth = async () => {
-      const token = getToken();
-      if (token) {
-        try {
-          // Verify token with backend and get user data
-          const response = await apiRequest('/auth/me');
-          if (response.success) {
-            // Include token in user object for API calls
-            const userWithToken = { ...response.user, token };
-            setUser(userWithToken);
-            localStorage.setItem('fridgy_user', JSON.stringify(response.user));
+      // Prevent double initialization
+      if (isInitializedRef.current) return;
+      isInitializedRef.current = true;
+
+      try {
+        // Try to get stored token first
+        const token = await getToken();
+        const storedUser = await getUserData();
+
+        if (token && storedUser) {
+          // Check if token is still valid
+          const isExpired = await pwaAuthStorage.isTokenExpired();
+
+          if (!isExpired) {
+            // Use stored data immediately for fast load
+            setUser({ ...storedUser, token });
+
+            // Verify with backend in background
+            try {
+              const response = await apiRequest('/auth/me');
+              if (response.success) {
+                const userWithToken = { ...response.user, token };
+                setUser(userWithToken);
+                await setUserData(response.user);
+                scheduleTokenRefresh();
+              } else {
+                await removeTokens();
+                setUser(null);
+              }
+            } catch (error) {
+              // If verification fails but we have a refresh token, try to refresh
+              const refreshToken = await getRefreshToken();
+              if (refreshToken) {
+                try {
+                  const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: safeJSONStringify({ refreshToken, isPWA: isPWA() })
+                  });
+
+                  if (refreshResponse.ok) {
+                    const refreshData = await refreshResponse.json();
+                    await setTokens(
+                      refreshData.token,
+                      refreshData.refreshToken,
+                      refreshData.expiresIn
+                    );
+                    await setUserData(refreshData.user);
+                    setUser({ ...refreshData.user, token: refreshData.token });
+                    scheduleTokenRefresh();
+                  } else {
+                    await removeTokens();
+                    setUser(null);
+                  }
+                } catch (refreshError) {
+                  console.error('Token refresh failed:', refreshError);
+                  await removeTokens();
+                  setUser(null);
+                }
+              } else {
+                await removeTokens();
+                setUser(null);
+              }
+            }
           } else {
-            removeToken();
+            // Token expired, try refresh
+            const refreshToken = await getRefreshToken();
+            if (refreshToken) {
+              try {
+                const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: safeJSONStringify({ refreshToken, isPWA: isPWA() })
+                });
+
+                if (response.ok) {
+                  const data = await response.json();
+                  await setTokens(data.token, data.refreshToken, data.expiresIn);
+                  await setUserData(data.user);
+                  setUser({ ...data.user, token: data.token });
+                  scheduleTokenRefresh();
+                } else {
+                  await removeTokens();
+                  setUser(null);
+                }
+              } catch (error) {
+                console.error('Token refresh failed:', error);
+                await removeTokens();
+                setUser(null);
+              }
+            }
           }
-        } catch (error) {
-          console.error('Auth initialization error:', error);
-          removeToken();
         }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     initializeAuth();
-  }, []);
+
+    // Listen for app focus to refresh auth if needed (PWA specific)
+    const handleFocus = async () => {
+      if (isPWA() && user) {
+        const isExpired = await pwaAuthStorage.isTokenExpired();
+        if (isExpired) {
+          const refreshToken = await getRefreshToken();
+          if (refreshToken) {
+            try {
+              const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: safeJSONStringify({ refreshToken, isPWA: true })
+              });
+
+              if (response.ok) {
+                const data = await response.json();
+                await setTokens(data.token, data.refreshToken, data.expiresIn);
+                await setUserData(data.user);
+                setUser({ ...data.user, token: data.token });
+                scheduleTokenRefresh();
+              }
+            } catch (error) {
+              console.error('Focus refresh failed:', error);
+            }
+          }
+        }
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
+    };
+  }, [scheduleTokenRefresh]);
 
   // Sign up function
   const signUp = async (userData) => {
@@ -126,16 +343,22 @@ export const AuthProvider = ({ children }) => {
           firstName: firstName.trim(),
           email: email.toLowerCase(),
           password,
+          isPWA: isPWA()
         }),
-      });
+      }, false); // Don't retry with refresh for signup
 
       if (response.success) {
-        // Store token and user data
-        setToken(response.token);
+        // Store tokens and user data
+        await setTokens(
+          response.token,
+          response.refreshToken,
+          response.expiresIn
+        );
+        await setUserData(response.user);
         // Include token in user object for API calls
         const userWithToken = { ...response.user, token: response.token };
         setUser(userWithToken);
-        localStorage.setItem('fridgy_user', JSON.stringify(response.user));
+        scheduleTokenRefresh();
         return userWithToken;
       } else {
         throw new Error(response.error || 'Signup failed');
@@ -164,16 +387,22 @@ export const AuthProvider = ({ children }) => {
         body: safeJSONStringify({
           email: email.toLowerCase(),
           password,
+          isPWA: isPWA()
         }),
-      });
+      }, false); // Don't retry with refresh for signin
 
       if (response.success) {
-        // Store token and user data
-        setToken(response.token);
+        // Store tokens and user data
+        await setTokens(
+          response.token,
+          response.refreshToken,
+          response.expiresIn
+        );
+        await setUserData(response.user);
         // Include token in user object for API calls
         const userWithToken = { ...response.user, token: response.token };
         setUser(userWithToken);
-        localStorage.setItem('fridgy_user', JSON.stringify(response.user));
+        scheduleTokenRefresh();
         return userWithToken;
       } else {
         throw new Error(response.error || 'Login failed');
@@ -188,19 +417,24 @@ export const AuthProvider = ({ children }) => {
   const signOut = async () => {
     try {
       // Call backend logout endpoint
-      const token = getToken();
+      const token = await getToken();
       if (token) {
         await apiRequest('/auth/logout', {
           method: 'POST'
-        });
+        }, false);
       }
     } catch (error) {
       // Log error but don't prevent logout from completing
       console.error('Backend logout error:', error);
     }
-    
-    // Always clear local storage and state regardless of backend response
-    removeToken();
+
+    // Clear refresh timeout
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
+    }
+
+    // Always clear all storage and state regardless of backend response
+    await removeTokens();
     setUser(null);
   };
 

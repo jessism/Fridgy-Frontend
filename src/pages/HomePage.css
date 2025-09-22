@@ -321,18 +321,23 @@
 .greeting-content {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 1.5rem;
   position: relative;
 }
 
-/* Desktop greeting without logo */
+/* Left-aligned greeting */
+.greeting-content.left-aligned {
+  justify-content: flex-start;
+}
+
+/* Desktop greeting */
 .desktop-greeting {
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .desktop-greeting .greeting-text {
-  text-align: center;
+  text-align: left;
   flex: 1;
 }
 
@@ -357,7 +362,7 @@
 
 .greeting-text {
   flex: 0 1 auto;
-  text-align: center;
+  text-align: left;
 }
 
 .greeting-hello {
@@ -369,7 +374,7 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin: 0 0 0.25rem 0;
-  text-align: center;
+  text-align: left;
   line-height: 1.1;
 }
 
@@ -379,8 +384,22 @@
   font-weight: 400;
   color: #888;
   margin: 0;
-  text-align: center;
+  text-align: left;
   line-height: 1.2;
+}
+
+/* Font toggle positioning in greeting section */
+.greeting-actions {
+  position: absolute;
+  top: 1rem;
+  right: 2rem;
+  z-index: 10;
+}
+
+.greeting-actions-mobile {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
 }
 
 /* Mobile styles for greeting */
@@ -418,13 +437,13 @@
   
   .greeting-hello {
     font-size: 24px;
-    text-align: center;
+    text-align: left;
     margin-bottom: 0.25rem;
   }
-  
+
   .greeting-subtitle {
     font-size: 0.8rem;
-    text-align: center;
+    text-align: left;
   }
 }
 
@@ -2846,12 +2865,14 @@ h2.section-title::after {
 
   .recipe-modal-footer {
     padding: 1rem;
+    padding-bottom: 80px; /* Space for mobile bottom navigation */
     flex-direction: column-reverse;
     gap: 0.75rem;
   }
 
   .recipe-cancel-button,
-  .recipe-cook-button {
+  .recipe-cook-button,
+  .recipe-add-items-button {
     width: 100%;
     padding: 1rem;
     font-size: 0.9rem;

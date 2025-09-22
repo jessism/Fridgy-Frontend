@@ -26,6 +26,11 @@ const InventoryPage = ({ defaultTab }) => {
   const [activeTab, setActiveTab] = useState(defaultTab || 'inventory'); // New state for tab navigation
   const [clickedIcon, setClickedIcon] = useState(null); // Track which icon was clicked
 
+  // Touch/swipe state for mobile navigation
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const [isSwiping, setIsSwiping] = useState(false);
+
   // Shopping list selection modal state
   const [showShoppingListModal, setShowShoppingListModal] = useState(false);
   const [selectedItemForList, setSelectedItemForList] = useState(null);
@@ -58,6 +63,44 @@ const InventoryPage = ({ defaultTab }) => {
       }, 100);
     }
   }, [location.search]);
+
+  // Swipe gesture handlers for mobile tab navigation
+  const handleTouchStart = (e) => {
+    setTouchEnd(null); // Reset touchEnd
+    setTouchStart(e.targetTouches[0].clientX);
+    setIsSwiping(true);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isSwiping) return;
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    if (!touchStart || !touchEnd || !isSwiping) {
+      setIsSwiping(false);
+      return;
+    }
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+    const minSwipeDistance = 50;
+
+    if (Math.abs(distance) >= minSwipeDistance) {
+      if (isLeftSwipe && activeTab === 'inventory') {
+        // Swipe left: go to shopping list
+        setActiveTab('shopping-list');
+        navigate('/inventory/shopping-list');
+      } else if (isRightSwipe && activeTab === 'shopping-list') {
+        // Swipe right: go to inventory
+        setActiveTab('inventory');
+        navigate('/inventory');
+      }
+    }
+
+    setIsSwiping(false);
+  };
 
   // Function to scroll to a specific category section
   const scrollToCategory = (category) => {
@@ -523,7 +566,13 @@ const InventoryPage = ({ defaultTab }) => {
             </button>
           </div>
 
-          {/* Conditional Content Based on Active Tab */}
+          {/* Conditional Content Based on Active Tab - Touch enabled for swipe navigation */}
+          <div
+            className="inventory-page__content-container"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
           {activeTab === 'inventory' ? (
             <>
           {/* Row 2: Search Bar + Plus Button */}
@@ -1417,6 +1466,7 @@ const InventoryPage = ({ defaultTab }) => {
             /* Shopping List Tab Content */
             <ShoppingListSection />
           )}
+          </div>
         </div>
       </div>
       

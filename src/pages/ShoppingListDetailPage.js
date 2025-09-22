@@ -15,6 +15,7 @@ const ShoppingListDetailPage = () => {
     updateList,
     deleteList,
     addItem,
+    updateItem,
     toggleItem,
     deleteItem: deleteItemFromList,
     clearCompleted,
@@ -30,11 +31,19 @@ const ShoppingListDetailPage = () => {
   const [editingListNameId, setEditingListNameId] = useState(null);
   const [tempListName, setTempListName] = useState('');
   const [togglingItemId, setTogglingItemId] = useState(null);
+  const [editingItemId, setEditingItemId] = useState(null);
+  const [tempItemName, setTempItemName] = useState('');
+  const [tempItemQuantity, setTempItemQuantity] = useState('');
+  const [updatingItemId, setUpdatingItemId] = useState(null);
+  const [recentlyCheckedItems, setRecentlyCheckedItems] = useState([]);
 
   // Refs for direct DOM access - instant operations
   const itemNameInputRef = useRef(null);
   const itemAmountInputRef = useRef(null);
   const listTitleInputRef = useRef(null);
+  const editItemNameInputRef = useRef(null);
+  const editItemQuantityInputRef = useRef(null);
+  const delayedMoveTimersRef = useRef(new Map());
 
   // Load list details - use navigation state first, fallback to API
   useEffect(() => {
@@ -99,6 +108,14 @@ const ShoppingListDetailPage = () => {
       window.removeEventListener('focus', handleVisibilityChange);
     };
   }, [selectedList, listId, getList, fetchLists]);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      delayedMoveTimersRef.current.forEach(timer => clearTimeout(timer));
+      delayedMoveTimersRef.current.clear();
+    };
+  }, []);
 
   const handleAddItem = async () => {
     // Read directly from DOM refs - no state delay
@@ -191,6 +208,10 @@ const ShoppingListDetailPage = () => {
 
     setTogglingItemId(itemId);
 
+    // Find the current item to check if it's being checked or unchecked
+    const currentItem = selectedList.shopping_list_items.find(item => item.id === itemId);
+    const isBeingChecked = currentItem && !currentItem.is_checked;
+
     // Optimistic update - immediately toggle the item in local state
     const originalList = selectedList;
     setSelectedList(prevList => ({
@@ -206,6 +227,32 @@ const ShoppingListDetailPage = () => {
           : item
       )
     }));
+
+    // If item is being checked (unchecked -> checked), add to recently checked items
+    if (isBeingChecked) {
+      // Clear any existing timer for this item
+      if (delayedMoveTimersRef.current.has(itemId)) {
+        clearTimeout(delayedMoveTimersRef.current.get(itemId));
+      }
+
+      // Add to recently checked items (prevents immediate sorting to bottom)
+      setRecentlyCheckedItems(prev => [...prev.filter(id => id !== itemId), itemId]);
+
+      // Set timer to remove from recently checked items after 800ms
+      const timer = setTimeout(() => {
+        setRecentlyCheckedItems(prev => prev.filter(id => id !== itemId));
+        delayedMoveTimersRef.current.delete(itemId);
+      }, 800);
+
+      delayedMoveTimersRef.current.set(itemId, timer);
+    } else {
+      // If item is being unchecked, remove from recently checked items immediately
+      setRecentlyCheckedItems(prev => prev.filter(id => id !== itemId));
+      if (delayedMoveTimersRef.current.has(itemId)) {
+        clearTimeout(delayedMoveTimersRef.current.get(itemId));
+        delayedMoveTimersRef.current.delete(itemId);
+      }
+    }
 
     try {
       console.log('Calling toggleItem...');
@@ -337,6 +384,85 @@ const ShoppingListDetailPage = () => {
     } else if (e.key === 'Escape') {
       e.preventDefault();
       handleCancelEditListName();
+    }
+  };
+
+  // Item editing handlers
+  const handleStartEditItem = (item) => {
+    setEditingItemId(item.id);
+    setTempItemName(item.name);
+    setTempItemQuantity(item.quantity || '');
+    // Use setTimeout to ensure the input is rendered before focusing
+    setTimeout(() => {
+      if (editItemNameInputRef.current) {
+        editItemNameInputRef.current.focus();
+        editItemNameInputRef.current.select();
+      }
+    }, 0);
+  };
+
+  const handleSaveItemEdit = async () => {
+    if (editingItemId && tempItemName.trim()) {
+      setUpdatingItemId(editingItemId);
+
+      try {
+        const updates = {
+          name: tempItemName.trim(),
+          quantity: tempItemQuantity.trim() || null
+        };
+
+        await updateItem(selectedList.id, editingItemId, updates);
+
+        // Update the local state optimistically
+        setSelectedList(prevList => ({
+          ...prevList,
+          shopping_list_items: prevList.shopping_list_items.map(item =>
+            item.id === editingItemId
+              ? { ...item, ...updates }
+              : item
+          )
+        }));
+
+        // Reset edit state
+        setEditingItemId(null);
+        setTempItemName('');
+        setTempItemQuantity('');
+      } catch (err) {
+        console.error('Failed to update item:', err);
+        alert('Failed to update item. Please try again.');
+      } finally {
+        setUpdatingItemId(null);
+      }
+    }
+  };
+
+  const handleCancelItemEdit = () => {
+    setEditingItemId(null);
+    setTempItemName('');
+    setTempItemQuantity('');
+  };
+
+  const handleItemNameKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSaveItemEdit();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      handleCancelItemEdit();
+    } else if (e.key === 'Tab') {
+      // Allow tab to move to quantity field
+      e.preventDefault();
+      editItemQuantityInputRef.current?.focus();
+    }
+  };
+
+  const handleItemQuantityKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSaveItemEdit();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      handleCancelItemEdit();
     }
   };
 
@@ -564,11 +690,18 @@ const ShoppingListDetailPage = () => {
           {/* Items list below the input */}
           <div className="shopping-list-section__items-clean">
             {selectedList.shopping_list_items && selectedList.shopping_list_items.length > 0 && (
-              // Sort items: unchecked first, then checked
+              // Sort items: unchecked first, then checked (but keep recently checked in place)
               [...selectedList.shopping_list_items]
                 .sort((a, b) => {
-                  if (a.is_checked === b.is_checked) return 0;
-                  return a.is_checked ? 1 : -1;
+                  const aIsRecentlyChecked = recentlyCheckedItems.includes(a.id);
+                  const bIsRecentlyChecked = recentlyCheckedItems.includes(b.id);
+
+                  // Treat recently checked items as unchecked for sorting purposes
+                  const aEffectivelyChecked = a.is_checked && !aIsRecentlyChecked;
+                  const bEffectivelyChecked = b.is_checked && !bIsRecentlyChecked;
+
+                  if (aEffectivelyChecked === bEffectivelyChecked) return 0;
+                  return aEffectivelyChecked ? 1 : -1;
                 })
                 .map(item => (
                   <div key={item.id} className={`shopping-list-section__item-minimal ${item.is_checked ? 'shopping-list-section__item-minimal--checked' : ''}`}>
@@ -579,13 +712,47 @@ const ShoppingListDetailPage = () => {
                     >
                     </span>
                     <div className="shopping-list-section__item-info">
-                      <div className="shopping-list-section__item-name-line">
-                        {item.name}
-                      </div>
-                      {item.quantity && (
-                        <div className="shopping-list-section__item-amount-line">
-                          {item.quantity} {item.unit || ''}
-                        </div>
+                      {editingItemId === item.id ? (
+                        // Edit mode - show input fields
+                        <>
+                          <input
+                            ref={editItemNameInputRef}
+                            type="text"
+                            value={tempItemName}
+                            onChange={(e) => setTempItemName(e.target.value)}
+                            onKeyDown={handleItemNameKeyPress}
+                            onBlur={handleSaveItemEdit}
+                            className="shopping-list-section__item-name-input"
+                            disabled={updatingItemId === item.id}
+                          />
+                          <input
+                            ref={editItemQuantityInputRef}
+                            type="text"
+                            value={tempItemQuantity}
+                            onChange={(e) => setTempItemQuantity(e.target.value)}
+                            onKeyDown={handleItemQuantityKeyPress}
+                            onBlur={handleSaveItemEdit}
+                            className="shopping-list-section__item-amount-input"
+                            placeholder="1"
+                            disabled={updatingItemId === item.id}
+                          />
+                        </>
+                      ) : (
+                        // Display mode - show text with click handlers
+                        <>
+                          <div
+                            className="shopping-list-section__item-name-line shopping-list-section__item-name-line--editable"
+                            onClick={() => !item.is_checked && handleStartEditItem(item)}
+                          >
+                            {item.name}
+                          </div>
+                          <div
+                            className="shopping-list-section__item-amount-line shopping-list-section__item-amount-line--editable"
+                            onClick={() => !item.is_checked && handleStartEditItem(item)}
+                          >
+                            {item.quantity ? `${item.quantity} ${item.unit || ''}` : 'Add quantity'}
+                          </div>
+                        </>
                       )}
                     </div>
                     {/* Show who checked the item in shared lists */}
