@@ -2,15 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
-import { EditIcon, DeleteIcon } from '../components/icons';
+import { EditIcon, DeleteIcon, PlusIcon } from '../components/icons';
 import useInventory from '../hooks/useInventory';
+import useShoppingLists from '../hooks/useShoppingLists';
 import { getItemIconIcons8, getExpiryStatus, formatQuantity } from '../assets/inventory_emojis/iconHelpers.js';
 import IngredientImage from '../components/IngredientImage';
 import ShoppingListSection from '../components/ShoppingListSection';
+import ShoppingListSelectionModal from '../components/ShoppingListSelectionModal';
 import './InventoryPage.css';
 
 const InventoryPage = ({ defaultTab }) => {
   const { items: inventoryItems, loading, error, refreshInventory, deleteItem, updateItem } = useInventory();
+  const { lists: shoppingLists, addItem: addToShoppingList, createList } = useShoppingLists();
   const navigate = useNavigate();
   const location = useLocation();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -21,6 +24,11 @@ const InventoryPage = ({ defaultTab }) => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState(defaultTab || 'inventory'); // New state for tab navigation
+  const [clickedIcon, setClickedIcon] = useState(null); // Track which icon was clicked
+
+  // Shopping list selection modal state
+  const [showShoppingListModal, setShowShoppingListModal] = useState(false);
+  const [selectedItemForList, setSelectedItemForList] = useState(null);
 
   // Handle tab switching based on props and URL changes
   useEffect(() => {
@@ -33,6 +41,50 @@ const InventoryPage = ({ defaultTab }) => {
       setActiveTab('inventory');
     }
   }, [location, defaultTab]);
+
+  // Handle category navigation from HomePage
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const categoryParam = searchParams.get('category');
+
+    if (categoryParam) {
+      // Set filter to by-category and ensure we're on inventory tab
+      setActiveFilter('by-category');
+      setActiveTab('inventory');
+
+      // Scroll to category after a short delay to ensure DOM is updated
+      setTimeout(() => {
+        scrollToCategory(categoryParam);
+      }, 100);
+    }
+  }, [location.search]);
+
+  // Function to scroll to a specific category section
+  const scrollToCategory = (category) => {
+    // Try to find the category header element
+    // Look for both desktop table view and mobile card view
+    const categorySelector = `[data-category="${category}"], tr[data-category="${category}"]`;
+    const categoryElement = document.querySelector(categorySelector);
+
+    if (categoryElement) {
+      categoryElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    } else {
+      // Fallback: try to find by text content
+      const elements = document.querySelectorAll('tr, h3');
+      for (const element of elements) {
+        if (element.textContent && element.textContent.trim().toUpperCase() === category.toUpperCase()) {
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+          break;
+        }
+      }
+    }
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -152,6 +204,106 @@ const InventoryPage = ({ defaultTab }) => {
     setItemToDelete(null);
   };
 
+  // Shopping list handler - now opens modal for selection
+  const handleAddToShoppingList = (item) => {
+    setClickedIcon(`add-${item.id}`);
+    setTimeout(() => setClickedIcon(null), 300); // Reset after 300ms
+
+    setSelectedItemForList(item);
+    setShowShoppingListModal(true);
+  };
+
+  // Handle adding item to existing shopping list
+  const handleAddToExistingList = async (listId, listName) => {
+    try {
+      const shoppingItem = {
+        name: selectedItemForList.itemName,
+        quantity: '1', // Default quantity
+        category: selectedItemForList.category || 'Other'
+      };
+
+      // Add item to shopping list
+      const newItem = await addToShoppingList(listId, shoppingItem);
+
+      // Find the existing list data
+      const existingList = shoppingLists.find(list => list.id === listId);
+
+      // Construct updated list data with new item
+      const updatedListData = {
+        ...existingList,
+        name: listName,
+        shopping_list_items: [
+          ...(existingList?.shopping_list_items || []),
+          {
+            id: newItem?.id || Date.now(), // Use API response ID or temp ID
+            name: shoppingItem.name,
+            quantity: shoppingItem.quantity,
+            category: shoppingItem.category,
+            is_checked: false,
+            created_at: new Date().toISOString()
+          }
+        ],
+        total_items: (existingList?.total_items || 0) + 1
+      };
+
+      // Navigate directly to list detail page with the updated data
+      navigate(`/shopping-list/${listId}`, {
+        state: {
+          listData: updatedListData
+        }
+      });
+    } catch (error) {
+      console.error('Failed to add item to shopping list:', error);
+      alert('Failed to add item to shopping list. Please try again.');
+    }
+  };
+
+  // Handle creating new list with item
+  const handleCreateNewListAndAdd = async (listName) => {
+    try {
+      const shoppingItem = {
+        name: selectedItemForList.itemName,
+        quantity: '1', // Default quantity
+        category: selectedItemForList.category || 'Other'
+      };
+
+      // Create list with the item already included
+      const newList = await createList(listName, '#4fcf61', [shoppingItem]);
+
+      // Construct the new list data with the item already included
+      const newListData = {
+        ...newList,
+        shopping_list_items: [
+          {
+            id: Date.now(), // Temporary ID
+            name: shoppingItem.name,
+            quantity: shoppingItem.quantity,
+            category: shoppingItem.category,
+            is_checked: false,
+            created_at: new Date().toISOString()
+          }
+        ],
+        total_items: 1
+      };
+
+      // Navigate directly to the new list detail page with the data
+      navigate(`/shopping-list/${newList.id}`, {
+        state: {
+          listData: newListData
+        }
+      });
+    } catch (error) {
+      console.error('Failed to create new shopping list:', error);
+      alert('Failed to create new shopping list. Please try again.');
+    }
+  };
+
+  // Close shopping list modal
+  const handleCloseShoppingListModal = () => {
+    setShowShoppingListModal(false);
+    setSelectedItemForList(null);
+  };
+
   // Dropdown menu handlers
   const handleDropdownToggle = (itemId) => {
     setOpenDropdownId(openDropdownId === itemId ? null : itemId);
@@ -163,6 +315,8 @@ const InventoryPage = ({ defaultTab }) => {
 
   // Edit handlers
   const handleEditItem = (item) => {
+    setClickedIcon(`edit-${item.id}`);
+    setTimeout(() => setClickedIcon(null), 300); // Reset after 300ms
     setItemToEdit(item);
     setShowEditModal(true);
     setOpenDropdownId(null);
@@ -190,6 +344,8 @@ const InventoryPage = ({ defaultTab }) => {
 
   // Enhanced delete handler that closes dropdown
   const handleDeleteItemFromDropdown = (item) => {
+    setClickedIcon(`delete-${item.id}`);
+    setTimeout(() => setClickedIcon(null), 300); // Reset after 300ms
     setItemToDelete(item);
     setShowDeleteModal(true);
     setOpenDropdownId(null);
@@ -561,20 +717,25 @@ const InventoryPage = ({ defaultTab }) => {
             }}>
               <h3 style={{ color: '#666', marginBottom: '1rem' }}>No items match your filter</h3>
               <p style={{ color: '#999', marginBottom: '2rem' }}>Try selecting a different filter or add more items to your inventory.</p>
-              <button 
-                style={{
-                  padding: '0.5rem 1.5rem',
-                  background: 'var(--primary-green)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '0.9rem',
-                  cursor: 'pointer'
-                }}
-                onClick={() => setActiveFilter('all')}
-              >
-                Show All Items
-              </button>
+              {/* Only show "Show All Items" button if there are items that would show when filter is set to 'all' */}
+              {activeFilter !== 'all' && inventoryItems.filter(item =>
+                !searchTerm.trim() || item.itemName.toLowerCase().includes(searchTerm.toLowerCase().trim())
+              ).length > 0 && (
+                <button
+                  style={{
+                    padding: '0.5rem 1.5rem',
+                    background: 'var(--primary-green)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '0.9rem',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => setActiveFilter('all')}
+                >
+                  Show All Items
+                </button>
+              )}
             </div>
           )}
 
@@ -670,7 +831,7 @@ const InventoryPage = ({ defaultTab }) => {
                     Object.entries(groupedItems).map(([category, items]) => (
                       <React.Fragment key={category}>
                         {/* Group header row */}
-                        <tr style={{
+                        <tr data-category={category} style={{
                           backgroundColor: activeFilter === 'by-category'
                             ? getCategoryColor(category).bg
                             : getExpirationColor(category).bg,
@@ -963,7 +1124,7 @@ const InventoryPage = ({ defaultTab }) => {
                 Object.entries(groupedItems).map(([category, items]) => (
                   <div key={category}>
                     {/* Group header */}
-                    <h3 style={{
+                    <h3 data-category={category} style={{
                       margin: '1.5rem 0 1rem 0',
                       padding: '0.5rem 1rem',
                       background: activeFilter === 'by-category'
@@ -1048,6 +1209,31 @@ const InventoryPage = ({ defaultTab }) => {
                             {/* Shelf life text - Third row */}
                             <div className={`inventory-page__card-shelf-life ${getShelfLifeColorClass(item.expiryDate)}`}>
                               {getShelfLifeText(item.expiryDate)}
+                            </div>
+
+                            {/* Action icons row */}
+                            <div className="inventory-page__card-actions">
+                              <button
+                                className={`inventory-page__action-icon ${clickedIcon === `edit-${item.id}` ? 'inventory-page__action-icon--clicked' : ''}`}
+                                onClick={() => handleEditItem(item)}
+                                title="Edit item"
+                              >
+                                <EditIcon width={16} height={16} />
+                              </button>
+                              <button
+                                className={`inventory-page__action-icon ${clickedIcon === `add-${item.id}` ? 'inventory-page__action-icon--clicked' : ''}`}
+                                onClick={() => handleAddToShoppingList(item)}
+                                title="Add to shopping list"
+                              >
+                                <PlusIcon width={16} height={16} />
+                              </button>
+                              <button
+                                className={`inventory-page__action-icon inventory-page__action-icon--delete ${clickedIcon === `delete-${item.id}` ? 'inventory-page__action-icon--clicked' : ''}`}
+                                onClick={() => handleDeleteItemFromDropdown(item)}
+                                title="Delete item"
+                              >
+                                <DeleteIcon width={16} height={16} />
+                              </button>
                             </div>
                           </div>
 
@@ -1158,6 +1344,31 @@ const InventoryPage = ({ defaultTab }) => {
                         {/* Shelf life text - Third row */}
                         <div className={`inventory-page__card-shelf-life ${getShelfLifeColorClass(item.expiryDate)}`}>
                           {getShelfLifeText(item.expiryDate)}
+                        </div>
+
+                        {/* Action icons row */}
+                        <div className="inventory-page__card-actions">
+                          <button
+                            className={`inventory-page__action-icon ${clickedIcon === `edit-${item.id}` ? 'inventory-page__action-icon--clicked' : ''}`}
+                            onClick={() => handleEditItem(item)}
+                            title="Edit item"
+                          >
+                            <EditIcon width={16} height={16} />
+                          </button>
+                          <button
+                            className={`inventory-page__action-icon ${clickedIcon === `add-${item.id}` ? 'inventory-page__action-icon--clicked' : ''}`}
+                            onClick={() => handleAddToShoppingList(item)}
+                            title="Add to shopping list"
+                          >
+                            <PlusIcon width={16} height={16} />
+                          </button>
+                          <button
+                            className={`inventory-page__action-icon inventory-page__action-icon--delete ${clickedIcon === `delete-${item.id}` ? 'inventory-page__action-icon--clicked' : ''}`}
+                            onClick={() => handleDeleteItemFromDropdown(item)}
+                            title="Delete item"
+                          >
+                            <DeleteIcon width={16} height={16} />
+                          </button>
                         </div>
                       </div>
 
@@ -1531,7 +1742,16 @@ const InventoryPage = ({ defaultTab }) => {
       )}
 
 
-      {/* Removed old shopping list modals - now handled by ShoppingListSection component */}
+      {/* Shopping List Selection Modal */}
+      <ShoppingListSelectionModal
+        isOpen={showShoppingListModal}
+        onClose={handleCloseShoppingListModal}
+        item={selectedItemForList}
+        shoppingLists={shoppingLists}
+        onAddToExistingList={handleAddToExistingList}
+        onCreateNewListAndAdd={handleCreateNewListAndAdd}
+      />
+
 
       <MobileBottomNav />
     </div>

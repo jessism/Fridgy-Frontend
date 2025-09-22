@@ -20,36 +20,44 @@
 
 /* Hero Section */
 .ai-recipe-page__hero {
-  text-align: center;
   margin-bottom: 2rem;
   padding-top: 1rem;
+}
+
+.ai-recipe-page__hero-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1rem;
 }
 
 .ai-recipe-page__back-btn {
   background: none;
   border: none;
-  color: black;
-  font-size: 1rem;
-  font-weight: 600;
+  color: #333;
   cursor: pointer;
-  padding: 0.25rem 0;
-  margin-bottom: 0.25rem;
-  transition: color 0.2s ease;
-  text-align: left;
-  width: 100%;
+  padding: 8px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  flex-shrink: 0;
 }
 
 .ai-recipe-page__back-btn:hover {
-  color: #333;
+  background: #f0f0f0;
 }
 
 .ai-recipe-page__hero-title {
   font-family: var(--header-font);
   font-size: 2.5rem;
   color: var(--header-color);
-  margin: 0 0 1rem 0;
+  margin: 0;
   font-weight: 700;
-  text-align: center;
+  flex: 1;
 }
 
 .ai-recipe-page__hero-subtitle {
@@ -58,6 +66,7 @@
   margin: 0 0 2rem 0;
   line-height: 1.6;
   max-width: 600px;
+  text-align: center;
 }
 
 /* Content Area */
@@ -341,9 +350,17 @@
     margin-bottom: 1.5rem;
   }
 
+  .ai-recipe-page__hero-header {
+    gap: 8px;
+  }
+
+  .ai-recipe-page__back-btn {
+    width: 36px;
+    height: 36px;
+  }
+
   .ai-recipe-page__hero-title {
     font-size: 2rem;
-    margin-bottom: 0.75rem;
   }
 
   .ai-recipe-page__hero-subtitle {
@@ -363,9 +380,11 @@
     flex: 1;
     margin-left: 0.5rem;
   }
-  
-  .ai-recipe-page__back-btn {
+
+  .recipes-header .ai-recipe-page__back-btn {
     order: 0;
+    width: 36px;
+    height: 36px;
   }
   
   .btn-regenerate {

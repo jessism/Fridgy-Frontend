@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import RecipeCookingConfirmation from '../../features/recipe-cooking/components/RecipeCookingConfirmation';
+import useShoppingLists from '../../hooks/useShoppingLists';
+import ShoppingListSelectionModal from '../ShoppingListSelectionModal';
 
 const RecipeDetailModal = ({
   isOpen,
@@ -11,6 +14,16 @@ const RecipeDetailModal = ({
 }) => {
   const [activeTab, setActiveTab] = useState('ingredients');
   const [showCookingConfirmation, setShowCookingConfirmation] = useState(false);
+
+  // Shopping list selection modal state
+  const [showShoppingListModal, setShowShoppingListModal] = useState(false);
+  const [selectedIngredientsForList, setSelectedIngredientsForList] = useState(null);
+
+  // Shopping lists hook
+  const { lists: shoppingLists, createList, addItem: addToShoppingList } = useShoppingLists();
+
+  // Navigation hook
+  const navigate = useNavigate();
 
   // API base URL for proxy
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -81,6 +94,37 @@ const RecipeDetailModal = ({
     return attributes.slice(0, 3); // Limit to 3 attributes max
   };
 
+  // Helper function to transform recipe ingredients to shopping list format
+  const transformIngredientsForShoppingList = () => {
+    if (!recipe?.extendedIngredients) return [];
+
+    return recipe.extendedIngredients.map(ingredient => {
+      // Combine amount and unit into quantity string
+      let quantity = '';
+      if (ingredient.amount && ingredient.amount > 0) {
+        quantity = `${Math.round(ingredient.amount * 100) / 100}`;
+        if (ingredient.unit) {
+          quantity += ` ${ingredient.unit}`;
+        }
+      } else if (ingredient.unit) {
+        quantity = ingredient.unit;
+      } else {
+        quantity = '1';
+      }
+
+      return {
+        name: ingredient.name || 'Unknown ingredient',
+        quantity: quantity.trim(),
+        category: 'Other'
+      };
+    });
+  };
+
+  // Get count of ingredients
+  const getIngredientsCount = () => {
+    return recipe?.extendedIngredients?.length || 0;
+  };
+
   // Helper function to get clean description
   const getDescription = () => {
     if (!recipe?.summary) return 'A delicious recipe worth trying.';
@@ -145,6 +189,67 @@ const RecipeDetailModal = ({
       onCookNow(recipe);
     }
   };
+
+  // Shopping list handlers
+  const handleAddToShoppingList = () => {
+    const ingredients = transformIngredientsForShoppingList();
+    setSelectedIngredientsForList(ingredients);
+    setShowShoppingListModal(true);
+  };
+
+  const handleAddToExistingList = async (listId, listName) => {
+    try {
+      // Add all ingredients to the existing list
+      for (const ingredient of selectedIngredientsForList) {
+        await addToShoppingList(listId, ingredient);
+      }
+
+      // Close modals
+      setShowShoppingListModal(false);
+      setSelectedIngredientsForList(null);
+      onClose();
+
+      // Navigate to shopping list tab and show the specific list details
+      navigate('/inventory/shopping-list', {
+        state: {
+          selectedListId: listId,
+          autoSelectList: true
+        }
+      });
+    } catch (error) {
+      console.error('Failed to add ingredients to shopping list:', error);
+      alert('Failed to add ingredients to shopping list. Please try again.');
+    }
+  };
+
+  const handleCreateNewListAndAdd = async (listName) => {
+    try {
+      // Create list with all the ingredients already included
+      const newList = await createList(listName, '#4fcf61', selectedIngredientsForList);
+
+      // Close modals
+      setShowShoppingListModal(false);
+      setSelectedIngredientsForList(null);
+      onClose();
+
+      // Navigate to shopping list tab and show the new list details
+      navigate('/inventory/shopping-list', {
+        state: {
+          selectedListId: newList.id,
+          autoSelectList: true
+        }
+      });
+    } catch (error) {
+      console.error('Failed to create new shopping list:', error);
+      alert('Failed to create shopping list. Please try again.');
+    }
+  };
+
+  const handleCloseShoppingListModal = () => {
+    setShowShoppingListModal(false);
+    setSelectedIngredientsForList(null);
+  };
+
 
   const renderIngredients = () => {
     if (!recipe?.extendedIngredients || recipe.extendedIngredients.length === 0) {
@@ -244,31 +349,9 @@ const RecipeDetailModal = ({
       <div className="nutrition-info">
         {/* AI Estimation Badge */}
         {isAIEstimated && (
-          <div style={{
-            textAlign: 'center',
-            marginBottom: '1rem',
-            padding: '0.5rem',
-            backgroundColor: '#f0f9ff',
-            borderRadius: '8px',
-            border: '1px solid #e0f2fe'
-          }}>
-            <span style={{
-              fontSize: '0.875rem',
-              color: '#0284c7',
-              fontWeight: 500
-            }}>
-              🤖 AI-Estimated Nutrition
-            </span>
-            {confidence && (
-              <span style={{
-                fontSize: '0.75rem',
-                color: '#64748b',
-                marginLeft: '0.5rem'
-              }}>
-                ({Math.round(confidence * 100)}% confidence)
-              </span>
-            )}
-          </div>
+          <p style={{ fontSize: '0.8rem', color: '#999', margin: '0 0 0.5rem 0' }}>
+            Estimated nutrition
+          </p>
         )}
 
         {/* Caloric Section - 50/50 Layout */}
@@ -471,7 +554,7 @@ const RecipeDetailModal = ({
                           rel="noopener noreferrer"
                           className="recipe-instagram-link"
                         >
-                          @{recipe.source_author || 'View original post'} →
+                          @{recipe.source_author || 'View original post'}
                         </a>
                       )}
                     </div>
@@ -494,7 +577,7 @@ const RecipeDetailModal = ({
                     <div className="servings-display">
                       {recipe.servings || 2} servings
                     </div>
-                    <button 
+                    <button
                       className="save-recipe-action-btn"
                       onClick={() => console.log('Save recipe placeholder')}
                     >
@@ -564,14 +647,13 @@ const RecipeDetailModal = ({
           {/* Footer with action buttons */}
           {recipe && !isLoading && (
             <div className="recipe-modal-footer">
-              {!customActionLabel && (
-                <button
-                  className="recipe-cancel-button"
-                  onClick={onClose}
-                >
-                  Cancel
-                </button>
-              )}
+              <button
+                className="recipe-add-items-button"
+                onClick={handleAddToShoppingList}
+                disabled={getIngredientsCount() === 0}
+              >
+                Add {getIngredientsCount()} items
+              </button>
               <button
                 className="recipe-cook-button"
                 onClick={customActionLabel ? () => onCookNow(recipe) : handleCookNow}
@@ -589,6 +671,16 @@ const RecipeDetailModal = ({
         isOpen={showCookingConfirmation}
         onClose={() => setShowCookingConfirmation(false)}
         onCookComplete={handleCookingComplete}
+      />
+
+      {/* Shopping List Selection Modal */}
+      <ShoppingListSelectionModal
+        isOpen={showShoppingListModal}
+        onClose={handleCloseShoppingListModal}
+        item={{ itemName: `${getIngredientsCount()} recipe ingredients` }}
+        shoppingLists={shoppingLists}
+        onAddToExistingList={handleAddToExistingList}
+        onCreateNewListAndAdd={handleCreateNewListAndAdd}
       />
     </>
   );

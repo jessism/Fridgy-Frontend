@@ -3791,3 +3791,366 @@ h2.section-title::after {
     font-size: 0.75rem;
   }
 }
+
+/* Shopping List Integration Styles */
+
+/* Shopping List Action Button */
+.shopping-list-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 2rem;
+  background: #4fcf61;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.shopping-list-action-btn:hover {
+  background: #3cb54c;
+  transform: scale(1.02);
+}
+
+/* Add Items Button in Footer */
+.recipe-add-items-button {
+  padding: 0.875rem 1.75rem;
+  background: #4fcf61;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  min-width: 160px;
+}
+
+.recipe-add-items-button:hover:not(:disabled) {
+  background: #3cb54c;
+  transform: translateY(-1px);
+}
+
+.recipe-add-items-button:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Ingredients Preview Modal */
+.ingredients-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 1100;
+  animation: fadeIn 0.3s ease;
+}
+
+.ingredients-modal {
+  background: white;
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUpModal 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes slideUpModal {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ingredients-modal-header {
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.ingredients-modal-title {
+  font-family: var(--header-font);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.ingredients-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.ingredients-modal-close:hover {
+  color: #374151;
+  background: #f3f4f6;
+  transform: scale(1.1);
+}
+
+.ingredients-modal-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 1.5rem;
+}
+
+.ingredients-modal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 0;
+}
+
+.ingredients-modal-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  border-left: 4px solid #4fcf61;
+}
+
+.ingredients-modal-quantity {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4fcf61;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.ingredients-modal-name {
+  font-size: 1rem;
+  color: #374151;
+  flex: 1;
+}
+
+.ingredients-modal-footer {
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.ingredients-modal-add-button {
+  width: 100%;
+  padding: 1rem;
+  background: #4fcf61;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ingredients-modal-add-button:hover {
+  background: #3cb54c;
+  transform: translateY(-1px);
+}
+
+/* Shopping List Name Input Modal */
+.name-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1200;
+  padding: 1.5rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.name-modal {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 400px;
+  animation: scaleInModal 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes scaleInModal {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.name-modal-header {
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.name-modal-header h3 {
+  font-family: var(--header-font);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.name-modal-content {
+  padding: 1.5rem;
+}
+
+.name-modal-input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 1rem;
+  color: #374151;
+  background: white;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.name-modal-input:focus {
+  outline: none;
+  border-color: #4fcf61;
+  box-shadow: 0 0 0 3px rgba(79, 207, 97, 0.1);
+}
+
+.name-modal-footer {
+  padding: 0 1.5rem 1.5rem;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.name-modal-cancel {
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  color: #6b7280;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.name-modal-cancel:hover {
+  color: #374151;
+  border-color: #d1d5db;
+  background: #f9fafb;
+}
+
+.name-modal-create {
+  padding: 0.75rem 1.5rem;
+  background: #4fcf61;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.name-modal-create:hover:not(:disabled) {
+  background: #3cb54c;
+  transform: translateY(-1px);
+}
+
+.name-modal-create:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .recipe-action-buttons .shopping-list-action-btn {
+    padding: 0.625rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .ingredients-modal {
+    max-height: 90vh;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .ingredients-modal-header,
+  .ingredients-modal-content,
+  .ingredients-modal-footer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .ingredients-modal-item {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .ingredients-modal-quantity {
+    min-width: 60px;
+    font-size: 0.85rem;
+  }
+
+  .ingredients-modal-name {
+    font-size: 0.95rem;
+  }
+
+  .name-modal-overlay {
+    padding: 1rem;
+  }
+
+  .name-modal-footer {
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+  }
+
+  .name-modal-cancel,
+  .name-modal-create {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import useShoppingLists from '../hooks/useShoppingLists';
 import ShareListModal from './modals/ShareListModal';
 import JoinListModal from './modals/JoinListModal';
+import { ChevronLeft, Users, Check, Trash2, RefreshCw } from 'lucide-react';
 import './ShoppingListSection.css';
 
 const ShoppingListSection = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const {
     lists,
     loading,
@@ -22,28 +26,14 @@ const ShoppingListSection = () => {
     fetchLists
   } = useShoppingLists();
 
-  const [selectedListId, setSelectedListId] = useState(null);
-  const [selectedList, setSelectedList] = useState(null);
-  const [editingListId, setEditingListId] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newListName, setNewListName] = useState('');
-  const [itemQuantity, setItemQuantity] = useState('');
-  const [itemCategory, setItemCategory] = useState('Other');
   const [showShareModal, setShowShareModal] = useState(false);
   const [listToShare, setListToShare] = useState(null);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showBottomSheet, setShowBottomSheet] = useState(false);
   const [bottomSheetListId, setBottomSheetListId] = useState(null);
-  const [editingListNameId, setEditingListNameId] = useState(null);
-  const [tempListName, setTempListName] = useState('');
-  const [togglingItemId, setTogglingItemId] = useState(null); // Track which item is being toggled
 
-  // Refs for direct DOM access - instant operations
-  const itemNameInputRef = useRef(null);
-  const itemAmountInputRef = useRef(null);
-
-  // Categories for dropdown
-  const categories = ['Other', 'Fruits', 'Vegetables', 'Dairy', 'Protein', 'Grains', 'Beverages', 'Snacks'];
 
   // Migrate local lists on component mount
   useEffect(() => {
@@ -65,86 +55,15 @@ const ShoppingListSection = () => {
     }
   }, [migrateLists]);
 
-  // Load full list details when selecting a list
+
+
+
+  // Handle navigation state for auto-selecting a list
   useEffect(() => {
-    if (selectedListId) {
-      getList(selectedListId).then(list => {
-        setSelectedList(list);
-      }).catch(err => {
-        console.error('Failed to load list:', err);
-      });
+    if (location.state?.autoSelectList && location.state?.selectedListId) {
+      navigate(`/shopping-list/${location.state.selectedListId}`);
     }
-  }, [selectedListId, getList]);
-
-  // Auto-refresh shared lists when returning to app
-  useEffect(() => {
-    // Only for shared lists
-    if (!selectedList?.shopping_list_members || selectedList.shopping_list_members.length <= 1) {
-      return;
-    }
-
-    let lastRefresh = Date.now();
-
-    const handleVisibilityChange = () => {
-      // When user returns to the app/tab
-      if (document.visibilityState === 'visible') {
-        const timeSinceRefresh = Date.now() - lastRefresh;
-
-        // Only refresh if been away for 30+ seconds
-        if (timeSinceRefresh > 30000) {
-          console.log('Refreshing shared list after returning to app');
-          getList(selectedListId).then(list => {
-            setSelectedList(list);
-            lastRefresh = Date.now();
-            // Also refresh the main lists to update counts
-            fetchLists();
-          }).catch(err => {
-            console.error('Failed to refresh list on return:', err);
-          });
-        }
-      }
-    };
-
-    // Listen for both visibility change and focus events
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleVisibilityChange);
-    };
-  }, [selectedList, selectedListId, getList, fetchLists]);
-
-  // Auto-refresh list counts when returning to main list view
-  useEffect(() => {
-    // Only when viewing the main list (not inside a specific list)
-    if (selectedListId || editingListId) {
-      return;
-    }
-
-    let lastRefresh = Date.now();
-
-    const handleMainViewVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        const timeSinceRefresh = Date.now() - lastRefresh;
-
-        // Refresh if been away for 30+ seconds
-        if (timeSinceRefresh > 30000) {
-          console.log('Refreshing list counts after returning to app');
-          fetchLists();
-          lastRefresh = Date.now();
-        }
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleMainViewVisibilityChange);
-    window.addEventListener('focus', handleMainViewVisibilityChange);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleMainViewVisibilityChange);
-      window.removeEventListener('focus', handleMainViewVisibilityChange);
-    };
-  }, [selectedListId, editingListId, fetchLists]);
+  }, [location.state, navigate]);
 
   const handleCreateList = async () => {
     if (newListName.trim()) {
@@ -159,144 +78,21 @@ const ShoppingListSection = () => {
 
         setNewListName('');
         setShowCreateModal(false);
-        // Immediately enter edit mode for the new list
-        setSelectedListId(newList.id);
-        setEditingListId(newList.id);
+        // Navigate to the new list page
+        navigate(`/shopping-list/${newList.id}`);
       } catch (err) {
         alert('Failed to create list. Please try again.');
       }
     }
   };
 
-  const handleAddItem = async () => {
-    // Read directly from DOM refs - no state delay
-    const tempName = itemNameInputRef.current?.value?.trim();
-    const tempAmount = itemAmountInputRef.current?.value?.trim() || '1';
-
-    if (tempName && editingListId) {
-      // Clear inputs via DOM - instant, no React re-render
-      if (itemNameInputRef.current) itemNameInputRef.current.value = '';
-      if (itemAmountInputRef.current) itemAmountInputRef.current.value = '';
-
-      // Keep focus on name input - no blur/focus cycle
-      itemNameInputRef.current?.focus();
-
-      // Generate temporary ID for instant UI update
-      const tempId = `temp_${Date.now()}_${Math.random()}`;
-      const tempItem = {
-        id: tempId,
-        name: tempName,
-        quantity: tempAmount,
-        unit: '',
-        category: 'Other',
-        is_checked: false
-      };
-
-      // Add temporary item for instant feedback
-      setSelectedList(prevList => ({
-        ...prevList,
-        shopping_list_items: [tempItem, ...(prevList.shopping_list_items || [])]
-      }));
-
-      try {
-        // Make API call and wait for real item with database ID
-        const realItem = await addItem(editingListId, {
-          name: tempName,
-          quantity: tempAmount,
-          category: 'Other'
-        });
-
-        // Replace temporary item with real item from backend
-        if (realItem) {
-          setSelectedList(prevList => ({
-            ...prevList,
-            shopping_list_items: prevList.shopping_list_items.map(item =>
-              item.id === tempId ? realItem : item
-            )
-          }));
-          console.log('Item added successfully with ID:', realItem.id);
-        }
-      } catch (err) {
-        // On error, remove the optimistic item and restore inputs
-        console.error('Failed to add item:', err);
-        setSelectedList(prevList => ({
-          ...prevList,
-          shopping_list_items: prevList.shopping_list_items.filter(item => item.id !== tempId)
-        }));
-        // Restore values to DOM refs
-        if (itemNameInputRef.current) itemNameInputRef.current.value = tempName;
-        if (itemAmountInputRef.current) itemAmountInputRef.current.value = tempAmount;
-        alert('Failed to add item. Your input has been restored.');
-      }
-    }
-  };
-
-  // Handle Enter key on item field - move to amount field
-  const handleItemKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      // Move focus to amount field using ref - instant, no DOM search
-      itemAmountInputRef.current?.focus();
-    }
-  };
-
-  // Handle Enter key on amount field - add item
-  const handleAmountKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddItem();
-    }
-  };
-
-  const handleToggleItem = async (listId, itemId) => {
-    console.log('handleToggleItem called with:', { listId, itemId });
-
-    // Prevent multiple simultaneous toggles
-    if (togglingItemId === itemId) {
-      console.log('Already toggling this item, ignoring click');
-      return;
-    }
-
-    setTogglingItemId(itemId);
-
-    try {
-      console.log('Calling toggleItem...');
-      await toggleItem(listId, itemId);
-      console.log('Toggle successful, refreshing list...');
-
-      // Refresh the list
-      const updatedList = await getList(listId);
-      console.log('Updated list received:', updatedList);
-      setSelectedList(updatedList);
-
-      // Also refresh the main lists to update counts
-      fetchLists();
-    } catch (err) {
-      console.error('Failed to toggle item - Full error:', err);
-      alert(`Failed to toggle item: ${err.message || 'Unknown error'}`);
-    } finally {
-      setTogglingItemId(null);
-    }
-  };
-
-  const handleDeleteItem = async (listId, itemId) => {
-    try {
-      await deleteItemFromList(listId, itemId);
-      // Refresh the list
-      const updatedList = await getList(listId);
-      setSelectedList(updatedList);
-    } catch (err) {
-      alert('Failed to delete item. Please try again.');
-    }
-  };
 
   const handleDeleteList = async (listId) => {
     try {
       await deleteList(listId);
-      setSelectedListId(null);
-      setSelectedList(null);
-      setEditingListId(null);
       setShowBottomSheet(false);
+      // Refresh the lists to remove the deleted one
+      fetchLists();
     } catch (err) {
       alert('Failed to delete list. Only owners can delete lists.');
     }
@@ -305,9 +101,9 @@ const ShoppingListSection = () => {
   const handleClearCompleted = async (listId) => {
     try {
       const cleared = await clearCompleted(listId);
-      // Refresh the list
-      const updatedList = await getList(listId);
-      setSelectedList(updatedList);
+      // Refresh the lists to update counts
+      fetchLists();
+      setShowBottomSheet(false);
       alert(`Cleared ${cleared} completed items`);
     } catch (err) {
       alert('Failed to clear completed items. Please try again.');
@@ -318,12 +114,20 @@ const ShoppingListSection = () => {
     try {
       await shareList(listId, emails);
       alert('List shared successfully!');
-      // Refresh the list to show new members
-      const updatedList = await getList(listId);
-      setSelectedList(updatedList);
-      setListToShare(updatedList);
+      // Refresh the lists to update member counts
+      fetchLists();
     } catch (err) {
       throw err; // Let the modal handle the error
+    }
+  };
+
+  const handleRefreshList = async () => {
+    // Just refresh the main lists since we're in overview mode
+    try {
+      fetchLists();
+      setShowBottomSheet(false);
+    } catch (err) {
+      alert('Failed to refresh lists. Please try again.');
     }
   };
 
@@ -333,30 +137,31 @@ const ShoppingListSection = () => {
     setShowBottomSheet(false);
   };
 
-  const handleSaveListName = async () => {
-    if (tempListName.trim() && editingListNameId) {
-      try {
-        await updateList(editingListNameId, { name: tempListName.trim() });
-        setEditingListNameId(null);
-        setTempListName('');
-        fetchLists(); // Refresh lists
-      } catch (err) {
-        alert('Failed to update list name. Please try again.');
-      }
-    }
-  };
 
-  const getInitials = (firstName, lastName) => {
-    const first = firstName?.charAt(0)?.toUpperCase() || '';
-    const last = lastName?.charAt(0)?.toUpperCase() || '';
+  const getInitials = (member, listItems) => {
+    // Use the same priority as getDisplayName - get the real name first
+    const realName = getRealUserName(member?.user_id, listItems);
+    let name = '';
 
-    if (first && last) {
-      return first + last;
-    } else if (first) {
-      return first + firstName?.charAt(1)?.toUpperCase() || first;
-    } else if (lastName) {
-      return lastName.substring(0, 2).toUpperCase();
+    if (realName) {
+      name = realName;
+    } else if (member?.invited_by_name && member.invited_by_name !== 'Share Link') {
+      name = member.invited_by_name;
+    } else if (member?.user?.first_name) {
+      name = member.user.first_name;
+    } else if (member?.user?.email) {
+      const emailPart = member.user.email.split('@')[0];
+      return emailPart.substring(0, 2).toUpperCase();
+    } else if (member?.invited_by_name) {
+      name = member.invited_by_name;
     }
+
+    if (name) {
+      const first = name.charAt(0)?.toUpperCase() || '';
+      const second = name.charAt(1)?.toUpperCase() || '';
+      return first + (second || first);
+    }
+
     return '?';
   };
 
@@ -407,6 +212,51 @@ const ShoppingListSection = () => {
   const getFirstName = (fullName) => {
     if (!fullName) return '';
     return fullName.trim().split(' ')[0];
+  };
+
+  // Helper function to find real user name from their item interactions
+  const getRealUserName = (userId, listItems) => {
+    if (!userId || !listItems) return null;
+
+    // Find any item checked or added by this user
+    const userItem = listItems.find(item =>
+      item.checked_by === userId || item.added_by === userId
+    );
+
+    return userItem?.checked_by_name || userItem?.added_by_name;
+  };
+
+  // Helper function to get display name with fallbacks
+  const getDisplayName = (member, listItems) => {
+    // First try to get the real user name from their item interactions
+    const realName = getRealUserName(member?.user_id, listItems);
+    if (realName) {
+      return realName;
+    }
+
+    // Then try the invited_by_name (but skip "Share Link")
+    if (member?.invited_by_name && member.invited_by_name !== 'Share Link') {
+      return member.invited_by_name;
+    }
+
+    // Then try user object if it exists
+    if (member?.user?.first_name) {
+      return member.user.first_name;
+    }
+
+    if (member?.user?.email) {
+      // Extract name from email (everything before @)
+      const emailName = member.user.email.split('@')[0];
+      // Capitalize first letter
+      return emailName.charAt(0).toUpperCase() + emailName.slice(1);
+    }
+
+    // Fall back to invited_by_name even if it's "Share Link"
+    if (member?.invited_by_name) {
+      return member.invited_by_name;
+    }
+
+    return 'Unknown User';
   };
 
   // Color assignment storage key
@@ -511,8 +361,8 @@ const ShoppingListSection = () => {
     <div className="shopping-list-section">
       {/* Shopping List Content */}
       <div className="shopping-list-section__content">
-        {/* Show list of lists when not editing */}
-        {!editingListId && !selectedListId && (() => {
+        {/* Show list of lists */}
+        {(() => {
           // Separate lists into owned and shared
           const myLists = lists.filter(list => list.is_owner === true);
           const sharedLists = lists.filter(list => list.is_owner === false);
@@ -548,8 +398,7 @@ const ShoppingListSection = () => {
                       <div
                         className="shopping-list-section__list-main"
                         onClick={() => {
-                          setSelectedListId(list.id);
-                          setEditingListId(list.id);
+                          navigate(`/shopping-list/${list.id}`);
                         }}
                       >
                         <h3 className="shopping-list-section__list-name">{list.name}</h3>
@@ -618,8 +467,7 @@ const ShoppingListSection = () => {
                       <div
                         className="shopping-list-section__list-main"
                         onClick={() => {
-                          setSelectedListId(list.id);
-                          setEditingListId(list.id);
+                          navigate(`/shopping-list/${list.id}`);
                         }}
                       >
                         <h3 className="shopping-list-section__list-name">{list.name}</h3>
@@ -667,177 +515,6 @@ const ShoppingListSection = () => {
           );
         })()}
 
-        {/* Edit mode for a list */}
-        {editingListId && selectedList && (
-          <div className="shopping-list-section__edit-mode">
-            <div className="shopping-list-section__edit-header">
-              <button
-                className="shopping-list-section__back-icon"
-                onClick={() => {
-                  setEditingListId(null);
-                  setSelectedListId(null);
-                  setSelectedList(null);
-                }}
-                aria-label="Go back"
-              >
-                ←
-              </button>
-              <h1 className="shopping-list-section__list-title">
-                {selectedList.name}
-              </h1>
-              <div className="shopping-list-section__header-actions">
-                <button
-                  className="shopping-list-section__add-icon"
-                  onClick={() => document.querySelector('.shopping-list-section__item-name-input')?.focus()}
-                  aria-label="Add item"
-                >
-                  +
-                </button>
-                <button
-                  className="shopping-list-section__more-icon"
-                  onClick={() => {
-                    setBottomSheetListId(selectedList.id);
-                    setShowBottomSheet(true);
-                  }}
-                  aria-label="More options"
-                >
-                  ⋮
-                </button>
-              </div>
-            </div>
-
-            {/* Add item form at the top */}
-            <div className="shopping-list-section__item-minimal shopping-list-section__item-input">
-              <span className="shopping-list-section__item-circle">○</span>
-              <div className="shopping-list-section__item-info">
-                <input
-                  ref={itemNameInputRef}
-                  type="text"
-                  onKeyPress={handleItemKeyPress}
-                  className="shopping-list-section__item-name-input"
-                  placeholder=""
-                  autoFocus
-                />
-                <input
-                  ref={itemAmountInputRef}
-                  type="text"
-                  onKeyPress={handleAmountKeyPress}
-                  className="shopping-list-section__item-amount-input"
-                  placeholder=""
-                />
-              </div>
-            </div>
-
-            {/* Items list below the input */}
-            <div className="shopping-list-section__items-clean">
-              {selectedList.shopping_list_items && selectedList.shopping_list_items.length > 0 && (
-                // Sort items: unchecked first, then checked
-                [...selectedList.shopping_list_items]
-                  .sort((a, b) => {
-                    if (a.is_checked === b.is_checked) return 0;
-                    return a.is_checked ? 1 : -1;
-                  })
-                  .map(item => (
-                    <div key={item.id} className={`shopping-list-section__item-minimal ${item.is_checked ? 'shopping-list-section__item-minimal--checked' : ''}`}>
-                      <span
-                        className={`shopping-list-section__item-circle ${item.is_checked ? 'shopping-list-section__item-circle--checked' : ''} ${togglingItemId === item.id ? 'shopping-list-section__item-circle--loading' : ''}`}
-                        onClick={() => handleToggleItem(selectedList.id, item.id)}
-                        style={{ opacity: togglingItemId === item.id ? 0.5 : 1 }}
-                      >
-                        {togglingItemId === item.id ? '⟳' : (item.is_checked ? '✓' : '○')}
-                      </span>
-                      <div className="shopping-list-section__item-info">
-                        <div className="shopping-list-section__item-name-line">
-                          {item.name}
-                        </div>
-                        {item.quantity && (
-                          <div className="shopping-list-section__item-amount-line">
-                            {item.quantity} {item.unit || ''}
-                          </div>
-                        )}
-                      </div>
-                      {/* Show who checked the item in shared lists */}
-                      {selectedList.shopping_list_members && selectedList.shopping_list_members.length > 1 && item.is_checked && item.checked_by_name && (
-                        <div className="shopping-list-section__checked-by">
-                          ✓ by {getCheckedByText(item)}
-                        </div>
-                      )}
-                      <button
-                        onClick={() => handleDeleteItem(selectedList.id, item.id)}
-                        className="shopping-list-section__item-delete-btn"
-                        aria-label="Remove item"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))
-              )}
-            </div>
-
-            {/* Members section if shared */}
-            {selectedList.shopping_list_members && selectedList.shopping_list_members.length > 1 && (
-              <div className="shopping-list-section__members">
-                {/* List Owner Section */}
-                {(() => {
-                  const owner = selectedList.shopping_list_members.find(m => m.role === 'owner');
-                  return owner && (
-                    <div className="shopping-list-section__members-section">
-                      <h5 className="shopping-list-section__members-title">List Owner</h5>
-                      <div className="shopping-list-section__member-row">
-                        <div
-                          className="shopping-list-section__member-avatar shopping-list-section__member-avatar--owner"
-                          style={{ backgroundColor: getAvatarColor(owner.user_id) }}
-                        >
-                          {owner.user?.first_name || owner.user?.last_name ?
-                            getInitials(owner.user?.first_name, owner.user?.last_name) :
-                            ''
-                          }
-                        </div>
-                        <div className="shopping-list-section__member-info">
-                          <div className="shopping-list-section__member-name">
-                            {owner.user?.first_name || 'Unknown'} {owner.user?.last_name || ''}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                {/* Collaborators Section */}
-                {(() => {
-                  const collaborators = selectedList.shopping_list_members.filter(m => m.role !== 'owner');
-                  return collaborators.length > 0 && (
-                    <div className="shopping-list-section__members-section">
-                      <h5 className="shopping-list-section__members-title">
-                        Collaborators ({collaborators.length})
-                      </h5>
-                      <div className="shopping-list-section__members-grid">
-                        {collaborators.map(member => (
-                          <div key={member.id} className="shopping-list-section__member-row">
-                            <div
-                              className="shopping-list-section__member-avatar"
-                              style={{ backgroundColor: getAvatarColor(member.user_id) }}
-                            >
-                              {member.user?.first_name || member.user?.last_name ?
-                                getInitials(member.user?.first_name, member.user?.last_name) :
-                                ''
-                              }
-                            </div>
-                            <div className="shopping-list-section__member-info">
-                              <div className="shopping-list-section__member-name">
-                                {member.user?.first_name || 'Unknown'} {member.user?.last_name || ''}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Create List Modal */}
@@ -868,37 +545,42 @@ const ShoppingListSection = () => {
             <button
               className="shopping-list-section__bottom-sheet-option"
               onClick={() => {
-                const list = lists.find(l => l.id === bottomSheetListId) || selectedList;
-                handleOpenShareModal(list);
+                const list = lists.find(l => l.id === bottomSheetListId);
+                if (list) handleOpenShareModal(list);
               }}
             >
               <span>SHARE LIST</span>
-              <span>👥</span>
+              <Users size={20} />
+            </button>
+            <button
+              className="shopping-list-section__bottom-sheet-option"
+              onClick={handleRefreshList}
+            >
+              <span>REFRESH LIST</span>
+              <RefreshCw size={20} />
             </button>
             <button
               className="shopping-list-section__bottom-sheet-option"
               onClick={() => {
-                handleClearCompleted(bottomSheetListId || selectedList.id);
-                setShowBottomSheet(false);
+                if (bottomSheetListId) {
+                  handleClearCompleted(bottomSheetListId);
+                  setShowBottomSheet(false);
+                }
               }}
             >
               <span>CLEAR COMPLETED</span>
-              <span>✓</span>
-            </button>
-            <button
-              className="shopping-list-section__bottom-sheet-option shopping-list-section__bottom-sheet-option--danger"
-              onClick={() => {
-                handleDeleteList(bottomSheetListId || selectedList.id);
-              }}
-            >
-              <span>DELETE LIST</span>
-              <span>🗑</span>
+              <Check size={20} />
             </button>
             <button
               className="shopping-list-section__bottom-sheet-option"
-              onClick={() => setShowBottomSheet(false)}
+              onClick={() => {
+                if (bottomSheetListId) {
+                  handleDeleteList(bottomSheetListId);
+                }
+              }}
             >
-              <span>CANCEL</span>
+              <span>DELETE LIST</span>
+              <Trash2 size={20} />
             </button>
           </div>
         </div>

@@ -28,26 +28,39 @@ const PlanPreviewScreen = ({ data, updateData, onNext, onBack }) => {
         </p>
         
         <div style={{ textAlign: 'left' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#333' }}>
-            Get reminders?
+          <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px', color: '#333' }}>
+            Get expiry reminders?
           </h3>
+          <p style={{ fontSize: '14px', color: '#666', marginBottom: '16px' }}>
+            We'll notify you when your food items are about to expire
+          </p>
           <div className="checkbox-group">
             <div
               className={`checkbox-item checkbox-item--no-input ${reminderEnabled ? 'checkbox-item--selected' : ''}`}
               onClick={() => selectReminders(true)}
             >
               <label className="checkbox-item__label">
-                Yes
+                Yes, remind me
               </label>
+              {reminderEnabled && (
+                <span style={{ fontSize: '12px', color: '#888', display: 'block', marginTop: '4px', paddingLeft: '4px' }}>
+                  We'll set this up after creating your account
+                </span>
+              )}
             </div>
-            
+
             <div
               className={`checkbox-item checkbox-item--no-input ${!reminderEnabled ? 'checkbox-item--selected' : ''}`}
               onClick={() => selectReminders(false)}
             >
               <label className="checkbox-item__label">
-                No
+                No thanks
               </label>
+              {!reminderEnabled && (
+                <span style={{ fontSize: '12px', color: '#888', display: 'block', marginTop: '4px', paddingLeft: '4px' }}>
+                  You can always enable this later in settings
+                </span>
+              )}
             </div>
           </div>
         </div>

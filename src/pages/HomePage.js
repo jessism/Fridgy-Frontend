@@ -4,6 +4,7 @@ import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import { useAuth } from '../features/auth/context/AuthContext';
 import useInventory from '../hooks/useInventory';
+import IOSInstallPrompt from '../components/IOSInstallPrompt';
 import appLogo from '../assets/images/Logo.png';
 import { ReactComponent as AddToFridgeIcon } from '../assets/icons/quickaccess/add-to-fridge.svg';
 import { ReactComponent as MyFridgeIcon } from '../assets/icons/quickaccess/my-fridge.svg';
@@ -35,6 +36,12 @@ const HomePage = () => {
   // Function to navigate and scroll to top
   const navigateToPage = (path) => {
     navigate(path);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Function to navigate to inventory with category filter
+  const navigateToCategory = (category) => {
+    navigate(`/inventory?category=${encodeURIComponent(category)}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -151,7 +158,7 @@ const HomePage = () => {
             <h2 className="section-title">In Your Fridge</h2>
           </div>
           <div className="categories-grid">
-            <div className="category-card">
+            <div className="category-card" onClick={() => navigateToCategory('Protein')}>
               <div className="category-count">{categoryCounts['Protein']}</div>
               <div className="category-image">
                 <img src={proteinIcon} alt="Protein" className="food-group-icon" />
@@ -159,7 +166,7 @@ const HomePage = () => {
               <h3>Protein</h3>
             </div>
 
-            <div className="category-card">
+            <div className="category-card" onClick={() => navigateToCategory('Dairy')}>
               <div className="category-count">{categoryCounts['Dairy']}</div>
               <div className="category-image">
                 <img src={dairyIcon} alt="Dairy" className="food-group-icon" />
@@ -167,7 +174,7 @@ const HomePage = () => {
               <h3>Dairy</h3>
             </div>
 
-            <div className="category-card">
+            <div className="category-card" onClick={() => navigateToCategory('Vegetables')}>
               <div className="category-count">{categoryCounts['Vegetables']}</div>
               <div className="category-image">
                 <img src={veggiesIcon} alt="Vegetables" className="food-group-icon" />
@@ -175,7 +182,7 @@ const HomePage = () => {
               <h3>Vegetables</h3>
             </div>
 
-            <div className="category-card">
+            <div className="category-card" onClick={() => navigateToCategory('Fruits')}>
               <div className="category-count">{categoryCounts['Fruits']}</div>
               <div className="category-image">
                 <img src={fruitsIcon} alt="Fruits" className="food-group-icon" />
@@ -183,7 +190,7 @@ const HomePage = () => {
               <h3>Fruits</h3>
             </div>
 
-            <div className="category-card">
+            <div className="category-card" onClick={() => navigateToCategory('Grains')}>
               <div className="category-count">{categoryCounts['Grains']}</div>
               <div className="category-image">
                 <img src={grainsIcon} alt="Grains" className="food-group-icon" />
@@ -191,7 +198,7 @@ const HomePage = () => {
               <h3>Grains</h3>
             </div>
 
-            <div className="category-card">
+            <div className="category-card" onClick={() => navigateToCategory('Fats and Oils')}>
               <div className="category-count">{categoryCounts['Fats and Oils']}</div>
               <div className="category-image">
                 <img src={fatsIcon} alt="Fats and Oils" className="food-group-icon" />
@@ -683,6 +690,7 @@ const HomePage = () => {
       </section>
       
       <MobileBottomNav />
+      <IOSInstallPrompt />
     </div>
   );
 };

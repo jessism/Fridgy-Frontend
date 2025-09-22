@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ChevronLeft } from 'lucide-react';
 import { AppNavBar } from '../../../components/Navbar';
 import MobileBottomNav from '../../../components/MobileBottomNav';
 import RecipeDetailModal from '../../../components/modals/RecipeDetailModal';
@@ -208,10 +209,12 @@ const AIRecipePage = () => {
           {/* Hero Section - Only show when not displaying recipes */}
           {!hasRecipes && (
             <div className="ai-recipe-page__hero">
-              <button className="ai-recipe-page__back-btn" onClick={handleBackToMeals}>
-                ←
-              </button>
-              <h1 className="ai-recipe-page__hero-title">Personalize your recipes<br />with AI</h1>
+              <div className="ai-recipe-page__hero-header">
+                <button className="ai-recipe-page__back-btn" onClick={handleBackToMeals}>
+                  <ChevronLeft size={20} />
+                </button>
+                <h1 className="ai-recipe-page__hero-title">Personalize your recipes with AI</h1>
+              </div>
               <p className="ai-recipe-page__hero-subtitle">Answer a few questions to get recipes tailored to your fridge inventory and taste preferences</p>
             </div>
           )}
@@ -252,22 +255,22 @@ const AIRecipePage = () => {
             <div className="recipes-container-no-border">
               <div className="recipes-header">
                 <button className="ai-recipe-page__back-btn" onClick={handleBackToMeals}>
-                  ←
+                  <ChevronLeft size={20} />
                 </button>
                 <h2>Your Personalized Recipes</h2>
-                <button 
+                <button
                   className="btn-regenerate"
                   onClick={handleRegenerateRecipes}
                   disabled={loading}
                 >
-                  <svg 
-                    width="16" 
-                    height="16" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
                     strokeWidth="2"
-                    strokeLinecap="round" 
+                    strokeLinecap="round"
                     strokeLinejoin="round"
                   >
                     <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
