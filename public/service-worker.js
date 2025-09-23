@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-globals */
 
 // Cache name versioning
-const CACHE_NAME = 'trackabite-v1';
+const CACHE_NAME = 'trackabite-v2';
 const urlsToCache = [
   '/',
   '/static/css/main.css',

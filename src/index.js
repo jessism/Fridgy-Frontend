@@ -18,11 +18,16 @@ root.render(
 reportWebVitals();
 
 // Register service worker for PWA functionality and push notifications
-serviceWorkerRegistration.register({
-  onUpdate: (registration) => {
-    console.log('New app version available!');
-  },
-  onSuccess: (registration) => {
-    console.log('App is ready for offline use!');
-  }
-});
+if (process.env.NODE_ENV === 'production') {
+  serviceWorkerRegistration.register({
+    onUpdate: (registration) => {
+      console.log('New app version available!');
+    },
+    onSuccess: (registration) => {
+      console.log('App is ready for offline use!');
+    }
+  });
+} else {
+  // Disable service worker in development
+  serviceWorkerRegistration.unregister();
+}
