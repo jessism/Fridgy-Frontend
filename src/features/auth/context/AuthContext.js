@@ -82,9 +82,10 @@ const apiRequest = async (endpoint, options = {}, retryWithRefresh = true) => {
   const token = await getToken();
   
   const config = {
+    credentials: 'include', // Include cookies with requests
     headers: {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
+      ...(token && { Authorization: `Bearer ${token}` }), // Keep for backward compatibility
       ...options.headers,
     },
     ...options,
@@ -102,6 +103,7 @@ const apiRequest = async (endpoint, options = {}, retryWithRefresh = true) => {
           // Try to refresh the token
           const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh`, {
             method: 'POST',
+            credentials: 'include', // Include cookies with refresh request
             headers: { 'Content-Type': 'application/json' },
             body: safeJSONStringify({ refreshToken, isPWA: isPWA() })
           });
@@ -135,6 +137,8 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const refreshTimeoutRef = useRef(null);
   const isInitializedRef = useRef(false);
+  const lastFocusCheckRef = useRef(0);
+  const FOCUS_CHECK_INTERVAL = 60000; // 60 seconds minimum between focus checks
 
   // Schedule token refresh before expiry
   const scheduleTokenRefresh = useCallback(async () => {
@@ -213,6 +217,7 @@ export const AuthProvider = ({ children }) => {
                 try {
                   const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh`, {
                     method: 'POST',
+                    credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
                     body: safeJSONStringify({ refreshToken, isPWA: isPWA() })
                   });
@@ -248,6 +253,7 @@ export const AuthProvider = ({ children }) => {
               try {
                 const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
                   method: 'POST',
+                  credentials: 'include',
                   headers: { 'Content-Type': 'application/json' },
                   body: safeJSONStringify({ refreshToken, isPWA: isPWA() })
                 });
@@ -281,14 +287,28 @@ export const AuthProvider = ({ children }) => {
 
     // Listen for app focus to refresh auth if needed (PWA specific)
     const handleFocus = async () => {
+      // Debounce: Skip if we've checked recently
+      const now = Date.now();
+      if (now - lastFocusCheckRef.current < FOCUS_CHECK_INTERVAL) {
+        return;
+      }
+      lastFocusCheckRef.current = now;
+
+      // Only check for PWA and when user is logged in
       if (isPWA() && user) {
-        const isExpired = await pwaAuthStorage.isTokenExpired();
-        if (isExpired) {
+        // Check if token is about to expire (within 5 minutes)
+        const expiry = await pwaAuthStorage.getTokenExpiry();
+        const fiveMinutesFromNow = Date.now() + (5 * 60 * 1000);
+
+        if (expiry && expiry < fiveMinutesFromNow) {
+          console.log('Token expiring soon, attempting refresh on focus...');
           const refreshToken = await getRefreshToken();
+
           if (refreshToken) {
             try {
               const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: safeJSONStringify({ refreshToken, isPWA: true })
               });
@@ -299,9 +319,14 @@ export const AuthProvider = ({ children }) => {
                 await setUserData(data.user);
                 setUser({ ...data.user, token: data.token });
                 scheduleTokenRefresh();
+                console.log('Token refreshed successfully on focus');
+              } else {
+                console.warn('Focus refresh failed with status:', response.status);
               }
             } catch (error) {
               console.error('Focus refresh failed:', error);
+              // Don't log user out on network errors during focus
+              // They might be offline temporarily
             }
           }
         }

@@ -10,13 +10,18 @@ class PWAAuthStorage {
     this.TOKEN_KEY = 'fridgy_token';
     this.REFRESH_TOKEN_KEY = 'fridgy_refresh_token';
     this.USER_KEY = 'fridgy_user';
+    this.TOKEN_EXPIRY_KEY = 'fridgy_token_expiry';
     this.db = null;
+    this.dbInitialized = false;
 
     // Detect if running as PWA
     this.isPWA = this.detectPWA();
 
-    // Initialize IndexedDB
-    this.initDB();
+    // Initialize IndexedDB and store the promise for race condition prevention
+    this.dbReady = this.initDB();
+
+    // Request persistent storage permission (non-blocking)
+    this.requestPersistentStorage();
   }
 
   detectPWA() {
@@ -33,31 +38,49 @@ class PWAAuthStorage {
   async initDB() {
     if (!('indexedDB' in window)) {
       console.warn('IndexedDB not supported');
-      return;
+      this.dbInitialized = true; // Mark as initialized even if not supported
+      return null;
     }
 
-    try {
-      const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
+    return new Promise((resolve) => {
+      try {
+        const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
 
-      request.onerror = () => {
-        console.error('Failed to open IndexedDB');
-      };
+        request.onerror = () => {
+          console.error('Failed to open IndexedDB');
+          this.dbInitialized = true; // Mark as initialized even on error
+          resolve(null);
+        };
 
-      request.onsuccess = (event) => {
-        this.db = event.target.result;
-        console.log('IndexedDB initialized successfully');
-      };
+        request.onsuccess = (event) => {
+          this.db = event.target.result;
+          this.dbInitialized = true;
+          console.log('IndexedDB initialized successfully');
+          resolve(this.db);
+        };
 
-      request.onupgradeneeded = (event) => {
-        const db = event.target.result;
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
 
-        if (!db.objectStoreNames.contains(this.STORE_NAME)) {
-          db.createObjectStore(this.STORE_NAME);
-        }
-      };
-    } catch (error) {
-      console.error('IndexedDB initialization error:', error);
-    }
+          if (!db.objectStoreNames.contains(this.STORE_NAME)) {
+            db.createObjectStore(this.STORE_NAME);
+          }
+        };
+
+        // Add timeout to prevent infinite waiting
+        setTimeout(() => {
+          if (!this.dbInitialized) {
+            console.warn('IndexedDB initialization timeout');
+            this.dbInitialized = true;
+            resolve(null);
+          }
+        }, 5000);
+      } catch (error) {
+        console.error('IndexedDB initialization error:', error);
+        this.dbInitialized = true;
+        resolve(null);
+      }
+    });
   }
 
   // Get token with fallback strategy
@@ -241,6 +264,7 @@ class PWAAuthStorage {
       localStorage.removeItem(this.TOKEN_KEY);
       localStorage.removeItem(this.REFRESH_TOKEN_KEY);
       localStorage.removeItem(this.USER_KEY);
+      localStorage.removeItem(this.TOKEN_EXPIRY_KEY);
     } catch (e) {
       console.warn('localStorage clear failed:', e);
     }
@@ -249,7 +273,8 @@ class PWAAuthStorage {
     promises.push(
       this.deleteFromIndexedDB(this.TOKEN_KEY).catch(e => console.warn('IndexedDB delete failed:', e)),
       this.deleteFromIndexedDB(this.REFRESH_TOKEN_KEY).catch(e => console.warn('IndexedDB delete failed:', e)),
-      this.deleteFromIndexedDB(this.USER_KEY).catch(e => console.warn('IndexedDB delete failed:', e))
+      this.deleteFromIndexedDB(this.USER_KEY).catch(e => console.warn('IndexedDB delete failed:', e)),
+      this.deleteFromIndexedDB(this.TOKEN_EXPIRY_KEY).catch(e => console.warn('IndexedDB delete failed:', e))
     );
 
     // Clear sessionStorage
@@ -257,6 +282,7 @@ class PWAAuthStorage {
       sessionStorage.removeItem(this.TOKEN_KEY);
       sessionStorage.removeItem(this.REFRESH_TOKEN_KEY);
       sessionStorage.removeItem(this.USER_KEY);
+      sessionStorage.removeItem(this.TOKEN_EXPIRY_KEY);
     } catch (e) {
       console.warn('sessionStorage clear failed:', e);
     }
@@ -354,13 +380,24 @@ class PWAAuthStorage {
 
   // Wait for IndexedDB to be ready
   async waitForDB(timeout = 3000) {
-    const start = Date.now();
-
-    while (!this.db && Date.now() - start < timeout) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+    // If already initialized, return immediately
+    if (this.dbInitialized) {
+      return this.db;
     }
 
-    return this.db;
+    // Wait for the initialization promise with timeout
+    const timeoutPromise = new Promise((resolve) =>
+      setTimeout(() => resolve(null), timeout)
+    );
+
+    try {
+      // Race between initialization and timeout
+      const result = await Promise.race([this.dbReady, timeoutPromise]);
+      return result;
+    } catch (error) {
+      console.warn('Error waiting for DB:', error);
+      return null;
+    }
   }
 
   // Sync data back to localStorage for faster access
@@ -379,20 +416,142 @@ class PWAAuthStorage {
     return !!(token && user);
   }
 
-  // Get auth expiry time (if stored)
-  async getTokenExpiry() {
+  // Request persistent storage permission
+  async requestPersistentStorage() {
+    // Only request if running as PWA and API is available
+    if (!this.isPWA || !navigator.storage || !navigator.storage.persist) {
+      return false;
+    }
+
     try {
-      const expiryStr = localStorage.getItem('fridgy_token_expiry');
-      if (expiryStr) return parseInt(expiryStr, 10);
+      // Check if already persisted
+      const isPersisted = await navigator.storage.persisted();
+      if (isPersisted) {
+        console.log('✅ Storage is already persisted');
+        return true;
+      }
+
+      // Request persistence
+      const granted = await navigator.storage.persist();
+      if (granted) {
+        console.log('✅ Storage persistence granted');
+        // Show notification to user
+        this.showPersistenceNotification(true);
+        return true;
+      } else {
+        console.log('⚠️ Storage persistence denied');
+        // Still functional, just might lose data on iOS
+        this.showPersistenceNotification(false);
+        return false;
+      }
+    } catch (error) {
+      console.error('Error requesting persistent storage:', error);
+      return false;
+    }
+  }
+
+  // Show user-friendly notification about storage persistence
+  showPersistenceNotification(granted) {
+    // Only show for PWA users
+    if (!this.isPWA) return;
+
+    // Check if we've already shown this notification recently
+    const lastShown = localStorage.getItem('fridgy_persistence_notification');
+    const oneWeek = 7 * 24 * 60 * 60 * 1000;
+    if (lastShown && Date.now() - parseInt(lastShown, 10) < oneWeek) {
+      return;
+    }
+
+    // Save notification timestamp
+    try {
+      localStorage.setItem('fridgy_persistence_notification', Date.now().toString());
     } catch (e) {
       // Ignore
     }
 
+    // Create and show notification (only if not already shown)
+    if (granted) {
+      console.info('🔒 Your login will be remembered securely');
+    } else {
+      console.info('📱 For best experience on iOS, add this app to your home screen');
+    }
+  }
+
+  // Check storage persistence status
+  async checkPersistence() {
+    if (!navigator.storage || !navigator.storage.persisted) {
+      return null;
+    }
+
     try {
-      const expiryStr = await this.getFromIndexedDB('fridgy_token_expiry');
-      if (expiryStr) return parseInt(expiryStr, 10);
+      return await navigator.storage.persisted();
+    } catch (error) {
+      console.error('Error checking persistence:', error);
+      return null;
+    }
+  }
+
+  // Get storage quota information
+  async getStorageInfo() {
+    if (!navigator.storage || !navigator.storage.estimate) {
+      return null;
+    }
+
+    try {
+      const estimate = await navigator.storage.estimate();
+      return {
+        usage: estimate.usage || 0,
+        quota: estimate.quota || 0,
+        percentage: estimate.quota ? ((estimate.usage || 0) / estimate.quota * 100).toFixed(2) : 0
+      };
+    } catch (error) {
+      console.error('Error getting storage info:', error);
+      return null;
+    }
+  }
+
+  // Get auth expiry time (if stored)
+  async getTokenExpiry() {
+    // Try localStorage first
+    try {
+      const expiryStr = localStorage.getItem(this.TOKEN_EXPIRY_KEY);
+      if (expiryStr) {
+        const expiry = parseInt(expiryStr, 10);
+        // Validate it's a reasonable timestamp
+        if (expiry && expiry > 0) {
+          return expiry;
+        }
+      }
     } catch (e) {
-      // Ignore
+      console.warn('Failed to get expiry from localStorage:', e);
+    }
+
+    // Try IndexedDB second
+    try {
+      const expiryStr = await this.getFromIndexedDB(this.TOKEN_EXPIRY_KEY);
+      if (expiryStr) {
+        const expiry = parseInt(expiryStr, 10);
+        if (expiry && expiry > 0) {
+          // Sync back to localStorage for faster access
+          this.syncToLocalStorage(this.TOKEN_EXPIRY_KEY, expiryStr);
+          return expiry;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to get expiry from IndexedDB:', e);
+    }
+
+    // Try sessionStorage as fallback
+    try {
+      const expiryStr = sessionStorage.getItem(this.TOKEN_EXPIRY_KEY);
+      if (expiryStr) {
+        const expiry = parseInt(expiryStr, 10);
+        if (expiry && expiry > 0) {
+          return expiry;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to get expiry from sessionStorage:', e);
     }
 
     return null;
@@ -401,24 +560,62 @@ class PWAAuthStorage {
   // Set auth expiry time
   async setTokenExpiry(expiry) {
     const expiryStr = expiry.toString();
+    const promises = [];
 
+    // Save to localStorage
     try {
-      localStorage.setItem('fridgy_token_expiry', expiryStr);
+      localStorage.setItem(this.TOKEN_EXPIRY_KEY, expiryStr);
     } catch (e) {
-      // Ignore
+      console.warn('Failed to set expiry in localStorage:', e);
     }
 
+    // Save to IndexedDB
+    promises.push(
+      this.setInIndexedDB(this.TOKEN_EXPIRY_KEY, expiryStr).catch(e => {
+        console.warn('Failed to set expiry in IndexedDB:', e);
+      })
+    );
+
+    // Save to sessionStorage as fallback
     try {
-      await this.setInIndexedDB('fridgy_token_expiry', expiryStr);
+      sessionStorage.setItem(this.TOKEN_EXPIRY_KEY, expiryStr);
     } catch (e) {
-      // Ignore
+      console.warn('Failed to set expiry in sessionStorage:', e);
     }
+
+    await Promise.all(promises);
   }
 
   // Check if token is expired
   async isTokenExpired() {
     const expiry = await this.getTokenExpiry();
-    if (!expiry) return true;
+
+    // If no expiry is stored, check if token exists
+    if (!expiry) {
+      const token = await this.getToken();
+      // If token exists but no expiry, assume it's expired (safer)
+      // Unless it's a new token (within last hour)
+      if (token) {
+        console.warn('Token exists but no expiry timestamp found');
+        // Try to decode the JWT to get expiry
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          if (payload.exp) {
+            const expiryMs = payload.exp * 1000;
+            // Save the extracted expiry for future use
+            await this.setTokenExpiry(expiryMs);
+            return Date.now() > expiryMs;
+          }
+        } catch (e) {
+          console.warn('Failed to decode JWT for expiry:', e);
+        }
+        // Conservative: assume expired if we can't determine
+        return true;
+      }
+      // No token and no expiry means expired
+      return true;
+    }
+
     return Date.now() > expiry;
   }
 }
