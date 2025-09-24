@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-globals */
 
 // Cache name versioning
-const CACHE_NAME = 'trackabite-v2';
+const CACHE_NAME = 'trackabite-v3'; // Updated to force PWA update
 const urlsToCache = [
   '/',
   '/static/css/main.css',
@@ -61,31 +61,16 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Skip API requests from cache (except auth endpoints for better persistence)
+  // NEVER cache auth endpoints - always go to network
+  if (event.request.url.includes('/api/auth/')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // Skip other API requests from cache
   if (event.request.url.includes('/api/')) {
-    // Cache successful auth responses
-    if (event.request.url.includes('/api/auth/me')) {
-      event.respondWith(
-        fetch(event.request)
-          .then(response => {
-            // Cache successful auth verification
-            if (response.ok) {
-              const responseToCache = response.clone();
-              caches.open(CACHE_NAME).then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-            }
-            return response;
-          })
-          .catch(() => {
-            // If offline, return cached auth response
-            return caches.match(event.request);
-          })
-      );
-      return;
-    }
-    // For other API requests, just fetch
-    return fetch(event.request);
+    event.respondWith(fetch(event.request));
+    return;
   }
 
   event.respondWith(

@@ -186,100 +186,112 @@ export const AuthProvider = ({ children }) => {
       isInitializedRef.current = true;
 
       try {
-        // Try to get stored token first
+        // Check for auth hint (indicates user might be logged in)
+        const authHint = localStorage.getItem('fridgy_auth_hint');
+
+        // If auth hint exists OR we have stored tokens, verify with backend
+        if (authHint === 'true') {
+          try {
+            // ALWAYS verify with backend first (this will use cookies if available)
+            const response = await apiRequest('/auth/me');
+
+            if (response.success) {
+              // User is authenticated via cookies or tokens
+              const userWithToken = { ...response.user, token: response.token || '' };
+              setUser(userWithToken);
+              await setUserData(response.user);
+
+              // Update tokens if provided (for PWA localStorage)
+              if (response.token) {
+                await setTokens(response.token, response.refreshToken, response.expiresIn);
+              }
+
+              // Keep the auth hint
+              localStorage.setItem('fridgy_auth_hint', 'true');
+              scheduleTokenRefresh();
+              setLoading(false);
+              return;
+            }
+          } catch (verifyError) {
+            console.log('Backend verification failed, trying localStorage tokens...');
+          }
+        }
+
+        // Fallback: Check localStorage tokens (for PWA offline or network errors)
         const token = await getToken();
         const storedUser = await getUserData();
 
         if (token && storedUser) {
-          // Check if token is still valid
           const isExpired = await pwaAuthStorage.isTokenExpired();
 
           if (!isExpired) {
-            // Use stored data immediately for fast load
+            // Use stored data for offline support
             setUser({ ...storedUser, token });
 
-            // Verify with backend in background
+            // Try to verify/refresh in background
             try {
               const response = await apiRequest('/auth/me');
               if (response.success) {
-                const userWithToken = { ...response.user, token };
-                setUser(userWithToken);
                 await setUserData(response.user);
+                setUser({ ...response.user, token });
+                localStorage.setItem('fridgy_auth_hint', 'true');
                 scheduleTokenRefresh();
               } else {
-                await removeTokens();
-                setUser(null);
+                // Try refresh
+                await tryTokenRefresh();
               }
             } catch (error) {
-              // If verification fails but we have a refresh token, try to refresh
-              const refreshToken = await getRefreshToken();
-              if (refreshToken) {
-                try {
-                  const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh`, {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: safeJSONStringify({ refreshToken, isPWA: isPWA() })
-                  });
-
-                  if (refreshResponse.ok) {
-                    const refreshData = await refreshResponse.json();
-                    await setTokens(
-                      refreshData.token,
-                      refreshData.refreshToken,
-                      refreshData.expiresIn
-                    );
-                    await setUserData(refreshData.user);
-                    setUser({ ...refreshData.user, token: refreshData.token });
-                    scheduleTokenRefresh();
-                  } else {
-                    await removeTokens();
-                    setUser(null);
-                  }
-                } catch (refreshError) {
-                  console.error('Token refresh failed:', refreshError);
-                  await removeTokens();
-                  setUser(null);
-                }
-              } else {
-                await removeTokens();
-                setUser(null);
-              }
+              // Network error - keep using cached data
+              console.log('Network error, using cached auth');
             }
           } else {
             // Token expired, try refresh
-            const refreshToken = await getRefreshToken();
-            if (refreshToken) {
-              try {
-                const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
-                  method: 'POST',
-                  credentials: 'include',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: safeJSONStringify({ refreshToken, isPWA: isPWA() })
-                });
-
-                if (response.ok) {
-                  const data = await response.json();
-                  await setTokens(data.token, data.refreshToken, data.expiresIn);
-                  await setUserData(data.user);
-                  setUser({ ...data.user, token: data.token });
-                  scheduleTokenRefresh();
-                } else {
-                  await removeTokens();
-                  setUser(null);
-                }
-              } catch (error) {
-                console.error('Token refresh failed:', error);
-                await removeTokens();
-                setUser(null);
-              }
-            }
+            await tryTokenRefresh();
           }
+        } else {
+          // No auth found
+          localStorage.removeItem('fridgy_auth_hint');
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
+        localStorage.removeItem('fridgy_auth_hint');
       } finally {
         setLoading(false);
+      }
+    };
+
+    // Helper function to try token refresh
+    const tryTokenRefresh = async () => {
+      const refreshToken = await getRefreshToken();
+      if (refreshToken) {
+        try {
+          const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: safeJSONStringify({ refreshToken, isPWA: isPWA() })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            await setTokens(data.token, data.refreshToken, data.expiresIn);
+            await setUserData(data.user);
+            setUser({ ...data.user, token: data.token });
+            localStorage.setItem('fridgy_auth_hint', 'true');
+            scheduleTokenRefresh();
+          } else {
+            await removeTokens();
+            localStorage.removeItem('fridgy_auth_hint');
+            setUser(null);
+          }
+        } catch (error) {
+          console.error('Token refresh failed:', error);
+          await removeTokens();
+          localStorage.removeItem('fridgy_auth_hint');
+          setUser(null);
+        }
+      } else {
+        localStorage.removeItem('fridgy_auth_hint');
       }
     };
 
@@ -383,6 +395,8 @@ export const AuthProvider = ({ children }) => {
         // Include token in user object for API calls
         const userWithToken = { ...response.user, token: response.token };
         setUser(userWithToken);
+        // Set auth hint for persistence
+        localStorage.setItem('fridgy_auth_hint', 'true');
         scheduleTokenRefresh();
         return userWithToken;
       } else {
@@ -427,6 +441,8 @@ export const AuthProvider = ({ children }) => {
         // Include token in user object for API calls
         const userWithToken = { ...response.user, token: response.token };
         setUser(userWithToken);
+        // Set auth hint for persistence
+        localStorage.setItem('fridgy_auth_hint', 'true');
         scheduleTokenRefresh();
         return userWithToken;
       } else {
@@ -460,6 +476,7 @@ export const AuthProvider = ({ children }) => {
 
     // Always clear all storage and state regardless of backend response
     await removeTokens();
+    localStorage.removeItem('fridgy_auth_hint');
     setUser(null);
   };
 
