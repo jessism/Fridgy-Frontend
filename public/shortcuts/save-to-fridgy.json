@@ -24,13 +24,13 @@
       "ParameterKey": "BackendURL",
       "WFParameterType": "Text",
       "WFWorkflowImportQuestionText": "Enter your Fridgy backend URL:",
-      "DefaultValue": "https://fridgy-backend-production.up.railway.app"
+      "DefaultValue": "https://api.trackabite.app"
     },
     {
       "ParameterKey": "FrontendURL",
       "WFParameterType": "Text",
       "WFWorkflowImportQuestionText": "Enter your Fridgy app URL:",
-      "DefaultValue": "https://fridgy-frontend.vercel.app"
+      "DefaultValue": "https://www.trackabite.app"
     }
   ],
   "WFWorkflowActions": [
