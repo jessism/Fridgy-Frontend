@@ -240,31 +240,31 @@ export const AuthProvider = ({ children }) => {
         }
 
         // No valid cached auth, try server verification (cookies)
-        if (authHint === 'true') {
-          console.log('[AUTH] No valid cache, trying server verification...');
-          try {
-            const headers = isPWA() ? { 'X-PWA-Request': 'true' } : {};
-            const response = await apiRequest('/auth/me', { headers });
+        // ALWAYS try server verification - cookies might exist even if localStorage is cleared
+        console.log('[AUTH] No valid cache, trying server verification with cookies...');
+        try {
+          const headers = isPWA() ? { 'X-PWA-Request': 'true' } : {};
+          const response = await apiRequest('/auth/me', { headers });
 
-            if (response.success) {
-              console.log('[AUTH] Server verification successful');
-              // User is authenticated via cookies
-              await setUserData(response.user);
+          if (response.success) {
+            console.log('[AUTH] Server verification successful - authenticated via cookies');
+            // User is authenticated via cookies
+            await setUserData(response.user);
 
-              // Save tokens for next time
-              if (response.token) {
-                await setTokens(response.token, response.refreshToken, response.expiresIn);
-              }
-
-              setUser({ ...response.user, token: response.token || '' });
-              localStorage.setItem('fridgy_auth_hint', 'true');
-              scheduleTokenRefresh();
-              setLoading(false);
-              return;
+            // Save tokens for next time
+            if (response.token) {
+              await setTokens(response.token, response.refreshToken, response.expiresIn);
             }
-          } catch (error) {
-            console.log('[AUTH] Server verification failed:', error.message);
+
+            setUser({ ...response.user, token: response.token || '' });
+            localStorage.setItem('fridgy_auth_hint', 'true');
+            scheduleTokenRefresh();
+            setLoading(false);
+            return;
           }
+        } catch (error) {
+          console.log('[AUTH] Server verification failed (might be offline or no cookies):', error.message);
+          // Don't return here - continue to check if we have a refresh token
         }
 
         // No auth found anywhere
