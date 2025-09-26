@@ -1,9 +1,9 @@
 /* eslint-disable no-restricted-globals */
 
 // Cache name versioning
-const CACHE_NAME = 'trackabite-v3'; // Updated to force PWA update
+const CACHE_NAME = 'trackabite-v4'; // v4: Remove HTML caching for auth redirect
 const urlsToCache = [
-  '/',
+  // Removed '/' to prevent caching landing page - fixes auth redirect issue
   '/static/css/main.css',
   '/static/js/main.js',
   '/manifest.json',
@@ -73,6 +73,19 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Network-first for HTML documents (for auth redirect to work)
+  if (event.request.mode === 'navigate' || event.request.destination === 'document') {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => {
+          // Only use cache when offline
+          return caches.match(event.request);
+        })
+    );
+    return;
+  }
+
+  // Cache-first for static assets (CSS, JS, images)
   event.respondWith(
     caches.match(event.request)
       .then(response => {
@@ -83,22 +96,36 @@ self.addEventListener('fetch', event => {
             return fetchResponse;
           }
 
-          // Clone the response before caching
-          const responseToCache = fetchResponse.clone();
+          // Only cache static assets, not HTML
+          const isStaticAsset = event.request.url.includes('/static/') ||
+                                event.request.url.includes('.css') ||
+                                event.request.url.includes('.js') ||
+                                event.request.url.includes('.png') ||
+                                event.request.url.includes('.jpg') ||
+                                event.request.url.includes('.ico');
 
-          caches.open(CACHE_NAME)
-            .then(cache => {
-              cache.put(event.request, responseToCache);
-            });
+          if (isStaticAsset) {
+            // Clone the response before caching
+            const responseToCache = fetchResponse.clone();
+
+            caches.open(CACHE_NAME)
+              .then(cache => {
+                cache.put(event.request, responseToCache);
+              });
+          }
 
           return fetchResponse;
         });
       })
       .catch(() => {
-        // Offline fallback for HTML pages
-        if (event.request.destination === 'document') {
-          return caches.match('/');
-        }
+        // Return a simple offline message for failed requests
+        return new Response('Offline - Please check your connection', {
+          status: 503,
+          statusText: 'Service Unavailable',
+          headers: new Headers({
+            'Content-Type': 'text/plain'
+          })
+        });
       })
   );
 });
