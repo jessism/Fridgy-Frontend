@@ -187,11 +187,20 @@ export const AuthProvider = ({ children }) => {
 
       try {
         console.log('[AUTH] Starting auth initialization...');
+        console.log('[AUTH] API_BASE_URL:', API_BASE_URL);
+        console.log('[AUTH] Is PWA:', isPWA());
+        console.log('[AUTH] Window location:', window.location.href);
 
         // CRITICAL FIX: Check localStorage FIRST (before any network calls!)
         const token = await getToken();
         const storedUser = await getUserData();
         const authHint = localStorage.getItem('fridgy_auth_hint');
+
+        console.log('[AUTH] Local storage check:', {
+          hasToken: !!token,
+          hasUser: !!storedUser,
+          hasAuthHint: !!authHint
+        });
 
         // If we have valid local auth, use it immediately
         if (token && storedUser) {
@@ -242,8 +251,21 @@ export const AuthProvider = ({ children }) => {
         // No valid cached auth, try server verification (cookies)
         // ALWAYS try server verification - cookies might exist even if localStorage is cleared
         console.log('[AUTH] No valid cache, trying server verification with cookies...');
+        console.log('[AUTH] Making request to:', `${API_BASE_URL}/auth/me`);
         try {
           const headers = isPWA() ? { 'X-PWA-Request': 'true' } : {};
+
+          // First, let's check what the debug endpoint says
+          try {
+            const debugResponse = await fetch(`${API_BASE_URL}/auth/debug`, {
+              credentials: 'include'
+            });
+            const debugData = await debugResponse.json();
+            console.log('[AUTH DEBUG]', debugData);
+          } catch (debugError) {
+            console.log('[AUTH DEBUG] Failed to fetch debug info:', debugError);
+          }
+
           const response = await apiRequest('/auth/me', { headers });
 
           if (response.success) {
