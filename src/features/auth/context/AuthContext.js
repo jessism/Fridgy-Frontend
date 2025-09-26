@@ -186,75 +186,95 @@ export const AuthProvider = ({ children }) => {
       isInitializedRef.current = true;
 
       try {
-        // Check for auth hint (indicates user might be logged in)
+        console.log('[AUTH] Starting auth initialization...');
+
+        // CRITICAL FIX: Check localStorage FIRST (before any network calls!)
+        const token = await getToken();
+        const storedUser = await getUserData();
         const authHint = localStorage.getItem('fridgy_auth_hint');
 
-        // If auth hint exists OR we have stored tokens, verify with backend
+        // If we have valid local auth, use it immediately
+        if (token && storedUser) {
+          const isExpired = await pwaAuthStorage.isTokenExpired();
+
+          if (!isExpired) {
+            console.log('[AUTH] Found valid cached auth, using immediately');
+            // USE CACHED AUTH IMMEDIATELY - Don't wait for network
+            setUser({ ...storedUser, token });
+            setLoading(false);
+
+            // Verify/refresh in background (non-blocking)
+            // Add PWA header for backend to know this is a PWA request
+            const headers = isPWA() ? { 'X-PWA-Request': 'true' } : {};
+
+            apiRequest('/auth/me', { headers })
+              .then(async (response) => {
+                if (response.success) {
+                  console.log('[AUTH] Background verification successful, updating tokens');
+                  // Update with fresh data and tokens
+                  await setUserData(response.user);
+
+                  if (response.token) {
+                    await setTokens(response.token, response.refreshToken, response.expiresIn);
+                  }
+
+                  setUser({ ...response.user, token: response.token || token });
+                  localStorage.setItem('fridgy_auth_hint', 'true');
+                  scheduleTokenRefresh();
+                }
+              })
+              .catch((error) => {
+                // Network error - keep using cached auth (DON'T LOGOUT!)
+                console.log('[AUTH] Background verification failed (network error), keeping cached auth');
+              });
+
+            return; // User is logged in with cached data
+          } else {
+            console.log('[AUTH] Cached token expired, trying refresh...');
+            // Token expired, try refresh
+            const refreshSuccess = await tryTokenRefresh();
+            if (refreshSuccess) {
+              return; // Successfully refreshed
+            }
+          }
+        }
+
+        // No valid cached auth, try server verification (cookies)
         if (authHint === 'true') {
+          console.log('[AUTH] No valid cache, trying server verification...');
           try {
-            // ALWAYS verify with backend first (this will use cookies if available)
-            const response = await apiRequest('/auth/me');
+            const headers = isPWA() ? { 'X-PWA-Request': 'true' } : {};
+            const response = await apiRequest('/auth/me', { headers });
 
             if (response.success) {
-              // User is authenticated via cookies or tokens
-              const userWithToken = { ...response.user, token: response.token || '' };
-              setUser(userWithToken);
+              console.log('[AUTH] Server verification successful');
+              // User is authenticated via cookies
               await setUserData(response.user);
 
-              // Update tokens if provided (for PWA localStorage)
+              // Save tokens for next time
               if (response.token) {
                 await setTokens(response.token, response.refreshToken, response.expiresIn);
               }
 
-              // Keep the auth hint
+              setUser({ ...response.user, token: response.token || '' });
               localStorage.setItem('fridgy_auth_hint', 'true');
               scheduleTokenRefresh();
               setLoading(false);
               return;
             }
-          } catch (verifyError) {
-            console.log('Backend verification failed, trying localStorage tokens...');
+          } catch (error) {
+            console.log('[AUTH] Server verification failed:', error.message);
           }
         }
 
-        // Fallback: Check localStorage tokens (for PWA offline or network errors)
-        const token = await getToken();
-        const storedUser = await getUserData();
-
-        if (token && storedUser) {
-          const isExpired = await pwaAuthStorage.isTokenExpired();
-
-          if (!isExpired) {
-            // Use stored data for offline support
-            setUser({ ...storedUser, token });
-
-            // Try to verify/refresh in background
-            try {
-              const response = await apiRequest('/auth/me');
-              if (response.success) {
-                await setUserData(response.user);
-                setUser({ ...response.user, token });
-                localStorage.setItem('fridgy_auth_hint', 'true');
-                scheduleTokenRefresh();
-              } else {
-                // Try refresh
-                await tryTokenRefresh();
-              }
-            } catch (error) {
-              // Network error - keep using cached data
-              console.log('Network error, using cached auth');
-            }
-          } else {
-            // Token expired, try refresh
-            await tryTokenRefresh();
-          }
-        } else {
-          // No auth found
-          localStorage.removeItem('fridgy_auth_hint');
-        }
-      } catch (error) {
-        console.error('Auth initialization error:', error);
+        // No auth found anywhere
+        console.log('[AUTH] No authentication found');
         localStorage.removeItem('fridgy_auth_hint');
+        setUser(null);
+      } catch (error) {
+        console.error('[AUTH] Critical initialization error:', error);
+        localStorage.removeItem('fridgy_auth_hint');
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -265,6 +285,7 @@ export const AuthProvider = ({ children }) => {
       const refreshToken = await getRefreshToken();
       if (refreshToken) {
         try {
+          console.log('[AUTH] Attempting token refresh...');
           const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
             method: 'POST',
             credentials: 'include',
@@ -274,24 +295,30 @@ export const AuthProvider = ({ children }) => {
 
           if (response.ok) {
             const data = await response.json();
+            console.log('[AUTH] Token refresh successful');
             await setTokens(data.token, data.refreshToken, data.expiresIn);
             await setUserData(data.user);
             setUser({ ...data.user, token: data.token });
             localStorage.setItem('fridgy_auth_hint', 'true');
             scheduleTokenRefresh();
+            return true; // Refresh succeeded
           } else {
+            console.log('[AUTH] Token refresh failed - invalid refresh token');
             await removeTokens();
             localStorage.removeItem('fridgy_auth_hint');
             setUser(null);
+            return false; // Refresh failed
           }
         } catch (error) {
-          console.error('Token refresh failed:', error);
-          await removeTokens();
-          localStorage.removeItem('fridgy_auth_hint');
-          setUser(null);
+          console.error('[AUTH] Token refresh network error:', error);
+          // Don't remove tokens on network error - might be offline
+          // Keep the expired token and let user continue offline
+          return false;
         }
       } else {
+        console.log('[AUTH] No refresh token available');
         localStorage.removeItem('fridgy_auth_hint');
+        return false;
       }
     };
 

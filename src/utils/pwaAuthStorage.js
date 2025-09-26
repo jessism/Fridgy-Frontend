@@ -21,7 +21,14 @@ class PWAAuthStorage {
     this.dbReady = this.initDB();
 
     // Request persistent storage permission (non-blocking)
-    this.requestPersistentStorage();
+    // More aggressive for PWAs
+    if (this.isPWA) {
+      // Try immediately and also after a delay
+      this.requestPersistentStorage();
+      setTimeout(() => this.requestPersistentStorage(), 5000);
+    } else {
+      this.requestPersistentStorage();
+    }
   }
 
   detectPWA() {
@@ -588,35 +595,63 @@ class PWAAuthStorage {
 
   // Check if token is expired
   async isTokenExpired() {
-    const expiry = await this.getTokenExpiry();
+    const token = await this.getToken();
 
-    // If no expiry is stored, check if token exists
-    if (!expiry) {
-      const token = await this.getToken();
-      // If token exists but no expiry, assume it's expired (safer)
-      // Unless it's a new token (within last hour)
-      if (token) {
-        console.warn('Token exists but no expiry timestamp found');
-        // Try to decode the JWT to get expiry
-        try {
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          if (payload.exp) {
-            const expiryMs = payload.exp * 1000;
-            // Save the extracted expiry for future use
-            await this.setTokenExpiry(expiryMs);
-            return Date.now() > expiryMs;
-          }
-        } catch (e) {
-          console.warn('Failed to decode JWT for expiry:', e);
-        }
-        // Conservative: assume expired if we can't determine
-        return true;
-      }
-      // No token and no expiry means expired
+    // No token means expired
+    if (!token) {
       return true;
     }
 
-    return Date.now() > expiry;
+    // First, check if we have a stored expiry
+    const storedExpiry = await this.getTokenExpiry();
+
+    if (storedExpiry) {
+      // Use stored expiry if available
+      return Date.now() > storedExpiry;
+    }
+
+    // No stored expiry, try to decode the JWT
+    try {
+      // JWT structure: header.payload.signature
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        console.warn('Invalid JWT format');
+        // Invalid token format - consider it valid to avoid logout
+        // This is better for PWA persistence
+        return false;
+      }
+
+      const payload = JSON.parse(atob(parts[1]));
+
+      if (payload.exp) {
+        const expiryMs = payload.exp * 1000;
+        // Save the extracted expiry for future use
+        await this.setTokenExpiry(expiryMs);
+
+        // Add 5 minute grace period for clock skew
+        const now = Date.now();
+        const isExpired = now > (expiryMs + 5 * 60 * 1000);
+
+        if (isExpired) {
+          console.log('[PWA Storage] Token is expired');
+        } else {
+          const minutesLeft = Math.floor((expiryMs - now) / 60000);
+          console.log(`[PWA Storage] Token valid for ${minutesLeft} more minutes`);
+        }
+
+        return isExpired;
+      } else {
+        // No expiry in token - assume it's valid
+        // This is better for PWA persistence than assuming expired
+        console.log('[PWA Storage] Token has no expiry, assuming valid');
+        return false;
+      }
+    } catch (e) {
+      console.warn('[PWA Storage] Failed to decode JWT:', e);
+      // On error, assume token is still valid to avoid logout
+      // Better to let backend reject if truly invalid
+      return false;
+    }
   }
 }
 

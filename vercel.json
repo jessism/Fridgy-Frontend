@@ -1,8 +1,1 @@
-{
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://fridgy-backend-production.up.railway.app/api/:path*"
-    }
-  ]
-}
+{}
