@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../features/auth/context/AuthContext';
 import appLogo from '../assets/images/Logo.png';
 import fridgeHeroImage from '../assets/images/fridge.jpg';
 import foodImage1 from '../assets/images/Landingpage_food_1.jpg';
@@ -15,6 +16,16 @@ const NewLandingPage = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const totalTestimonials = 4;
+  const navigate = useNavigate();
+  const { isAuthenticated, loading } = useAuth();
+
+  // Check authentication and redirect if logged in
+  useEffect(() => {
+    if (!loading && isAuthenticated()) {
+      console.log('[Landing] User authenticated, redirecting to home...');
+      navigate('/home');
+    }
+  }, [loading, isAuthenticated, navigate]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,6 +48,15 @@ const NewLandingPage = () => {
   const goToTestimonial = (index) => {
     setCurrentTestimonial(index);
   };
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="landing-page-v2" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <div>Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="landing-page-v2">

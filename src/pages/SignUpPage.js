@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/context/AuthContext';
 import './SignUpPage.css';
 
 const SignUpPage = () => {
-  const { signUp } = useAuth();
+  const { signUp, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
@@ -16,6 +16,14 @@ const SignUpPage = () => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [redirectMessage, setRedirectMessage] = useState('');
+
+  // Check authentication and redirect if already logged in
+  useEffect(() => {
+    if (!loading && isAuthenticated()) {
+      console.log('[SignUp] User already authenticated, redirecting to home...');
+      navigate('/home');
+    }
+  }, [loading, isAuthenticated, navigate]);
 
   // Check for redirect message on component mount
   React.useEffect(() => {
@@ -70,6 +78,15 @@ const SignUpPage = () => {
       setIsLoading(false);
     }
   };
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="signup-page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <div>Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="signup-page">
