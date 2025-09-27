@@ -645,7 +645,7 @@ const InventoryPage = ({ defaultTab }) => {
                     background: activeFilter === filter.key ? 'var(--primary-green)' : 'white',
                     color: activeFilter === filter.key ? 'white' : '#666',
                     cursor: 'pointer',
-                    fontSize: '14px',
+                    fontSize: '14pt',
                     fontWeight: '500',
                     transition: 'all 0.3s ease',
                     outline: 'none',

@@ -388,13 +388,16 @@ const ShoppingListDetailPage = () => {
   };
 
   // Item editing handlers
-  const handleStartEditItem = (item) => {
+  const handleStartEditItem = (item, focusField = 'name') => {
     setEditingItemId(item.id);
     setTempItemName(item.name);
     setTempItemQuantity(item.quantity || '');
     // Use setTimeout to ensure the input is rendered before focusing
     setTimeout(() => {
-      if (editItemNameInputRef.current) {
+      if (focusField === 'quantity' && editItemQuantityInputRef.current) {
+        editItemQuantityInputRef.current.focus();
+        editItemQuantityInputRef.current.select();
+      } else if (editItemNameInputRef.current) {
         editItemNameInputRef.current.focus();
         editItemNameInputRef.current.select();
       }
@@ -642,7 +645,7 @@ const ShoppingListDetailPage = () => {
             ) : (
               <h1
                 className="shopping-list-section__list-title"
-                onDoubleClick={handleDoubleClickTitle}
+                onClick={handleDoubleClickTitle}
               >
                 {selectedList.name}
               </h1>
@@ -742,13 +745,13 @@ const ShoppingListDetailPage = () => {
                         <>
                           <div
                             className="shopping-list-section__item-name-line shopping-list-section__item-name-line--editable"
-                            onClick={() => !item.is_checked && handleStartEditItem(item)}
+                            onClick={() => !item.is_checked && handleStartEditItem(item, 'name')}
                           >
                             {item.name}
                           </div>
                           <div
                             className="shopping-list-section__item-amount-line shopping-list-section__item-amount-line--editable"
-                            onClick={() => !item.is_checked && handleStartEditItem(item)}
+                            onClick={() => !item.is_checked && handleStartEditItem(item, 'quantity')}
                           >
                             {item.quantity ? `${item.quantity} ${item.unit || ''}` : 'Add quantity'}
                           </div>

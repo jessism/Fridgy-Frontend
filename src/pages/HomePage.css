@@ -436,13 +436,13 @@
   }
   
   .greeting-hello {
-    font-size: 24px;
+    font-size: 26pt;
     text-align: left;
     margin-bottom: 0.25rem;
   }
 
   .greeting-subtitle {
-    font-size: 0.8rem;
+    font-size: 14pt;
     text-align: left;
   }
 }
@@ -751,7 +751,7 @@
   }
 
   .category-card h3 {
-    font-size: 0.8rem;
+    font-size: 14pt;
     margin-top: 0.5rem;
   }
 
@@ -769,7 +769,7 @@
 
   /* Systematic mobile section headline sizing */
   .section-title {
-    font-size: 18px !important;
+    font-size: 17pt !important;
   }
 
   .section-subtitle {
@@ -967,7 +967,7 @@
 .item-name {
   font-family: var(--header-font);
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--header-color);
   margin: 0 0 0.25rem 0;
 }
@@ -986,7 +986,7 @@
 .days-left {
   font-family: var(--description-font);
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 400;
   color: #ff9500;
   padding: 0.5rem 1rem;
   background: rgba(255, 149, 0, 0.1);
@@ -1002,7 +1002,7 @@
 .days-left.expired {
   color: #ff4757;
   background: rgba(255, 71, 87, 0.15);
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .expired-subtitle p {
@@ -1135,7 +1135,7 @@
 .quick-access-label {
   font-family: var(--header-font);
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;  /* Increased from 500 to 600 for bolder text */
   text-align: left;
   line-height: 1.2;
   align-self: flex-start;
@@ -1225,7 +1225,7 @@
 .analytics-label {
   font-family: var(--header-font);
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;  /* Increased from 500 to 600 for bolder text */
   text-align: left;
   line-height: 1.2;
   align-self: flex-start;
@@ -1240,7 +1240,7 @@
   }
 
   .quick-access .section-title {
-    font-size: 18px !important;
+    font-size: 17pt !important;
   }
 
   .quick-access-grid {
@@ -1265,7 +1265,7 @@
   }
 
   .quick-access-label {
-    font-size: 0.8rem;
+    font-size: 14pt;
   }
 
   /* Mobile Responsive for Analytics Grid */
@@ -1290,7 +1290,7 @@
   }
 
   .analytics-label {
-    font-size: 0.8rem;
+    font-size: 14pt;
   }
 }
 
@@ -1570,19 +1570,29 @@
 
   .expiring-soon .section-title {
     font-family: var(--header-font);
+    font-size: 17pt !important;
   }
 
   .item-name {
-    font-size: 0.9rem;
+    font-size: 14pt !important;
+    font-weight: 400;
   }
 
   .item-category {
-    font-size: 0.75rem;
+    font-size: 14pt;
   }
 
   .days-left {
-    font-size: 0.8rem;
+    font-size: 14pt;
     padding: 0.3rem 0.6rem;
+  }
+
+  .expiring-subtitle p {
+    font-size: 14pt;
+  }
+
+  .reminder-text {
+    font-size: 14pt;
   }
 
   .shopping-items {
@@ -1910,6 +1920,7 @@ h2.section-title::after {
 
   .section-header-with-arrow .section-title {
     font-family: var(--header-font);
+    font-size: 17pt !important;
   }
 
   .meals-slider {

@@ -191,7 +191,7 @@
 }
 
 .shopping-list-section__list-name {
-  font-size: 18px;
+  font-size: 14pt;
   font-weight: 600;
   color: #2c3e50;
   margin: 0 0 6px 0;
@@ -202,7 +202,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: 14pt;
   color: #6b7280;
   font-weight: 500;
   white-space: nowrap;
@@ -248,7 +248,7 @@
 
 .shopping-list-section__list-updated {
   margin-top: 10px;
-  font-size: 11px;
+  font-size: 12pt;
   color: #9ca3af;
   font-weight: 400;
   letter-spacing: 0.2px;
@@ -424,13 +424,13 @@
 }
 
 .shopping-list-section__item-name {
-  font-size: 16px;
+  font-size: 14pt;
   color: #333;
   font-weight: 500;
 }
 
 .shopping-list-section__item-quantity {
-  font-size: 14px;
+  font-size: 14pt;
   color: #666;
 }
 
@@ -706,7 +706,7 @@
   }
 
   .shopping-list-section__item-name {
-    font-size: 14px;
+    font-size: 14pt;
   }
 
   .shopping-list-section__edit-title {
@@ -762,18 +762,19 @@
   font-weight: 700;
   color: #000;
   margin: 0;
-  padding: 8px 12px;
+  padding: 0 12px;
   letter-spacing: -1px;
-  border: 2px solid #4fcf61;
-  border-radius: 8px;
-  background: white;
+  border: none;
+  border-radius: 0;
+  background: transparent;
   outline: none;
   transition: all 0.2s;
 }
 
 .shopping-list-section__list-title-input:focus {
-  border-color: #3cb54c;
-  box-shadow: 0 0 0 3px rgba(79, 207, 97, 0.1);
+  border: none;
+  box-shadow: none;
+  background: transparent;
 }
 
 .shopping-list-section__header-actions {
@@ -1001,7 +1002,7 @@
 /* Minimal Item Display */
 .shopping-list-section__item-minimal {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-start;  /* Back to flex-start to align with top of content */
   padding: 8px 0;
   gap: 16px;
   transition: opacity 0.2s ease, transform 0.4s ease, box-shadow 0.2s ease;
@@ -1049,6 +1050,7 @@
   justify-content: center;
   background: transparent;
   position: relative;
+  /* Remove margin-top and let natural alignment work */
 }
 
 .shopping-list-section__item-circle:hover {
@@ -1071,7 +1073,8 @@
 
 .shopping-list-section__item-circle--loading {
   border-color: #4fcf61;
-  animation: spin 1s linear infinite;
+  /* Removed spinning animation - just show loading state without circling */
+  /* animation: spin 1s linear infinite; */
 }
 
 @keyframes spin {
@@ -1087,9 +1090,10 @@
 }
 
 .shopping-list-section__item-name-line {
-  font-size: 18px;
+  font-size: 14pt;
   color: #000;
   font-weight: 400;
+  line-height: 24px;  /* Match circle height for alignment */
 }
 
 .shopping-list-section__item-name-line--editable {
@@ -1104,7 +1108,7 @@
 }
 
 .shopping-list-section__item-amount-line {
-  font-size: 16px;
+  font-size: 14pt;
   color: #4fcf61;
   font-weight: 400;
 }
@@ -1182,7 +1186,7 @@
   width: 100%;
   border: none;
   padding: 0;
-  font-size: 18px;
+  font-size: 14pt;
   color: #000;
   font-weight: 400;
   background: transparent;
@@ -1226,12 +1230,12 @@
 /* Mobile-specific adjustments for clean design */
 @media (max-width: 768px) {
   .shopping-list-section__list-title {
-    font-size: 26px;
+    font-size: 26pt;
   }
 
   .shopping-list-section__list-title-input {
-    font-size: 26px;
-    padding: 6px 10px;
+    font-size: 26pt;
+    padding: 0 12px;
   }
 
   .shopping-list-section__single-input {

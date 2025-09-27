@@ -322,7 +322,7 @@
   
   .inventory-page__card-item-name {
     font-family: var(--header-font);
-    font-size: 1.1rem;
+    font-size: 14pt;
     font-weight: 600;
     color: var(--header-color);
     margin: 0;
@@ -336,7 +336,7 @@
   
   /* Shelf life text styling */
   .inventory-page__card-shelf-life {
-    font-size: 0.9rem;
+    font-size: 14pt;
     color: #888;
     margin: 0.125rem 0 0.125rem 0;
     font-weight: 500;
@@ -364,7 +364,7 @@
   }
   
   .inventory-page__card-text-info {
-    font-size: 0.85rem;
+    font-size: 14pt;
     color: #666;
     font-weight: 500;
   }
@@ -514,7 +514,7 @@
 
   /* Very small screen adjustments for search */
   .inventory-page__search-input {
-    font-size: 0.9rem;
+    font-size: 14pt;
     padding: 0 14px 0 44px;
   }
 
@@ -1551,7 +1551,7 @@
   }
   
   .inventory-page__tab {
-    font-size: 1rem;
+    font-size: 14pt;
     flex: 1;
   }
   

@@ -455,8 +455,18 @@ const MealPlansPage = ({ defaultTab }) => {
             src={imageUrl}
             alt={recipe.title}
             onError={(e) => {
+              // Check if this is an Instagram CDN URL that expired
+              const isExpiredInstagram = e.target.src.includes('cdninstagram.com') ||
+                                        e.target.src.includes('fbcdn.net') ||
+                                        e.target.src.includes('proxy-image');
+
               if (e.target.src !== 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c') {
                 e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+
+                // Log the error for debugging
+                if (isExpiredInstagram) {
+                  console.log('[RecipeCard] Instagram image expired for recipe:', recipe.title);
+                }
               }
             }}
           />
