@@ -19,9 +19,8 @@ const RecipeCreationModal = ({ isOpen, onClose }) => {
   };
 
   const handleManualEntry = () => {
-    // TODO: Implement manual entry
     onClose();
-    alert('Manual entry coming soon!');
+    navigate('/recipes/manual');
   };
 
   const modalContent = (

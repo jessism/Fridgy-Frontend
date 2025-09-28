@@ -64,7 +64,7 @@ const NotificationSettings = () => {
 
   const checkSubscriptionStatus = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('fridgy_token');
       const response = await fetch(`${API_BASE_URL}/push/check-subscription`, {
         method: 'POST',
         headers: {
@@ -84,7 +84,7 @@ const NotificationSettings = () => {
 
   const loadPreferences = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('fridgy_token');
       const response = await fetch(`${API_BASE_URL}/push/preferences`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -102,7 +102,7 @@ const NotificationSettings = () => {
 
   const loadDailyReminders = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('fridgy_token');
       const response = await fetch(`${API_BASE_URL}/push/daily-reminders`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -143,7 +143,7 @@ const NotificationSettings = () => {
       }
 
       // Save subscription to backend - validate token first
-      const token = ensureValidToken();
+      const token = ensureValidToken();  // Will be fixed in tokenValidator.js
 
       if (!token) {
         // Run debug info for troubleshooting
@@ -196,7 +196,7 @@ const NotificationSettings = () => {
         await subscription.unsubscribe();
 
         // Remove from backend
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('fridgy_token');
         await fetch(`${API_BASE_URL}/push/unsubscribe`, {
           method: 'POST',
           headers: {
@@ -221,7 +221,7 @@ const NotificationSettings = () => {
     setMessage('');
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('fridgy_token');
       const response = await fetch(`${API_BASE_URL}/push/test`, {
         method: 'POST',
         headers: {
@@ -243,7 +243,7 @@ const NotificationSettings = () => {
 
   const updatePreferences = async (newPreferences) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('fridgy_token');
       const response = await fetch(`${API_BASE_URL}/push/preferences`, {
         method: 'PUT',
         headers: {
@@ -292,7 +292,7 @@ const NotificationSettings = () => {
 
   const updateDailyReminders = async (newReminders) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('fridgy_token');
       const response = await fetch(`${API_BASE_URL}/push/daily-reminders`, {
         method: 'PUT',
         headers: {
@@ -349,7 +349,7 @@ const NotificationSettings = () => {
 
   const handleTestDailyReminder = async (reminderType) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('fridgy_token');
       const response = await fetch(`${API_BASE_URL}/push/test-daily-reminder`, {
         method: 'POST',
         headers: {
@@ -541,11 +541,19 @@ const NotificationSettings = () => {
           className="notification-settings__debug-btn"
           onClick={() => {
             debugTokenStatus();
+            const fridgyToken = localStorage.getItem('fridgy_token');
+            const tokenPreview = fridgyToken ?
+              `${fridgyToken.substring(0, 10)}...${fridgyToken.substring(fridgyToken.length - 10)}` :
+              'NOT FOUND';
+
             const debugInfo = `Token Status Debug:\n\n` +
               `LocalStorage Available: ${typeof localStorage !== 'undefined' ? 'Yes' : 'No'}\n` +
-              `Token Exists: ${localStorage.getItem('token') ? 'Yes' : 'No'}\n` +
-              `User Data: ${localStorage.getItem('user') ? 'Yes' : 'No'}\n\n` +
-              `Check browser console for detailed information.`;
+              `Auth Token (fridgy_token): ${fridgyToken ? 'Yes ✅' : 'No ❌'}\n` +
+              `Token Preview: ${tokenPreview}\n` +
+              `User Data (fridgy_user): ${localStorage.getItem('fridgy_user') ? 'Yes ✅' : 'No ❌'}\n` +
+              `Refresh Token: ${localStorage.getItem('fridgy_refresh_token') ? 'Yes ✅' : 'No ❌'}\n\n` +
+              `If tokens are missing, please log out and log back in.\n` +
+              `Check browser console for more details.`;
             alert(debugInfo);
           }}
           style={{

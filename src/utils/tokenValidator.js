@@ -58,7 +58,7 @@ export const isTokenExpired = (token) => {
  * @returns {object} Token validation result
  */
 export const validateStoredToken = () => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('fridgy_token');
 
   // Check if token exists
   if (!token) {
@@ -114,8 +114,9 @@ export const validateStoredToken = () => {
  */
 export const clearInvalidToken = () => {
   console.log('Clearing invalid token...');
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
+  localStorage.removeItem('fridgy_token');
+  localStorage.removeItem('fridgy_user');
+  localStorage.removeItem('fridgy_refresh_token');
 
   // Store the current path for redirect after login
   if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
@@ -201,7 +202,7 @@ export const debugTokenStatus = () => {
   console.log('localStorage keys:', keys);
 
   // Check token
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('fridgy_token');
   console.log('Token exists:', !!token);
 
   if (token) {
@@ -213,7 +214,7 @@ export const debugTokenStatus = () => {
   }
 
   // Check user data
-  const user = localStorage.getItem('user');
+  const user = localStorage.getItem('fridgy_user');
   if (user) {
     try {
       const userData = JSON.parse(user);

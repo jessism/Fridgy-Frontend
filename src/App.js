@@ -19,6 +19,8 @@ import MealHistoryPage from './pages/MealHistoryPage';
 import SavedRecipesPage from './pages/SavedRecipesPage';
 import RecipeImportPage from './pages/RecipeImportPage';
 import MultiModalImportPage from './pages/MultiModalImportPage';
+import ManualRecipeEntryPage from './pages/ManualRecipeEntryPage';
+import RecipePhotoCamera from './components/RecipePhotoCamera';
 import InventoryUsagePage from './pages/InventoryUsagePage';
 import BatchCamera from './features/batchcamera/components/BatchCamera';
 import RecipeScannerCamera from './features/recipe-scanner/components/RecipeScannerCamera';
@@ -116,6 +118,16 @@ function App() {
           <Route path="/import/multi-modal" element={
             <AuthGuard>
               <MultiModalImportPage />
+            </AuthGuard>
+          } />
+          <Route path="/recipes/manual" element={
+            <AuthGuard>
+              <ManualRecipeEntryPage />
+            </AuthGuard>
+          } />
+          <Route path="/recipes/camera" element={
+            <AuthGuard>
+              <RecipePhotoCamera />
             </AuthGuard>
           } />
           <Route path="/shortcuts/setup" element={

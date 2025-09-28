@@ -529,7 +529,6 @@
 
 .category-card:hover .category-image {
   background: var(--primary-green);
-  box-shadow: 0 6px 20px rgba(129, 224, 83, 0.3);
   transform: scale(1.05);
 }
 
@@ -567,7 +566,6 @@
   justify-content: center;
   align-items: center;
   margin: 0 auto 0.4rem;
-  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.2);
   transition: all 0.3s ease;
 }
 
