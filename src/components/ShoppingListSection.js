@@ -526,13 +526,26 @@ const ShoppingListSection = () => {
               type="text"
               placeholder="List name..."
               value={newListName}
-              onChange={(e) => setNewListName(e.target.value)}
+              onChange={(e) => {
+                if (e.target.value.length <= 30) {
+                  setNewListName(e.target.value);
+                }
+              }}
               onKeyPress={(e) => e.key === 'Enter' && handleCreateList()}
+              maxLength={30}
               autoFocus
             />
+            <div style={{
+              fontSize: '0.85rem',
+              color: newListName.length > 25 ? '#ff6b6b' : '#666',
+              marginTop: '0.5rem',
+              marginBottom: '1rem'
+            }}>
+              {newListName.length}/30 characters
+            </div>
             <div className="shopping-list-section__modal-buttons">
               <button onClick={() => setShowCreateModal(false)}>Cancel</button>
-              <button onClick={handleCreateList} disabled={!newListName.trim()}>Create</button>
+              <button onClick={handleCreateList} disabled={!newListName.trim() || newListName.length > 30}>Create</button>
             </div>
           </div>
         </div>

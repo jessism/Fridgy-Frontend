@@ -18,7 +18,6 @@ const InventoryPage = ({ defaultTab }) => {
   const location = useLocation();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
-  const [openDropdownId, setOpenDropdownId] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [itemToEdit, setItemToEdit] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all');
@@ -27,8 +26,10 @@ const InventoryPage = ({ defaultTab }) => {
   const [clickedIcon, setClickedIcon] = useState(null); // Track which icon was clicked
 
   // Touch/swipe state for mobile navigation
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
+  const [touchStartX, setTouchStartX] = useState(null);
+  const [touchStartY, setTouchStartY] = useState(null);
+  const [touchEndX, setTouchEndX] = useState(null);
+  const [touchEndY, setTouchEndY] = useState(null);
   const [isSwiping, setIsSwiping] = useState(false);
 
   // Shopping list selection modal state
@@ -66,28 +67,38 @@ const InventoryPage = ({ defaultTab }) => {
 
   // Swipe gesture handlers for mobile tab navigation
   const handleTouchStart = (e) => {
-    setTouchEnd(null); // Reset touchEnd
-    setTouchStart(e.targetTouches[0].clientX);
+    setTouchEndX(null); // Reset touchEnd
+    setTouchEndY(null);
+    setTouchStartX(e.targetTouches[0].clientX);
+    setTouchStartY(e.targetTouches[0].clientY);
     setIsSwiping(true);
   };
 
   const handleTouchMove = (e) => {
     if (!isSwiping) return;
-    setTouchEnd(e.targetTouches[0].clientX);
+    setTouchEndX(e.targetTouches[0].clientX);
+    setTouchEndY(e.targetTouches[0].clientY);
   };
 
   const handleTouchEnd = (e) => {
-    if (!touchStart || !touchEnd || !isSwiping) {
+    if (!touchStartX || !touchEndX || !touchStartY || !touchEndY || !isSwiping) {
       setIsSwiping(false);
       return;
     }
 
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
+    const horizontalDistance = touchStartX - touchEndX;
+    const verticalDistance = Math.abs(touchStartY - touchEndY);
     const minSwipeDistance = 50;
 
-    if (Math.abs(distance) >= minSwipeDistance) {
+    // Only trigger tab switch if horizontal swipe is dominant
+    // Horizontal distance must be at least 2x the vertical distance
+    const isHorizontalSwipe = Math.abs(horizontalDistance) > verticalDistance * 1.5;
+    const isSignificantSwipe = Math.abs(horizontalDistance) >= minSwipeDistance;
+
+    if (isHorizontalSwipe && isSignificantSwipe) {
+      const isLeftSwipe = horizontalDistance > 0;
+      const isRightSwipe = horizontalDistance < 0;
+
       if (isLeftSwipe && activeTab === 'inventory') {
         // Swipe left: go to shopping list
         setActiveTab('shopping-list');
@@ -347,14 +358,6 @@ const InventoryPage = ({ defaultTab }) => {
     setSelectedItemForList(null);
   };
 
-  // Dropdown menu handlers
-  const handleDropdownToggle = (itemId) => {
-    setOpenDropdownId(openDropdownId === itemId ? null : itemId);
-  };
-
-  const handleDropdownClose = () => {
-    setOpenDropdownId(null);
-  };
 
   // Edit handlers
   const handleEditItem = (item) => {
@@ -362,7 +365,6 @@ const InventoryPage = ({ defaultTab }) => {
     setTimeout(() => setClickedIcon(null), 300); // Reset after 300ms
     setItemToEdit(item);
     setShowEditModal(true);
-    setOpenDropdownId(null);
   };
 
   const handleEditCancel = () => {
@@ -385,57 +387,8 @@ const InventoryPage = ({ defaultTab }) => {
     }
   };
 
-  // Enhanced delete handler that closes dropdown
-  const handleDeleteItemFromDropdown = (item) => {
-    setClickedIcon(`delete-${item.id}`);
-    setTimeout(() => setClickedIcon(null), 300); // Reset after 300ms
-    setItemToDelete(item);
-    setShowDeleteModal(true);
-    setOpenDropdownId(null);
-  };
 
-  // Handle keyboard events (ESC to close dropdown) and click outside
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        setOpenDropdownId(null);
-      }
-    };
 
-    const handleClickOutside = (event) => {
-      // Check if click is outside dropdown
-      if (!event.target.closest('.inventory-page__card-menu')) {
-        setOpenDropdownId(null);
-      }
-    };
-
-    if (openDropdownId) {
-      document.addEventListener('keydown', handleKeyDown);
-      document.addEventListener('click', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, [openDropdownId]);
-
-  // Auto-close dropdown after timeout
-  useEffect(() => {
-    let timeoutId;
-    
-    if (openDropdownId) {
-      timeoutId = setTimeout(() => {
-        setOpenDropdownId(null);
-      }, 5000); // Close after 5 seconds of inactivity
-    }
-
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [openDropdownId]);
 
   // Filter items based on active filter and search term
   const getFilteredItems = () => {
@@ -1279,7 +1232,7 @@ const InventoryPage = ({ defaultTab }) => {
                               </button>
                               <button
                                 className={`inventory-page__action-icon inventory-page__action-icon--delete ${clickedIcon === `delete-${item.id}` ? 'inventory-page__action-icon--clicked' : ''}`}
-                                onClick={() => handleDeleteItemFromDropdown(item)}
+                                onClick={() => handleDeleteItem(item)}
                                 title="Delete item"
                               >
                                 <DeleteIcon width={16} height={16} />
@@ -1287,39 +1240,6 @@ const InventoryPage = ({ defaultTab }) => {
                             </div>
                           </div>
 
-                          {/* Top-right: 3-dot menu */}
-                          <div className="inventory-page__card-menu">
-                            <button 
-                              className="inventory-page__card-menu-btn"
-                              onClick={() => handleDropdownToggle(item.id)}
-                              title="Options"
-                            >
-                              ⋮
-                            </button>
-                            
-                            {/* Dropdown menu */}
-                            {openDropdownId === item.id && (
-                              <>
-                                <div className="inventory-page__dropdown-overlay" onClick={handleDropdownClose}></div>
-                                <div className="inventory-page__dropdown-menu">
-                                  <button 
-                                    className="inventory-page__dropdown-option"
-                                    onClick={() => handleEditItem(item)}
-                                  >
-                                    <EditIcon />
-                                    <span>Edit</span>
-                                  </button>
-                                  <button 
-                                    className="inventory-page__dropdown-option"
-                                    onClick={() => handleDeleteItemFromDropdown(item)}
-                                  >
-                                    <DeleteIcon />
-                                    <span>Delete</span>
-                                  </button>
-                                </div>
-                              </>
-                            )}
-                          </div>
                           </div>
                         </div>
                       );
@@ -1414,7 +1334,7 @@ const InventoryPage = ({ defaultTab }) => {
                           </button>
                           <button
                             className={`inventory-page__action-icon inventory-page__action-icon--delete ${clickedIcon === `delete-${item.id}` ? 'inventory-page__action-icon--clicked' : ''}`}
-                            onClick={() => handleDeleteItemFromDropdown(item)}
+                            onClick={() => handleDeleteItem(item)}
                             title="Delete item"
                           >
                             <DeleteIcon width={16} height={16} />
@@ -1422,39 +1342,6 @@ const InventoryPage = ({ defaultTab }) => {
                         </div>
                       </div>
 
-                      {/* Top-right: 3-dot menu */}
-                      <div className="inventory-page__card-menu">
-                        <button 
-                          className="inventory-page__card-menu-btn"
-                          onClick={() => handleDropdownToggle(item.id)}
-                          title="Options"
-                        >
-                          ⋮
-                        </button>
-                        
-                        {/* Dropdown menu */}
-                        {openDropdownId === item.id && (
-                          <>
-                            <div className="inventory-page__dropdown-overlay" onClick={handleDropdownClose}></div>
-                            <div className="inventory-page__dropdown-menu">
-                              <button 
-                                className="inventory-page__dropdown-option"
-                                onClick={() => handleEditItem(item)}
-                              >
-                                <EditIcon />
-                                <span>Edit</span>
-                              </button>
-                              <button 
-                                className="inventory-page__dropdown-option"
-                                onClick={() => handleDeleteItemFromDropdown(item)}
-                              >
-                                <DeleteIcon />
-                                <span>Delete</span>
-                              </button>
-                            </div>
-                          </>
-                        )}
-                      </div>
                       </div>
                     </div>
                   );

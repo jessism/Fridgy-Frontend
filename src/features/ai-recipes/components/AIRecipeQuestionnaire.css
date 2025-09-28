@@ -575,35 +575,36 @@
 }
 
 .btn-generate-recipes {
-  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+  background: var(--primary-green, #81e053); /* Flat green background with fallback */
   color: white;
   border: none;
-  border-radius: 12px;
-  padding: 1rem 2rem;
+  border-radius: 24px; /* Match other buttons */
+  padding: 0.875rem 2rem; /* Same as btn-continue */
   font-family: 'Poppins', system-ui, sans-serif;
-  font-size: 1.1rem;
-  font-weight: 500; /* Changed to 500 weight */
+  font-size: 1rem; /* 1rem as requested */
+  font-weight: 500; /* 500 weight as requested */
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(129, 224, 83, 0.3);
+  transition: all 0.2s ease; /* Match other buttons */
+  box-shadow: none; /* No shadow for flat design */
   min-width: 200px;
   justify-content: center;
 }
 
 .btn-generate-recipes:hover:not(.disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(79, 207, 97, 0.4);
-  background: linear-gradient(135deg, var(--primary-green-dark), #5eb849);
+  background: var(--primary-green-dark, #6bc93f); /* Darker green on hover with fallback */
+  transform: translateY(-2px); /* Same hover effect as other buttons */
+  box-shadow: none; /* No shadow for flat design */
 }
 
 .btn-generate-recipes.disabled {
-  opacity: 0.6;
+  background: #e5e7eb; /* Same as disabled btn-continue */
+  color: #9ca3af; /* Same as disabled btn-continue */
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: none; /* No shadow for flat design */
 }
 
 .btn-icon {
@@ -712,7 +713,8 @@
   
   .btn-generate-recipes {
     padding: 0.875rem 1.5rem;
-    font-size: 1rem;
+    font-size: 1rem; /* Keep 1rem on mobile */
+    font-weight: 500; /* Keep 500 weight */
     min-width: 180px;
   }
 }
@@ -765,7 +767,8 @@
   
   .btn-generate-recipes {
     padding: 0.75rem 1.25rem;
-    font-size: 0.95rem;
+    font-size: 1rem; /* Keep 1rem even on small screens */
+    font-weight: 500; /* Keep 500 weight */
     min-width: 160px;
   }
 }

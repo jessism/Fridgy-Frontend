@@ -1,6 +1,13 @@
 .shopping-list-section {
   width: 100%;
+  max-width: 100%;
   min-height: 500px;
+  box-sizing: border-box;
+}
+
+/* Apply box-sizing to all children */
+.shopping-list-section * {
+  box-sizing: border-box;
 }
 
 .shopping-list-section__loading {
@@ -12,7 +19,7 @@
 }
 
 .shopping-list-section__content {
-  padding: 20px;
+  padding: 0;  /* No padding - content goes edge to edge like Inventory */
 }
 
 /* Header */
@@ -21,12 +28,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 25px;  /* More space between header and lists */
+  padding: 0;  /* No padding to align with Inventory title */
 }
 
 .shopping-list-section__shared-header {
-  margin-top: 30px;
-  padding-top: 20px;
+  margin-top: 45px;  /* More space above shared lists section */
+  padding-top: 30px;  /* More padding from the grey border line */
+  padding-left: 0;
+  padding-right: 0;
   border-top: 1px solid #e0e0e0;
 }
 
@@ -46,8 +56,8 @@
 .shopping-list-section__join-header-btn {
   padding: 8px 16px;
   background: white;
-  border: 2px solid #4fcf61;
-  color: #4fcf61;
+  border: 1px solid var(--primary-green);  /* Thinner border */
+  color: var(--primary-green);
   border-radius: 20px;
   font-size: 0.875rem; /* 14px */
   font-weight: 500;
@@ -56,7 +66,7 @@
 }
 
 .shopping-list-section__join-header-btn:hover {
-  background: #4fcf61;
+  background: var(--primary-green);
   color: white;
 }
 
@@ -64,7 +74,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #4fcf61;
+  background: var(--primary-green);  /* Use the same green as navbar */
   color: white;
   border: none;
   font-size: 1.5rem; /* 24px */
@@ -76,14 +86,17 @@
 }
 
 .shopping-list-section__add-btn:hover {
-  background: #3cb54c;
+  background: var(--primary-green-dark);  /* Use consistent hover color */
   transform: scale(1.05);
 }
 
 /* Lists Grid */
 .shopping-list-section__lists {
   display: grid;
-  gap: 15px;
+  gap: 16px;  /* Comfortable spacing between cards */
+  width: 100%;
+  max-width: 100%;
+  padding: 0;  /* No padding for full width usage */
 }
 
 .shopping-list-section__empty {
@@ -106,7 +119,7 @@
 .shopping-list-section__create-first-btn {
   margin-top: 20px;
   padding: 12px 24px;
-  background: #4fcf61;
+  background: var(--primary-green);
   color: white;
   border: none;
   border-radius: 8px;
@@ -116,15 +129,15 @@
 }
 
 .shopping-list-section__create-first-btn:hover {
-  background: #3cb54c;
+  background: var(--primary-green-dark);
 }
 
 .shopping-list-section__join-btn {
   margin-top: 10px;
   padding: 12px 24px;
   background: white;
-  color: #4fcf61;
-  border: 2px solid #4fcf61;
+  color: var(--primary-green);
+  border: 1px solid var(--primary-green);  /* Thinner border */
   border-radius: 24px;
   font-size: 1rem; /* 16px */
   cursor: pointer;
@@ -132,7 +145,7 @@
 }
 
 .shopping-list-section__join-btn:hover {
-  background: #4fcf61;
+  background: var(--primary-green);
   color: white;
 }
 
@@ -147,6 +160,9 @@
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;  /* Include padding in width calculation */
 }
 
 /* Pastel color variations for list cards - Modern gradient backgrounds */
@@ -193,6 +209,8 @@
 
 .shopping-list-section__list-main {
   flex: 1;
+  min-width: 0;  /* Allow flex item to shrink below content size */
+  overflow: hidden;  /* Prevent content overflow */
 }
 
 .shopping-list-section__list-name {
@@ -201,6 +219,12 @@
   color: #222222;
   margin: 0 0 6px 0;
   letter-spacing: -0.3px;
+  /* Truncate long names with ellipsis */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;  /* Force width instead of max-width for proper truncation */
+  display: block;  /* Ensure block display for width to work */
 }
 
 .shopping-list-section__list-meta {
@@ -211,7 +235,8 @@
   color: #222222;
   font-weight: 400;
   white-space: nowrap;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;  /* Allow wrapping if needed */
+  max-width: 100%;  /* Ensure it doesn't exceed parent */
 }
 
 .shopping-list-section__meta-item {
@@ -288,6 +313,10 @@
   color: #666666;
   font-weight: 400;
   letter-spacing: 0.2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .shopping-list-section__more-btn {
@@ -297,6 +326,8 @@
   color: #999;
   cursor: pointer;
   padding: 5px 10px;
+  flex-shrink: 0;  /* Prevent button from shrinking */
+  margin-left: auto;  /* Push to right edge */
 }
 
 .shopping-list-section__more-btn:hover {
@@ -307,6 +338,7 @@
 .shopping-list-section__edit-mode {
   max-width: 800px;
   margin: 0 auto;
+  padding-top: 15px;  /* Add top padding for breathing room */
 }
 
 .shopping-list-section__edit-header {
@@ -321,14 +353,14 @@
 .shopping-list-section__back-btn {
   background: none;
   border: none;
-  color: #4fcf61;
+  color: var(--primary-green);
   font-size: 1rem; /* 16px */
   cursor: pointer;
   padding: 5px 10px;
 }
 
 .shopping-list-section__back-btn:hover {
-  color: #3cb54c;
+  color: var(--primary-green-dark);
 }
 
 .shopping-list-section__edit-title {
@@ -353,7 +385,7 @@
   font-size: 1.25rem; /* 20px */
   font-weight: 600;
   color: #333;
-  border: 1px solid #4fcf61;
+  border: 1px solid var(--primary-green);
   border-radius: 4px;
   padding: 5px 10px;
   outline: none;
@@ -392,7 +424,7 @@
 
 .shopping-list-section__add-item-btn {
   padding: 10px 20px;
-  background: #4fcf61;
+  background: var(--primary-green);
   color: white;
   border: none;
   border-radius: 6px;
@@ -403,7 +435,7 @@
 }
 
 .shopping-list-section__add-item-btn:hover:not(:disabled) {
-  background: #3cb54c;
+  background: var(--primary-green-dark);
 }
 
 .shopping-list-section__add-item-btn:disabled {
@@ -472,7 +504,7 @@
 
 .shopping-list-section__checked-by {
   font-size: 0.75rem; /* 12px */
-  color: #4fcf61;
+  color: var(--primary-green);
   font-weight: 500;
 }
 
@@ -634,7 +666,7 @@
 }
 
 .shopping-list-section__modal input:focus {
-  border-color: #4fcf61;
+  border-color: var(--primary-green);
 }
 
 .shopping-list-section__modal-buttons {
@@ -658,7 +690,7 @@
 }
 
 .shopping-list-section__modal-buttons button:last-child {
-  background: #4fcf61;
+  background: var(--primary-green);
   color: white;
 }
 
@@ -683,7 +715,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(135deg, #4fcf61 0%, #3cb54c 50%, #2d9e3f 100%);
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 50%, #2d9e3f 100%);
   border: none;
   border-radius: 20px 20px 0 0;
   padding: 20px;
@@ -730,7 +762,53 @@
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .shopping-list-section__content {
-    padding: 10px;
+    padding: 0;  /* No padding - let parent container handle it */
+  }
+
+  /* Ensure lists grid respects container on mobile */
+  .shopping-list-section__lists {
+    margin: 0;
+    padding: 0;  /* No padding for full width */
+    width: 100%;
+  }
+
+  /* Make header elements use full width on mobile */
+  .shopping-list-section__header,
+  .shopping-list-section__shared-header {
+    padding: 0;  /* No padding to align with Inventory */
+    margin-bottom: 20px;  /* Keep good spacing on mobile too */
+  }
+
+  /* Extra spacing for shared header on mobile */
+  .shopping-list-section__shared-header {
+    margin-top: 35px;  /* Good separation from my lists */
+    padding-top: 25px;  /* Space from the grey line */
+  }
+
+  /* Add top padding for shopping list detail page on mobile */
+  .shopping-list-section__edit-mode {
+    padding-top: 20px;  /* More padding on mobile for better spacing */
+  }
+
+  /* Ensure cards don't overflow on mobile */
+  .shopping-list-section__list-card {
+    width: 100%;  /* Full width of grid cell */
+    max-width: 100%;
+    padding: 15px 12px;  /* Consistent vertical, reduced horizontal padding */
+  }
+
+  /* Adjust more button for mobile */
+  .shopping-list-section__more-btn {
+    padding: 5px;  /* Reduce padding on mobile */
+  }
+
+  /* Ensure text truncation works on mobile */
+  .shopping-list-section__list-main {
+    max-width: calc(100% - 35px);  /* Account for more button with less space */
+  }
+
+  .shopping-list-section__list-name {
+    max-width: 280px;  /* Allow slightly more text on mobile */
   }
 
   .shopping-list-section__add-item-form {
@@ -785,6 +863,11 @@
   padding: 0 12px;
   letter-spacing: -1px;
   cursor: pointer;
+  /* Truncate long titles with ellipsis */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .shopping-list-section__list-title:hover {
@@ -837,7 +920,7 @@
 }
 
 .shopping-list-section__add-icon {
-  color: #4fcf61;
+  color: var(--primary-green);
   font-size: 1.75rem; /* 28px */
   font-weight: 400;
 }
@@ -1087,16 +1170,21 @@
   background: transparent;
   position: relative;
   margin-top: 3px;  /* Adjustment to align with text baseline */
+  -webkit-tap-highlight-color: transparent;  /* Remove tap highlight on iOS */
+  touch-action: manipulation;  /* Prevent double-tap zoom */
 }
 
-.shopping-list-section__item-circle:hover {
-  border-color: #bbb;
-  transform: scale(1.05);
+/* Only apply hover on devices with precise pointers (mouse) */
+@media (hover: hover) and (pointer: fine) {
+  .shopping-list-section__item-circle:hover {
+    border-color: #bbb;
+    transform: scale(1.05);
+  }
 }
 
 .shopping-list-section__item-circle--checked {
-  background: #4fcf61 !important;
-  border-color: #4fcf61 !important;
+  background: var(--primary-green) !important;
+  border-color: var(--primary-green) !important;
   transition: none;  /* Instant change for checked state */
 }
 
@@ -1109,7 +1197,7 @@
 }
 
 .shopping-list-section__item-circle--loading {
-  border-color: #4fcf61;
+  border-color: var(--primary-green);
   /* Removed spinning animation - just show loading state without circling */
   /* animation: spin 1s linear infinite; */
 }
@@ -1138,15 +1226,20 @@
   padding: 2px 4px;
   border-radius: 4px;
   transition: background-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
-.shopping-list-section__item-name-line--editable:hover {
-  background-color: rgba(0, 0, 0, 0.03);
+/* Only apply hover on devices with precise pointers (mouse) */
+@media (hover: hover) and (pointer: fine) {
+  .shopping-list-section__item-name-line--editable:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+  }
 }
 
 .shopping-list-section__item-amount-line {
   font-size: 1rem; /* 16px */
-  color: #4fcf61;
+  color: var(--primary-green);
   font-weight: 400;
 }
 
@@ -1155,10 +1248,15 @@
   padding: 2px 4px;
   border-radius: 4px;
   transition: background-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
-.shopping-list-section__item-amount-line--editable:hover {
-  background-color: rgba(79, 207, 97, 0.08);
+/* Only apply hover on devices with precise pointers (mouse) */
+@media (hover: hover) and (pointer: fine) {
+  .shopping-list-section__item-amount-line--editable:hover {
+    background-color: rgba(79, 207, 97, 0.08);
+  }
 }
 
 /* Style the "Add quantity" placeholder */
@@ -1174,9 +1272,12 @@
   pointer-events: none;
 }
 
-.shopping-list-section__item-minimal--checked .shopping-list-section__item-name-line--editable:hover,
-.shopping-list-section__item-minimal--checked .shopping-list-section__item-amount-line--editable:hover {
-  background-color: transparent;
+/* Only apply hover reset on devices with precise pointers (mouse) */
+@media (hover: hover) and (pointer: fine) {
+  .shopping-list-section__item-minimal--checked .shopping-list-section__item-name-line--editable:hover,
+  .shopping-list-section__item-minimal--checked .shopping-list-section__item-amount-line--editable:hover {
+    background-color: transparent;
+  }
 }
 
 .shopping-list-section__item-delete-btn {
@@ -1242,7 +1343,7 @@
   border: none;
   padding: 0;
   font-size: 1rem; /* 16px */
-  color: #4fcf61;
+  color: var(--primary-green);
   font-weight: 400;
   background: transparent;
   outline: none;

@@ -681,6 +681,7 @@ const RecipeDetailModal = ({
         shoppingLists={shoppingLists}
         onAddToExistingList={handleAddToExistingList}
         onCreateNewListAndAdd={handleCreateNewListAndAdd}
+        recipeTitle={recipe?.title}
       />
     </>
   );

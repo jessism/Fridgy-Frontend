@@ -151,6 +151,7 @@ const AIRecipeQuestionnaire = ({ onSubmit, onBackToMeals, loading = false }) => 
       required: false,
       multiple: true,
       options: [
+        { value: 'none', label: 'No special considerations' },
         { value: 'low_carb', label: 'Low Carb' },
         { value: 'high_protein', label: 'High Protein' },
         { value: 'low_calorie', label: 'Low Calorie' },

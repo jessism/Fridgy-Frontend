@@ -633,19 +633,36 @@ const ShoppingListDetailPage = () => {
               <ChevronLeft size={20} />
             </button>
             {editingListNameId === selectedList.id ? (
-              <input
-                ref={listTitleInputRef}
-                type="text"
-                value={tempListName}
-                onChange={(e) => setTempListName(e.target.value)}
-                onKeyDown={handleListNameKeyPress}
-                onBlur={handleSaveListName}
-                className="shopping-list-section__list-title-input"
-              />
+              <div style={{ flex: 1, position: 'relative' }}>
+                <input
+                  ref={listTitleInputRef}
+                  type="text"
+                  value={tempListName}
+                  onChange={(e) => {
+                    if (e.target.value.length <= 30) {
+                      setTempListName(e.target.value);
+                    }
+                  }}
+                  onKeyDown={handleListNameKeyPress}
+                  onBlur={handleSaveListName}
+                  className="shopping-list-section__list-title-input"
+                  maxLength={30}
+                />
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-20px',
+                  left: '12px',
+                  fontSize: '0.75rem',
+                  color: tempListName.length > 25 ? '#ff6b6b' : '#666'
+                }}>
+                  {tempListName.length}/30 characters
+                </div>
+              </div>
             ) : (
               <h1
                 className="shopping-list-section__list-title"
                 onDoubleClick={handleDoubleClickTitle}
+                title={selectedList.name}
               >
                 {selectedList.name}
               </h1>
@@ -710,7 +727,11 @@ const ShoppingListDetailPage = () => {
                   <div key={item.id} className={`shopping-list-section__item-minimal ${item.is_checked ? 'shopping-list-section__item-minimal--checked' : ''}`}>
                     <span
                       className={`shopping-list-section__item-circle ${item.is_checked ? 'shopping-list-section__item-circle--checked' : ''} ${togglingItemId === item.id ? 'shopping-list-section__item-circle--loading' : ''}`}
-                      onClick={() => handleToggleItem(selectedList.id, item.id)}
+                      onPointerDown={(e) => {
+                        e.preventDefault(); // Prevent any default touch/mouse behavior
+                        e.stopPropagation(); // Stop event bubbling
+                        handleToggleItem(selectedList.id, item.id);
+                      }}
                       style={{ opacity: togglingItemId === item.id ? 0.5 : 1 }}
                     >
                     </span>

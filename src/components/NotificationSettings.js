@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './NotificationSettings.css';
 import { requestNotificationPermission, subscribeToPush } from '../serviceWorkerRegistration';
+import { ensureValidToken, debugTokenStatus } from '../utils/tokenValidator';
 
 const NotificationSettings = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -141,8 +142,23 @@ const NotificationSettings = () => {
         return;
       }
 
-      // Save subscription to backend
-      const token = localStorage.getItem('token');
+      // Save subscription to backend - validate token first
+      const token = ensureValidToken();
+
+      if (!token) {
+        // Run debug info for troubleshooting
+        debugTokenStatus();
+        setMessage('Authentication required. Please log in first.');
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('Push Subscribe Request:', {
+        url: `${API_BASE_URL}/push/subscribe`,
+        tokenValid: true,
+        subscriptionKeys: subscription ? Object.keys(subscription) : []
+      });
+
       const response = await fetch(`${API_BASE_URL}/push/subscribe`, {
         method: 'POST',
         headers: {
@@ -517,6 +533,34 @@ const NotificationSettings = () => {
         <div className={`notification-settings__message ${message.includes('error') || message.includes('Failed') ? 'error' : 'success'}`}>
           {message}
         </div>
+      )}
+
+      {/* Debug button for troubleshooting on mobile */}
+      {!isSubscribed && (
+        <button
+          className="notification-settings__debug-btn"
+          onClick={() => {
+            debugTokenStatus();
+            const debugInfo = `Token Status Debug:\n\n` +
+              `LocalStorage Available: ${typeof localStorage !== 'undefined' ? 'Yes' : 'No'}\n` +
+              `Token Exists: ${localStorage.getItem('token') ? 'Yes' : 'No'}\n` +
+              `User Data: ${localStorage.getItem('user') ? 'Yes' : 'No'}\n\n` +
+              `Check browser console for detailed information.`;
+            alert(debugInfo);
+          }}
+          style={{
+            marginTop: '10px',
+            padding: '8px 16px',
+            backgroundColor: '#6c757d',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}
+        >
+          🔍 Debug Token Status
+        </button>
       )}
     </div>
   );

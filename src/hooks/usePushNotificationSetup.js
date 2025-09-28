@@ -1,9 +1,32 @@
 import { requestNotificationPermission, subscribeToPush } from '../serviceWorkerRegistration';
+import { validateStoredToken, ensureValidToken, debugTokenStatus } from '../utils/tokenValidator';
 
 export const usePushNotificationSetup = () => {
-  const setupPushNotifications = async (token) => {
+  const setupPushNotifications = async (providedToken) => {
     try {
       console.log('Starting automatic push notification setup...');
+
+      // Use provided token or validate stored token
+      let token = providedToken;
+
+      if (!token) {
+        console.log('No token provided, checking localStorage...');
+        token = ensureValidToken();
+
+        if (!token) {
+          // Run debug to help user understand the issue
+          debugTokenStatus();
+          return {
+            success: false,
+            error: 'INVALID_TOKEN',
+            message: 'Please log in first to enable notifications'
+          };
+        }
+      }
+
+      // Debug: Check token status
+      const validation = validateStoredToken();
+      console.log('Token validation:', validation);
 
       // Check if we're in a supported environment
       if (!('Notification' in window)) {
@@ -57,6 +80,15 @@ export const usePushNotificationSetup = () => {
       // Save subscription to backend
       console.log('Saving subscription to backend...');
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+      // Debug: Log request details
+      console.log('API Request Details:', {
+        url: `${apiUrl}/push/subscribe`,
+        hasToken: !!token,
+        tokenPreview: token ? `${token.substring(0, 10)}...${token.substring(token.length - 10)}` : 'NO TOKEN',
+        authHeader: token ? `Bearer ${token.substring(0, 10)}...` : 'NO AUTH HEADER'
+      });
+
       const response = await fetch(`${apiUrl}/push/subscribe`, {
         method: 'POST',
         headers: {

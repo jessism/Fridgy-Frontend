@@ -32,7 +32,7 @@
 /* Content Container for Swipe Navigation */
 .inventory-page__content-container {
   width: 100%;
-  touch-action: pan-x; /* Allow horizontal panning for swipe */
+  touch-action: manipulation; /* Allow both scrolling and touch gestures */
   -webkit-user-select: none; /* Prevent text selection during swipe on Safari */
   -moz-user-select: none;
   -ms-user-select: none;
@@ -42,7 +42,7 @@
 /* Mobile-specific enhancements for swipe */
 @media (max-width: 768px) {
   .inventory-page__content-container {
-    touch-action: pan-x; /* Enable horizontal swipe, disable vertical scroll during swipe */
+    touch-action: manipulation; /* Allow both vertical scroll and horizontal swipe */
     overflow-x: hidden; /* Prevent horizontal scroll */
   }
 }

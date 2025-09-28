@@ -8,11 +8,41 @@ const ShoppingListSelectionModal = ({
   item,
   shoppingLists,
   onAddToExistingList,
-  onCreateNewListAndAdd
+  onCreateNewListAndAdd,
+  recipeTitle
 }) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+
+  // Generate a smart default name from recipe title
+  const getDefaultListName = () => {
+    if (!recipeTitle) return '';
+
+    // If recipe title is already short, use it as is
+    if (recipeTitle.length <= 30) {
+      return recipeTitle + ' List';
+    }
+
+    // Otherwise, truncate smartly
+    // Try to cut at a word boundary before 25 characters
+    const maxLength = 25;
+    let truncated = recipeTitle.substring(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(' ');
+
+    if (lastSpace > 15) {
+      truncated = truncated.substring(0, lastSpace);
+    }
+
+    return truncated + '...';
+  };
+
+  // Set default name when form opens
+  React.useEffect(() => {
+    if (showCreateForm && recipeTitle && !newListName) {
+      setNewListName(getDefaultListName());
+    }
+  }, [showCreateForm, recipeTitle]);
 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
@@ -124,11 +154,23 @@ const ShoppingListSelectionModal = ({
                     type="text"
                     placeholder="Enter list name..."
                     value={newListName}
-                    onChange={(e) => setNewListName(e.target.value)}
+                    onChange={(e) => {
+                      if (e.target.value.length <= 30) {
+                        setNewListName(e.target.value);
+                      }
+                    }}
                     onKeyDown={handleKeyPress}
                     className="shopping-list-selection-modal__input"
+                    maxLength={30}
                     autoFocus
                   />
+                  <div style={{
+                    fontSize: '0.75rem',
+                    color: newListName.length > 25 ? '#ff6b6b' : '#666',
+                    marginTop: '0.25rem'
+                  }}>
+                    {newListName.length}/30 characters
+                  </div>
                   <div className="shopping-list-selection-modal__form-actions">
                     <button
                       className="shopping-list-selection-modal__form-btn shopping-list-selection-modal__form-btn--cancel"
