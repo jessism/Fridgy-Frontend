@@ -16,7 +16,7 @@
 }
 
 .font-toggle__label {
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   font-weight: 500;
   color: #666;
   margin-right: 4px;
@@ -29,7 +29,7 @@
 }
 
 .font-toggle__option {
-  font-size: 13px;
+  font-size: 0.8125rem; /* 13px */
   font-weight: 500;
   color: #999;
   transition: all 0.3s ease;
@@ -88,12 +88,12 @@
   }
 
   .font-toggle__label {
-    font-size: 12px;
+    font-size: 0.75rem; /* 12px */
     margin-right: 2px;
   }
 
   .font-toggle__option {
-    font-size: 12px;
+    font-size: 0.75rem; /* 12px */
     min-width: 50px;
   }
 

@@ -11,6 +11,46 @@ const NotificationSettings = () => {
     notification_time: '09:00',
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
   });
+  const [dailyReminders, setDailyReminders] = useState({
+    inventory_check: {
+      enabled: true,
+      time: '17:30',
+      message: "See what's in your fridge",
+      emoji: '🥗'
+    },
+    meal_planning: {
+      enabled: false,
+      time: '10:00',
+      day: 'Sunday',
+      message: 'Plan your meals for the week',
+      emoji: '📅'
+    },
+    dinner_prep: {
+      enabled: false,
+      time: '16:00',
+      message: 'Time to prep dinner!',
+      emoji: '👨‍🍳'
+    },
+    breakfast_reminder: {
+      enabled: false,
+      time: '08:00',
+      message: 'Start your day right - check breakfast options',
+      emoji: '🌅'
+    },
+    lunch_reminder: {
+      enabled: false,
+      time: '12:00',
+      message: 'Lunch time! See what you can make',
+      emoji: '🥙'
+    },
+    shopping_reminder: {
+      enabled: false,
+      time: '18:00',
+      day: 'Saturday',
+      message: 'Time to plan your grocery shopping',
+      emoji: '🛒'
+    }
+  });
   const [message, setMessage] = useState('');
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -18,6 +58,7 @@ const NotificationSettings = () => {
   useEffect(() => {
     checkSubscriptionStatus();
     loadPreferences();
+    loadDailyReminders();
   }, []);
 
   const checkSubscriptionStatus = async () => {
@@ -55,6 +96,24 @@ const NotificationSettings = () => {
       }
     } catch (error) {
       console.error('Error loading preferences:', error);
+    }
+  };
+
+  const loadDailyReminders = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/push/daily-reminders`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setDailyReminders(data.dailyReminders);
+      }
+    } catch (error) {
+      console.error('Error loading daily reminders:', error);
     }
   };
 
@@ -215,6 +274,93 @@ const NotificationSettings = () => {
     updatePreferences(newPreferences);
   };
 
+  const updateDailyReminders = async (newReminders) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/push/daily-reminders`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ dailyReminders: newReminders })
+      });
+
+      if (response.ok) {
+        setMessage('Daily reminders updated successfully');
+      }
+    } catch (error) {
+      console.error('Update daily reminders error:', error);
+      setMessage('Failed to update daily reminders');
+    }
+  };
+
+  const handleDailyReminderToggle = (reminderType) => {
+    const newReminders = {
+      ...dailyReminders,
+      [reminderType]: {
+        ...dailyReminders[reminderType],
+        enabled: !dailyReminders[reminderType].enabled
+      }
+    };
+    setDailyReminders(newReminders);
+    updateDailyReminders(newReminders);
+  };
+
+  const handleDailyReminderTimeChange = (reminderType, time) => {
+    const newReminders = {
+      ...dailyReminders,
+      [reminderType]: {
+        ...dailyReminders[reminderType],
+        time
+      }
+    };
+    setDailyReminders(newReminders);
+    updateDailyReminders(newReminders);
+  };
+
+  const handleDailyReminderDayChange = (reminderType, day) => {
+    const newReminders = {
+      ...dailyReminders,
+      [reminderType]: {
+        ...dailyReminders[reminderType],
+        day
+      }
+    };
+    setDailyReminders(newReminders);
+    updateDailyReminders(newReminders);
+  };
+
+  const handleTestDailyReminder = async (reminderType) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/push/test-daily-reminder`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ reminderType })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setMessage(data.message);
+      } else {
+        setMessage('Failed to send test reminder');
+      }
+    } catch (error) {
+      console.error('Test daily reminder error:', error);
+      setMessage('An error occurred');
+    }
+  };
+
+  const formatReminderLabel = (key) => {
+    return key.split('_').map(word =>
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
+
   return (
     <div className="notification-settings">
       <h2 className="notification-settings__title">Push Notifications</h2>
@@ -296,6 +442,74 @@ const NotificationSettings = () => {
               />
             </label>
           </div>
+        </div>
+      )}
+
+      {isSubscribed && (
+        <div className="notification-settings__section">
+          <h3>Daily Reminders</h3>
+          <p className="daily-reminders-description">
+            Get daily notifications to help you stay on track with your food management
+          </p>
+
+          {Object.entries(dailyReminders).map(([key, reminder]) => (
+            <div key={key} className="daily-reminder-item">
+              <div className="daily-reminder-header">
+                <label className="daily-reminder-toggle">
+                  <input
+                    type="checkbox"
+                    checked={reminder.enabled}
+                    onChange={() => handleDailyReminderToggle(key)}
+                  />
+                  <span className="reminder-emoji">{reminder.emoji}</span>
+                  <span className="reminder-label">{formatReminderLabel(key)}</span>
+                </label>
+
+                {reminder.enabled && (
+                  <button
+                    className="test-reminder-btn"
+                    onClick={() => handleTestDailyReminder(key)}
+                    title="Send test notification"
+                  >
+                    Test
+                  </button>
+                )}
+              </div>
+
+              {reminder.enabled && (
+                <div className="daily-reminder-settings">
+                  <div className="reminder-message">
+                    <span className="message-preview">"{reminder.message}"</span>
+                  </div>
+
+                  <div className="reminder-schedule">
+                    {reminder.day && (
+                      <select
+                        value={reminder.day}
+                        onChange={(e) => handleDailyReminderDayChange(key, e.target.value)}
+                        className="day-select"
+                      >
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                      </select>
+                    )}
+
+                    <input
+                      type="time"
+                      value={reminder.time}
+                      onChange={(e) => handleDailyReminderTimeChange(key, e.target.value)}
+                      className="reminder-time-input"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
 

@@ -538,7 +538,7 @@ const InventoryPage = ({ defaultTab }) => {
       <div style={{paddingTop: '60px', minHeight: '100vh', background: 'white'}}>
         <div className="container" style={{maxWidth: '1200px', margin: '0 auto', padding: '1rem 1rem', overflow: 'visible'}}>
           {/* Row 1: Title Only */}
-          <div style={{ marginBottom: '1.5rem', marginTop: '0.5rem' }}>
+          <div style={{ marginBottom: '1rem', marginTop: '0' }}>
             <h1 className="inventory-page__title">
               Inventory
             </h1>
@@ -639,14 +639,15 @@ const InventoryPage = ({ defaultTab }) => {
                   key={filter.key}
                   onClick={() => setActiveFilter(filter.key)}
                   style={{
-                    padding: '12px 16px',
+                    padding: '8px 14px',
                     borderRadius: '25px',
                     border: activeFilter === filter.key ? 'none' : '1px solid #e0e0e0',
                     background: activeFilter === filter.key ? 'var(--primary-green)' : 'white',
                     color: activeFilter === filter.key ? 'white' : '#666',
                     cursor: 'pointer',
-                    fontSize: '14pt',
-                    fontWeight: '500',
+                    fontSize: '1rem',
+                    fontFamily: 'var(--header-font)',
+                    fontWeight: '400',
                     transition: 'all 0.3s ease',
                     outline: 'none',
                     whiteSpace: 'nowrap',

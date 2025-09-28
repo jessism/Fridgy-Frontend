@@ -658,7 +658,7 @@ const RecipeDetailModal = ({
                 onClick={handleAddToShoppingList}
                 disabled={getIngredientsCount() === 0}
               >
-                Add {getIngredientsCount()} items
+                Add to shopping list
               </button>
             </div>
           )}

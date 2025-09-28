@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useAuth } from '../../auth/context/AuthContext';
+import TrackabideLogo from '../../../assets/images/Trackabite-logo.png';
 import './AIRecipeQuestionnaire.css';
 
 // Debounce utility function
@@ -15,8 +16,11 @@ const debounce = (func, wait) => {
   };
 };
 
-const AIRecipeQuestionnaire = ({ onSubmit, loading = false }) => {
+const AIRecipeQuestionnaire = ({ onSubmit, onBackToMeals, loading = false }) => {
   const { user } = useAuth();
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 7; // Reduced from 8 after removing cuisine preference
+
   const [formData, setFormData] = useState({
     meal_type: '',
     serving_size: 1,
@@ -116,8 +120,7 @@ const AIRecipeQuestionnaire = ({ onSubmit, loading = false }) => {
         { value: '15_minutes', label: '15 min' },
         { value: '30_minutes', label: '30 min' },
         { value: '45_minutes', label: '45 min' },
-        { value: '60_minutes', label: '1 hour' },
-        { value: '90_plus_minutes', label: '90+ min' }
+        { value: '60_plus_minutes', label: '1+ hour' }
       ]
     },
     vibe: {
@@ -221,6 +224,18 @@ const AIRecipeQuestionnaire = ({ onSubmit, loading = false }) => {
     }
   };
 
+  const goToNext = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const goToPrevious = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
   const renderQuestion = (key, question) => {
     const isMultiple = question.multiple;
     const currentValue = formData[key];
@@ -321,61 +336,219 @@ const AIRecipeQuestionnaire = ({ onSubmit, loading = false }) => {
       .every(([key, _]) => formData[key]);
   };
 
-  return (
-    <div className="questionnaire-container">
-      <div className="questionnaire-header">
-      </div>
+  const renderProgressBar = () => {
+    const progressPercentage = (currentStep / totalSteps) * 100;
 
-      <div className="questionnaire-form">
-        {/* Render meal_type question first */}
-        {renderQuestion('meal_type', questions.meal_type)}
-        
-        {/* Insert serving size question after meal_type */}
-        {renderServingSizeQuestion()}
-        
-        {/* Render remaining questions */}
-        {Object.entries(questions)
-          .filter(([key]) => key !== 'meal_type') // Skip meal_type since we already rendered it
-          .map(([key, question]) => renderQuestion(key, question))
-        }
-
-        <div className="question-group">
-          <div className="question-header">
-            <h3 className="question-title">
-              Tell Trackabite anything else
-            </h3>
-            <p className="question-subtitle">
-              e.g. cravings, ingredients to use up, flavor notes...
-            </p>
+    return (
+      <div className="questionnaire-progress">
+        <div className="questionnaire-progress__header">
+          {currentStep > 1 && (
+            <button
+              className="questionnaire-progress__back-btn"
+              onClick={goToPrevious}
+              aria-label="Go back"
+              type="button"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          )}
+          <div className="questionnaire-progress__bar">
+            <div
+              className="questionnaire-progress__bar-fill"
+              style={{ width: `${progressPercentage}%` }}
+            />
           </div>
-          
-          <textarea
-            className="additional-notes"
-            placeholder="I'm craving something creamy and comforting..."
-            value={formData.additional_notes}
-            onChange={handleNotesChange}
-            rows={3}
-          />
         </div>
+      </div>
+    );
+  };
 
-        <div className="questionnaire-actions">
-          <button 
-            className={`btn-generate-recipes ${!isFormValid() || loading ? 'disabled' : ''}`}
-            onClick={handleSubmit}
-            disabled={!isFormValid() || loading}
-          >
-            {loading ? (
-              <>
-                <span className="btn-spinner"></span>
-                <span>Generating recipes...</span>
-              </>
-            ) : (
-              <>
-                <span>Generate my recipes</span>
-              </>
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        // Welcome/Title page
+        return (
+          <div className="questionnaire-step questionnaire-step--welcome">
+            {onBackToMeals && (
+              <button
+                className="questionnaire-back-to-meals"
+                onClick={onBackToMeals}
+                type="button"
+                aria-label="Back to meals"
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M12.5 15l-5-5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
             )}
-          </button>
-        </div>
+            <div className="questionnaire-welcome-content">
+              <div className="questionnaire-icon">
+                <img src={TrackabideLogo} alt="Fridgy" className="questionnaire-logo" />
+              </div>
+              <h1 className="questionnaire-title">
+                Personalize your recipes with AI
+              </h1>
+              <p className="questionnaire-subtitle">
+                Answer a few questions to get recipes tailored to your fridge inventory and taste preferences
+              </p>
+              <div className="questionnaire-actions">
+                <button
+                  className="btn-continue btn-continue--large"
+                  onClick={goToNext}
+                  type="button"
+                >
+                  Get Started
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 2:
+        // What are you cooking?
+        return (
+          <div className="questionnaire-step">
+            {renderQuestion('meal_type', questions.meal_type)}
+            <div className="questionnaire-actions">
+              <button
+                className="btn-continue"
+                onClick={goToNext}
+                disabled={!formData.meal_type}
+                type="button"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        );
+
+      case 3:
+        // How many servings?
+        return (
+          <div className="questionnaire-step">
+            {renderServingSizeQuestion()}
+            <div className="questionnaire-actions">
+              <button
+                className="btn-continue"
+                onClick={goToNext}
+                type="button"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        );
+
+      case 4:
+        // How much time do you have?
+        return (
+          <div className="questionnaire-step">
+            {renderQuestion('cooking_time', questions.cooking_time)}
+            <div className="questionnaire-actions">
+              <button
+                className="btn-continue"
+                onClick={goToNext}
+                disabled={!formData.cooking_time}
+                type="button"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        );
+
+      case 5:
+        // What's the vibe?
+        return (
+          <div className="questionnaire-step">
+            {renderQuestion('vibe', questions.vibe)}
+            <div className="questionnaire-actions">
+              <button
+                className="btn-continue"
+                onClick={goToNext}
+                disabled={!formData.vibe}
+                type="button"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        );
+
+      case 6:
+        // Any special considerations?
+        return (
+          <div className="questionnaire-step">
+            {renderQuestion('dietary_considerations', questions.dietary_considerations)}
+            <div className="questionnaire-actions">
+              <button
+                className="btn-continue"
+                onClick={goToNext}
+                type="button"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        );
+
+      case 7:
+        // Tell Trackabite anything else
+        return (
+          <div className="questionnaire-step questionnaire-step--final">
+            <div className="question-group">
+              <div className="question-header">
+                <h3 className="question-title">
+                  Tell Trackabite anything else
+                </h3>
+                <p className="question-subtitle">
+                  e.g. cravings, ingredients to use up, flavor notes...
+                </p>
+              </div>
+
+              <textarea
+                className="additional-notes"
+                placeholder="I'm craving something creamy and comforting..."
+                value={formData.additional_notes}
+                onChange={handleNotesChange}
+                rows={3}
+              />
+            </div>
+
+            <div className="questionnaire-actions">
+              <button
+                className={`btn-generate-recipes ${!isFormValid() || loading ? 'disabled' : ''}`}
+                onClick={handleSubmit}
+                disabled={!isFormValid() || loading}
+                type="button"
+              >
+                {loading ? (
+                  <>
+                    <span className="btn-spinner"></span>
+                    <span>Generating recipes...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Generate my recipes</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="questionnaire-container questionnaire-container--multi-step">
+      {currentStep > 1 && renderProgressBar()}
+      <div className="questionnaire-content">
+        {renderStepContent()}
       </div>
     </div>
   );

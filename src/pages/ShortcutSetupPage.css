@@ -32,7 +32,7 @@
   padding: 8px 16px;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   transition: background 0.3s;
 }
 
@@ -42,7 +42,7 @@
 
 .setup-header h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 1.75rem; /* 28px */
   font-weight: 600;
 }
 
@@ -56,7 +56,7 @@
 }
 
 .how-it-works h2 {
-  font-size: 24px;
+  font-size: 1.5rem; /* 24px */
   margin-bottom: 20px;
   color: #333;
 }
@@ -98,13 +98,13 @@
 
 .step-content h3 {
   margin: 0 0 5px 0;
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   color: #333;
 }
 
 .step-content p {
   margin: 0;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   color: #666;
 }
 
@@ -114,7 +114,7 @@
 }
 
 .installation h2 {
-  font-size: 24px;
+  font-size: 1.5rem; /* 24px */
   margin-bottom: 20px;
   color: #333;
 }
@@ -135,7 +135,7 @@
 .install-button {
   width: 100%;
   padding: 15px 30px;
-  font-size: 18px;
+  font-size: 1.125rem; /* 18px */
   font-weight: 600;
   border: none;
   border-radius: 12px;
@@ -176,7 +176,7 @@
   border: 2px solid #e0e0e0;
   background: white;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s;
@@ -196,7 +196,7 @@
 .method-description {
   text-align: center;
   color: #666;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   margin-bottom: 15px;
 }
 
@@ -231,7 +231,7 @@
 .troubleshooting li {
   margin: 8px 0;
   color: #555;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
 }
 
 .troubleshooting code {
@@ -239,7 +239,7 @@
   padding: 2px 6px;
   border-radius: 4px;
   border: 1px solid #ddd;
-  font-size: 13px;
+  font-size: 0.8125rem; /* 13px */
   color: #d63384;
 }
 
@@ -278,7 +278,7 @@
   display: block;
   margin-top: 10px;
   color: #999;
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
 }
 
 /* Manual Setup */
@@ -318,14 +318,14 @@
 .config-value code {
   flex: 1;
   font-family: 'Courier New', monospace;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   word-break: break-all;
 }
 
 .config-value pre {
   flex: 1;
   margin: 0;
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   overflow-x: auto;
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -338,7 +338,7 @@
   padding: 5px 10px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   transition: background 0.3s;
 }
 
@@ -375,7 +375,7 @@
   padding: 10px 20px;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   transition: background 0.3s;
 }
 
@@ -389,7 +389,7 @@
 }
 
 .usage-stats h2 {
-  font-size: 24px;
+  font-size: 1.5rem; /* 24px */
   margin-bottom: 20px;
   color: #333;
 }
@@ -409,14 +409,14 @@
 
 .stat-value {
   display: block;
-  font-size: 32px;
+  font-size: 2rem; /* 32px */
   font-weight: bold;
   color: #4fcf61;
   margin-bottom: 5px;
 }
 
 .stat-label {
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   color: #666;
 }
 
@@ -426,7 +426,7 @@
 }
 
 .test-section h2 {
-  font-size: 24px;
+  font-size: 1.5rem; /* 24px */
   margin-bottom: 20px;
   color: #333;
 }
@@ -452,13 +452,13 @@
   padding: 15px;
   border-radius: 8px;
   overflow-x: auto;
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   margin-top: 10px;
 }
 
 .test-note {
   color: #666;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   margin: 10px 0;
 }
 
@@ -493,7 +493,7 @@
 
 .token-section p {
   color: #666;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
 }
 
 .regenerate-button {
@@ -503,7 +503,7 @@
   padding: 10px 20px;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   transition: background 0.3s;
 }
 
@@ -518,7 +518,7 @@
 
 .warning-text {
   color: #dc3545;
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   margin-top: 10px;
 }
 
@@ -570,7 +570,7 @@
   }
   
   .setup-header h1 {
-    font-size: 24px;
+    font-size: 1.5rem; /* 24px */
   }
   
   .setup-content {

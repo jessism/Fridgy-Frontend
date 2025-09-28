@@ -45,7 +45,7 @@
 }
 
 .onboarding-progress__label {
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   font-weight: 600;
   color: #999999;
   text-transform: uppercase;
@@ -53,7 +53,7 @@
 }
 
 .onboarding-progress__counter {
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   font-weight: 500;
   color: #666666;
 }

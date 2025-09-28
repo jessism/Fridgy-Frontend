@@ -424,7 +424,8 @@
   border-radius: 8px;
   margin-bottom: 1rem;
   padding: 1rem;
-  border: 1px solid #e0e0e0;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .meal-history-page__meal-title {

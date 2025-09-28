@@ -26,6 +26,11 @@ const MobileBottomNav = () => {
     navigate('/batchcamera');
   };
 
+  const handleAddRecipe = () => {
+    setIsModalOpen(false);
+    navigate('/meal-plans/recipes');
+  };
+
   const handleLogMeal = () => {
     setIsModalOpen(false);
     navigate('/mealscanner');
@@ -162,9 +167,21 @@ const MobileBottomNav = () => {
                     <circle cx="20" cy="21" r="1"/>
                   </svg>
                 </div>
-                <span className="modal-option-label">Scan Grocery</span>
+                <span className="modal-option-label">Add Grocery</span>
               </button>
-              
+
+              <button className="modal-option" onClick={handleAddRecipe}>
+                <div className="modal-option-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    <path d="M12 6h4"/>
+                    <path d="M12 10h4"/>
+                  </svg>
+                </div>
+                <span className="modal-option-label">Add Recipe</span>
+              </button>
+
               <button className="modal-option" onClick={handleLogMeal}>
                 <div className="modal-option-icon">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -172,7 +189,7 @@ const MobileBottomNav = () => {
                     <path d="M7 2v8l-1.5 1.5a1 1 0 0 0 0 1.4l.3.3a1 1 0 0 0 1.4 0L9 11.4V22"/>
                   </svg>
                 </div>
-                <span className="modal-option-label">Scan Meal</span>
+                <span className="modal-option-label">Add Meal</span>
               </button>
             </div>
           </div>

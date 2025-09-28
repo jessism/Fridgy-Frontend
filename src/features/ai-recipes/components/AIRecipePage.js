@@ -206,8 +206,8 @@ const AIRecipePage = () => {
       {/* AI Recipe Content */}
       <div className="ai-recipe-page__main">
         <div className="ai-recipe-page__container">
-          {/* Hero Section - Only show when not displaying recipes */}
-          {!hasRecipes && (
+          {/* Hero Section - Only show when not displaying recipes and not in questionnaire */}
+          {!hasRecipes && !showQuestionnaire && (
             <div className="ai-recipe-page__hero">
               <div className="ai-recipe-page__hero-header">
                 <button className="ai-recipe-page__back-btn" onClick={handleBackToMeals}>
@@ -238,8 +238,9 @@ const AIRecipePage = () => {
           {showQuestionnaire && !loading && (
             /* Questionnaire Form */
             <div className="ai-recipe-page__content">
-              <AIRecipeQuestionnaire 
+              <AIRecipeQuestionnaire
                 onSubmit={handleQuestionnaireSubmit}
+                onBackToMeals={handleBackToMeals}
                 loading={loading}
               />
             </div>

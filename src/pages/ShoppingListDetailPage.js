@@ -645,7 +645,7 @@ const ShoppingListDetailPage = () => {
             ) : (
               <h1
                 className="shopping-list-section__list-title"
-                onClick={handleDoubleClickTitle}
+                onDoubleClick={handleDoubleClickTitle}
               >
                 {selectedList.name}
               </h1>

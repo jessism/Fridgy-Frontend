@@ -49,7 +49,7 @@
 }
 
 .shopping-list-selection-modal__title {
-  font-size: 17px;
+  font-size: 1.0625rem; /* 17px */
   font-weight: 500;
   color: #1a1a1a;
   margin: 0;
@@ -72,7 +72,7 @@
 }
 
 .shopping-list-selection-modal__section-title {
-  font-size: 13px;
+  font-size: 0.8125rem; /* 13px */
   font-weight: 500;
   color: #8a8a8a;
   text-transform: uppercase;
@@ -114,7 +114,7 @@
 }
 
 .shopping-list-selection-modal__list-name {
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   font-weight: 500;
   color: #1a1a1a;
   margin-bottom: 6px;
@@ -125,7 +125,7 @@
 }
 
 .shopping-list-selection-modal__list-meta {
-  font-size: 13px;
+  font-size: 0.8125rem; /* 13px */
   color: #8a8a8a;
   display: flex;
   align-items: center;
@@ -139,7 +139,7 @@
 }
 
 .shopping-list-selection-modal__list-arrow {
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   color: #c0c0c0;
   margin-left: 16px;
   font-weight: 300;
@@ -157,7 +157,7 @@
   color: white;
   border: none;
   border-radius: 16px;
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -188,7 +188,7 @@
   padding: 14px 16px;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   outline: none;
   transition: all 0.2s ease;
   margin-bottom: 16px;
@@ -210,7 +210,7 @@
 .shopping-list-selection-modal__form-btn {
   padding: 10px 20px;
   border-radius: 10px;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -258,7 +258,7 @@
   }
 
   .shopping-list-selection-modal__title {
-    font-size: 16px;
+    font-size: 1rem; /* 16px */
   }
 
   .shopping-list-selection-modal__list-card {
@@ -266,16 +266,16 @@
   }
 
   .shopping-list-selection-modal__list-name {
-    font-size: 15px;
+    font-size: 0.9375rem; /* 15px */
   }
 
   .shopping-list-selection-modal__list-meta {
-    font-size: 12px;
+    font-size: 0.75rem; /* 12px */
   }
 
   .shopping-list-selection-modal__create-btn {
     padding: 16px;
-    font-size: 15px;
+    font-size: 0.9375rem; /* 15px */
   }
 
   .shopping-list-selection-modal__create-form {

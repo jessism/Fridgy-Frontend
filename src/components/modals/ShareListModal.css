@@ -32,7 +32,7 @@
 
 .share-modal__title {
   margin: 0;
-  font-size: 20px;
+  font-size: 1.25rem; /* 20px */
   font-weight: 600;
   color: #333;
 }
@@ -40,7 +40,7 @@
 .share-modal__close {
   background: none;
   border: none;
-  font-size: 28px;
+  font-size: 1.75rem; /* 28px */
   color: #999;
   cursor: pointer;
   padding: 0;
@@ -69,7 +69,7 @@
   margin-bottom: 10px;
   font-weight: 500;
   color: #333;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
 }
 
 .share-modal__input-group {
@@ -82,7 +82,7 @@
   padding: 12px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   transition: border-color 0.2s;
 }
 
@@ -103,7 +103,7 @@
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s;
@@ -121,7 +121,7 @@
 
 .share-modal__hint {
   margin: 8px 0 0 0;
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   color: #888;
 }
 
@@ -130,7 +130,7 @@
   align-items: center;
   margin: 25px 0;
   color: #999;
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -158,7 +158,7 @@
   color: #333;
   border: 1px solid #ddd;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
@@ -177,7 +177,7 @@
   padding: 20px 30px;
   background: linear-gradient(135deg, #4fcf61 0%, #3cb54c 100%);
   color: white;
-  font-size: 24px;
+  font-size: 1.5rem; /* 24px */
   font-weight: bold;
   letter-spacing: 2px;
   border-radius: 12px;
@@ -197,7 +197,7 @@
 
 .share-modal__code-hint {
   margin: 5px 0;
-  font-size: 11px;
+  font-size: 0.6875rem; /* 11px */
   color: #999;
   font-style: italic;
 }
@@ -224,12 +224,12 @@
 }
 
 .share-modal__member-name {
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   color: #333;
 }
 
 .share-modal__member-role {
-  font-size: 11px;
+  font-size: 0.6875rem; /* 11px */
   color: #4fcf61;
   background: rgba(79, 207, 97, 0.1);
   padding: 2px 8px;
@@ -243,7 +243,7 @@
   background: #ffebee;
   color: #c62828;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
 }
 
 .share-modal__footer {
@@ -257,7 +257,7 @@
 .share-modal__button {
   padding: 12px 24px;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -310,7 +310,7 @@
   }
 
   .share-modal__code {
-    font-size: 20px;
+    font-size: 1.25rem; /* 20px */
     padding: 15px 25px;
   }
 }

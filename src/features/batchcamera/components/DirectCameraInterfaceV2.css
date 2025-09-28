@@ -192,6 +192,7 @@
   background: none;
   border: none;
   color: var(--header-color);
+  font-family: 'Poppins', sans-serif;
   font-size: 1rem;
   font-weight: 600;
   padding: 0.75rem 1.5rem;
@@ -592,7 +593,7 @@
   color: #9ca3af;
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -710,7 +711,8 @@
   }
   
   .camera-v2__control-button {
-    font-size: 0.9rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
     padding: 0.5rem 1rem;
     min-width: 70px;
   }
@@ -765,7 +767,8 @@
   }
   
   .camera-v2__control-button {
-    font-size: 0.8rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
     padding: 0.5rem 0.75rem;
     min-width: 60px;
   }

@@ -33,7 +33,7 @@
 
 .join-list-modal__title {
   margin: 0;
-  font-size: 20px;
+  font-size: 1.25rem; /* 20px */
   font-weight: 600;
   color: #333;
 }
@@ -41,7 +41,7 @@
 .join-list-modal__close {
   background: none;
   border: none;
-  font-size: 28px;
+  font-size: 1.75rem; /* 28px */
   color: #999;
   cursor: pointer;
   padding: 0;
@@ -72,7 +72,7 @@
 .join-list-modal__label {
   display: block;
   margin-bottom: 8px;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   font-weight: 500;
   color: #555;
 }
@@ -82,7 +82,7 @@
   padding: 12px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   transition: border-color 0.2s;
   box-sizing: border-box;
 }
@@ -100,7 +100,7 @@
 
 .join-list-modal__hint {
   margin-top: 6px;
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   color: #999;
   margin-bottom: 0;
 }
@@ -111,7 +111,7 @@
   color: #c62828;
   border-radius: 6px;
   margin-top: 12px;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
 }
 
 .join-list-modal__examples {
@@ -123,7 +123,7 @@
 
 .join-list-modal__examples-title {
   margin: 0 0 8px 0;
-  font-size: 13px;
+  font-size: 0.8125rem; /* 13px */
   font-weight: 500;
   color: #666;
 }
@@ -138,7 +138,7 @@
   position: relative;
   padding-left: 12px;
   margin-bottom: 6px;
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   color: #888;
   font-family: 'Courier New', monospace;
 }
@@ -162,7 +162,7 @@
   padding: 10px 20px;
   border: none;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;

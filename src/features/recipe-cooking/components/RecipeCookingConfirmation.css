@@ -74,7 +74,7 @@
 
 .recipe-cooking-title {
   flex: 1;
-  font-size: 20px;
+  font-size: 1.25rem; /* 20px */
   font-weight: 600;
   color: #111827;
   margin: 0;
@@ -89,7 +89,7 @@
   right: 16px;
   background: none;
   border: none;
-  font-size: 28px;
+  font-size: 1.75rem; /* 28px */
   color: #6b7280;
   cursor: pointer;
   width: 32px;
@@ -131,14 +131,14 @@
 }
 
 .recipe-cooking-servings {
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   font-weight: 600;
   color: #111827;
   margin: 0;
 }
 
 .recipe-cooking-time {
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   color: #6b7280;
   margin: 0;
 }
@@ -152,7 +152,7 @@
 
 .recipe-cooking-instructions p {
   margin: 0;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   color: #065f46;
   font-weight: 500;
 }
@@ -189,14 +189,14 @@
 }
 
 .recipe-ingredient-name {
-  font-size: 15px;
+  font-size: 0.9375rem; /* 15px */
   font-weight: 500;
   color: #111827;
   text-transform: capitalize;
 }
 
 .recipe-ingredient-amount {
-  font-size: 13px;
+  font-size: 0.8125rem; /* 13px */
   color: #6b7280;
 }
 
@@ -253,7 +253,7 @@
   background-color: #fef2f2;
   color: #dc2626;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   font-weight: 500;
 }
 
@@ -269,7 +269,7 @@
 }
 
 .recipe-cooking-count {
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   color: #6b7280;
   font-weight: 500;
 }
@@ -285,7 +285,7 @@
   background: white;
   color: #374151;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 0.9375rem; /* 15px */
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -302,7 +302,7 @@
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 0.9375rem; /* 15px */
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -352,7 +352,7 @@
   }
   
   .recipe-cooking-title {
-    font-size: 18px;
+    font-size: 1.125rem; /* 18px */
   }
   
   .recipe-cooking-info {
@@ -373,7 +373,7 @@
   }
   
   .recipe-cooking-count {
-    font-size: 13px;
+    font-size: 0.8125rem; /* 13px */
   }
   
   .recipe-cooking-actions {
@@ -383,6 +383,6 @@
   .recipe-cooking-cancel,
   .recipe-cooking-confirm {
     padding: 8px 16px;
-    font-size: 14px;
+    font-size: 0.875rem; /* 14px */
   }
 }

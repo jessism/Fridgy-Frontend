@@ -7,7 +7,7 @@
 
 /* Main Content Area */
 .ai-recipe-page__main {
-  padding-top: 80px; /* Reduced from 100px */
+  padding-top: 0; /* Remove top padding entirely */
   min-height: 100vh;
   background: white;
 }
@@ -15,7 +15,7 @@
 .ai-recipe-page__container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0.5rem 1rem; /* Reduced top padding */
+  padding: 0 1rem; /* Remove top padding */
 }
 
 /* Hero Section */
@@ -32,23 +32,27 @@
 }
 
 .ai-recipe-page__back-btn {
-  background: none;
+  position: fixed; /* Changed back to fixed for consistent positioning */
+  top: 1rem; /* Closer to top */
+  left: 1rem;
+  background: transparent;
   border: none;
-  color: #333;
+  color: #222222;
   cursor: pointer;
   padding: 8px;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
+  transition: all 0.2s;
   flex-shrink: 0;
+  z-index: 100;
 }
 
 .ai-recipe-page__back-btn:hover {
-  background: #f0f0f0;
+  transform: translateX(-2px);
+  opacity: 0.7;
 }
 
 .ai-recipe-page__hero-title {
@@ -73,9 +77,12 @@
 .ai-recipe-page__content {
   background: white;
   border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  border: none; /* Removed grey outline */
   overflow: hidden;
   margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 600px;
 }
 
 /* Error Message */
@@ -215,7 +222,7 @@
 }
 
 .recipes-container-no-border {
-  padding: 0;
+  padding: 0 0 100px 0; /* Add bottom padding for mobile nav */
   margin-top: 0;
 }
 
@@ -225,9 +232,9 @@
 
 .recipes-header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  padding: 1.5rem 0;
+  padding: 1rem 0 1.5rem 0; /* Set padding to match arrow position */
   margin-bottom: 2.5rem;
   position: relative;
 }
@@ -236,10 +243,11 @@
   font-family: var(--header-font);
   font-size: 2rem;
   color: var(--header-color);
-  margin: 0;
+  margin: 0 0 1.5rem 0; /* Remove top margin */
   font-weight: 700;
-  flex: 1;
   text-align: center;
+  width: 100%;
+  line-height: 40px; /* Match arrow button height for alignment */
 }
 
 .btn-regenerate {
@@ -287,6 +295,7 @@
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 2rem;
   margin-bottom: 2rem;
+  padding-bottom: 2rem; /* Extra padding at bottom */
 }
 
 .generation-info {
@@ -338,11 +347,11 @@
 
 @media (max-width: 768px) {
   .ai-recipe-page__main {
-    padding-top: 10px; /* Further reduced for mobile */
+    padding-top: 0; /* No top padding on mobile */
   }
 
   .ai-recipe-page__container {
-    padding: 0.25rem 1rem; /* Even less top padding on mobile */
+    padding: 0 1rem; /* No top padding on mobile */
   }
 
   .ai-recipe-page__hero {
@@ -357,6 +366,8 @@
   .ai-recipe-page__back-btn {
     width: 36px;
     height: 36px;
+    top: 0.75rem; /* Closer to top on mobile */
+    left: 0.5rem;
   }
 
   .ai-recipe-page__hero-title {
@@ -369,28 +380,21 @@
   }
 
   .recipes-header {
-    flex-wrap: wrap;
-    padding: 1rem 0;
+    flex-direction: column;
+    padding: 0.75rem 0 1rem 0; /* Match arrow position on mobile */
     margin-bottom: 2rem;
   }
   
   .recipes-header h2 {
     font-size: 1.75rem;
-    order: 1;
-    flex: 1;
-    margin-left: 0.5rem;
+    margin: 0 0 1rem 0; /* No top margin */
+    line-height: 36px; /* Match mobile arrow height */
   }
 
-  .recipes-header .ai-recipe-page__back-btn {
-    order: 0;
-    width: 36px;
-    height: 36px;
-  }
+  /* Back button positioned within header */
   
   .btn-regenerate {
-    order: 2;
     width: 100%;
-    margin-top: 1rem;
     justify-content: center;
   }
   
@@ -403,7 +407,7 @@
   }
   
   .recipes-container-no-border {
-    padding: 0;
+    padding: 0 0 60px 0; /* Bottom padding for mobile nav */
     margin-top: 0;
   }
   
@@ -437,7 +441,7 @@
   }
   
   .recipes-container-no-border {
-    padding: 0;
+    padding: 0 0 60px 0; /* Bottom padding for mobile nav */
     margin-top: 0;
   }
 }

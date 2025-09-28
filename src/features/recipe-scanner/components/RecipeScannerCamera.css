@@ -592,7 +592,7 @@
   color: #9ca3af;
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   display: flex;
   align-items: center;
   justify-content: center;

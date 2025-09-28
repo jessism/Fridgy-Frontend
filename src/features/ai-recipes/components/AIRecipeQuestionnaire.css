@@ -1,10 +1,85 @@
 /* AI Recipe Questionnaire Styles */
 .questionnaire-container {
-  padding: 2rem;
-  padding-bottom: 3rem; /* Extra bottom padding to ensure button is visible */
   max-width: 800px;
   margin: 0 auto;
   min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.questionnaire-container--multi-step {
+  padding: 0;
+  height: 100%;
+  min-height: calc(100vh - 60px); /* Full viewport minus nav */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Progress Bar */
+.questionnaire-progress {
+  position: fixed;
+  top: 2rem;
+  left: 0;
+  right: 0;
+  width: 100%;
+  padding: 0 2rem 0 4rem; /* Clean padding, arrow space on left */
+  margin-bottom: 0;
+  z-index: 50;
+  background: transparent; /* No background needed */
+}
+
+.questionnaire-progress__header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: none;
+  width: 100%;
+  height: 40px; /* Fixed height to align with arrow */
+}
+
+.questionnaire-progress__back-btn {
+  position: fixed;
+  top: 2rem; /* Same as progress container */
+  left: 1.5rem;
+  background: transparent;
+  border: none;
+  color: #666666; /* Lighter grey like onboarding */
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 100;
+  width: 40px;
+  height: 40px; /* Same height as progress header */
+}
+
+.questionnaire-progress__back-btn:hover {
+  transform: translateX(-2px); /* Subtle left movement on hover */
+  opacity: 0.7;
+}
+
+.questionnaire-progress__bar {
+  flex: 1;
+  height: 8px; /* Slightly thicker like onboarding */
+  background: #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  max-width: none;
+}
+
+.questionnaire-progress__bar-fill {
+  height: 100%;
+  background: var(--primary-green);
+  transition: width 0.3s ease;
+}
+
+.questionnaire-progress__counter {
+  font-size: 0.875rem;
+  color: #666666;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 /* Header */
@@ -14,22 +89,34 @@
 }
 
 .questionnaire-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.questionnaire-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
 }
 
 .questionnaire-title {
-  font-size: 1.8rem;
+  font-size: 1.5rem; /* Changed from 2rem to 1.5rem */
   font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 0.5rem 0;
+  color: #222222;
+  margin: 0 0 1rem 0;
+  line-height: 1.2;
 }
 
 .questionnaire-subtitle {
-  color: #6b7280;
-  font-size: 1rem;
-  line-height: 1.5;
-  margin: 0;
+  color: #666666;
+  font-size: 1rem; /* Changed from 1.125rem to 1rem */
+  line-height: 1.6;
+  margin: 0 0 2rem 0;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Form */
@@ -39,11 +126,84 @@
   gap: 2.5rem;
 }
 
+/* Content Container */
+.questionnaire-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.3s ease;
+  padding: 5rem 1.5rem 2rem; /* Reduced top padding */
+  max-width: 100%;
+  width: 100%;
+  min-height: calc(100vh - 120px); /* Account for navbar and bottom nav */
+}
+
+/* Step Container */
+.questionnaire-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Center content vertically */
+  gap: 3rem; /* Increased from 2.5rem */
+  animation: slideIn 0.3s ease;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+  min-height: 0; /* Allow flex to work properly */
+}
+
+.questionnaire-step--welcome {
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+.questionnaire-step--final {
+  gap: 2.5rem;
+}
+
+/* Back to Meals Button */
+.questionnaire-back-to-meals {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  background: transparent; /* No background */
+  border: none;
+  color: #222222;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 100;
+}
+
+.questionnaire-back-to-meals:hover {
+  transform: translateX(-2px);
+  opacity: 0.7;
+}
+
+/* Welcome Content */
+.questionnaire-welcome-content {
+  max-width: 600px;
+  width: 100%;
+}
+
+.btn-continue--large {
+  padding: 1rem 2.5rem;
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 500; /* Changed to 500 weight */
+}
+
 /* Question Groups */
 .question-group {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem; /* Increased from 1rem */
 }
 
 .question-group.has-error .question-header {
@@ -54,24 +214,24 @@
 .serving-size-container {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 0;
-  background: #f8fafc;
-  border-radius: 50px;
-  padding: 4px;
-  max-width: 150px;
+  justify-content: center;
+  gap: 1.5rem;
+  background: transparent;
+  border: none;
+  padding: 1.5rem 0;
+  max-width: 100%;
   margin: 0;
 }
 
 .serving-btn {
   width: 40px;
   height: 40px;
-  border: none;
-  border-radius: 0;
+  border: 2px solid var(--primary-green); /* Green border */
+  border-radius: 50%;
   background: transparent;
-  color: #374151;
-  font-size: 20px;
-  font-weight: 600;
+  color: var(--primary-green); /* Green color for +/- */
+  font-size: 1rem; /* 1rem as requested */
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -80,28 +240,32 @@
 }
 
 .serving-btn:hover:not(:disabled) {
-  color: #4fcf61;
-  transform: scale(1.1);
+  background: var(--primary-green); /* Solid green on hover */
+  color: white; /* White text on hover */
+  transform: scale(1.05);
 }
 
 .serving-btn:disabled {
+  border-color: #d1d5db;
   color: #d1d5db;
   cursor: not-allowed;
+  opacity: 0.5;
   transform: none;
 }
 
 .serving-display {
-  min-width: 60px;
+  min-width: 40px;
   height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e293b;
-  background: white;
-  border-radius: 20px;
-  margin: 0 8px;
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 1.5rem; /* Slightly smaller to match button size */
+  font-weight: 500;
+  color: #222222;
+  background: transparent;
+  border: none;
+  margin: 0 0.5rem;
 }
 
 /* Serving Size Warning */
@@ -131,7 +295,7 @@
 
 .warning-icon {
   flex-shrink: 0;
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
 }
 
 .warning-content {
@@ -176,7 +340,7 @@
 }
 
 .checking-spinner {
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   animation: spin 1s linear infinite;
 }
 
@@ -209,17 +373,22 @@
 .question-header {
   display: flex;
   flex-direction: column;
+  align-items: center; /* Center align all question header content */
   gap: 0.25rem;
+  width: 100%;
 }
 
 .question-title {
   display: flex;
   align-items: center;
+  justify-content: center; /* Center align the text */
   gap: 0.5rem;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  color: #1f2937;
+  color: #222222;
   margin: 0;
+  text-align: center;
+  width: 100%;
 }
 
 .question-icon {
@@ -233,10 +402,11 @@
 }
 
 .question-subtitle {
-  color: #6b7280;
-  font-size: 0.9rem;
+  color: #666666; /* Changed to #666666 */
+  font-size: 0.75rem; /* Changed to 0.75rem */
   margin: 0;
   font-weight: 400;
+  text-align: center; /* Center align subtitle too */
 }
 
 .question-error {
@@ -246,49 +416,65 @@
   margin-top: 0.25rem;
 }
 
-/* Chips Container */
+/* Chips Container - Now stacked vertically */
 .chips-container {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+  flex-direction: column; /* Stack vertically */
+  gap: 1.25rem; /* Increased from 0.75rem for more breathing room */
+  width: 100%;
+  margin: 1rem 0; /* Add margin top and bottom */
 }
 
-/* Individual Chips - Modern Design */
+/* Individual Chips - Minimal Stacked Design */
 .chip {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  background: #f3f4f6;
-  border: none;
-  border-radius: 24px; /* Fully rounded for modern pill look */
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #374151;
+  padding: 1rem 1.5rem;
+  background: #fafafa; /* Very light background */
+  border: 1px solid #f0f0f0; /* Very subtle border */
+  border-radius: 8px; /* Subtle rounding */
+  font-family: 'Poppins', system-ui, sans-serif; /* System font */
+  font-size: 1rem;
+  font-weight: 400; /* Changed to 400 weight */
+  color: #222222; /* System black */
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
-  min-height: 40px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  min-height: 56px;
+  width: 100%;
+  text-align: left;
+  box-shadow: none;
 }
 
 .chip:hover:not(:disabled) {
-  background: #e5e7eb;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: #f5f5f5;
+  border-color: #e0e0e0;
+  transform: translateX(2px);
+  box-shadow: none; /* No shadow for minimal look */
 }
 
 .chip.selected {
-  background: var(--primary-green);
-  color: white;
-  font-weight: 600;
-  box-shadow: 0 4px 8px rgba(79, 207, 97, 0.25);
+  background: #f0fdf4; /* Very light green background */
+  color: #222222; /* Keep text black */
+  font-weight: 600 !important; /* Semi-bold weight when selected - force with !important */
+  border-color: var(--primary-green); /* Green border */
+  border-width: 2px; /* Slightly thicker border when selected */
+  box-shadow: none;
+}
+
+/* Ensure chip label inside selected chip is also bold */
+.chip.selected .chip-label {
+  font-weight: 600 !important;
 }
 
 .chip.selected:hover {
-  background: var(--primary-green-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(79, 207, 97, 0.35);
+  background: #e6f9ed; /* Slightly darker light green on hover */
+  color: #222222; /* Keep text black */
+  border-color: var(--primary-green);
+  transform: translateX(2px);
+  box-shadow: none;
 }
 
 .chip-icon {
@@ -297,30 +483,33 @@
 }
 
 .chip-label {
-  font-size: 0.9rem;
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: inherit; /* Inherit from parent chip */
   line-height: 1.2;
+  color: inherit;
 }
 
 /* Additional Notes */
 .additional-notes {
   width: 100%;
   padding: 1rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
+  border: 1px solid #e5e5e5; /* Thinner, more modern border */
+  border-radius: 8px; /* Slightly less rounded for modern look */
   font-size: 1rem;
   line-height: 1.5;
   color: #1f2937;
   background: #ffffff;
   resize: vertical;
   min-height: 80px;
-  font-family: inherit;
+  font-family: 'Poppins', system-ui, sans-serif;
   transition: border-color 0.2s ease;
 }
 
 .additional-notes:focus {
   outline: none;
   border-color: var(--primary-green);
-  box-shadow: 0 0 0 3px rgba(79, 207, 97, 0.1);
+  box-shadow: none; /* Remove shadow for cleaner look */
 }
 
 .additional-notes::placeholder {
@@ -331,13 +520,58 @@
 /* Actions */
 .questionnaire-actions {
   display: flex;
-  flex-direction: column;
-  align-items: center;
   gap: 1rem;
-  margin-top: 1rem;
-  margin-bottom: 2rem; /* Extra bottom margin for button visibility */
-  padding-top: 2rem;
-  border-top: 1px solid #e5e7eb;
+  margin-top: 3rem; /* Increased from 2rem for more space before button */
+  padding-top: 0;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Continue Button */
+.btn-continue {
+  padding: 0.875rem 2rem;
+  background: var(--primary-green);
+  color: white;
+  border: none;
+  border-radius: 24px;
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 500; /* Changed to 500 weight */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 140px;
+}
+
+.btn-continue:hover:not(:disabled) {
+  background: var(--primary-green-dark);
+  transform: translateY(-2px);
+}
+
+.btn-continue:disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Skip Button */
+.btn-skip {
+  padding: 0.875rem 1.5rem;
+  background: transparent;
+  color: #666666;
+  border: 1px solid #e5e7eb;
+  border-radius: 24px;
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 500; /* Changed to 500 weight */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.btn-skip:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
 }
 
 .btn-generate-recipes {
@@ -346,8 +580,9 @@
   border: none;
   border-radius: 12px;
   padding: 1rem 2rem;
+  font-family: 'Poppins', system-ui, sans-serif;
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: 500; /* Changed to 500 weight */
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -400,13 +635,44 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .questionnaire-container {
-    padding: 1.5rem;
+    padding: 0;
+    min-height: calc(100vh - 60px);
   }
-  
+
+  .questionnaire-progress {
+    padding: 0 1rem 0 3rem; /* Clean padding for mobile */
+    top: 1.5rem;
+  }
+
+  .questionnaire-progress__back-btn {
+    top: 1.5rem; /* Same as progress container */
+    left: 0.5rem;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+  }
+
+  .questionnaire-content {
+    padding: 4rem 1rem 1rem; /* Adjusted for mobile */
+    min-height: calc(100vh - 100px); /* Account for mobile nav */
+  }
+
+  .questionnaire-step--welcome {
+    padding: 1rem;
+  }
+
+  .questionnaire-back-to-meals {
+    top: 0.5rem;
+    left: 0.5rem;
+    background: transparent;
+    border: none;
+  }
+
   .questionnaire-header {
     margin-bottom: 2rem;
   }
-  
+
   .questionnaire-title {
     font-size: 1.5rem;
   }
@@ -416,22 +682,27 @@
   }
   
   .question-title {
-    font-size: 1.1rem;
+    font-size: 1.5rem; /* Keep 1.5rem on all screen sizes */
   }
   
   .chips-container {
-    gap: 0.5rem;
+    gap: 1rem; /* Good spacing on mobile too */
   }
-  
+
   .chip {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    min-height: 38px;
-    border-radius: 20px;
+    padding: 0.875rem 1.25rem;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 1rem !important; /* Force 1rem with !important */
+    color: #222222;
+    min-height: 50px;
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
   }
   
   .chip-label {
-    font-size: 0.875rem;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 1rem !important;
+    font-weight: inherit; /* Inherit from parent */
   }
   
   .additional-notes {
@@ -448,42 +719,48 @@
 
 @media (max-width: 480px) {
   .questionnaire-container {
-    padding: 1rem;
+    padding: 0;
   }
-  
-  .questionnaire-icon {
-    font-size: 2.5rem;
+
+  .questionnaire-logo {
+    width: 60px;
+    height: 60px;
   }
-  
+
   .questionnaire-title {
     font-size: 1.3rem;
   }
-  
+
   .questionnaire-subtitle {
     font-size: 0.9rem;
   }
-  
+
   .chips-container {
-    gap: 0.4rem;
+    gap: 0.9rem; /* Still good spacing on small screens */
   }
-  
+
   .chip {
-    padding: 0.45rem 0.875rem;
-    font-size: 0.8rem;
-    border-radius: 18px;
-    min-height: 34px;
+    padding: 0.75rem 1rem;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 1rem !important; /* Force 1rem even on small screens */
+    color: #222222;
+    border-radius: 8px;
+    min-height: 46px;
+    border: 1px solid #f0f0f0;
   }
-  
+
   .chip-icon {
     font-size: 0.9rem;
   }
-  
+
   .chip-label {
-    font-size: 0.8rem;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 1rem !important;
+    font-weight: inherit; /* Inherit from parent */
   }
-  
+
   .question-title {
-    font-size: 1rem;
+    font-size: 1.5rem; /* Keep 1.5rem even on small screens */
   }
   
   .btn-generate-recipes {
@@ -511,7 +788,10 @@
 }
 
 /* Focus styles for keyboard navigation */
-.chip:focus,
+.chip:focus {
+  outline: none;
+}
+
 .additional-notes:focus,
 .btn-generate-recipes:focus {
   outline: 2px solid var(--primary-green);
@@ -523,10 +803,22 @@
   .chip {
     border-width: 3px;
   }
-  
+
   .chip.selected {
     background: #222222;
     border-color: #222222;
     color: #fff;
+  }
+}
+
+/* Additional animation for multi-step flow */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

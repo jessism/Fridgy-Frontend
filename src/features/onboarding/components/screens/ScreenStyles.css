@@ -89,22 +89,22 @@
 }
 
 .onboarding-screen__title {
-  font-size: 28px;
+  font-size: 2rem; /* 32px - Welcome to Trackabite */
   font-weight: 700;
-  color: #1a1a1a;
+  color: #222222;
   margin-bottom: 20px;
   line-height: 1.3;
 }
 
 .onboarding-screen__subtitle {
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   color: #666;
   margin-bottom: 24px;
   line-height: 1.5;
 }
 
 .onboarding-screen__note {
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   color: #999;
   margin-top: 20px;
 }
@@ -121,8 +121,9 @@
 .onboarding-btn {
   padding: 12px 24px;
   border-radius: 25px;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 1rem; /* 16px */
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-weight: 500;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -177,13 +178,13 @@
 
 .onboarding-btn--large {
   padding: 16px 32px;
-  font-size: 18px;
+  font-size: 1rem; /* 16px - matching button text requirement */
   min-width: 200px;
 }
 
 .onboarding-btn--small {
   padding: 8px 16px;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   min-width: 80px;
 }
 
@@ -218,11 +219,11 @@
 }
 
 .welcome-feature__icon {
-  font-size: 24px;
+  font-size: 1.5rem; /* 24px */
 }
 
 .welcome-feature__text {
-  font-size: 15px;
+  font-size: 0.9375rem; /* 15px */
   color: #333;
 }
 
@@ -255,18 +256,18 @@
 }
 
 .selection-card__icon {
-  font-size: 32px;
+  font-size: 2rem; /* 32px */
   margin-bottom: 8px;
 }
 
 .selection-card__label {
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   font-weight: 600;
   color: #333;
 }
 
 .selection-card__description {
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   color: #666;
   margin-top: 4px;
 }
@@ -278,7 +279,7 @@
 
 .input-group__label {
   display: block;
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   font-weight: 500;
   color: #333;
   margin-bottom: 12px;
@@ -289,7 +290,7 @@
   padding: 14px 16px;
   border: 1.5px solid #e8e8e8;
   border-radius: 12px;
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   transition: all 0.2s ease;
   background: #fafafa;
 }
@@ -302,7 +303,7 @@
 }
 
 .input-group__helper {
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   color: #666;
   margin-top: 4px;
 }
@@ -379,7 +380,7 @@
 }
 
 .checkbox-item__label {
-  font-size: 15px;
+  font-size: 0.9375rem; /* 15px */
   font-weight: 500;
   color: #1f2937;
   cursor: pointer;
@@ -411,7 +412,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   background: white;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   font-weight: 500;
   color: #1f2937;
   min-width: fit-content;
@@ -476,13 +477,13 @@
 }
 
 .cuisine-card__icon {
-  font-size: 24px;
+  font-size: 1.5rem; /* 24px */
   flex-shrink: 0;
   line-height: 1;
 }
 
 .cuisine-card__label {
-  font-size: 15px;
+  font-size: 0.9375rem; /* 15px */
   font-weight: 500;
   color: inherit;
   line-height: 1.2;
@@ -497,7 +498,7 @@
 }
 
 .slider-group__value {
-  font-size: 24px;
+  font-size: 1.5rem; /* 24px */
   font-weight: 700;
   color: #4fcf61;
   margin-bottom: 16px;
@@ -523,7 +524,7 @@
   display: flex;
   justify-content: space-between;
   margin-top: 8px;
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   color: #666;
 }
 
@@ -545,7 +546,7 @@
   color: #666;
   border: 2px solid #e8e8e8;
   border-radius: 25px;
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -585,7 +586,7 @@
   background: white;
   color: var(--primary-green, #81e053);
   border-radius: 50%;
-  font-size: 20px;
+  font-size: 1.25rem; /* 20px */
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -605,7 +606,7 @@
 }
 
 .number-selector__value {
-  font-size: 18px;
+  font-size: 1.125rem; /* 18px */
   font-weight: 600;
   color: #333;
   min-width: 40px;
@@ -624,13 +625,13 @@
 }
 
 .budget-slider__label {
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   font-weight: 500;
   color: #333;
 }
 
 .budget-slider__value {
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   font-weight: 600;
   color: #333;
 }
@@ -678,7 +679,7 @@
 .budget-slider__labels {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   color: #666;
   margin-top: 8px;
 }
@@ -690,11 +691,11 @@
   }
   
   .onboarding-screen__title {
-    font-size: 24px;
+    font-size: 1.5rem; /* 24px */
   }
   
   .onboarding-screen__subtitle {
-    font-size: 15px;
+    font-size: 0.9375rem; /* 15px */
   }
   
   .selection-grid {

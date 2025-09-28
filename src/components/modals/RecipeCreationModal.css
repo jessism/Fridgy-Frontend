@@ -46,7 +46,7 @@
 }
 
 .recipe-creation-title {
-  font-size: 20px;
+  font-size: 1.25rem; /* 20px */
   font-weight: 600;
   color: #1F2937;
   margin: 0;
@@ -65,7 +65,7 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  font-size: 20px;
+  font-size: 1.25rem; /* 20px */
 }
 
 .recipe-creation-close:hover {
@@ -116,7 +116,7 @@
 }
 
 .recipe-option-label {
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   font-weight: 500;
   color: #374151;
   text-align: center;
@@ -162,6 +162,6 @@
   }
 
   .recipe-option-label {
-    font-size: 13px;
+    font-size: 0.8125rem; /* 13px */
   }
 }

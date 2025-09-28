@@ -662,9 +662,9 @@ const MealPlansPage = ({ defaultTab }) => {
               <div className="meal-plans-page__scan-header">
                 <h2 className="meal-plans-page__scan-title">Scan your meal</h2>
                 <button className="meal-plans-page__scan-button" onClick={handleLogMeal}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" strokeWidth="2"/>
-                    <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" strokeWidth="2"/>
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <circle cx="16" cy="16" r="14" fill="var(--primary-green)"/>
+                    <path d="M16 10V22M10 16H22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
                   </svg>
                 </button>
               </div>
@@ -832,8 +832,8 @@ const MealPlansPage = ({ defaultTab }) => {
                     {userUploadedRecipes.slice(0, 4).map(recipe => renderSavedRecipeCard(recipe, true))}
                   </div>
                 ) : (
-                  <div style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>
-                    <p style={{ marginBottom: '1rem', fontSize: '1rem' }}>Upload your first recipe</p>
+                  <div style={{ padding: '2rem', textAlign: 'center' }}>
+                    <p style={{ marginBottom: '1rem', fontSize: '1rem', color: '#666' }}>Upload your first recipe</p>
                   </div>
                 )}
               </div>

@@ -4,6 +4,7 @@ import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import { EditIcon, DeleteIcon } from '../components/icons';
 import MealDetailModal from '../components/modals/MealDetailModal.jsx';
+import { ChevronLeft } from 'lucide-react';
 import './MealHistoryPage.css';
 
 const MealHistoryPage = () => {
@@ -655,15 +656,12 @@ const MealHistoryPage = () => {
         <div className="meal-history-page__container">
           {/* Header with back button */}
           <div className="meal-history-page__header">
-            <button 
+            <button
               className="meal-history-page__back-button"
               onClick={handleBackClick}
               aria-label="Go back to meal plans"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19 12H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <ChevronLeft size={20} />
             </button>
           </div>
 

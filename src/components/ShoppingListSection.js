@@ -412,7 +412,7 @@ const ShoppingListSection = () => {
                             </span>
                           )}
                           {list.member_count > 1 && (
-                            <span className="shopping-list-section__shared-badge">
+                            <span className={`shopping-list-section__shared-badge shopping-list-section__shared-badge--color-${getListColor(list.id)}`}>
                               <span className="shopping-list-section__shared-count">{list.member_count}</span> Shared
                             </span>
                           )}
@@ -481,7 +481,7 @@ const ShoppingListSection = () => {
                             </span>
                           )}
                           {list.member_count > 1 && (
-                            <span className="shopping-list-section__shared-badge">
+                            <span className={`shopping-list-section__shared-badge shopping-list-section__shared-badge--color-${getListColor(list.id)}`}>
                               <span className="shopping-list-section__shared-count">{list.member_count}</span> Shared
                             </span>
                           )}

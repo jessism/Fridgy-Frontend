@@ -32,7 +32,7 @@
 }
 
 .shopping-icon {
-  font-size: 64px;
+  font-size: 4rem; /* 64px */
   display: inline-block;
   animation: bounce 2s infinite;
 }
@@ -138,7 +138,7 @@
   }
   
   .shopping-icon {
-    font-size: 48px;
+    font-size: 3rem; /* 48px */
   }
 }
 

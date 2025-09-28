@@ -7,10 +7,12 @@ import appLogo from '../../assets/images/Logo.png';
 const AppNavBar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const dropdownRef = useRef(null);
+  const addModalRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,15 +30,19 @@ const AppNavBar = () => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsProfileDropdownOpen(false);
       }
+      if (addModalRef.current && !addModalRef.current.contains(event.target)) {
+        setIsAddModalOpen(false);
+      }
     };
 
     const handleEscapeKey = (event) => {
       if (event.key === 'Escape') {
         setIsProfileDropdownOpen(false);
+        setIsAddModalOpen(false);
       }
     };
 
-    if (isProfileDropdownOpen) {
+    if (isProfileDropdownOpen || isAddModalOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('keydown', handleEscapeKey);
     }
@@ -45,7 +51,7 @@ const AppNavBar = () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscapeKey);
     };
-  }, [isProfileDropdownOpen]);
+  }, [isProfileDropdownOpen, isAddModalOpen]);
 
   const handleHomeClick = () => {
     navigate('/home');
@@ -69,6 +75,25 @@ const AppNavBar = () => {
     } catch (error) {
       console.error('Logout failed:', error);
     }
+  };
+
+  const handleAddButtonClick = () => {
+    setIsAddModalOpen(true);
+  };
+
+  const handleAddGrocery = () => {
+    setIsAddModalOpen(false);
+    navigate('/batchcamera');
+  };
+
+  const handleAddRecipe = () => {
+    setIsAddModalOpen(false);
+    navigate('/meal-plans/recipes');
+  };
+
+  const handleAddMeal = () => {
+    setIsAddModalOpen(false);
+    navigate('/mealscanner');
   };
 
   // Helper function to check if link is active
@@ -120,8 +145,8 @@ const AppNavBar = () => {
           </Link>
           
           {/* Add to Fridge Button */}
-          <Link 
-            to="/batchcamera" 
+          <button
+            onClick={handleAddButtonClick}
             className="add-to-fridge-button"
             title="Add to Fridge"
           >
@@ -129,7 +154,7 @@ const AppNavBar = () => {
               <circle cx="16" cy="16" r="14" fill="#81e053"/>
               <path d="M16 10V22M10 16H22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
             </svg>
-          </Link>
+          </button>
           
           {/* Profile Dropdown */}
           <div className="profile-dropdown-container" ref={dropdownRef}>
@@ -195,6 +220,51 @@ const AppNavBar = () => {
         </div>
 
       </div>
+
+      {/* Add Options Modal */}
+      {isAddModalOpen && (
+        <div className="add-modal-overlay" onClick={() => setIsAddModalOpen(false)}>
+          <div className="add-modal-content" ref={addModalRef} onClick={(e) => e.stopPropagation()}>
+            <div className="add-modal-header">
+              <div className="add-modal-handle"></div>
+            </div>
+            <div className="add-modal-options">
+              <button className="add-modal-option" onClick={handleAddGrocery}>
+                <div className="add-modal-option-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                    <circle cx="9" cy="21" r="1"/>
+                    <circle cx="20" cy="21" r="1"/>
+                  </svg>
+                </div>
+                <span className="add-modal-option-label">Add Grocery</span>
+              </button>
+
+              <button className="add-modal-option" onClick={handleAddRecipe}>
+                <div className="add-modal-option-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    <path d="M12 6h4"/>
+                    <path d="M12 10h4"/>
+                  </svg>
+                </div>
+                <span className="add-modal-option-label">Add Recipe</span>
+              </button>
+
+              <button className="add-modal-option" onClick={handleAddMeal}>
+                <div className="add-modal-option-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M11 2v20M11 7h5a4 4 0 0 0 0-5"/>
+                    <path d="M7 2v8l-1.5 1.5a1 1 0 0 0 0 1.4l.3.3a1 1 0 0 0 1.4 0L9 11.4V22"/>
+                  </svg>
+                </div>
+                <span className="add-modal-option-label">Add Meal</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

@@ -26,7 +26,7 @@
   padding: 8px 16px;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   transition: all 0.3s ease;
 }
 
@@ -37,14 +37,14 @@
 
 .multi-modal-import-page__header h1 {
   color: white;
-  font-size: 32px;
+  font-size: 2rem; /* 32px */
   margin-bottom: 8px;
   font-weight: 600;
 }
 
 .multi-modal-import-page__subtitle {
   color: rgba(255, 255, 255, 0.9);
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   margin: 0;
 }
 
@@ -68,7 +68,7 @@
   padding: 14px 18px;
   border: 2px solid #e9ecef;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   transition: all 0.3s ease;
 }
 
@@ -82,7 +82,7 @@
   padding: 14px 24px;
   border: none;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -137,7 +137,7 @@
 .multi-modal-import-page__progress h3 {
   margin: 0 0 20px 0;
   color: #495057;
-  font-size: 18px;
+  font-size: 1.125rem; /* 18px */
   font-weight: 600;
 }
 
@@ -173,7 +173,7 @@
 }
 
 .multi-modal-import-page__stage-icon {
-  font-size: 24px;
+  font-size: 1.5rem; /* 24px */
   min-width: 32px;
   text-align: center;
 }
@@ -185,12 +185,12 @@
 }
 
 .multi-modal-import-page__stage-info strong {
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   color: #212529;
 }
 
 .multi-modal-import-page__stage-info span {
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   color: #6c757d;
 }
 
@@ -206,7 +206,7 @@
   margin: 0 0 24px 0;
   text-align: center;
   color: #212529;
-  font-size: 20px;
+  font-size: 1.25rem; /* 20px */
 }
 
 .multi-modal-import-page__feature-grid {
@@ -229,7 +229,7 @@
 }
 
 .multi-modal-import-page__feature-icon {
-  font-size: 32px;
+  font-size: 2rem; /* 32px */
   display: block;
   margin-bottom: 12px;
 }
@@ -238,13 +238,13 @@
   display: block;
   margin-bottom: 8px;
   color: #212529;
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
 }
 
 .multi-modal-import-page__feature p {
   margin: 0;
   color: #6c757d;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
 }
 
 /* Recipe Preview */
@@ -279,7 +279,7 @@
 .multi-modal-import-page__recipe-title-section h2 {
   margin: 0 0 12px 0;
   color: #212529;
-  font-size: 28px;
+  font-size: 1.75rem; /* 28px */
 }
 
 .multi-modal-import-page__recipe-summary {
@@ -307,11 +307,11 @@
 
 .multi-modal-import-page__metric strong {
   color: #6c757d;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
 }
 
 .multi-modal-import-page__metric-value {
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   font-weight: 600;
   color: #667eea;
 }
@@ -328,7 +328,7 @@
 .multi-modal-import-page__recipe-section h3 {
   margin: 0 0 16px 0;
   color: #212529;
-  font-size: 20px;
+  font-size: 1.25rem; /* 20px */
   border-bottom: 2px solid #e9ecef;
   padding-bottom: 8px;
 }
@@ -376,7 +376,7 @@
   padding: 6px 12px;
   background: white;
   border-radius: 20px;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   color: #495057;
 }
 
@@ -449,7 +449,7 @@
   }
 
   .multi-modal-import-page__header h1 {
-    font-size: 24px;
+    font-size: 1.5rem; /* 24px */
   }
 
   .multi-modal-import-page__input-wrapper {

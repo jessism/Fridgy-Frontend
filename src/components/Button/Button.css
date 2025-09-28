@@ -30,19 +30,19 @@
 /* BUTTON SIZES */
 .button--small {
   padding: 8px 16px;
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   border-radius: 20px;
 }
 
 .button--medium {
   padding: 12px 24px;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   border-radius: 25px;
 }
 
 .button--large {
   padding: 16px 32px;
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   border-radius: 30px;
 }
 

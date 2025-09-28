@@ -61,7 +61,7 @@
 }
 
 .brand-name {
-  font-size: 20px;
+  font-size: 1.25rem; /* 20px */
   font-weight: 600;
   color: #222222;
   margin: 0;
@@ -80,7 +80,7 @@
   text-decoration: none;
   padding: 12px 24px;
   border-radius: 25px;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   font-weight: 500;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -137,7 +137,7 @@
   padding: 12px 24px;
   border-radius: 25px;
   margin-bottom: 40px;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   color: #666;
   font-weight: 500;
   box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
@@ -154,7 +154,7 @@
 }
 
 .hero-subtitle {
-  font-size: 18px;
+  font-size: 1.125rem; /* 18px */
   color: #333;
   margin: 0 0 48px 0;
   line-height: 1.6;
@@ -191,7 +191,7 @@
 }
 
 .app-store-icon {
-  font-size: 20px;
+  font-size: 1.25rem; /* 20px */
 }
 
 .btn-content {
@@ -202,13 +202,13 @@
 }
 
 .btn-text-small {
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   opacity: 0.8;
   font-weight: 400;
 }
 
 .btn-text-large {
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   font-weight: 600;
 }
 
@@ -261,7 +261,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px 10px;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   font-weight: 600;
 }
 
@@ -272,7 +272,7 @@
 .status-indicators {
   display: flex;
   gap: 4px;
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
 }
 
 .app-interface {
@@ -295,7 +295,7 @@
 }
 
 .app-name {
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   font-weight: 600;
   color: #222222;
   flex: 1;
@@ -309,12 +309,12 @@
 }
 
 .search-icon {
-  font-size: 18px;
+  font-size: 1.125rem; /* 18px */
 }
 
 .cart-icon {
   position: relative;
-  font-size: 18px;
+  font-size: 1.125rem; /* 18px */
 }
 
 .cart-badge {
@@ -323,7 +323,7 @@
   right: -8px;
   background: #ff4444;
   color: white;
-  font-size: 10px;
+  font-size: 0.625rem; /* 10px */
   font-weight: 600;
   padding: 2px 6px;
   border-radius: 10px;
@@ -340,7 +340,7 @@
 .tab {
   padding: 12px 20px;
   border-radius: 15px;
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -368,14 +368,14 @@
 }
 
 .section-header h3 {
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   font-weight: 600;
   color: #222222;
   margin: 0;
 }
 
 .see-all {
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   color: #666;
   font-weight: 500;
 }
@@ -406,7 +406,7 @@
 }
 
 .product-item span {
-  font-size: 11px;
+  font-size: 0.6875rem; /* 11px */
   color: #666;
   font-weight: 500;
 }
@@ -504,7 +504,7 @@
   }
   
   .hero-title {
-    font-size: 36px;
+    font-size: 2.25rem; /* 36px */
   }
   
   .app-store-buttons {
@@ -519,11 +519,11 @@
 
 @media (max-width: 480px) {
   .hero-title {
-    font-size: 28px;
+    font-size: 1.75rem; /* 28px */
   }
   
   .hero-subtitle {
-    font-size: 16px;
+    font-size: 1rem; /* 16px */
   }
   
   .phone-frame {
