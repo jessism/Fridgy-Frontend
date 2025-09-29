@@ -8,7 +8,6 @@ const ManualRecipeEntryPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentSection, setCurrentSection] = useState(1);
-  const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef(null);
 
   // Form data state
@@ -46,23 +45,26 @@ const ManualRecipeEntryPage = () => {
 
   // Auto-save to localStorage and handle camera return
   useEffect(() => {
-    // Check if returning from camera with image
-    if (location.state?.capturedImage) {
-      handleChange('image', location.state.capturedImage);
-      handleChange('imageFile', location.state.imageBlob);
-      // Clear the state to prevent re-applying on refresh
-      window.history.replaceState({}, document.title);
-    }
-
-    // Load saved draft
+    // First, load any saved draft
     const savedData = localStorage.getItem('draft_recipe');
-    if (savedData && !location.state?.capturedImage) {
+    if (savedData) {
       try {
         const parsed = JSON.parse(savedData);
         setRecipeData(parsed);
       } catch (e) {
         console.log('No valid draft found');
       }
+    }
+
+    // Then, if returning from camera, add the image to existing data
+    if (location.state?.capturedImage) {
+      setRecipeData(prev => ({
+        ...prev, // Keep all existing data (title, summary, etc.)
+        image: location.state.capturedImage,
+        imageFile: location.state.imageBlob
+      }));
+      // Clear the state to prevent re-applying on refresh
+      window.history.replaceState({}, document.title);
     }
   }, [location.state]);
 
@@ -86,6 +88,12 @@ const ManualRecipeEntryPage = () => {
       ...prev,
       ingredients: [...prev.ingredients, { amount: '', unit: '', name: '', notes: '' }]
     }));
+    // Focus on the new ingredient's name field after adding
+    setTimeout(() => {
+      const inputs = document.querySelectorAll('.manual-recipe-entry__ingredient-name-input');
+      const lastInput = inputs[inputs.length - 1];
+      if (lastInput) lastInput.focus();
+    }, 100);
   };
 
   const removeIngredient = (index) => {
@@ -110,6 +118,12 @@ const ManualRecipeEntryPage = () => {
       ...prev,
       instructions: [...prev.instructions, { step: '', time: '' }]
     }));
+    // Focus on the new instruction's textarea after adding
+    setTimeout(() => {
+      const textareas = document.querySelectorAll('.manual-recipe-entry__instruction-input');
+      const lastTextarea = textareas[textareas.length - 1];
+      if (lastTextarea) lastTextarea.focus();
+    }, 100);
   };
 
   const removeInstruction = (index) => {
@@ -207,38 +221,8 @@ const ManualRecipeEntryPage = () => {
     handleChange('imageFile', file);
   };
 
-  const uploadImageToSupabase = async (imageFile) => {
-    if (!imageFile) return null;
-
-    setUploadingImage(true);
-    try {
-      const token = localStorage.getItem('fridgy_token');
-      const formData = new FormData();
-      formData.append('image', imageFile);
-
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${apiUrl}/recipes/upload-image`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        return data.imageUrl;
-      } else {
-        console.error('Failed to upload image');
-        return null;
-      }
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      return null;
-    } finally {
-      setUploadingImage(false);
-    }
-  };
+  // TODO: Future enhancement - implement image upload to Supabase storage
+  // For now, manual recipes are saved without images
 
 
   // Validate current section
@@ -294,12 +278,71 @@ const ManualRecipeEntryPage = () => {
         return;
       }
 
-      // Upload image if needed
-      let finalImageUrl = recipeData.image;
-      if (recipeData.imageFile) {
-        const uploadedUrl = await uploadImageToSupabase(recipeData.imageFile);
-        if (uploadedUrl) {
-          finalImageUrl = uploadedUrl;
+      // Upload image if user has taken a photo
+      let finalImageUrl = null;
+
+      if (recipeData.image && recipeData.image.startsWith('data:image')) {
+        console.log('[Manual Recipe] Uploading user photo...');
+
+        try {
+          // Convert base64 to blob
+          const base64Response = await fetch(recipeData.image);
+          const blob = await base64Response.blob();
+
+          // Create FormData for upload
+          const formData = new FormData();
+          formData.append('image', blob, 'recipe-photo.jpg');
+
+          // Upload to backend
+          const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+          const uploadResponse = await fetch(`${apiUrl}/recipes/upload-image`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            body: formData
+          });
+
+          const uploadResult = await uploadResponse.json();
+
+          if (uploadResult.success) {
+            finalImageUrl = uploadResult.imageUrl;
+            console.log('[Manual Recipe] Photo uploaded successfully:', finalImageUrl);
+          } else {
+            console.error('[Manual Recipe] Photo upload failed:', uploadResult.error);
+            // Continue without image if upload fails
+          }
+        } catch (uploadError) {
+          console.error('[Manual Recipe] Error uploading photo:', uploadError);
+          // Continue without image if upload fails
+        }
+      } else if (recipeData.imageFile) {
+        console.log('[Manual Recipe] Uploading selected image file...');
+
+        try {
+          // Upload file directly
+          const formData = new FormData();
+          formData.append('image', recipeData.imageFile);
+
+          const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+          const uploadResponse = await fetch(`${apiUrl}/recipes/upload-image`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            body: formData
+          });
+
+          const uploadResult = await uploadResponse.json();
+
+          if (uploadResult.success) {
+            finalImageUrl = uploadResult.imageUrl;
+            console.log('[Manual Recipe] Image file uploaded successfully:', finalImageUrl);
+          } else {
+            console.error('[Manual Recipe] Image file upload failed:', uploadResult.error);
+          }
+        } catch (uploadError) {
+          console.error('[Manual Recipe] Error uploading image file:', uploadError);
         }
       }
 
@@ -312,7 +355,7 @@ const ManualRecipeEntryPage = () => {
       const recipeToSave = {
         title: recipeData.title,
         summary: recipeData.summary || '',
-        image: finalImageUrl || null,
+        image: finalImageUrl || null, // Now includes uploaded image URL
 
         // Transform ingredients to extendedIngredients format
         extendedIngredients: recipeData.ingredients
@@ -362,6 +405,8 @@ const ManualRecipeEntryPage = () => {
         extraction_notes: recipeData.notes
       };
 
+      console.log('[Manual Recipe] Saving recipe:', recipeToSave.title);
+
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
       const response = await fetch(`${apiUrl}/recipes/save`, {
         method: 'POST',
@@ -380,10 +425,11 @@ const ManualRecipeEntryPage = () => {
       const data = await response.json();
 
       if (data.success) {
+        console.log('[Manual Recipe] Recipe saved successfully!');
         // Clear draft
         localStorage.removeItem('draft_recipe');
-        // Navigate to saved recipes
-        navigate('/saved-recipes');
+        // Navigate to uploaded recipes (user-created content)
+        navigate('/uploaded-recipes');
       } else {
         setError(data.error || 'Failed to save recipe');
       }
@@ -405,7 +451,6 @@ const ManualRecipeEntryPage = () => {
 
   // Category options
   const categoryOptions = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Dessert', 'Appetizer'];
-  const cuisineOptions = ['American', 'Italian', 'Mexican', 'Asian', 'Mediterranean', 'French', 'Indian', 'Thai', 'Japanese', 'Greek'];
   const dishTypeOptions = ['main course', 'side dish', 'dessert', 'appetizer', 'salad', 'bread', 'breakfast', 'soup', 'beverage', 'sauce', 'marinade', 'fingerfood', 'snack', 'drink'];
 
   // Common units for dropdown
@@ -601,12 +646,6 @@ const ManualRecipeEntryPage = () => {
                   </button>
                 </div>
               )}
-
-              {uploadingImage && (
-                <div className="upload-progress">
-                  Uploading image...
-                </div>
-              )}
             </div>
 
             <div className="form-group">
@@ -639,45 +678,61 @@ const ManualRecipeEntryPage = () => {
             <h2>Ingredients</h2>
             <p className="section-hint">Tip: You can paste a full list of ingredients</p>
 
-            <div className="ingredients-list" onPaste={handleIngredientsPaste}>
+            <div className="manual-recipe-entry__ingredients-minimal" onPaste={handleIngredientsPaste}>
               {recipeData.ingredients.map((ingredient, index) => (
-                <div key={index} className="ingredient-row">
-                  <input
-                    type="text"
-                    placeholder="Amount"
-                    value={ingredient.amount}
-                    onChange={(e) => updateIngredient(index, 'amount', e.target.value)}
-                    className="ingredient-amount"
-                  />
-                  <select
-                    value={ingredient.unit}
-                    onChange={(e) => updateIngredient(index, 'unit', e.target.value)}
-                    className="ingredient-unit"
-                  >
-                    {unitOptions.map(unit => (
-                      <option key={unit} value={unit}>{unit}</option>
-                    ))}
-                  </select>
-                  <input
-                    type="text"
-                    placeholder="Ingredient name"
-                    value={ingredient.name}
-                    onChange={(e) => updateIngredient(index, 'name', e.target.value)}
-                    className="ingredient-name"
-                    required
-                  />
-                  <input
-                    type="text"
-                    placeholder="Notes (optional)"
-                    value={ingredient.notes}
-                    onChange={(e) => updateIngredient(index, 'notes', e.target.value)}
-                    className="ingredient-notes"
-                  />
+                <div key={index} className="manual-recipe-entry__ingredient-minimal">
+                  <span className="manual-recipe-entry__ingredient-circle"></span>
+                  <div className="manual-recipe-entry__ingredient-info">
+                    <input
+                      type="text"
+                      placeholder="Ingredient name"
+                      value={ingredient.name}
+                      onChange={(e) => updateIngredient(index, 'name', e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          // Move focus to amount field
+                          const amountInput = e.target.parentElement.querySelector('.manual-recipe-entry__ingredient-amount-input');
+                          if (amountInput) amountInput.focus();
+                        }
+                      }}
+                      className="manual-recipe-entry__ingredient-name-input"
+                      required
+                    />
+                    <input
+                      type="text"
+                      placeholder="Amount (e.g., 2 cups)"
+                      value={ingredient.amount && ingredient.unit ? `${ingredient.amount} ${ingredient.unit}` : ingredient.amount}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Parse amount and unit from single input
+                        const match = value.match(/^([\d./]+)?\s*(.*)$/);
+                        if (match) {
+                          updateIngredient(index, 'amount', match[1] || '');
+                          updateIngredient(index, 'unit', match[2] || '');
+                        }
+                      }}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          // If this is the last ingredient and both fields have values, add a new one
+                          if (index === recipeData.ingredients.length - 1 && ingredient.name) {
+                            addIngredient();
+                          } else {
+                            // Otherwise, move to next ingredient's name field
+                            const nextIngredient = document.querySelectorAll('.manual-recipe-entry__ingredient-name-input')[index + 1];
+                            if (nextIngredient) nextIngredient.focus();
+                          }
+                        }
+                      }}
+                      className="manual-recipe-entry__ingredient-amount-input"
+                    />
+                  </div>
                   {recipeData.ingredients.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeIngredient(index)}
-                      className="remove-button"
+                      className="manual-recipe-entry__ingredient-delete-btn"
                       aria-label="Remove ingredient"
                     >
                       ×
@@ -702,57 +757,42 @@ const ManualRecipeEntryPage = () => {
           <div className="manual-recipe-entry__section">
             <h2>Instructions</h2>
 
-            <div className="instructions-list">
+            <div className="manual-recipe-entry__instructions-minimal">
               {recipeData.instructions.map((instruction, index) => (
-                <div key={index} className="instruction-row">
-                  <span className="step-number">Step {index + 1}</span>
-                  <textarea
-                    placeholder="Describe this step..."
-                    value={instruction.step}
-                    onChange={(e) => updateInstruction(index, 'step', e.target.value)}
-                    className="instruction-text"
-                    rows="3"
-                    required
-                  />
-                  <input
-                    type="number"
-                    placeholder="Time (min)"
-                    value={instruction.time}
-                    onChange={(e) => updateInstruction(index, 'time', e.target.value)}
-                    className="instruction-time"
-                  />
-                  <div className="instruction-actions">
-                    {index > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => moveInstruction(index, 'up')}
-                        className="move-button"
-                        aria-label="Move up"
-                      >
-                        ↑
-                      </button>
-                    )}
-                    {index < recipeData.instructions.length - 1 && (
-                      <button
-                        type="button"
-                        onClick={() => moveInstruction(index, 'down')}
-                        className="move-button"
-                        aria-label="Move down"
-                      >
-                        ↓
-                      </button>
-                    )}
-                    {recipeData.instructions.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeInstruction(index)}
-                        className="remove-button"
-                        aria-label="Remove step"
-                      >
-                        ×
-                      </button>
-                    )}
+                <div key={index} className="manual-recipe-entry__instruction-minimal">
+                  <span className="manual-recipe-entry__instruction-number">
+                    {index + 1}
+                  </span>
+                  <div className="manual-recipe-entry__instruction-info">
+                    <textarea
+                      placeholder="Describe this step..."
+                      value={instruction.step}
+                      onChange={(e) => updateInstruction(index, 'step', e.target.value)}
+                      onKeyPress={(e) => {
+                        // Add new step on Enter (with Shift for new line within step)
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          // If this is the last step and it has content, add a new one
+                          if (index === recipeData.instructions.length - 1 && instruction.step.trim()) {
+                            addInstruction();
+                          }
+                        }
+                      }}
+                      className="manual-recipe-entry__instruction-input"
+                      rows="2"
+                      required
+                    />
                   </div>
+                  {recipeData.instructions.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeInstruction(index)}
+                      className="manual-recipe-entry__instruction-delete-btn"
+                      aria-label="Remove step"
+                    >
+                      ×
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -771,59 +811,6 @@ const ManualRecipeEntryPage = () => {
         {currentSection === 4 && (
           <div className="manual-recipe-entry__section">
             <h2>Additional Details</h2>
-
-            <div className="form-group">
-              <label>Dietary Information</label>
-              <div className="checkbox-group">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={recipeData.vegetarian}
-                    onChange={(e) => handleChange('vegetarian', e.target.checked)}
-                  />
-                  <span>Vegetarian</span>
-                </label>
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={recipeData.vegan}
-                    onChange={(e) => handleChange('vegan', e.target.checked)}
-                  />
-                  <span>Vegan</span>
-                </label>
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={recipeData.glutenFree}
-                    onChange={(e) => handleChange('glutenFree', e.target.checked)}
-                  />
-                  <span>Gluten Free</span>
-                </label>
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={recipeData.dairyFree}
-                    onChange={(e) => handleChange('dairyFree', e.target.checked)}
-                  />
-                  <span>Dairy Free</span>
-                </label>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="cuisine">Cuisine Type</label>
-              <select
-                id="cuisine"
-                value={recipeData.cuisines[0] || ''}
-                onChange={(e) => handleChange('cuisines', e.target.value ? [e.target.value] : [])}
-                className="form-select"
-              >
-                <option value="">Select cuisine...</option>
-                {cuisineOptions.map(cuisine => (
-                  <option key={cuisine} value={cuisine.toLowerCase()}>{cuisine}</option>
-                ))}
-              </select>
-            </div>
 
             <div className="form-group">
               <label htmlFor="dishType">Dish Type</label>
@@ -850,26 +837,6 @@ const ManualRecipeEntryPage = () => {
                 className="form-textarea"
                 rows="4"
               />
-            </div>
-
-            {/* Recipe Preview */}
-            <div className="recipe-preview">
-              <h3>Recipe Preview</h3>
-              <div className="preview-content">
-                <h4>{recipeData.title || 'Untitled Recipe'}</h4>
-                <p>{recipeData.summary || 'No description provided'}</p>
-                <div className="preview-meta">
-                  <span>⏱️ {(parseInt(recipeData.prepTime) || 0) + (parseInt(recipeData.cookTime) || 0)} min</span>
-                  <span>🍽️ {recipeData.servings} servings</span>
-                  <span>📊 {recipeData.difficulty}</span>
-                </div>
-                <div className="preview-ingredients">
-                  <strong>Ingredients:</strong> {recipeData.ingredients.filter(i => i.name).length} items
-                </div>
-                <div className="preview-instructions">
-                  <strong>Instructions:</strong> {recipeData.instructions.filter(i => i.step).length} steps
-                </div>
-              </div>
             </div>
           </div>
         )}

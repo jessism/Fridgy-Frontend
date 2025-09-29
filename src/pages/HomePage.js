@@ -664,10 +664,11 @@ const HomePage = () => {
               onClick={() => navigateToPage('/analytics/inventory')}
             >
               <div className="analytics-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                  <line x1="9" y1="9" x2="15" y2="9"/>
-                  <line x1="9" y1="15" x2="15" y2="15"/>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  {/* Modern bar chart icon for inventory usage */}
+                  <rect x="5" y="12" width="3" height="7" rx="0.5"/>
+                  <rect x="10.5" y="8" width="3" height="11" rx="0.5"/>
+                  <rect x="16" y="5" width="3" height="14" rx="0.5"/>
                 </svg>
               </div>
               <span className="analytics-label">Inventory Usage</span>
@@ -677,8 +678,11 @@ const HomePage = () => {
               onClick={() => navigateToPage('/meal-history')}
             >
               <div className="analytics-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M3 13h8v8H3zM13 3h8v8h-8zM13 13h8v8h-8zM3 3h8v8H3z"/>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  {/* Modern pie chart icon for meals analytics */}
+                  <circle cx="12" cy="12" r="8" stroke-width="2.5"/>
+                  <path d="M12 4 L12 12 L18.5 8" stroke-width="2.5"/>
+                  <circle cx="12" cy="12" r="2" fill="currentColor"/>
                 </svg>
               </div>
               <span className="analytics-label">Meals Analytics</span>

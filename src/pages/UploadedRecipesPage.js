@@ -3,88 +3,46 @@ import { useNavigate } from 'react-router-dom';
 import MobileBottomNav from '../components/MobileBottomNav';
 import RecipeDetailModal from '../components/modals/RecipeDetailModal';
 import RecipeCreationModal from '../components/modals/RecipeCreationModal';
-import './SavedRecipesPage.css';
+import './UploadedRecipesPage.css';
 
 // API base URL - adjust for your backend
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-const SavedRecipesPage = () => {
+const UploadedRecipesPage = () => {
   const navigate = useNavigate();
   const [recipes, setRecipes] = useState([]);
-  const [scannedRecipes, setScannedRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
   const [showCreationModal, setShowCreationModal] = useState(false);
   const [deletingRecipeId, setDeletingRecipeId] = useState(null);
-  
+
   useEffect(() => {
     fetchRecipes();
   }, []);
-
-  const fetchScannedRecipes = async () => {
-    try {
-      const token = localStorage.getItem('fridgy_token');
-
-      if (!token) {
-        setScannedRecipes([]);
-        return;
-      }
-
-      const params = new URLSearchParams({
-        limit: 10,
-        filter: 'scanned'
-      });
-
-      const response = await fetch(`${API_BASE_URL}/saved-recipes?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        console.error('Failed to fetch scanned recipes:', response.status);
-        setScannedRecipes([]);
-        return;
-      }
-
-      const data = await response.json();
-      setScannedRecipes(data.recipes || []);
-    } catch (error) {
-      console.error('Error fetching scanned recipes:', error);
-      setScannedRecipes([]);
-    }
-  };
 
   const fetchRecipes = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('fridgy_token');
 
-      // If no token, don't try to fetch - user is not logged in
       if (!token) {
         console.log('No token found - user not authenticated');
         setRecipes([]);
-        setScannedRecipes([]);
         setLoading(false);
         return;
       }
 
-      // Fetch both regular recipes and scanned recipes
-      await Promise.all([
-        fetchAllRecipes(token),
-        fetchScannedRecipes()
-      ]);
+      await fetchUploadedRecipes(token);
     } catch (error) {
       console.error('Error in fetchRecipes:', error);
       setRecipes([]);
-      setScannedRecipes([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchAllRecipes = async (token) => {
+  const fetchUploadedRecipes = async (token) => {
     try {
       const params = new URLSearchParams({
         limit: 50
@@ -99,38 +57,41 @@ const SavedRecipesPage = () => {
       if (!response.ok) {
         if (response.status === 401) {
           console.error('Authentication failed - token might be expired');
-          // Only redirect if truly unauthorized, not for empty results
           navigate('/signin');
           return;
         }
         console.error('Failed to fetch recipes:', response.status);
-        // Don't throw error for other status codes, just set empty recipes
         setRecipes([]);
         return;
       }
 
       const data = await response.json();
 
-      // Filter to only show imported recipes (exclude manual/uploaded)
-      const importedRecipes = (data.recipes || []).filter(recipe => {
-        // Exclude manual/uploaded recipes
-        return recipe.source_type !== 'manual' &&
-               recipe.import_method !== 'manual' &&
-               recipe.source_author !== 'Me';
+      // Filter to only show uploaded/manual recipes
+      const uploadedRecipes = (data.recipes || []).filter(recipe => {
+        const sourceType = recipe.source_type?.toLowerCase();
+        // Include manual/uploaded recipes
+        return sourceType === 'manual' ||
+               recipe.import_method === 'manual' ||
+               recipe.source_author === 'Me' ||
+               sourceType === 'scanned' ||
+               sourceType === 'voice' ||
+               sourceType === 'user_created' ||
+               (!sourceType && !recipe.source_type && recipe.source_author === 'Me');
       });
 
-      console.log('[SavedRecipes] Filtered imported recipes:', {
+      console.log('[UploadedRecipes] Filtered uploaded recipes:', {
         total: data.recipes?.length,
-        imported: importedRecipes.length
+        uploaded: uploadedRecipes.length
       });
 
-      setRecipes(importedRecipes);
+      setRecipes(uploadedRecipes);
     } catch (error) {
-      console.error('Error fetching all recipes:', error);
+      console.error('Error fetching uploaded recipes:', error);
       setRecipes([]);
     }
   };
-  
+
   const handleToggleFavorite = async (recipeId, event) => {
     event.stopPropagation();
     try {
@@ -141,11 +102,11 @@ const SavedRecipesPage = () => {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       if (response.ok) {
-        setRecipes(prevRecipes => 
-          prevRecipes.map(recipe => 
-            recipe.id === recipeId 
+        setRecipes(prevRecipes =>
+          prevRecipes.map(recipe =>
+            recipe.id === recipeId
               ? { ...recipe, is_favorite: !recipe.is_favorite }
               : recipe
           )
@@ -155,26 +116,22 @@ const SavedRecipesPage = () => {
       console.error('Error toggling favorite:', error);
     }
   };
-  
+
   const handleDeleteRecipe = async (recipeId, event) => {
     console.log('[Delete] Button clicked for recipe:', recipeId);
     event.stopPropagation();
 
-    // Prevent multiple clicks
     if (deletingRecipeId === recipeId) {
       console.log('[Delete] Already deleting this recipe, ignoring click');
       return;
     }
 
     console.log('[Delete] Deleting recipe immediately...');
-    setDeletingRecipeId(recipeId); // Show loading state
+    setDeletingRecipeId(recipeId);
 
     try {
       const token = localStorage.getItem('fridgy_token');
-      console.log('[Delete] Token exists:', !!token);
-
       const url = `${API_BASE_URL}/saved-recipes/${recipeId}`;
-      console.log('[Delete] Making DELETE request to:', url);
 
       const response = await fetch(url, {
         method: 'DELETE',
@@ -182,9 +139,6 @@ const SavedRecipesPage = () => {
           'Authorization': `Bearer ${token}`
         }
       });
-
-      console.log('[Delete] Response status:', response.status);
-      console.log('[Delete] Response ok:', response.ok);
 
       if (response.ok) {
         console.log('[Delete] Recipe deleted successfully');
@@ -194,24 +148,18 @@ const SavedRecipesPage = () => {
           setSelectedRecipe(null);
         }
       } else {
-        // Log detailed error information
         const errorText = await response.text();
         console.error('[Delete] Server error:', response.status, errorText);
         alert(`Failed to delete recipe: ${response.status} - ${errorText || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('[Delete] Exception caught:', error);
-      console.error('[Delete] Error details:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-      });
       alert(`Failed to delete recipe: ${error.message}`);
     } finally {
-      setDeletingRecipeId(null); // Reset loading state
+      setDeletingRecipeId(null);
     }
   };
-  
+
   const handleCookRecipe = async (recipe) => {
     try {
       const token = localStorage.getItem('fridgy_token');
@@ -221,10 +169,10 @@ const SavedRecipesPage = () => {
           'Authorization': `Bearer ${token}`
         }
       });
-      
-      setRecipes(prevRecipes => 
-        prevRecipes.map(r => 
-          r.id === recipe.id 
+
+      setRecipes(prevRecipes =>
+        prevRecipes.map(r =>
+          r.id === recipe.id
             ? { ...r, times_cooked: (r.times_cooked || 0) + 1, last_cooked: new Date() }
             : r
         )
@@ -235,14 +183,14 @@ const SavedRecipesPage = () => {
   };
 
   return (
-    <div className="saved-recipes-page">
-      <div className="saved-recipes-page__main">
-        <div className="saved-recipes-page__container">
+    <div className="uploaded-recipes-page">
+      <div className="uploaded-recipes-page__main">
+        <div className="uploaded-recipes-page__container">
           {/* Header */}
-          <div className="saved-recipes-page__header" style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '0.5rem 0 1rem 0', marginTop: '-1rem', marginLeft: '-0.5rem' }}>
+          <div className="uploaded-recipes-page__header" style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '0.5rem 0 1rem 0', marginTop: '-1rem', marginLeft: '-0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginBottom: '1rem' }}>
               <button
-                className="saved-recipes-page__back-button"
+                className="uploaded-recipes-page__back-button"
                 onClick={() => navigate('/meal-plans/recipes')}
                 style={{ marginRight: '0.5rem', marginLeft: '-0.5rem' }}
               >
@@ -250,20 +198,14 @@ const SavedRecipesPage = () => {
                   <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
-              <h1 className="saved-recipes-page__title" style={{ margin: 0, textAlign: 'left' }}>
-                All imported recipes
+              <h1 className="uploaded-recipes-page__title" style={{ margin: 0, textAlign: 'left' }}>
+                All uploaded recipes
               </h1>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%', justifyContent: 'flex-end' }}>
               <button
-                className="saved-recipes-page__setup-button"
-                onClick={() => navigate('/shortcuts/setup')}
-              >
-                Setup Shortcut
-              </button>
-              <button
-                className="saved-recipes-page__add-button-header"
-                onClick={() => navigate('/import')}
+                className="uploaded-recipes-page__add-button-header"
+                onClick={() => setShowCreationModal(true)}
               >
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
                   <circle cx="16" cy="16" r="14" fill="var(--primary-green)"/>
@@ -273,131 +215,67 @@ const SavedRecipesPage = () => {
             </div>
           </div>
 
-
           {/* Content */}
           {loading ? (
-            <div className="saved-recipes-page__loading-state">
-              <div className="saved-recipes-page__spinner"></div>
+            <div className="uploaded-recipes-page__loading-state">
+              <div className="uploaded-recipes-page__spinner"></div>
               <p>Loading recipes...</p>
             </div>
           ) : recipes.length === 0 ? (
-            <div className="saved-recipes-page__empty-state">
-              <div className="saved-recipes-page__empty-icon">
+            <div className="uploaded-recipes-page__empty-state">
+              <div className="uploaded-recipes-page__empty-icon">
                 <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" stroke="#ccc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" stroke="#ccc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
-              <h2 className="saved-recipes-page__empty-title">
-                No imported recipes yet
+              <h2 className="uploaded-recipes-page__empty-title">
+                No uploaded recipes yet
               </h2>
-              <p className="saved-recipes-page__empty-text">
-                Start importing recipes from Instagram!
+              <p className="uploaded-recipes-page__empty-text">
+                Create your first recipe!
               </p>
-              <div className="saved-recipes-page__empty-actions">
+              <div className="uploaded-recipes-page__empty-actions">
                 <button
-                  className="saved-recipes-page__cta-button"
-                  onClick={() => navigate('/import')}
+                  className="uploaded-recipes-page__cta-button"
+                  onClick={() => setShowCreationModal(true)}
                 >
-                  Import Recipe from Instagram
-                </button>
-                <button
-                  className="saved-recipes-page__cta-button saved-recipes-page__cta-button--secondary"
-                  onClick={() => navigate('/shortcuts/setup')}
-                >
-                  Setup iOS Shortcut
+                  Create Recipe
                 </button>
               </div>
             </div>
           ) : (
-            <div className="saved-recipes-page__recipes-grid">
+            <div className="uploaded-recipes-page__recipes-grid">
               {recipes.map(recipe => {
-                // Helper function to check if URL needs proxying
-                const needsProxy = (url) => {
-                  return url &&
-                         (url.includes('cdninstagram.com') ||
-                          url.includes('instagram.com') ||
-                          url.includes('fbcdn.net') ||
-                          url.includes('instagram.')) &&
-                         !url.includes('URL_OF_IMAGE') &&
-                         !url.includes('example.com') &&
-                         url !== 'URL of image';
-                };
-
-                // Get the base image URL
-                const baseImageUrl = recipe.image || recipe.image_urls?.[0] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
-
-                // Use proxy for Instagram images, direct URL for others
-                const imageUrl = needsProxy(baseImageUrl)
-                  ? `${API_BASE_URL}/proxy-image?url=${encodeURIComponent(baseImageUrl)}`
-                  : baseImageUrl;
-
-                // DEBUG: Log image URL selection for Instagram recipes
-                if (recipe.source_type === 'instagram') {
-                  console.log('[SavedRecipes] Instagram recipe image debug:', {
-                    recipeId: recipe.id,
-                    title: recipe.title,
-                    hasImage: !!recipe.image,
-                    imageValue: recipe.image?.substring(0, 100) + '...',
-                    hasImageUrls: !!recipe.image_urls,
-                    imageUrlsLength: recipe.image_urls?.length,
-                    firstImageUrl: recipe.image_urls?.[0]?.substring(0, 100) + '...',
-                    baseImageUrl: baseImageUrl.substring(0, 100) + '...',
-                    needsProxy: needsProxy(baseImageUrl),
-                    selectedImageUrl: imageUrl.substring(0, 100) + '...',
-                    isUsingPlaceholder: baseImageUrl === 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c',
-                    isUsingProxy: needsProxy(baseImageUrl)
-                  });
-                }
+                const imageUrl = recipe.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
 
                 return (
-                  <div 
+                  <div
                     key={recipe.id}
-                    className="saved-recipes-page__recipe-card"
+                    className="uploaded-recipes-page__recipe-card"
                     onClick={() => {
                       setSelectedRecipe(recipe);
                       setShowDetail(true);
                     }}
                   >
-                    <div className="saved-recipes-page__recipe-image">
+                    <div className="uploaded-recipes-page__recipe-image">
                       <img
                         src={imageUrl}
                         alt={recipe.title}
                         onError={(e) => {
-                          console.error('[SavedRecipes] Image failed to load:', {
-                            recipeId: recipe.id,
-                            title: recipe.title,
-                            failedUrl: e.target.src,
-                            sourceType: recipe.source_type
-                          });
-                          // Fallback to placeholder if Instagram image fails
                           if (e.target.src !== 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c') {
                             e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
                           }
                         }}
-                        onLoad={(e) => {
-                          if (recipe.source_type === 'instagram') {
-                            console.log('[SavedRecipes] Instagram image loaded successfully:', {
-                              recipeId: recipe.id,
-                              title: recipe.title,
-                              loadedUrl: e.target.src.substring(0, 100) + '...'
-                            });
-                          }
-                        }}
                       />
-                      {recipe.source_type === 'instagram' && (
-                        <div className="saved-recipes-page__source-badge">
-                          <span>Instagram</span>
-                        </div>
-                      )}
                     </div>
-                    
-                    <div className="saved-recipes-page__recipe-content">
+
+                    <div className="uploaded-recipes-page__recipe-content">
                       <h3>{recipe.title}</h3>
                       {recipe.source_author && (
-                        <p className="saved-recipes-page__recipe-author">@{recipe.source_author}</p>
+                        <p className="uploaded-recipes-page__recipe-author">@{recipe.source_author}</p>
                       )}
-                      
-                      <div className="saved-recipes-page__recipe-meta">
+
+                      <div className="uploaded-recipes-page__recipe-meta">
                         {recipe.readyInMinutes && (
                           <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -418,10 +296,10 @@ const SavedRecipesPage = () => {
                           </span>
                         )}
                       </div>
-                      
-                      <div className="saved-recipes-page__recipe-actions">
+
+                      <div className="uploaded-recipes-page__recipe-actions">
                         <button
-                          className={`saved-recipes-page__favorite-btn ${recipe.is_favorite ? 'active' : ''}`}
+                          className={`uploaded-recipes-page__favorite-btn ${recipe.is_favorite ? 'active' : ''}`}
                           onClick={(e) => handleToggleFavorite(recipe.id, e)}
                         >
                           {recipe.is_favorite ? (
@@ -435,13 +313,13 @@ const SavedRecipesPage = () => {
                           )}
                         </button>
                         <button
-                          className={`saved-recipes-page__delete-btn ${deletingRecipeId === recipe.id ? 'deleting' : ''}`}
+                          className={`uploaded-recipes-page__delete-btn ${deletingRecipeId === recipe.id ? 'deleting' : ''}`}
                           onClick={(e) => handleDeleteRecipe(recipe.id, e)}
                           disabled={deletingRecipeId === recipe.id}
                           title={deletingRecipeId === recipe.id ? 'Deleting...' : 'Delete recipe'}
                         >
                           {deletingRecipeId === recipe.id ? (
-                            <div className="saved-recipes-page__spinner-small">...</div>
+                            <div className="uploaded-recipes-page__spinner-small">...</div>
                           ) : (
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <polyline points="3,6 5,6 21,6"/>
@@ -460,8 +338,9 @@ const SavedRecipesPage = () => {
           )}
         </div>
       </div>
-      
-      {/* Recipe Detail Modal */}
+
+      <MobileBottomNav currentRoute="meals" />
+
       {showDetail && selectedRecipe && (
         <RecipeDetailModal
           isOpen={showDetail}
@@ -470,20 +349,37 @@ const SavedRecipesPage = () => {
             setShowDetail(false);
             setSelectedRecipe(null);
           }}
-          onCookNow={() => handleCookRecipe(selectedRecipe)}
-          isLoading={false}
+          onCook={() => handleCookRecipe(selectedRecipe)}
+          onDelete={(recipeId) => {
+            handleDeleteRecipe(recipeId, { stopPropagation: () => {} });
+            setShowDetail(false);
+          }}
         />
       )}
 
-      {/* Recipe Creation Modal */}
-      <RecipeCreationModal
-        isOpen={showCreationModal}
-        onClose={() => setShowCreationModal(false)}
-      />
-
-      <MobileBottomNav />
+      {showCreationModal && (
+        <RecipeCreationModal
+          onClose={() => setShowCreationModal(false)}
+          onSave={() => {
+            setShowCreationModal(false);
+            fetchRecipes();
+          }}
+          onImport={() => {
+            setShowCreationModal(false);
+            navigate('/import');
+          }}
+          onManual={() => {
+            setShowCreationModal(false);
+            navigate('/recipes/manual');
+          }}
+          onScan={() => {
+            setShowCreationModal(false);
+            navigate('/recipes/scan');
+          }}
+        />
+      )}
     </div>
   );
 };
 
-export default SavedRecipesPage;
+export default UploadedRecipesPage;

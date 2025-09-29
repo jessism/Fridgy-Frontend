@@ -17,6 +17,7 @@ import DietaryPreferencesPage from './pages/DietaryPreferencesPage';
 import NotificationSettingsPage from './pages/NotificationSettingsPage';
 import MealHistoryPage from './pages/MealHistoryPage';
 import SavedRecipesPage from './pages/SavedRecipesPage';
+import UploadedRecipesPage from './pages/UploadedRecipesPage';
 import RecipeImportPage from './pages/RecipeImportPage';
 import MultiModalImportPage from './pages/MultiModalImportPage';
 import ManualRecipeEntryPage from './pages/ManualRecipeEntryPage';
@@ -108,6 +109,11 @@ function App() {
           <Route path="/saved-recipes" element={
             <AuthGuard>
               <SavedRecipesPage />
+            </AuthGuard>
+          } />
+          <Route path="/uploaded-recipes" element={
+            <AuthGuard>
+              <UploadedRecipesPage />
             </AuthGuard>
           } />
           <Route path="/import" element={

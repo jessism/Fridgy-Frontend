@@ -91,8 +91,13 @@ const MealPlansPage = ({ defaultTab }) => {
         return;
       }
 
-      // Fetch all recipes first
-      const response = await fetch(`${API_BASE_URL}/saved-recipes?limit=50`, {
+      // Fetch uploaded recipes with filter
+      const params = new URLSearchParams({
+        filter: 'uploaded',
+        limit: 2
+      });
+
+      const response = await fetch(`${API_BASE_URL}/saved-recipes?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -109,19 +114,18 @@ const MealPlansPage = ({ defaultTab }) => {
 
       const data = await response.json();
 
-      // Filter for non-digital sources (manual, scanned, voice, etc.)
-      const uploadedRecipes = (data.recipes || []).filter(recipe => {
-        const sourceType = recipe.source_type?.toLowerCase();
-        // Include manual, scanned, voice, or undefined source types
-        // Exclude digital sources like instagram, facebook, youtube, blog
-        return sourceType === 'manual' ||
-               sourceType === 'scanned' ||
-               sourceType === 'voice' ||
-               sourceType === 'user_created' ||
-               (!sourceType || sourceType === '');
+      // API now returns only uploaded recipes with filter=uploaded
+      console.log('[MealPlans] Uploaded recipes from API:', {
+        count: data.recipes?.length,
+        samples: (data.recipes || []).map(r => ({
+          title: r.title,
+          source_type: r.source_type,
+          import_method: r.import_method,
+          source_author: r.source_author
+        }))
       });
 
-      setUserUploadedRecipes(uploadedRecipes);
+      setUserUploadedRecipes(data.recipes || []);
     } catch (error) {
       console.error('Error fetching uploaded recipes:', error);
       setUserUploadedRecipes([]);
@@ -144,6 +148,7 @@ const MealPlansPage = ({ defaultTab }) => {
       }
 
       const params = new URLSearchParams({
+        filter: 'imported',
         limit: 2
       });
 
@@ -163,6 +168,17 @@ const MealPlansPage = ({ defaultTab }) => {
       }
 
       const data = await response.json();
+
+      // API now returns only imported recipes with filter=imported
+      console.log('[MealPlans] Imported recipes from API:', {
+        count: data.recipes?.length,
+        samples: (data.recipes || []).map(r => ({
+          title: r.title,
+          source_type: r.source_type,
+          source_author: r.source_author
+        }))
+      });
+
       setSavedRecipes(data.recipes || []);
     } catch (error) {
       console.error('Error fetching saved recipes:', error);
@@ -829,7 +845,7 @@ const MealPlansPage = ({ defaultTab }) => {
                   </div>
                 ) : userUploadedRecipes.length > 0 ? (
                   <div className="meal-plans-page__saved-recipes-grid">
-                    {userUploadedRecipes.slice(0, 4).map(recipe => renderSavedRecipeCard(recipe, true))}
+                    {userUploadedRecipes.slice(0, 2).map(recipe => renderSavedRecipeCard(recipe, true))}
                   </div>
                 ) : (
                   <div style={{ padding: '2rem', textAlign: 'center' }}>

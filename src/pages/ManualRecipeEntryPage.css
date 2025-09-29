@@ -397,111 +397,212 @@
   }
 }
 
-/* Ingredients Section */
-.ingredients-list {
-  margin-bottom: 16px;
+/* Ingredients Section - Shopping List Style */
+.manual-recipe-entry__ingredients-minimal {
+  padding: 0 20px 12px;
+  transition: all 0.3s ease;
 }
 
-.ingredient-row {
-  display: grid;
-  grid-template-columns: 80px 120px 1fr 150px 40px;
-  gap: 8px;
-  margin-bottom: 12px;
-  align-items: center;
-}
-
-.ingredient-amount {
-  padding: 10px;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-.ingredient-unit {
-  padding: 10px;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  font-size: 14px;
-  background: white;
-}
-
-.ingredient-name {
-  padding: 10px;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-.ingredient-notes {
-  padding: 10px;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-/* Instructions Section */
-.instructions-list {
-  margin-bottom: 16px;
-}
-
-.instruction-row {
-  margin-bottom: 20px;
-  padding: 16px;
-  background: #f8f8f8;
-  border-radius: 8px;
-  position: relative;
-}
-
-.step-number {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: #4fcf61;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-.instruction-text {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  font-size: 14px;
-  resize: vertical;
-  font-family: inherit;
-  background: white;
-  box-sizing: border-box;
-}
-
-.instruction-time {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  font-size: 14px;
-  margin-top: 8px;
-  background: white;
-}
-
-.instruction-actions {
+.manual-recipe-entry__ingredient-minimal {
   display: flex;
-  gap: 8px;
-  margin-top: 8px;
-  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 12px 0;
+  gap: 16px;
+  transition: opacity 0.2s ease;
+  border-bottom: 1px solid #f5f5f5;
 }
 
-.move-button {
-  padding: 6px 12px;
-  background: #f0f0f0;
+.manual-recipe-entry__ingredient-minimal:last-child {
+  border-bottom: none;
+}
+
+.manual-recipe-entry__ingredient-minimal:first-child {
+  padding-top: 8px;
+}
+
+.manual-recipe-entry__ingredient-circle {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid #d0d0d0;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  margin-top: 3px;
+}
+
+.manual-recipe-entry__ingredient-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.manual-recipe-entry__ingredient-name-input {
+  width: 100%;
   border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.2s;
+  padding: 2px 0;
+  font-size: 1rem;
+  color: #222222;
+  font-weight: 400;
+  background: transparent;
+  outline: none;
+  transition: border-bottom 0.2s;
+  border-bottom: 1px solid transparent;
 }
 
-.move-button:hover {
-  background: #e0e0e0;
+.manual-recipe-entry__ingredient-name-input:focus {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.manual-recipe-entry__ingredient-name-input::placeholder {
+  color: #999;
+}
+
+.manual-recipe-entry__ingredient-amount-input {
+  width: 100%;
+  border: none;
+  padding: 2px 0;
+  font-size: 1rem;
+  color: #4fcf61;
+  font-weight: 400;
+  background: transparent;
+  outline: none;
+  transition: border-bottom 0.2s;
+  border-bottom: 1px solid transparent;
+}
+
+.manual-recipe-entry__ingredient-amount-input:focus {
+  border-bottom: 1px solid #4fcf61;
+}
+
+.manual-recipe-entry__ingredient-amount-input::placeholder {
+  color: #bbb;
+  font-style: italic;
+}
+
+.manual-recipe-entry__ingredient-delete-btn {
+  background: none;
+  border: none;
+  color: #ddd;
+  font-size: 1.5rem;
+  padding: 0;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s, color 0.2s;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.manual-recipe-entry__ingredient-minimal:hover .manual-recipe-entry__ingredient-delete-btn {
+  opacity: 1;
+}
+
+.manual-recipe-entry__ingredient-delete-btn:hover {
+  color: #ff4444;
+}
+
+/* Instructions Section - Shopping List Style */
+.manual-recipe-entry__instructions-minimal {
+  padding: 0 20px 12px;
+  transition: all 0.3s ease;
+}
+
+.manual-recipe-entry__instruction-minimal {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px 0;
+  gap: 16px;
+  transition: opacity 0.2s ease;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.manual-recipe-entry__instruction-minimal:last-child {
+  border-bottom: none;
+}
+
+.manual-recipe-entry__instruction-minimal:first-child {
+  padding-top: 8px;
+}
+
+.manual-recipe-entry__instruction-number {
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid #4fcf61;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: #4fcf61;
+  font-weight: 600;
+  font-size: 14px;
+  margin-top: 2px;
+}
+
+.manual-recipe-entry__instruction-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.manual-recipe-entry__instruction-input {
+  width: 100%;
+  border: none;
+  padding: 4px 0;
+  font-size: 1rem;
+  color: #222222;
+  font-weight: 400;
+  background: transparent;
+  outline: none;
+  resize: vertical;
+  min-height: 48px;
+  font-family: inherit;
+  line-height: 1.5;
+  transition: border-bottom 0.2s;
+  border-bottom: 1px solid transparent;
+}
+
+.manual-recipe-entry__instruction-input:focus {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.manual-recipe-entry__instruction-input::placeholder {
+  color: #999;
+}
+
+.manual-recipe-entry__instruction-delete-btn {
+  background: none;
+  border: none;
+  color: #ddd;
+  font-size: 1.5rem;
+  padding: 0;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s, color 0.2s;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.manual-recipe-entry__instruction-minimal:hover .manual-recipe-entry__instruction-delete-btn {
+  opacity: 1;
+}
+
+.manual-recipe-entry__instruction-delete-btn:hover {
+  color: #ff4444;
 }
 
 /* Remove Button */
@@ -544,51 +645,6 @@
   border-style: solid;
 }
 
-/* Recipe Preview */
-.recipe-preview {
-  margin-top: 32px;
-  padding: 20px;
-  background: #f8f8f8;
-  border-radius: 8px;
-}
-
-.recipe-preview h3 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-  margin: 0 0 16px 0;
-}
-
-.preview-content h4 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 8px 0;
-}
-
-.preview-content p {
-  color: #666;
-  margin: 0 0 12px 0;
-  font-size: 14px;
-}
-
-.preview-meta {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-
-.preview-meta span {
-  font-size: 14px;
-  color: #666;
-}
-
-.preview-ingredients,
-.preview-instructions {
-  font-size: 14px;
-  color: #333;
-  margin-bottom: 8px;
-}
 
 /* Footer Navigation */
 .manual-recipe-entry__footer {
@@ -710,24 +766,28 @@
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   }
 
-  .ingredient-row {
-    grid-template-columns: 60px 90px 1fr;
-    grid-template-rows: auto auto;
+  .manual-recipe-entry__ingredients-minimal {
+    padding: 0 16px 12px;
   }
 
-  .ingredient-notes {
-    grid-column: 1 / -1;
-    margin-top: 4px;
+  .manual-recipe-entry__ingredient-minimal {
+    padding: 10px 0;
   }
 
-  .remove-button {
-    grid-column: -1;
-    grid-row: 1;
+  .manual-recipe-entry__ingredient-delete-btn {
+    opacity: 1; /* Always visible on mobile */
   }
 
-  .preview-meta {
-    flex-direction: column;
-    gap: 8px;
+  .manual-recipe-entry__instructions-minimal {
+    padding: 0 16px 12px;
+  }
+
+  .manual-recipe-entry__instruction-minimal {
+    padding: 10px 0;
+  }
+
+  .manual-recipe-entry__instruction-delete-btn {
+    opacity: 1; /* Always visible on mobile */
   }
 
   .manual-recipe-entry__footer {
@@ -742,15 +802,12 @@
 
 /* Very Small Mobile */
 @media (max-width: 375px) {
-  .ingredient-row {
-    grid-template-columns: 1fr;
+  .manual-recipe-entry__ingredients-minimal {
+    padding: 0 12px 12px;
   }
 
-  .ingredient-amount,
-  .ingredient-unit,
-  .ingredient-name,
-  .ingredient-notes {
-    width: 100%;
+  .manual-recipe-entry__instructions-minimal {
+    padding: 0 12px 12px;
   }
 
   .checkbox-group {

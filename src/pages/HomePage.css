@@ -1113,27 +1113,45 @@
   justify-content: center;
   font-size: 1.5rem;
   border-radius: 50%;
-  background: transparent;
+  background: rgba(79, 207, 97, 0.15); /* Light green background */
   transition: all 0.3s ease;
 }
 
 .quick-access-icon svg {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
 }
 
-.quick-access-item.primary .quick-access-icon svg {
-  /* Remove filter to show the green circle with white plus */
+.quick-access-item.primary .quick-access-icon {
+  background: rgba(79, 207, 97, 0.2); /* Slightly darker for primary */
 }
 
-.quick-access-item:not(.primary) .quick-access-icon svg circle {
-  fill: rgba(129, 224, 83, 0.15);
+.quick-access-item:hover .quick-access-icon {
+  background: rgba(79, 207, 97, 0.25); /* Darker on hover */
+}
+
+/* Modern minimal icons - green color, no stroke */
+.quick-access-icon svg circle {
+  display: none; /* Hide the circle outline */
+}
+
+.quick-access-icon svg path,
+.quick-access-icon svg rect,
+.quick-access-icon svg line,
+.quick-access-icon svg polyline,
+.quick-access-icon svg polygon {
   stroke: var(--primary-green);
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.quick-access-item:not(.primary) .quick-access-icon svg path {
-  stroke: var(--primary-green);
+/* For filled elements */
+.quick-access-icon svg path[fill],
+.quick-access-icon svg rect[fill] {
   fill: var(--primary-green);
+  stroke: none;
 }
 
 .quick-access-label {
@@ -1218,14 +1236,40 @@
   justify-content: center;
   font-size: 1.5rem;
   border-radius: 50%;
-  background: rgba(129, 224, 83, 0.15);
+  background: rgba(79, 207, 97, 0.15); /* Light green background matching quick-access */
   transition: all 0.3s ease;
 }
 
+.analytics-item:hover .analytics-icon {
+  background: rgba(79, 207, 97, 0.25); /* Darker on hover */
+}
+
 .analytics-icon svg {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
+}
+
+/* Modern minimal icons - green color, no stroke */
+.analytics-icon svg circle {
+  display: none; /* Hide any circle outlines */
+}
+
+.analytics-icon svg path,
+.analytics-icon svg rect,
+.analytics-icon svg line,
+.analytics-icon svg polyline {
   stroke: var(--primary-green);
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* For filled elements */
+.analytics-icon svg path[fill],
+.analytics-icon svg rect[fill] {
+  fill: var(--primary-green);
+  stroke: none;
 }
 
 .analytics-label {
@@ -1291,8 +1335,8 @@
   }
 
   .analytics-icon svg {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
   }
 
   .analytics-label {

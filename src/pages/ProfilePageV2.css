@@ -10,7 +10,7 @@
 .profile-v2__header {
   position: relative;
   padding: 1rem 1.5rem;
-  padding-top: 4.5rem; /* Slightly reduced to move text up */
+  padding-top: 5rem; /* Account for 60px wrapper + 1rem container padding */
 }
 
 .profile-v2__header-left {
@@ -171,7 +171,7 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .profile-v2__header {
-    padding-top: 3.5rem; /* Slightly reduced for mobile */
+    padding-top: 2.5rem; /* Match Inventory page total mobile spacing */
   }
   
   .profile-v2__title {
@@ -219,7 +219,7 @@
 @media (max-width: 480px) {
   .profile-v2__header {
     padding: 1rem 0.75rem;
-    padding-top: 3rem; /* Slightly reduced for small screens */
+    padding-top: 2.5rem; /* Match Inventory page total mobile spacing */
   }
   
   .profile-v2__close-button {

@@ -1,21 +1,21 @@
-.saved-recipes-page {
+.uploaded-recipes-page {
   min-height: 100vh;
   background-color: white;
 }
 
-.saved-recipes-page__main {
+.uploaded-recipes-page__main {
   padding-top: 0;
   padding-bottom: 80px;
   min-height: 100vh;
 }
 
-.saved-recipes-page__container {
+.uploaded-recipes-page__container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem 2rem 2rem;
 }
 
-.saved-recipes-page__header {
+.uploaded-recipes-page__header {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -24,7 +24,7 @@
   margin-top: 0;
 }
 
-.saved-recipes-page__back-button {
+.uploaded-recipes-page__back-button {
   background: none;
   border: none;
   padding: 0.5rem;
@@ -37,11 +37,11 @@
   border-radius: 8px;
 }
 
-.saved-recipes-page__back-button:hover {
+.uploaded-recipes-page__back-button:hover {
   background-color: #f0f0f0;
 }
 
-.saved-recipes-page__title {
+.uploaded-recipes-page__title {
   font-size: 2rem;
   font-weight: 600;
   color: #333;
@@ -50,25 +50,25 @@
 }
 
 /* Your own recipe section */
-.saved-recipes-page__custom-section {
+.uploaded-recipes-page__custom-section {
   margin: 2rem 0;
 }
 
-.saved-recipes-page__section-header {
+.uploaded-recipes-page__section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1rem;
 }
 
-.saved-recipes-page__section-title {
+.uploaded-recipes-page__section-title {
   font-size: 1.5rem;
   font-weight: 600;
   color: #333;
   margin: 0;
 }
 
-.saved-recipes-page__add-button {
+.uploaded-recipes-page__add-button {
   background: none;
   border: none;
   padding: 0;
@@ -80,29 +80,29 @@
   border-radius: 50%;
 }
 
-.saved-recipes-page__add-button:hover {
+.uploaded-recipes-page__add-button:hover {
   transform: scale(1.1);
 }
 
-.saved-recipes-page__add-button:hover svg circle {
+.uploaded-recipes-page__add-button:hover svg circle {
   fill: var(--primary-green-dark);
 }
 
-.saved-recipes-page__custom-container-wrapper {
+.uploaded-recipes-page__custom-container-wrapper {
   display: flex;
   gap: 1rem;
   width: 100%;
 }
 
-.saved-recipes-page__custom-container-left,
-.saved-recipes-page__custom-container-right {
+.uploaded-recipes-page__custom-container-left,
+.uploaded-recipes-page__custom-container-right {
   flex: 1;
   width: 50%;
   display: flex;
   flex-direction: column;
 }
 
-.saved-recipes-page__custom-container {
+.uploaded-recipes-page__custom-container {
   background-color: white;
   border: 2px solid #4fcf61;
   border-radius: 12px;
@@ -115,14 +115,14 @@
   position: relative;
 }
 
-.saved-recipes-page__plus-icon {
+.uploaded-recipes-page__plus-icon {
   color: #4fcf61;
   font-size: 3rem;
   font-weight: 300;
   line-height: 1;
 }
 
-.saved-recipes-page__container-label {
+.uploaded-recipes-page__container-label {
   text-align: center;
   color: #666;
   font-size: 0.9rem;
@@ -130,19 +130,19 @@
   margin-bottom: 0;
 }
 
-.saved-recipes-page__scanned-recipe {
+.uploaded-recipes-page__scanned-recipe {
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
   padding: 0;
   overflow: hidden;
 }
 
-.saved-recipes-page__scanned-recipe:hover {
+.uploaded-recipes-page__scanned-recipe:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.saved-recipes-page__scanned-thumbnail {
+.uploaded-recipes-page__scanned-thumbnail {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -150,7 +150,7 @@
   min-height: 100px;
 }
 
-.saved-recipes-page__setup-button {
+.uploaded-recipes-page__setup-button {
   background: #4fcf61;
   color: white;
   border: none;
@@ -162,12 +162,12 @@
   transition: all 0.2s;
 }
 
-.saved-recipes-page__setup-button:hover {
+.uploaded-recipes-page__setup-button:hover {
   background: #3da84a;
   transform: translateY(-1px);
 }
 
-.saved-recipes-page__add-button-header {
+.uploaded-recipes-page__add-button-header {
   background: none;
   border: none;
   padding: 0;
@@ -179,25 +179,25 @@
   border-radius: 50%;
 }
 
-.saved-recipes-page__add-button-header:hover {
+.uploaded-recipes-page__add-button-header:hover {
   transform: scale(1.1);
 }
 
-.saved-recipes-page__add-button-header:hover svg circle {
+.uploaded-recipes-page__add-button-header:hover svg circle {
   fill: var(--primary-green-dark);
 }
 
 /* Import Recipe Section */
-.saved-recipes-page__import-section {
+.uploaded-recipes-page__import-section {
   margin: 2rem 0;
 }
 
 /* Search Section */
-.saved-recipes-page__search-section {
+.uploaded-recipes-page__search-section {
   margin-bottom: 1.5rem;
 }
 
-.saved-recipes-page__search-input {
+.uploaded-recipes-page__search-input {
   width: 100%;
   padding: 12px 16px;
   border: 1px solid #e0e0e0;
@@ -207,14 +207,14 @@
   transition: all 0.2s;
 }
 
-.saved-recipes-page__search-input:focus {
+.uploaded-recipes-page__search-input:focus {
   outline: none;
   border-color: #4fcf61;
   box-shadow: 0 0 0 3px rgba(79, 207, 97, 0.1);
 }
 
 /* Filter Tabs */
-.saved-recipes-page__filter-tabs {
+.uploaded-recipes-page__filter-tabs {
   display: flex;
   gap: 12px;
   margin-bottom: 2rem;
@@ -222,7 +222,7 @@
   padding-bottom: 12px;
 }
 
-.saved-recipes-page__tab {
+.uploaded-recipes-page__tab {
   background: none;
   border: none;
   padding: 8px 16px;
@@ -234,15 +234,15 @@
   transition: all 0.2s;
 }
 
-.saved-recipes-page__tab:hover {
+.uploaded-recipes-page__tab:hover {
   color: #4fcf61;
 }
 
-.saved-recipes-page__tab.active {
+.uploaded-recipes-page__tab.active {
   color: #4fcf61;
 }
 
-.saved-recipes-page__tab.active::after {
+.uploaded-recipes-page__tab.active::after {
   content: '';
   position: absolute;
   bottom: -13px;
@@ -253,7 +253,7 @@
 }
 
 /* Loading State */
-.saved-recipes-page__loading-state {
+.uploaded-recipes-page__loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -261,7 +261,7 @@
   padding: 4rem 2rem;
 }
 
-.saved-recipes-page__spinner {
+.uploaded-recipes-page__spinner {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
@@ -277,7 +277,7 @@
 }
 
 /* Empty State */
-.saved-recipes-page__empty-state {
+.uploaded-recipes-page__empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -286,25 +286,32 @@
   text-align: center;
 }
 
-.saved-recipes-page__empty-icon {
+.uploaded-recipes-page__empty-icon {
   margin-bottom: 1.5rem;
 }
 
-.saved-recipes-page__empty-title {
+.uploaded-recipes-page__empty-title {
   font-size: 1.5rem;
   font-weight: 600;
   color: #333;
   margin: 0 0 0.5rem 0;
 }
 
-.saved-recipes-page__empty-text {
+.uploaded-recipes-page__empty-text {
   font-size: 1rem;
   color: #666;
   margin: 0 0 1.5rem 0;
   max-width: 400px;
 }
 
-.saved-recipes-page__cta-button {
+.uploaded-recipes-page__empty-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.uploaded-recipes-page__cta-button {
   background: #4fcf61;
   color: white;
   border: none;
@@ -316,19 +323,29 @@
   transition: all 0.2s;
 }
 
-.saved-recipes-page__cta-button:hover {
+.uploaded-recipes-page__cta-button:hover {
   background: #3da84a;
   transform: translateY(-1px);
 }
 
+.uploaded-recipes-page__cta-button--secondary {
+  background: white;
+  color: #4fcf61;
+  border: 2px solid #4fcf61;
+}
+
+.uploaded-recipes-page__cta-button--secondary:hover {
+  background: #f0fff4;
+}
+
 /* Recipes Grid */
-.saved-recipes-page__recipes-grid {
+.uploaded-recipes-page__recipes-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
 }
 
-.saved-recipes-page__recipe-card {
+.uploaded-recipes-page__recipe-card {
   background: white;
   border-radius: 12px;
   overflow: hidden;
@@ -337,12 +354,12 @@
   transition: all 0.3s;
 }
 
-.saved-recipes-page__recipe-card:hover {
+.uploaded-recipes-page__recipe-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
-.saved-recipes-page__recipe-image {
+.uploaded-recipes-page__recipe-image {
   position: relative;
   width: 100%;
   height: 200px;
@@ -350,13 +367,13 @@
   background: #f0f0f0;
 }
 
-.saved-recipes-page__recipe-image img {
+.uploaded-recipes-page__recipe-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.saved-recipes-page__source-badge {
+.uploaded-recipes-page__source-badge {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -367,16 +384,16 @@
   font-weight: 500;
 }
 
-.saved-recipes-page__source-badge--manual {
+.uploaded-recipes-page__source-badge--uploaded {
   background: rgba(79, 207, 97, 0.95);
   color: white;
 }
 
-.saved-recipes-page__recipe-content {
+.uploaded-recipes-page__recipe-content {
   padding: 1rem;
 }
 
-.saved-recipes-page__recipe-content h3 {
+.uploaded-recipes-page__recipe-content h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.125rem;
   font-weight: 600;
@@ -390,13 +407,13 @@
   text-align: left;
 }
 
-.saved-recipes-page__recipe-author {
+.uploaded-recipes-page__recipe-author {
   font-size: 0.875rem;
   color: #666;
   margin: 0 0 0.75rem 0;
 }
 
-.saved-recipes-page__recipe-meta {
+.uploaded-recipes-page__recipe-meta {
   display: flex;
   gap: 0.75rem;
   margin-bottom: 0.75rem;
@@ -405,13 +422,13 @@
   flex-wrap: wrap;
 }
 
-.saved-recipes-page__recipe-meta span {
+.uploaded-recipes-page__recipe-meta span {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.saved-recipes-page__recipe-actions {
+.uploaded-recipes-page__recipe-actions {
   display: flex;
   gap: 0.5rem;
   justify-content: flex-end;
@@ -419,8 +436,8 @@
   border-top: 1px solid #f0f0f0;
 }
 
-.saved-recipes-page__favorite-btn,
-.saved-recipes-page__delete-btn {
+.uploaded-recipes-page__favorite-btn,
+.uploaded-recipes-page__delete-btn {
   background: none;
   border: none;
   padding: 4px;
@@ -431,31 +448,31 @@
   justify-content: center;
 }
 
-.saved-recipes-page__favorite-btn:hover svg {
+.uploaded-recipes-page__favorite-btn:hover svg {
   stroke: #4fcf61;
   transform: scale(1.1);
 }
 
-.saved-recipes-page__favorite-btn.active svg {
+.uploaded-recipes-page__favorite-btn.active svg {
   fill: #4fcf61;
   stroke: #4fcf61;
 }
 
-.saved-recipes-page__delete-btn:hover:not(:disabled) svg {
+.uploaded-recipes-page__delete-btn:hover:not(:disabled) svg {
   stroke: #ef4444;
   transform: scale(1.1);
 }
 
-.saved-recipes-page__delete-btn:disabled {
+.uploaded-recipes-page__delete-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.saved-recipes-page__delete-btn.deleting {
+.uploaded-recipes-page__delete-btn.deleting {
   background-color: #f0f0f0;
 }
 
-.saved-recipes-page__spinner-small {
+.uploaded-recipes-page__spinner-small {
   width: 18px;
   height: 18px;
   display: flex;
@@ -471,67 +488,67 @@
 
 /* Mobile styles */
 @media (max-width: 768px) {
-  .saved-recipes-page__main {
+  .uploaded-recipes-page__main {
     padding-top: 0;
     padding-bottom: 70px;
   }
   
-  .saved-recipes-page__container {
+  .uploaded-recipes-page__container {
     padding: 1rem;
   }
   
-  .saved-recipes-page__header {
+  .uploaded-recipes-page__header {
     gap: 0.5rem;
     margin-bottom: 1rem;
   }
   
-  .saved-recipes-page__title {
+  .uploaded-recipes-page__title {
     font-size: 1.5rem;
   }
   
-  .saved-recipes-page__setup-button {
+  .uploaded-recipes-page__setup-button {
     padding: 8px 12px;
     font-size: 0.75rem; /* 12px */
   }
   
-  .saved-recipes-page__empty-state {
+  .uploaded-recipes-page__empty-state {
     padding: 3rem 1rem;
   }
   
-  .saved-recipes-page__recipes-grid {
+  .uploaded-recipes-page__recipes-grid {
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
   }
   
-  .saved-recipes-page__recipe-image {
+  .uploaded-recipes-page__recipe-image {
     height: 140px;
   }
   
-  .saved-recipes-page__recipe-content {
+  .uploaded-recipes-page__recipe-content {
     padding: 0.75rem;
   }
   
-  .saved-recipes-page__recipe-content h3 {
+  .uploaded-recipes-page__recipe-content h3 {
     font-size: 1rem;
     margin-bottom: 0.25rem;
   }
   
-  .saved-recipes-page__recipe-author {
+  .uploaded-recipes-page__recipe-author {
     font-size: 0.75rem;
     margin-bottom: 0.5rem;
   }
   
-  .saved-recipes-page__recipe-meta {
+  .uploaded-recipes-page__recipe-meta {
     font-size: 0.75rem;
     gap: 0.5rem;
   }
   
-  .saved-recipes-page__recipe-actions {
+  .uploaded-recipes-page__recipe-actions {
     padding-top: 0.5rem;
   }
   
-  .saved-recipes-page__favorite-btn,
-  .saved-recipes-page__delete-btn {
+  .uploaded-recipes-page__favorite-btn,
+  .uploaded-recipes-page__delete-btn {
     width: 32px;
     height: 32px;
     font-size: 1rem; /* 16px */
