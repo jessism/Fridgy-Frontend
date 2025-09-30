@@ -61,6 +61,9 @@ const NotificationSettings = () => {
     }
   });
   const [message, setMessage] = useState('');
+  const [testRunning, setTestRunning] = useState(false);
+  const [nextTestTime, setNextTestTime] = useState(null);
+  const [testLoading, setTestLoading] = useState(false);
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -681,6 +684,122 @@ const NotificationSettings = () => {
     }
   };
 
+  // Start 5-minute test notifications
+  const startFiveMinuteTest = async () => {
+    setTestLoading(true);
+    setTestError(null);
+
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      if (!token) {
+        throw new Error('Please log in to start test notifications');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/push/test/start`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to start test');
+      }
+
+      const data = await response.json();
+      setTestRunning(true);
+      setNextTestTime(data.nextTime);
+      setTestSuccess(true);
+      setMessage(`Test started! Hey ${data.userName}, you'll get notifications every 5 minutes for the next hour.`);
+
+      // Store in localStorage so we remember across refreshes
+      localStorage.setItem('test_notifications_running', 'true');
+
+      addDebugLog('5-minute test started', 'success', data);
+      setTimeout(() => setTestSuccess(false), 5000);
+    } catch (error) {
+      setTestError(error.message);
+      addDebugLog('Failed to start 5-minute test', 'error', { error: error.message });
+      setTimeout(() => setTestError(null), 5000);
+    } finally {
+      setTestLoading(false);
+    }
+  };
+
+  // Stop 5-minute test notifications
+  const stopFiveMinuteTest = async () => {
+    setTestLoading(true);
+
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      if (!token) {
+        throw new Error('Please log in to stop test notifications');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/push/test/stop`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to stop test');
+      }
+
+      const data = await response.json();
+      setTestRunning(false);
+      setNextTestTime(null);
+      setMessage('Test notifications stopped');
+      localStorage.removeItem('test_notifications_running');
+
+      addDebugLog('5-minute test stopped', 'success', data);
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      setTestError(error.message);
+      addDebugLog('Failed to stop 5-minute test', 'error', { error: error.message });
+      setTimeout(() => setTestError(null), 5000);
+    } finally {
+      setTestLoading(false);
+    }
+  };
+
+  // Check test status on mount
+  useEffect(() => {
+    const checkTestStatus = async () => {
+      const testWasRunning = localStorage.getItem('test_notifications_running') === 'true';
+      if (testWasRunning) {
+        try {
+          const token = localStorage.getItem('fridgy_token');
+          if (token) {
+            const response = await fetch(`${API_BASE_URL}/push/test/status`, {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              setTestRunning(data.isRunning);
+              setNextTestTime(data.nextTime);
+
+              if (!data.isRunning) {
+                localStorage.removeItem('test_notifications_running');
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error checking test status:', error);
+        }
+      }
+    };
+
+    checkTestStatus();
+  }, [API_BASE_URL, addDebugLog]);
+
   return (
     <div className="notification-settings">
       <h2 className="notification-settings__title">Push Notifications</h2>
@@ -837,6 +956,115 @@ const NotificationSettings = () => {
             {testError}
           </div>
         )}
+      </div>
+
+      {/* 5-Minute Test Section */}
+      <div style={{
+        background: '#fff3cd',
+        border: '2px solid #ffc107',
+        borderRadius: '12px',
+        padding: '20px',
+        marginBottom: '20px'
+      }}>
+        <h3 style={{
+          marginTop: 0,
+          marginBottom: '12px',
+          fontSize: '20px',
+          color: '#333'
+        }}>
+          🧪 5-Minute Push Test (iOS 16.4+)
+        </h3>
+
+        <p style={{
+          fontSize: '14px',
+          color: '#666',
+          marginBottom: '16px',
+          lineHeight: '1.5'
+        }}>
+          Test if background push notifications work on your device.
+          Notifications will arrive every 5 minutes for 1 hour, even when the app is closed!
+        </p>
+
+        {!testRunning ? (
+          <button
+            onClick={startFiveMinuteTest}
+            disabled={testLoading || !isSubscribed}
+            style={{
+              width: '100%',
+              padding: '16px',
+              background: !isSubscribed ? '#ccc' : '#28a745',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              cursor: testLoading || !isSubscribed ? 'not-allowed' : 'pointer',
+              opacity: testLoading ? 0.7 : 1
+            }}
+          >
+            {testLoading ? 'Starting...' :
+             !isSubscribed ? 'Subscribe First to Enable Test' :
+             '🚀 Start 5-Minute Test Notifications'}
+          </button>
+        ) : (
+          <>
+            <div style={{
+              marginBottom: '12px',
+              padding: '12px',
+              background: '#e8f5e9',
+              borderRadius: '8px',
+              fontSize: '14px',
+              color: '#2e7d32'
+            }}>
+              <strong>✅ Test Running!</strong><br/>
+              Next notification: {nextTestTime || 'calculating...'}
+            </div>
+            <button
+              onClick={stopFiveMinuteTest}
+              disabled={testLoading}
+              style={{
+                width: '100%',
+                padding: '16px',
+                background: '#dc3545',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                cursor: testLoading ? 'not-allowed' : 'pointer',
+                opacity: testLoading ? 0.7 : 1
+              }}
+            >
+              {testLoading ? 'Stopping...' : '🛑 Stop Test Notifications'}
+            </button>
+          </>
+        )}
+
+        {message && (
+          <div style={{
+            marginTop: '12px',
+            padding: '10px',
+            background: '#d4edda',
+            borderRadius: '8px',
+            color: '#155724',
+            fontSize: '14px'
+          }}>
+            {message}
+          </div>
+        )}
+
+        <div style={{
+          marginTop: '12px',
+          fontSize: '12px',
+          color: '#856404',
+          lineHeight: '1.4'
+        }}>
+          💡 <strong>Test Instructions:</strong><br/>
+          1. Click "Start" to begin test<br/>
+          2. Close this app completely<br/>
+          3. Watch for "Hey [name], right now is [time]" every 5 minutes<br/>
+          4. Auto-stops after 1 hour
+        </div>
       </div>
 
       <div className="notification-settings__section">
