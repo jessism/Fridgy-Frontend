@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './NotificationSettings.css';
 import { requestNotificationPermission, subscribeToPush } from '../serviceWorkerRegistration';
 import { ensureValidToken, debugTokenStatus } from '../utils/tokenValidator';
@@ -6,6 +6,14 @@ import { ensureValidToken, debugTokenStatus } from '../utils/tokenValidator';
 const NotificationSettings = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showDebugConsole, setShowDebugConsole] = useState(false);
+  const [debugLogs, setDebugLogs] = useState([]);
+  const [deviceInfo, setDeviceInfo] = useState({});
+  const [permissionStatus, setPermissionStatus] = useState('unknown');
+  const [swStatus, setSwStatus] = useState('checking');
+  const [testError, setTestError] = useState(null);
+  const [testSuccess, setTestSuccess] = useState(false);
+  const [lastTestTime, setLastTestTime] = useState(null);
   const [preferences, setPreferences] = useState({
     enabled: true,
     days_before_expiry: [1, 3],
@@ -56,11 +64,105 @@ const NotificationSettings = () => {
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-  useEffect(() => {
-    checkSubscriptionStatus();
-    loadPreferences();
-    loadDailyReminders();
+  const addDebugLog = useCallback((message, type = 'info', details = {}) => {
+    const log = {
+      timestamp: new Date().toISOString(),
+      message,
+      type, // 'success', 'error', 'warning', 'info'
+      details
+    };
+
+    setDebugLogs(prev => {
+      const newLogs = [log, ...prev].slice(0, 20); // Keep last 20 logs
+      localStorage.setItem('notification_debug_logs', JSON.stringify(newLogs));
+      return newLogs;
+    });
+
+    console.log(`[Notification Debug] ${type.toUpperCase()}: ${message}`, details);
   }, []);
+
+  const loadDebugLogs = () => {
+    try {
+      const savedLogs = localStorage.getItem('notification_debug_logs');
+      if (savedLogs) {
+        setDebugLogs(JSON.parse(savedLogs));
+      }
+    } catch (error) {
+      console.error('Error loading debug logs:', error);
+    }
+  };
+
+  const clearDebugLogs = () => {
+    setDebugLogs([]);
+    localStorage.removeItem('notification_debug_logs');
+    addDebugLog('Debug logs cleared', 'info');
+  };
+
+  const initializeDebugInfo = async () => {
+    // Detect device and browser info
+    const ua = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+    const isAndroid = /Android/.test(ua);
+    const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+    const isChrome = /Chrome/.test(ua) && /Google Inc/.test(navigator.vendor);
+    const isFirefox = /Firefox/.test(ua);
+    const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+                  window.navigator.standalone ||
+                  document.referrer.includes('android-app://');
+
+    const info = {
+      platform: isIOS ? 'iOS' : isAndroid ? 'Android' : 'Desktop',
+      browser: isSafari ? 'Safari' : isChrome ? 'Chrome' : isFirefox ? 'Firefox' : 'Other',
+      isPWA,
+      userAgent: ua,
+      notificationSupport: 'Notification' in window,
+      serviceWorkerSupport: 'serviceWorker' in navigator,
+      pushManagerSupport: 'PushManager' in window
+    };
+
+    setDeviceInfo(info);
+    addDebugLog('Device info initialized', 'info', info);
+
+    // Check notification permission
+    if ('Notification' in window) {
+      const permission = Notification.permission;
+      setPermissionStatus(permission);
+      addDebugLog(`Notification permission: ${permission}`,
+        permission === 'granted' ? 'success' : permission === 'denied' ? 'error' : 'warning'
+      );
+    } else {
+      setPermissionStatus('not-supported');
+      addDebugLog('Notification API not supported', 'error');
+    }
+
+    // Check service worker status
+    if ('serviceWorker' in navigator) {
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        setSwStatus('active');
+        addDebugLog('Service worker is active', 'success', {
+          scope: registration.scope,
+          state: registration.active?.state
+        });
+
+        // Check push subscription
+        const subscription = await registration.pushManager.getSubscription();
+        if (subscription) {
+          addDebugLog('Push subscription found', 'success', {
+            endpoint: subscription.endpoint.substring(0, 50) + '...'
+          });
+        } else {
+          addDebugLog('No push subscription found', 'warning');
+        }
+      } catch (error) {
+        setSwStatus('error');
+        addDebugLog('Service worker error', 'error', { error: error.message });
+      }
+    } else {
+      setSwStatus('not-supported');
+      addDebugLog('Service worker not supported', 'error');
+    }
+  };
 
   const checkSubscriptionStatus = async () => {
     try {
@@ -118,40 +220,91 @@ const NotificationSettings = () => {
     }
   };
 
+  // Initialize component and set up service worker listener
+  useEffect(() => {
+    checkSubscriptionStatus();
+    loadPreferences();
+    loadDailyReminders();
+    initializeDebugInfo();
+    loadDebugLogs();
+
+    // Listen for messages from service worker
+    const handleServiceWorkerMessage = (event) => {
+      console.log('[NotificationSettings] SW message received:', event.data);
+
+      if (event.data.type === 'NOTIFICATION_SHOWN') {
+        addDebugLog('Notification displayed successfully!', 'success', event.data.data);
+      } else if (event.data.type === 'NOTIFICATION_ERROR') {
+        addDebugLog('Failed to display notification', 'error', { error: event.data.error });
+      } else if (event.data.type === 'SW_ACTIVATED') {
+        addDebugLog('Service worker activated', 'success', { timestamp: event.data.timestamp });
+        setSwStatus('active');
+      }
+    };
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', handleServiceWorkerMessage);
+    }
+
+    return () => {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
+      }
+    };
+  }, [addDebugLog, checkSubscriptionStatus, loadPreferences, loadDailyReminders, initializeDebugInfo, loadDebugLogs]);
+
   const handleSubscribe = async () => {
     setIsLoading(true);
     setMessage('');
+    addDebugLog('Starting subscription process', 'info');
 
     try {
       // Request notification permission
+      addDebugLog('Requesting notification permission', 'info');
       const permissionGranted = await requestNotificationPermission();
 
       if (!permissionGranted) {
-        setMessage('Please enable notifications in your browser settings');
+        const errorMsg = 'Please enable notifications in your browser settings';
+        setMessage(errorMsg);
+        addDebugLog(errorMsg, 'error', { permission: Notification.permission });
         setIsLoading(false);
         return;
       }
 
+      addDebugLog('Permission granted', 'success');
+
       // Subscribe to push notifications
+      addDebugLog('Creating push subscription', 'info');
       const subscription = await subscribeToPush();
       console.log('Push subscription result:', subscription);
 
       if (!subscription) {
-        setMessage('Failed to subscribe to notifications - check console for details');
+        const errorMsg = 'Failed to subscribe to notifications - check debug console';
+        setMessage(errorMsg);
+        addDebugLog(errorMsg, 'error', { subscription });
         setIsLoading(false);
         return;
       }
 
+      addDebugLog('Push subscription created', 'success', {
+        endpoint: subscription.endpoint.substring(0, 50) + '...'
+      });
+
       // Save subscription to backend - validate token first
+      addDebugLog('Validating authentication token', 'info');
       const token = ensureValidToken();  // Will be fixed in tokenValidator.js
 
       if (!token) {
         // Run debug info for troubleshooting
         debugTokenStatus();
-        setMessage('Authentication required. Please log in first.');
+        const errorMsg = 'Authentication required. Please log in first.';
+        setMessage(errorMsg);
+        addDebugLog(errorMsg, 'error', { hasToken: false });
         setIsLoading(false);
         return;
       }
+
+      addDebugLog('Token validated', 'success');
 
       console.log('Push Subscribe Request:', {
         url: `${API_BASE_URL}/push/subscribe`,
@@ -159,6 +312,7 @@ const NotificationSettings = () => {
         subscriptionKeys: subscription ? Object.keys(subscription) : []
       });
 
+      addDebugLog('Saving subscription to backend', 'info');
       const response = await fetch(`${API_BASE_URL}/push/subscribe`, {
         method: 'POST',
         headers: {
@@ -170,18 +324,90 @@ const NotificationSettings = () => {
 
       if (response.ok) {
         setIsSubscribed(true);
-        setMessage('Successfully subscribed to notifications!');
+        const successMsg = 'Successfully subscribed to notifications!';
+        setMessage(successMsg);
+        addDebugLog(successMsg, 'success');
+        setPermissionStatus('granted');
       } else {
         const errorData = await response.json();
         console.error('Subscription failed:', errorData);
-        setMessage(`Failed: ${errorData.message || errorData.error || 'Unknown error'}`);
+        const errorMsg = `Failed: ${errorData.message || errorData.error || 'Unknown error'}`;
+        setMessage(errorMsg);
+        addDebugLog('Backend subscription failed', 'error', errorData);
       }
     } catch (error) {
       console.error('Subscribe error:', error);
-      setMessage('An error occurred while subscribing');
+      const errorMsg = 'An error occurred while subscribing';
+      setMessage(errorMsg);
+      addDebugLog('Subscription error', 'error', {
+        error: error.message,
+        stack: error.stack
+      });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleQuickTest = async () => {
+    addDebugLog('Quick test notification triggered', 'info');
+
+    try {
+      // First check if we have permission
+      if (Notification.permission !== 'granted') {
+        const errorMsg = 'Notification permission not granted';
+        addDebugLog(errorMsg, 'error');
+        setMessage(errorMsg);
+        return;
+      }
+
+      // Try to show a local notification
+      addDebugLog('Attempting to show local notification', 'info');
+
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        // Send message to service worker to show notification
+        navigator.serviceWorker.controller.postMessage({
+          type: 'SHOW_TEST_NOTIFICATION',
+          data: {
+            title: '🔔 Test Notification',
+            body: 'If you see this, notifications are working!',
+            timestamp: new Date().toISOString()
+          }
+        });
+
+        addDebugLog('Test notification message sent to service worker', 'success');
+        setMessage('Test notification sent! Check your device.');
+      } else {
+        // Fallback: try direct notification
+        const notification = new Notification('🔔 Test Notification', {
+          body: 'If you see this, notifications are working!',
+          icon: '/logo192.png',
+          badge: '/logo192.png'
+        });
+
+        addDebugLog('Direct notification created', 'success');
+        setMessage('Test notification sent! Check your device.');
+
+        setTimeout(() => notification.close(), 5000);
+      }
+    } catch (error) {
+      const errorMsg = `Test failed: ${error.message}`;
+      addDebugLog('Test notification failed', 'error', { error: error.message });
+      setMessage(errorMsg);
+    }
+  };
+
+  const handleTestWithDelay = () => {
+    addDebugLog('Delayed test notification scheduled (5 seconds)', 'info');
+    setMessage('Test notification will appear in 5 seconds...');
+
+    setTimeout(() => {
+      handleQuickTest();
+    }, 5000);
+  };
+
+  const handleTestBackendPush = async () => {
+    addDebugLog('Testing backend push notification', 'info');
+    handleTestNotification();
   };
 
   const handleUnsubscribe = async () => {
@@ -219,9 +445,17 @@ const NotificationSettings = () => {
 
   const handleTestNotification = async () => {
     setMessage('');
+    addDebugLog('Sending test notification via backend', 'info');
 
     try {
       const token = localStorage.getItem('fridgy_token');
+      if (!token) {
+        const errorMsg = 'No authentication token found';
+        addDebugLog(errorMsg, 'error');
+        setMessage(errorMsg);
+        return;
+      }
+
       const response = await fetch(`${API_BASE_URL}/push/test`, {
         method: 'POST',
         headers: {
@@ -232,12 +466,17 @@ const NotificationSettings = () => {
       if (response.ok) {
         const data = await response.json();
         setMessage(data.message);
+        addDebugLog('Backend test notification sent', 'success', data);
       } else {
-        setMessage('Failed to send test notification');
+        const errorMsg = 'Failed to send test notification';
+        setMessage(errorMsg);
+        addDebugLog(errorMsg, 'error', { status: response.status });
       }
     } catch (error) {
       console.error('Test notification error:', error);
-      setMessage('An error occurred');
+      const errorMsg = 'An error occurred';
+      setMessage(errorMsg);
+      addDebugLog('Backend test error', 'error', { error: error.message });
     }
   };
 
@@ -377,9 +616,93 @@ const NotificationSettings = () => {
     ).join(' ');
   };
 
+  // SUPER SIMPLE test - just show a notification RIGHT NOW
+  const testNotificationNow = () => {
+    console.log('[Test] Showing notification NOW');
+
+    // Try to show notification immediately via service worker
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'SHOW_TEST_NOTIFICATION',
+        data: {
+          title: '🥬 Spinach Expiring Soon!',
+          body: 'Your spinach expires tomorrow - use it today!',
+          timestamp: Date.now()
+        }
+      });
+      setTestSuccess(true);
+      setTimeout(() => setTestSuccess(false), 3000);
+    } else {
+      // Fallback: direct notification
+      try {
+        new Notification('🥬 Spinach Expiring Soon!', {
+          body: 'Your spinach expires tomorrow - use it today!',
+          icon: '/logo192.png',
+          badge: '/logo192.png'
+        });
+        setTestSuccess(true);
+        setTimeout(() => setTestSuccess(false), 3000);
+      } catch (e) {
+        setTestError('Cannot show notification. Enable in Settings.');
+        setTimeout(() => setTestError(null), 5000);
+      }
+    }
+  };
+
   return (
     <div className="notification-settings">
       <h2 className="notification-settings__title">Push Notifications</h2>
+
+      {/* SUPER SIMPLE TEST BUTTON */}
+      <div style={{
+        marginBottom: '20px'
+      }}>
+        <button
+          onClick={testNotificationNow}
+          style={{
+            width: '100%',
+            padding: '20px',
+            fontSize: '18px',
+            fontWeight: 'bold',
+            background: '#FF6B6B',
+            color: 'white',
+            border: 'none',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+          }}
+        >
+          🔔 SHOW TEST NOTIFICATION NOW
+        </button>
+
+        {/* Simple feedback */}
+        {testSuccess && (
+          <div style={{
+            marginTop: '10px',
+            padding: '10px',
+            background: '#e8f5e9',
+            borderRadius: '8px',
+            color: '#2e7d32',
+            fontSize: '16px',
+            textAlign: 'center'
+          }}>
+            ✅ Look for the notification!
+          </div>
+        )}
+        {testError && (
+          <div style={{
+            marginTop: '10px',
+            padding: '10px',
+            background: '#ffebee',
+            borderRadius: '8px',
+            color: '#c62828',
+            fontSize: '16px',
+            textAlign: 'center'
+          }}>
+            {testError}
+          </div>
+        )}
+      </div>
 
       <div className="notification-settings__section">
         <h3>Notification Status</h3>

@@ -29,7 +29,7 @@ self.addEventListener('install', event => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', event => {
-  console.log('[Service Worker] Activate');
+  console.log('[Service Worker] Activate at', new Date().toISOString());
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
@@ -40,9 +40,22 @@ self.addEventListener('activate', event => {
           }
         })
       );
+    }).then(() => {
+      console.log('[Service Worker] Caches cleaned, claiming clients');
+      return self.clients.claim();
+    }).then(() => {
+      // Notify all clients that service worker is ready
+      return self.clients.matchAll().then(clients => {
+        console.log('[Service Worker] Notifying', clients.length, 'clients of activation');
+        clients.forEach(client => {
+          client.postMessage({
+            type: 'SW_ACTIVATED',
+            timestamp: new Date().toISOString()
+          });
+        });
+      });
     })
   );
-  self.clients.claim();
 });
 
 // Fetch event - serve from cache when offline
@@ -130,9 +143,38 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Push event - show notifications
+// Message handler for test notifications
+self.addEventListener('message', event => {
+  console.log('[Service Worker] Message received:', event.data);
+
+  if (event.data.type === 'SHOW_TEST_NOTIFICATION') {
+    const { title, body, timestamp } = event.data.data;
+
+    console.log('[Service Worker] Showing test notification:', { title, body });
+
+    self.registration.showNotification(title || '🔔 Test Notification', {
+      body: body || 'If you see this, notifications are working!',
+      icon: '/logo192.png',
+      badge: '/logo192.png',
+      tag: 'test-notification',
+      timestamp: timestamp || Date.now(),
+      requireInteraction: false,
+      vibrate: [200, 100, 200],
+      actions: [
+        { action: 'view', title: 'View' },
+        { action: 'dismiss', title: 'Dismiss' }
+      ]
+    }).then(() => {
+      console.log('[Service Worker] Test notification displayed successfully');
+    }).catch(error => {
+      console.error('[Service Worker] Failed to show test notification:', error);
+    });
+  }
+});
+
+// Push event - show notifications with detailed logging
 self.addEventListener('push', event => {
-  console.log('[Service Worker] Push Received');
+  console.log('[Service Worker] Push Received at', new Date().toISOString());
 
   let data = {
     title: 'Trackabite Reminder',
@@ -145,10 +187,14 @@ self.addEventListener('push', event => {
   if (event.data) {
     try {
       const payload = event.data.json();
+      console.log('[Service Worker] Push payload parsed:', payload);
       data = { ...data, ...payload };
     } catch (e) {
+      console.log('[Service Worker] Push payload as text:', event.data.text());
       data.body = event.data.text();
     }
+  } else {
+    console.log('[Service Worker] No push data received');
   }
 
   const options = {
@@ -167,12 +213,40 @@ self.addEventListener('push', event => {
 
   event.waitUntil(
     self.registration.showNotification(data.title, options)
+      .then(() => {
+        console.log('[Service Worker] Push notification displayed:', data.title);
+        // Send message back to clients about successful notification
+        self.clients.matchAll().then(clients => {
+          clients.forEach(client => {
+            client.postMessage({
+              type: 'NOTIFICATION_SHOWN',
+              data: { title: data.title, timestamp: new Date().toISOString() }
+            });
+          });
+        });
+      })
+      .catch(error => {
+        console.error('[Service Worker] Failed to show push notification:', error);
+        // Send error back to clients
+        self.clients.matchAll().then(clients => {
+          clients.forEach(client => {
+            client.postMessage({
+              type: 'NOTIFICATION_ERROR',
+              error: error.message
+            });
+          });
+        });
+      })
   );
 });
 
-// Notification click event
+// Notification click event with detailed logging
 self.addEventListener('notificationclick', event => {
-  console.log('[Service Worker] Notification clicked');
+  console.log('[Service Worker] Notification clicked:', {
+    action: event.action,
+    tag: event.notification.tag,
+    title: event.notification.title
+  });
   event.notification.close();
 
   let urlToOpen = '/inventory';
