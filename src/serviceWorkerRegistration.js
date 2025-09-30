@@ -162,7 +162,18 @@ export async function subscribeToPush() {
     const response = await fetch(`${apiUrl}/push/vapid-public-key`);
     if (!response.ok) {
       const error = await response.text();
-      console.error('Failed to fetch VAPID key:', error);
+      console.error('[Push Subscribe] VAPID key fetch failed:', {
+        status: response.status,
+        statusText: response.statusText,
+        url: `${apiUrl}/push/vapid-public-key`,
+        error: error,
+        possibleCauses: [
+          'CORS not configured on backend',
+          'Backend server not running',
+          'Wrong API URL in environment',
+          'Network connectivity issue'
+        ]
+      });
       return null;
     }
 

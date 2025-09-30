@@ -6,7 +6,7 @@ import { ensureValidToken, debugTokenStatus } from '../utils/tokenValidator';
 const NotificationSettings = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showDebugConsole, setShowDebugConsole] = useState(false);
+  const [showDebugConsole, setShowDebugConsole] = useState(true); // Changed to true to always show
   const [debugLogs, setDebugLogs] = useState([]);
   const [deviceInfo, setDeviceInfo] = useState({});
   const [permissionStatus, setPermissionStatus] = useState('unknown');
@@ -84,7 +84,7 @@ const NotificationSettings = () => {
     console.log(`[Notification Debug] ${type.toUpperCase()}: ${message}`, details);
   }, []);
 
-  const loadDebugLogs = () => {
+  const loadDebugLogs = useCallback(() => {
     try {
       const savedLogs = localStorage.getItem('notification_debug_logs');
       if (savedLogs) {
@@ -93,7 +93,7 @@ const NotificationSettings = () => {
     } catch (error) {
       console.error('Error loading debug logs:', error);
     }
-  };
+  }, []);
 
   const clearDebugLogs = () => {
     setDebugLogs([]);
@@ -101,7 +101,7 @@ const NotificationSettings = () => {
     addDebugLog('Debug logs cleared', 'info');
   };
 
-  const initializeDebugInfo = async () => {
+  const initializeDebugInfo = useCallback(async () => {
     // Detect device and browser info
     const ua = navigator.userAgent;
     const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
@@ -165,9 +165,9 @@ const NotificationSettings = () => {
       setSwStatus('not-supported');
       addDebugLog('Service worker not supported', 'error');
     }
-  };
+  }, [addDebugLog]);
 
-  const checkSubscriptionStatus = async () => {
+  const checkSubscriptionStatus = useCallback(async () => {
     try {
       const token = localStorage.getItem('fridgy_token');
       const response = await fetch(`${API_BASE_URL}/push/check-subscription`, {
@@ -185,9 +185,9 @@ const NotificationSettings = () => {
     } catch (error) {
       console.error('Error checking subscription status:', error);
     }
-  };
+  }, [API_BASE_URL]);
 
-  const loadPreferences = async () => {
+  const loadPreferences = useCallback(async () => {
     try {
       const token = localStorage.getItem('fridgy_token');
       const response = await fetch(`${API_BASE_URL}/push/preferences`, {
@@ -203,9 +203,9 @@ const NotificationSettings = () => {
     } catch (error) {
       console.error('Error loading preferences:', error);
     }
-  };
+  }, [API_BASE_URL]);
 
-  const loadDailyReminders = async () => {
+  const loadDailyReminders = useCallback(async () => {
     try {
       const token = localStorage.getItem('fridgy_token');
       const response = await fetch(`${API_BASE_URL}/push/daily-reminders`, {
@@ -221,7 +221,7 @@ const NotificationSettings = () => {
     } catch (error) {
       console.error('Error loading daily reminders:', error);
     }
-  };
+  }, [API_BASE_URL]);
 
   // Check browser notification permission on component mount and update
   useEffect(() => {
@@ -314,9 +314,20 @@ const NotificationSettings = () => {
       console.log('Push subscription result:', subscription);
 
       if (!subscription) {
-        const errorMsg = 'Failed to subscribe to notifications - check debug console';
+        const errorMsg = 'Failed to create push subscription. This could be due to:\n' +
+                       '1. Service worker not registered\n' +
+                       '2. VAPID key fetch failed (check network tab)\n' +
+                       '3. Push manager not available\n' +
+                       'Check the debug console below for details.';
         setMessage(errorMsg);
-        addDebugLog(errorMsg, 'error', { subscription });
+        addDebugLog('Subscription creation failed', 'error', {
+          subscription: null,
+          possibleReasons: [
+            'Service worker registration failed',
+            'VAPID key fetch failed (CORS?)',
+            'Push manager unavailable'
+          ]
+        });
         setIsLoading(false);
         return;
       }
@@ -1256,6 +1267,133 @@ const NotificationSettings = () => {
         >
           🔍 Debug Token Status
         </button>
+      )}
+
+      {/* Debug Console - Always Visible for Troubleshooting */}
+      {showDebugConsole && (
+        <div style={{
+          marginTop: '20px',
+          padding: '20px',
+          backgroundColor: '#f8f9fa',
+          border: '2px solid #dee2e6',
+          borderRadius: '8px'
+        }}>
+          <h3 style={{ marginTop: 0, marginBottom: '15px', color: '#495057' }}>
+            🐛 Debug Console
+          </h3>
+
+          {/* Status Summary */}
+          <div style={{
+            marginBottom: '20px',
+            padding: '15px',
+            backgroundColor: 'white',
+            borderRadius: '6px',
+            fontSize: '14px',
+            lineHeight: '1.6'
+          }}>
+            <div><strong>Device:</strong> {deviceInfo.platform || 'Unknown'} - {deviceInfo.browser || 'Unknown'}</div>
+            <div><strong>PWA Mode:</strong> {deviceInfo.isPWA ? '✅ Yes' : '❌ No'}</div>
+            <div><strong>Permission:</strong> <span style={{
+              color: permissionStatus === 'granted' ? '#28a745' :
+                     permissionStatus === 'denied' ? '#dc3545' : '#ffc107'
+            }}>{permissionStatus}</span></div>
+            <div><strong>Service Worker:</strong> <span style={{
+              color: swStatus === 'active' ? '#28a745' : '#dc3545'
+            }}>{swStatus}</span></div>
+            <div><strong>Subscribed:</strong> {isSubscribed ? '✅ Yes' : '❌ No'}</div>
+          </div>
+
+          {/* Recent Logs */}
+          <div style={{
+            maxHeight: '200px',
+            overflowY: 'auto',
+            padding: '10px',
+            backgroundColor: '#f1f3f5',
+            borderRadius: '6px',
+            fontSize: '12px',
+            fontFamily: 'monospace'
+          }}>
+            <strong>Recent Activity:</strong>
+            {debugLogs.length === 0 ? (
+              <div style={{ marginTop: '10px', color: '#6c757d' }}>No logs yet. Try subscribing to see activity.</div>
+            ) : (
+              debugLogs.slice(0, 10).map((log, index) => (
+                <div key={index} style={{
+                  marginTop: '8px',
+                  padding: '8px',
+                  backgroundColor: log.type === 'error' ? '#ffebee' :
+                                  log.type === 'success' ? '#e8f5e9' :
+                                  log.type === 'warning' ? '#fff3e0' : 'white',
+                  borderLeft: `4px solid ${
+                    log.type === 'error' ? '#f44336' :
+                    log.type === 'success' ? '#4caf50' :
+                    log.type === 'warning' ? '#ff9800' : '#2196f3'
+                  }`,
+                  borderRadius: '3px'
+                }}>
+                  <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                    [{new Date(log.timestamp).toLocaleTimeString()}] {log.message}
+                  </div>
+                  {log.details && (
+                    <div style={{ marginTop: '4px', fontSize: '11px', color: '#666' }}>
+                      {JSON.stringify(log.details, null, 2)}
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Manual Test Buttons */}
+          <div style={{ marginTop: '15px' }}>
+            <button
+              onClick={async () => {
+                addDebugLog('Testing VAPID key fetch...', 'info');
+                try {
+                  const response = await fetch(`${API_BASE_URL}/push/vapid-public-key`);
+                  if (response.ok) {
+                    const data = await response.json();
+                    addDebugLog('VAPID key fetch successful', 'success', { hasKey: !!data.publicKey });
+                  } else {
+                    addDebugLog('VAPID key fetch failed', 'error', { status: response.status });
+                  }
+                } catch (error) {
+                  addDebugLog('VAPID key fetch error', 'error', { error: error.message });
+                }
+              }}
+              style={{
+                marginRight: '10px',
+                padding: '8px 12px',
+                backgroundColor: '#007bff',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '13px'
+              }}
+            >
+              Test VAPID Fetch
+            </button>
+
+            <button
+              onClick={() => {
+                setDebugLogs([]);
+                addDebugLog('Logs cleared', 'info');
+              }}
+              style={{
+                padding: '8px 12px',
+                backgroundColor: '#6c757d',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '13px'
+              }}
+            >
+              Clear Logs
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
