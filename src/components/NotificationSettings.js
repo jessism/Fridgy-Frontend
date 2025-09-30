@@ -220,6 +220,38 @@ const NotificationSettings = () => {
     }
   };
 
+  // Check browser notification permission on component mount and update
+  useEffect(() => {
+    const updatePermissionStatus = () => {
+      if ('Notification' in window) {
+        setPermissionStatus(Notification.permission);
+      } else {
+        setPermissionStatus('not-supported');
+      }
+    };
+
+    // Check initial permission status
+    updatePermissionStatus();
+
+    // Check service worker status
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(registration => {
+        if (registration.active) {
+          setSwStatus('active');
+        }
+      }).catch(() => {
+        setSwStatus('error');
+      });
+    }
+
+    // Also check when window gets focus (user might have changed settings)
+    window.addEventListener('focus', updatePermissionStatus);
+
+    return () => {
+      window.removeEventListener('focus', updatePermissionStatus);
+    };
+  }, []);
+
   // Initialize component and set up service worker listener
   useEffect(() => {
     checkSubscriptionStatus();
@@ -653,6 +685,109 @@ const NotificationSettings = () => {
     <div className="notification-settings">
       <h2 className="notification-settings__title">Push Notifications</h2>
 
+      {/* Notification Permission Status Panel - Always Visible */}
+      <div style={{
+        background: '#f8f9fa',
+        borderRadius: '12px',
+        padding: '16px',
+        marginBottom: '20px'
+      }}>
+        <h3 style={{ marginTop: 0, marginBottom: '16px', fontSize: '18px', color: '#333' }}>
+          📱 Notification Status
+        </h3>
+
+        {/* Row 1: Browser/iOS Permission */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '12px',
+          background: 'white',
+          borderRadius: '8px',
+          marginBottom: '8px'
+        }}>
+          <span style={{ flex: 1, fontSize: '15px' }}>🔔 Browser Permission</span>
+          <span style={{
+            fontWeight: 'bold',
+            fontSize: '14px',
+            color: permissionStatus === 'granted' ? '#4fcf61' :
+                   permissionStatus === 'denied' ? '#ff4444' : '#ff9800'
+          }}>
+            {permissionStatus === 'granted' ? '✅ Allowed' :
+             permissionStatus === 'denied' ? '❌ Blocked' : '⚠️ Not Set'}
+          </span>
+        </div>
+
+        {/* Row 2: Service Worker */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '12px',
+          background: 'white',
+          borderRadius: '8px',
+          marginBottom: '8px'
+        }}>
+          <span style={{ flex: 1, fontSize: '15px' }}>⚙️ Service Worker</span>
+          <span style={{
+            fontWeight: 'bold',
+            fontSize: '14px',
+            color: swStatus === 'active' ? '#4fcf61' :
+                   swStatus === 'error' ? '#ff4444' : '#ff9800'
+          }}>
+            {swStatus === 'active' ? '✅ Active' :
+             swStatus === 'checking' ? '⏳ Loading' :
+             swStatus === 'error' ? '❌ Error' : '❌ Inactive'}
+          </span>
+        </div>
+
+        {/* Row 3: Push Subscription (Server Connection) */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '12px',
+          background: 'white',
+          borderRadius: '8px'
+        }}>
+          <span style={{ flex: 1, fontSize: '15px' }}>🌐 Server Connection</span>
+          <span style={{
+            fontWeight: 'bold',
+            fontSize: '14px',
+            color: isSubscribed ? '#4fcf61' : '#ff9800'
+          }}>
+            {isSubscribed ? '✅ Connected' : '⚠️ Not Connected'}
+          </span>
+        </div>
+
+        {/* Help text when permission granted but not subscribed */}
+        {permissionStatus === 'granted' && !isSubscribed && (
+          <div style={{
+            marginTop: '12px',
+            padding: '10px',
+            background: '#fff3cd',
+            border: '1px solid #ffeeba',
+            borderRadius: '6px',
+            fontSize: '14px',
+            color: '#856404'
+          }}>
+            💡 iOS permissions enabled! Click "Connect to Server" below to complete setup.
+          </div>
+        )}
+
+        {/* Help text when permission denied */}
+        {permissionStatus === 'denied' && (
+          <div style={{
+            marginTop: '12px',
+            padding: '10px',
+            background: '#f8d7da',
+            border: '1px solid #f5c6cb',
+            borderRadius: '6px',
+            fontSize: '14px',
+            color: '#721c24'
+          }}>
+            ⚠️ Notifications blocked. Enable in iOS Settings → Safari → Notifications → trackabite.app
+          </div>
+        )}
+      </div>
+
       {/* SUPER SIMPLE TEST BUTTON */}
       <div style={{
         marginBottom: '20px'
@@ -718,7 +853,8 @@ const NotificationSettings = () => {
             disabled={isLoading}
             className="notification-settings__button primary"
           >
-            {isLoading ? 'Subscribing...' : 'Enable Notifications'}
+            {isLoading ? 'Connecting...' :
+             permissionStatus === 'granted' ? '🔗 Connect to Server' : 'Enable Notifications'}
           </button>
         ) : (
           <div className="notification-settings__button-group">
