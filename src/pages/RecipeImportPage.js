@@ -22,16 +22,21 @@ const RecipeImportPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if came from iOS Shortcut with URL parameter
+    // Check if came from iOS Shortcut or Web Share Target with URL parameter
     const params = new URLSearchParams(location.search);
     const url = params.get('url');
+    const text = params.get('text'); // Instagram might send URL in text param
+    const title = params.get('title');
 
-    if (url && url.includes('instagram.com')) {
-      console.log('[RecipeImport] Detected Instagram URL from shortcut:', url);
-      setImportUrl(url);
+    // Check both url and text parameters for Instagram links
+    const instagramUrl = url || text;
+
+    if (instagramUrl && instagramUrl.includes('instagram.com')) {
+      console.log('[RecipeImport] Detected Instagram URL from share/shortcut:', instagramUrl);
+      setImportUrl(instagramUrl);
       setStatus('🎉 Recipe detected from Instagram!');
       // Auto-import after 1 second
-      setTimeout(() => handleImport(url), 1000);
+      setTimeout(() => handleImport(instagramUrl), 1000);
     }
 
     // Check clipboard for Instagram URL (optional enhancement)

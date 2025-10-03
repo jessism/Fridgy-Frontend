@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-globals */
 
 // Cache name versioning
-const CACHE_NAME = 'trackabite-v4'; // v4: Remove HTML caching for auth redirect
+const CACHE_NAME = 'trackabite-v5'; // v5: Added Web Share Target API support
 const urlsToCache = [
   // Removed '/' to prevent caching landing page - fixes auth redirect issue
   '/static/css/main.css',

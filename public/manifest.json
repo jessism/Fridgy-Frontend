@@ -28,6 +28,15 @@
   "background_color": "#ffffff",
   "orientation": "portrait",
   "categories": ["food", "lifestyle", "productivity"],
+  "share_target": {
+    "action": "/recipe-import",
+    "method": "GET",
+    "params": {
+      "url": "url",
+      "text": "text",
+      "title": "title"
+    }
+  },
   "shortcuts": [
     {
       "name": "Add Items",
