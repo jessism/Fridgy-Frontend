@@ -40,12 +40,12 @@ const MobileBottomNav = () => {
     {
       path: '/home',
       icon: (isActive) => isActive ? (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
           <rect x="9" y="12" width="6" height="10" fill="white"/>
         </svg>
       ) : (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
           <polyline points="9,22 9,12 15,12 15,22"/>
         </svg>
@@ -55,7 +55,7 @@ const MobileBottomNav = () => {
     {
       path: '/inventory',
       icon: (isActive) => isActive ? (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
           <rect x="3" y="4" width="18" height="2" rx="1"/>
           <rect x="3" y="11" width="18" height="2" rx="1"/>
           <rect x="3" y="18" width="18" height="2" rx="1"/>
@@ -68,7 +68,7 @@ const MobileBottomNav = () => {
     {
       path: '/batchcamera',
       icon: (
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
           <circle cx="14" cy="14" r="13" fill="#81e053" stroke="none"/>
           <path d="M14 10V18M10 14H18" stroke="white" strokeWidth="0.8" strokeLinecap="round"/>
         </svg>
@@ -79,7 +79,7 @@ const MobileBottomNav = () => {
     {
       path: '/meal-plans/recipes',
       icon: (isActive) => isActive ? (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
           {/* Fork - filled */}
           <path d="M7 2v6l2 2v12h-2V10l-2-2V2h2zm0 0h-2v4h2V2zm-2 0h-2v4h2V2zm4 0h-2v4h2V2z" />
           {/* Knife - filled */}
@@ -93,11 +93,11 @@ const MobileBottomNav = () => {
     {
       path: '/profile',
       icon: (isActive) => isActive ? (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
         </svg>
       ) : (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
           <circle cx="12" cy="7" r="4"/>
         </svg>

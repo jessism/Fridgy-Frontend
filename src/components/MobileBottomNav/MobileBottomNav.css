@@ -18,7 +18,7 @@
   grid-template-columns: repeat(5, 1fr);
   max-width: 100%;
   margin: 0 auto;
-  padding: 4px 0;
+  padding: 6px 0 8px 0; /* Added more bottom padding for better spacing */
 }
 
 .nav-tab {
@@ -48,9 +48,9 @@
 }
 
 .nav-icon {
-  width: 24px;
-  height: 24px;
-  margin-bottom: 2px;
+  width: 20px; /* Reduced from 24px */
+  height: 20px; /* Reduced from 24px */
+  margin-bottom: 3px; /* Slightly increased for better spacing */
   transition: transform 0.2s ease;
   line-height: 1;
   display: flex;
@@ -65,7 +65,7 @@
 }
 
 .nav-label {
-  font-size: 10pt;
+  font-size: 0.75rem; /* Changed to 0.75rem as requested */
   font-weight: 500;
   text-align: center;
   line-height: 1.2;
@@ -90,8 +90,8 @@
 }
 
 .nav-tab.add-button .nav-icon {
-  width: 48px;
-  height: 48px;
+  width: 40px; /* Reduced from 48px to maintain proportions */
+  height: 40px;
   margin-bottom: 0;
   border-radius: 50%;
   transition: all 0.3s ease;
@@ -120,12 +120,12 @@
 /* Extra small screens */
 @media (max-width: 480px) {
   .nav-icon {
-    width: 20px;
-    height: 20px;
+    width: 18px; /* Even smaller on very small screens */
+    height: 18px;
   }
-  
+
   .nav-label {
-    font-size: 10pt;
+    font-size: 0.75rem; /* Keep consistent with main size */
   }
 
   .nav-tab {
@@ -139,20 +139,20 @@
   .mobile-bottom-nav {
     padding-bottom: 2px;
   }
-  
+
   .nav-tab {
     min-height: 40px;
     padding: 2px 2px;
   }
-  
+
   .nav-icon {
-    width: 20px;
-    height: 20px;
+    width: 18px; /* Consistent with small screen size */
+    height: 18px;
     margin-bottom: 1px;
   }
-  
+
   .nav-label {
-    font-size: 10pt;
+    font-size: 0.75rem; /* Keep consistent with main size */
   }
 }
 
