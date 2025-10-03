@@ -17,9 +17,13 @@ const RecipeImportPage = () => {
   const [showVideoPreview, setShowVideoPreview] = useState(false);
   const [videoUrl, setVideoUrl] = useState(null);
   const [isTimeoutError, setIsTimeoutError] = useState(false);
+  const [showIOSPrompt, setShowIOSPrompt] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Detect iOS device
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
   useEffect(() => {
     // Check if came from iOS Shortcut or Web Share Target with URL parameter
@@ -44,7 +48,17 @@ const RecipeImportPage = () => {
 
     // Fetch Apify usage stats
     fetchApifyUsage();
-  }, [location]);
+
+    // Check if iOS user hasn't installed shortcut
+    if (isIOS && !localStorage.getItem('shortcut_installed')) {
+      const lastPrompt = localStorage.getItem('last_ios_prompt');
+      const now = Date.now();
+      // Show prompt once per week
+      if (!lastPrompt || now - parseInt(lastPrompt) > 7 * 24 * 60 * 60 * 1000) {
+        setShowIOSPrompt(true);
+      }
+    }
+  }, [location, isIOS]);
 
   const checkClipboard = async () => {
     try {
@@ -428,6 +442,56 @@ const RecipeImportPage = () => {
           </button>
           <h1>Import Recipe from Instagram</h1>
         </div>
+
+        {/* iOS Shortcut Prompt */}
+        {showIOSPrompt && isIOS && (
+          <div className="recipe-import-page__ios-prompt" style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            padding: '16px',
+            borderRadius: '12px',
+            marginBottom: '20px',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => {
+                setShowIOSPrompt(false);
+                localStorage.setItem('last_ios_prompt', Date.now().toString());
+              }}
+              style={{
+                position: 'absolute',
+                top: '8px',
+                right: '8px',
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                fontSize: '20px',
+                cursor: 'pointer'
+              }}
+            >
+              ×
+            </button>
+            <h3 style={{ marginTop: '0', marginBottom: '12px' }}>📱 Save recipes with 2 taps!</h3>
+            <p style={{ marginBottom: '12px' }}>Install our iOS Shortcut to save Instagram recipes directly from the share menu.</p>
+            <button
+              onClick={() => {
+                localStorage.setItem('last_ios_prompt', Date.now().toString());
+                navigate('/shortcut-setup');
+              }}
+              style={{
+                background: 'white',
+                color: '#667eea',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                border: 'none',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}
+            >
+              Setup Quick Share →
+            </button>
+          </div>
+        )}
 
         {/* Status Messages */}
         {status && !error && (

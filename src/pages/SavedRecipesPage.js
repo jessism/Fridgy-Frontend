@@ -17,6 +17,11 @@ const SavedRecipesPage = () => {
   const [showDetail, setShowDetail] = useState(false);
   const [showCreationModal, setShowCreationModal] = useState(false);
   const [deletingRecipeId, setDeletingRecipeId] = useState(null);
+  const [shortcutConfig, setShortcutConfig] = useState(null);
+  const [installingShortcut, setInstallingShortcut] = useState(false);
+
+  // Detect iOS device
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   
   useEffect(() => {
     fetchRecipes();
@@ -221,16 +226,112 @@ const SavedRecipesPage = () => {
           'Authorization': `Bearer ${token}`
         }
       });
-      
-      setRecipes(prevRecipes => 
-        prevRecipes.map(r => 
-          r.id === recipe.id 
+
+      setRecipes(prevRecipes =>
+        prevRecipes.map(r =>
+          r.id === recipe.id
             ? { ...r, times_cooked: (r.times_cooked || 0) + 1, last_cooked: new Date() }
             : r
         )
       );
     } catch (error) {
       console.error('Error marking recipe as cooked:', error);
+    }
+  };
+
+  // Quick install shortcut function
+  const handleQuickShortcutInstall = async () => {
+    if (!isIOS) {
+      // For non-iOS users, go to the setup page
+      navigate('/shortcuts/setup');
+      return;
+    }
+
+    setInstallingShortcut(true);
+
+    try {
+      // Fetch shortcut configuration if not already loaded
+      if (!shortcutConfig) {
+        const token = localStorage.getItem('fridgy_token');
+        if (!token) {
+          alert('Please sign in to set up shortcuts');
+          navigate('/signin');
+          return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/shortcuts/setup`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch shortcut configuration');
+        }
+
+        const config = await response.json();
+        setShortcutConfig(config);
+
+        // Fetch shortcut template
+        const templateResponse = await fetch('/shortcuts/save-to-fridgy.json');
+        const template = await templateResponse.json();
+
+        // Customize template with user's token
+        const customizedShortcut = {
+          ...template,
+          WFWorkflowImportQuestions: [
+            {
+              ParameterKey: "ShortcutToken",
+              WFParameterType: "Text",
+              WFWorkflowImportQuestionText: "Your Trackabite Token (already filled):",
+              DefaultValue: config.token
+            },
+            {
+              ParameterKey: "BackendURL",
+              WFParameterType: "Text",
+              WFWorkflowImportQuestionText: "API URL (already filled):",
+              DefaultValue: config.apiUrl.replace('/import', '')
+            },
+            {
+              ParameterKey: "FrontendURL",
+              WFParameterType: "Text",
+              WFWorkflowImportQuestionText: "App URL (already filled):",
+              DefaultValue: window.location.origin
+            }
+          ]
+        };
+
+        // Create blob and trigger download/install
+        const blob = new Blob([JSON.stringify(customizedShortcut)], {
+          type: 'application/x-apple-shortcuts'
+        });
+        const blobUrl = URL.createObjectURL(blob);
+
+        // Create temporary anchor to trigger the shortcut installation
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = 'Save to Trackabite.shortcut';
+        a.click();
+
+        // Clean up
+        setTimeout(() => {
+          URL.revokeObjectURL(blobUrl);
+        }, 1000);
+
+        // Mark shortcut as installed
+        localStorage.setItem('shortcut_installed', 'true');
+
+        // Show success message
+        setTimeout(() => {
+          alert('📱 Shortcut downloaded!\n\n1. Tap "Add Shortcut" when it opens\n2. Share from Instagram to save recipes!\n\nYour token is already filled in.');
+        }, 500);
+      }
+    } catch (error) {
+      console.error('Error installing shortcut:', error);
+      alert('Failed to install shortcut. Please try the manual setup.');
+      navigate('/shortcuts/setup');
+    } finally {
+      setInstallingShortcut(false);
     }
   };
 
@@ -255,12 +356,42 @@ const SavedRecipesPage = () => {
               </h1>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%', justifyContent: 'flex-end' }}>
-              <button
-                className="saved-recipes-page__setup-button"
-                onClick={() => navigate('/shortcuts/setup')}
-              >
-                Setup Shortcut
-              </button>
+              {isIOS && !localStorage.getItem('shortcut_installed') && (
+                <button
+                  className="saved-recipes-page__setup-button"
+                  onClick={handleQuickShortcutInstall}
+                  disabled={installingShortcut}
+                  style={{
+                    position: 'relative',
+                    backgroundColor: installingShortcut ? '#ccc' : undefined
+                  }}
+                >
+                  {installingShortcut ? (
+                    <>Installing...</>
+                  ) : (
+                    <>
+                      📱 Quick Save
+                      <span style={{
+                        position: 'absolute',
+                        top: '-8px',
+                        right: '-8px',
+                        background: '#ff4444',
+                        color: 'white',
+                        borderRadius: '50%',
+                        width: '16px',
+                        height: '16px',
+                        fontSize: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 'bold'
+                      }}>
+                        !
+                      </span>
+                    </>
+                  )}
+                </button>
+              )}
               <button
                 className="saved-recipes-page__add-button-header"
                 onClick={() => navigate('/import')}
