@@ -45,7 +45,7 @@ body {
   .meal-plans-page,
   .shopping-list-page,
   .profiles-page {
-    padding-bottom: 80px !important;
+    padding-bottom: 85px !important; /* Adjusted for balanced navbar height */
   }
   
   /* Adjust content areas that have fixed top padding for navbar */

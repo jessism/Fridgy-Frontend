@@ -18,7 +18,7 @@
   grid-template-columns: repeat(5, 1fr);
   max-width: 100%;
   margin: 0 auto;
-  padding: 6px 0 8px 0; /* Added more bottom padding for better spacing */
+  padding: 10px 0 18px 0; /* Moderate bottom padding for balanced height */
 }
 
 .nav-tab {
@@ -30,7 +30,7 @@
   text-decoration: none;
   color: #333; /* Softer dark gray instead of pure black */
   transition: all 0.2s ease;
-  min-height: 48px;
+  min-height: 50px; /* Slightly increased for better balance */
   position: relative;
 }
 

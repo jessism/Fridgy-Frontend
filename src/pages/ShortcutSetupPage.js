@@ -107,23 +107,45 @@ function ShortcutSetupPage() {
   const handleInstall = () => {
     if (!isIOS) {
       // Scroll to QR code for other devices
-      document.getElementById('qr-section')?.scrollIntoView({ 
-        behavior: 'smooth' 
+      document.getElementById('qr-section')?.scrollIntoView({
+        behavior: 'smooth'
       });
       return;
     }
-    
+
     // Copy token to clipboard first
     navigator.clipboard.writeText(config.token).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+
+      // iCloud shortcut link - UPDATE THIS WITH YOUR ACTUAL iCLOUD LINK
+      const iCloudShortcutURL = process.env.REACT_APP_ICLOUD_SHORTCUT_URL || 'https://www.icloud.com/shortcuts/PLACEHOLDER';
+
+      // Show instructions and open shortcut
+      const userConfirmed = window.confirm(
+        '📱 Install Trackabite Recipe Saver\n\n' +
+        '✅ Token copied to clipboard!\n\n' +
+        'Next steps:\n' +
+        '1. Tap OK to open the shortcut\n' +
+        '2. Paste your token when asked (already copied!)\n' +
+        '3. Tap "Add Shortcut"\n\n' +
+        'After setup, share Instagram recipes directly!'
+      );
+
+      if (userConfirmed) {
+        // Open iCloud shortcut link
+        window.location.href = iCloudShortcutURL;
+
+        // Mark as installed after confirmation
+        setTimeout(() => {
+          const installed = window.confirm('Did you successfully add the shortcut?');
+          if (installed) {
+            localStorage.setItem('shortcut_installed', 'true');
+            alert('🎉 Perfect! Share Instagram recipes directly to Trackabite now!');
+          }
+        }, 3000);
+      }
     });
-    
-    if (installMethod === 'auto') {
-      installViaDataURL();
-    } else if (installMethod === 'download') {
-      downloadShortcutFile();
-    }
   };
   
   const installViaDataURL = () => {

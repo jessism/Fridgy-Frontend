@@ -23,7 +23,7 @@
   align-items: center;
   max-width: none;
   margin: 0;
-  padding: 0.5rem calc(2vw + 2rem);
+  padding: 0.5rem calc(2vw + 2rem) 1.5rem calc(2vw + 2rem); /* Added more bottom padding */
   width: 100%;
 }
 

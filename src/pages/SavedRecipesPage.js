@@ -239,7 +239,7 @@ const SavedRecipesPage = () => {
     }
   };
 
-  // Quick install shortcut function
+  // Quick install shortcut function using iCloud link
   const handleQuickShortcutInstall = async () => {
     if (!isIOS) {
       // For non-iOS users, go to the setup page
@@ -250,86 +250,63 @@ const SavedRecipesPage = () => {
     setInstallingShortcut(true);
 
     try {
-      // Fetch shortcut configuration if not already loaded
-      if (!shortcutConfig) {
-        const token = localStorage.getItem('fridgy_token');
-        if (!token) {
-          alert('Please sign in to set up shortcuts');
-          navigate('/signin');
-          return;
-        }
+      const token = localStorage.getItem('fridgy_token');
+      if (!token) {
+        alert('Please sign in to set up shortcuts');
+        navigate('/signin');
+        return;
+      }
 
-        const response = await fetch(`${API_BASE_URL}/shortcuts/setup`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
+      // Fetch user's shortcut token
+      const response = await fetch(`${API_BASE_URL}/shortcuts/setup`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch shortcut configuration');
+      }
+
+      const config = await response.json();
+
+      // Copy token to clipboard for easy pasting
+      try {
+        await navigator.clipboard.writeText(config.token);
+        console.log('Token copied to clipboard');
+      } catch (clipboardError) {
+        console.warn('Could not copy to clipboard:', clipboardError);
+      }
+
+      // iCloud shortcut link - UPDATE THIS WITH YOUR ACTUAL iCLOUD LINK
+      const iCloudShortcutURL = process.env.REACT_APP_ICLOUD_SHORTCUT_URL || 'https://www.icloud.com/shortcuts/PLACEHOLDER';
+
+      // Show instructions modal
+      const userConfirmed = window.confirm(
+        '📱 Install Trackabite Recipe Saver\n\n' +
+        '1. Your token is copied to clipboard\n' +
+        '2. Tap OK to open the shortcut\n' +
+        '3. Paste your token when asked\n' +
+        '4. Tap "Add Shortcut"\n\n' +
+        'After setup, share Instagram recipes directly to Trackabite!'
+      );
+
+      if (userConfirmed) {
+        // Open iCloud shortcut link
+        window.location.href = iCloudShortcutURL;
+
+        // Mark as installed after user confirms
+        setTimeout(() => {
+          const installed = window.confirm('Did you successfully add the shortcut?');
+          if (installed) {
+            localStorage.setItem('shortcut_installed', 'true');
+            alert('🎉 Great! Now you can share recipes from Instagram directly to Trackabite!');
           }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch shortcut configuration');
-        }
-
-        const config = await response.json();
-        setShortcutConfig(config);
-
-        // Fetch shortcut template
-        const templateResponse = await fetch('/shortcuts/save-to-fridgy.json');
-        const template = await templateResponse.json();
-
-        // Customize template with user's token
-        const customizedShortcut = {
-          ...template,
-          WFWorkflowImportQuestions: [
-            {
-              ParameterKey: "ShortcutToken",
-              WFParameterType: "Text",
-              WFWorkflowImportQuestionText: "Your Trackabite Token (already filled):",
-              DefaultValue: config.token
-            },
-            {
-              ParameterKey: "BackendURL",
-              WFParameterType: "Text",
-              WFWorkflowImportQuestionText: "API URL (already filled):",
-              DefaultValue: config.apiUrl.replace('/import', '')
-            },
-            {
-              ParameterKey: "FrontendURL",
-              WFParameterType: "Text",
-              WFWorkflowImportQuestionText: "App URL (already filled):",
-              DefaultValue: window.location.origin
-            }
-          ]
-        };
-
-        // Create blob and trigger download/install
-        const blob = new Blob([JSON.stringify(customizedShortcut)], {
-          type: 'application/x-apple-shortcuts'
-        });
-        const blobUrl = URL.createObjectURL(blob);
-
-        // Create temporary anchor to trigger the shortcut installation
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = 'Save to Trackabite.shortcut';
-        a.click();
-
-        // Clean up
-        setTimeout(() => {
-          URL.revokeObjectURL(blobUrl);
-        }, 1000);
-
-        // Mark shortcut as installed
-        localStorage.setItem('shortcut_installed', 'true');
-
-        // Show success message
-        setTimeout(() => {
-          alert('📱 Shortcut downloaded!\n\n1. Tap "Add Shortcut" when it opens\n2. Share from Instagram to save recipes!\n\nYour token is already filled in.');
-        }, 500);
+        }, 3000);
       }
     } catch (error) {
       console.error('Error installing shortcut:', error);
-      alert('Failed to install shortcut. Please try the manual setup.');
-      navigate('/shortcuts/setup');
+      alert('Failed to set up shortcut. Please try again or use manual import.');
     } finally {
       setInstallingShortcut(false);
     }
