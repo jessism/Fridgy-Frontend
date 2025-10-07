@@ -278,22 +278,25 @@ const SavedRecipesPage = () => {
         console.warn('Could not copy to clipboard:', clipboardError);
       }
 
-      // iCloud shortcut link - UPDATE THIS WITH YOUR ACTUAL iCLOUD LINK
+      // iCloud shortcut link with pre-filled token
       const iCloudShortcutURL = process.env.REACT_APP_ICLOUD_SHORTCUT_URL || 'https://www.icloud.com/shortcuts/PLACEHOLDER';
+
+      // Try to pre-fill the token via URL parameters
+      const prefilledURL = `${iCloudShortcutURL}?ShortcutToken=${encodeURIComponent(config.token)}`;
 
       // Show instructions modal
       const userConfirmed = window.confirm(
         '📱 Install Trackabite Recipe Saver\n\n' +
-        '1. Your token is copied to clipboard\n' +
-        '2. Tap OK to open the shortcut\n' +
-        '3. Paste your token when asked\n' +
-        '4. Tap "Add Shortcut"\n\n' +
-        'After setup, share Instagram recipes directly to Trackabite!'
+        '1. Tap OK to open the shortcut\n' +
+        '2. Tap "Add Shortcut"\n' +
+        '3. Done!\n\n' +
+        'Your token will be automatically configured.\n' +
+        'After setup, share Instagram recipes directly!'
       );
 
       if (userConfirmed) {
-        // Open iCloud shortcut link
-        window.location.href = iCloudShortcutURL;
+        // Open iCloud shortcut link with pre-filled token
+        window.location.href = prefilledURL;
 
         // Mark as installed after user confirms
         setTimeout(() => {
