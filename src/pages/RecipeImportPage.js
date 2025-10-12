@@ -31,6 +31,56 @@ const RecipeImportPage = () => {
     const url = params.get('url');
     const text = params.get('text'); // Instagram might send URL in text param
     const title = params.get('title');
+    const importing = params.get('importing'); // From push notification
+
+    // Check if this is from shortcut import push notification
+    if (importing === 'true') {
+      console.log('[RecipeImport] Opened from import push notification - showing loading state');
+      setLoading(true);
+      setStatus('📥 Importing recipe from Instagram...');
+
+      // Poll for new recipe every 2 seconds
+      const pollInterval = setInterval(async () => {
+        try {
+          const token = localStorage.getItem('fridgy_token');
+          if (!token) return;
+
+          const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+          const response = await fetch(`${apiUrl}/saved-recipes?limit=1`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            const latestRecipe = data.recipes?.[0];
+
+            // Check if recipe was created in last 60 seconds
+            if (latestRecipe && latestRecipe.created_at) {
+              const recipeAge = Date.now() - new Date(latestRecipe.created_at).getTime();
+              if (recipeAge < 60000) {
+                console.log('[RecipeImport] New recipe detected!', latestRecipe.title);
+                clearInterval(pollInterval);
+                setLoading(false);
+                setStatus('✅ Recipe imported successfully!');
+                setTimeout(() => navigate('/saved-recipes'), 1500);
+              }
+            }
+          }
+        } catch (error) {
+          console.error('[RecipeImport] Polling error:', error);
+        }
+      }, 2000);
+
+      // Stop polling after 60 seconds
+      setTimeout(() => {
+        clearInterval(pollInterval);
+        setLoading(false);
+        setStatus('Import taking longer than expected. Check saved recipes.');
+        setTimeout(() => navigate('/saved-recipes'), 2000);
+      }, 60000);
+
+      return () => clearInterval(pollInterval);
+    }
 
     // Check both url and text parameters for Instagram links
     const instagramUrl = url || text;
