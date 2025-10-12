@@ -33,6 +33,9 @@ const RecipeImportPage = () => {
     const title = params.get('title');
     const importing = params.get('importing'); // From push notification
 
+    let pollInterval;
+    let timeoutId;
+
     // Check if this is from shortcut import push notification
     if (importing === 'true') {
       console.log('[RecipeImport] Opened from import push notification - showing loading state');
@@ -40,7 +43,7 @@ const RecipeImportPage = () => {
       setStatus('📥 Importing recipe from Instagram...');
 
       // Poll for new recipe every 2 seconds
-      const pollInterval = setInterval(async () => {
+      pollInterval = setInterval(async () => {
         try {
           const token = localStorage.getItem('fridgy_token');
           if (!token) return;
@@ -72,42 +75,48 @@ const RecipeImportPage = () => {
       }, 2000);
 
       // Stop polling after 60 seconds
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         clearInterval(pollInterval);
         setLoading(false);
         setStatus('Import taking longer than expected. Check saved recipes.');
         setTimeout(() => navigate('/saved-recipes'), 2000);
       }, 60000);
-
-      return () => clearInterval(pollInterval);
     }
 
-    // Check both url and text parameters for Instagram links
-    const instagramUrl = url || text;
+    // Check both url and text parameters for Instagram links (only if not in importing mode)
+    if (importing !== 'true') {
+      const instagramUrl = url || text;
 
-    if (instagramUrl && instagramUrl.includes('instagram.com')) {
-      console.log('[RecipeImport] Detected Instagram URL from share/shortcut:', instagramUrl);
-      setImportUrl(instagramUrl);
-      setStatus('🎉 Recipe detected from Instagram!');
-      // Auto-import after 1 second
-      setTimeout(() => handleImport(instagramUrl), 1000);
-    }
+      if (instagramUrl && instagramUrl.includes('instagram.com')) {
+        console.log('[RecipeImport] Detected Instagram URL from share/shortcut:', instagramUrl);
+        setImportUrl(instagramUrl);
+        setStatus('🎉 Recipe detected from Instagram!');
+        // Auto-import after 1 second
+        setTimeout(() => handleImport(instagramUrl), 1000);
+      }
 
-    // Check clipboard for Instagram URL (optional enhancement)
-    checkClipboard();
+      // Check clipboard for Instagram URL (optional enhancement)
+      checkClipboard();
 
-    // Fetch Apify usage stats
-    fetchApifyUsage();
+      // Fetch Apify usage stats
+      fetchApifyUsage();
 
-    // Check if iOS user hasn't installed shortcut
-    if (isIOS && !localStorage.getItem('shortcut_installed')) {
-      const lastPrompt = localStorage.getItem('last_ios_prompt');
-      const now = Date.now();
-      // Show prompt once per week
-      if (!lastPrompt || now - parseInt(lastPrompt) > 7 * 24 * 60 * 60 * 1000) {
-        setShowIOSPrompt(true);
+      // Check if iOS user hasn't installed shortcut
+      if (isIOS && !localStorage.getItem('shortcut_installed')) {
+        const lastPrompt = localStorage.getItem('last_ios_prompt');
+        const now = Date.now();
+        // Show prompt once per week
+        if (!lastPrompt || now - parseInt(lastPrompt) > 7 * 24 * 60 * 60 * 1000) {
+          setShowIOSPrompt(true);
+        }
       }
     }
+
+    // Cleanup function
+    return () => {
+      if (pollInterval) clearInterval(pollInterval);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [location, isIOS]);
 
   const checkClipboard = async () => {
