@@ -18,7 +18,7 @@
   grid-template-columns: repeat(5, 1fr);
   max-width: 100%;
   margin: 0 auto;
-  padding: 10px 0 18px 0; /* Moderate bottom padding for balanced height */
+  padding: 10px 0 10px 0; /* Balanced padding for minimal white space */
 }
 
 .nav-tab {

@@ -485,10 +485,10 @@
 
 .section-title {
   font-family: var(--header-font);
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   color: var(--header-color);
   margin-bottom: 1rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .section-subtitle {
@@ -769,7 +769,7 @@
 
   /* Systematic mobile section headline sizing */
   .section-title {
-    font-size: 1.125rem !important;
+    font-size: 1.25rem !important;
   }
 
   .section-subtitle {
@@ -915,9 +915,9 @@
 
 .expiring-soon .section-title {
   font-family: var(--header-font);
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   color: var(--header-color);
-  font-weight: 500;
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1058,9 +1058,9 @@
 
 .quick-access .section-title {
   font-family: var(--header-font);
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   color: var(--header-color);
-  font-weight: 500;
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1290,7 +1290,7 @@
   }
 
   .quick-access .section-title {
-    font-size: 1.125rem !important;
+    font-size: 1.25rem !important;
   }
 
   .quick-access-grid {
@@ -1363,9 +1363,9 @@
 
 .shopping-list .section-title {
   font-family: var(--header-font);
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   color: var(--header-color);
-  font-weight: 500;
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1620,7 +1620,7 @@
 
   .expiring-soon .section-title {
     font-family: var(--header-font);
-    font-size: 1.125rem !important;
+    font-size: 1.25rem !important;
   }
 
   .item-name {
@@ -1734,9 +1734,9 @@
 
 .section-header-with-arrow .section-title {
   font-family: var(--header-font);
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   color: var(--header-color);
-  font-weight: 500;
+  font-weight: 600;
   margin: 0;
 }
 
@@ -1973,7 +1973,7 @@ h2.section-title::after {
 
   .section-header-with-arrow .section-title {
     font-family: var(--header-font);
-    font-size: 1.125rem !important;
+    font-size: 1.25rem !important;
   }
 
   .meals-slider {
@@ -2674,8 +2674,8 @@ h2.section-title::after {
 
 .section-title {
   font-family: var(--header-font);
-  font-size: 1.125rem;
-  font-weight: 500;
+  font-size: 1.25rem;
+  font-weight: 600;
   color: var(--header-color);
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
@@ -2883,7 +2883,7 @@ h2.section-title::after {
   }
 
   .section-title {
-    font-size: 1.125rem;
+    font-size: 1.25rem;
   }
 
   .ingredients-container,
@@ -2986,7 +2986,7 @@ h2.section-title::after {
   }
 
   .section-title {
-    font-size: 1.125rem;
+    font-size: 1.25rem;
   }
 
   .ingredients-container,
