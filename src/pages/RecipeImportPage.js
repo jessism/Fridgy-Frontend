@@ -4,9 +4,16 @@ import FridgyLogo from '../assets/images/Logo.png';
 import './RecipeImportPage.css';
 
 const RecipeImportPage = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Check if coming from push notification
+  const params = new URLSearchParams(location.search);
+  const importing = params.get('importing');
+
   const [importUrl, setImportUrl] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState('');
+  const [loading, setLoading] = useState(importing === 'true'); // Initialize from URL param
+  const [status, setStatus] = useState(importing === 'true' ? '📥 Importing recipe from Instagram...' : '');
   const [error, setError] = useState('');
   const [extractedRecipe, setExtractedRecipe] = useState(null);
   const [showManualForm, setShowManualForm] = useState(false);
@@ -19,19 +26,14 @@ const RecipeImportPage = () => {
   const [isTimeoutError, setIsTimeoutError] = useState(false);
   const [showIOSPrompt, setShowIOSPrompt] = useState(false);
 
-  const location = useLocation();
-  const navigate = useNavigate();
-
   // Detect iOS device
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
   useEffect(() => {
     // Check if came from iOS Shortcut or Web Share Target with URL parameter
-    const params = new URLSearchParams(location.search);
     const url = params.get('url');
     const text = params.get('text'); // Instagram might send URL in text param
     const title = params.get('title');
-    const importing = params.get('importing'); // From push notification
 
     let pollInterval;
     let timeoutId;
@@ -39,14 +41,17 @@ const RecipeImportPage = () => {
     // Check if this is from shortcut import push notification
     if (importing === 'true') {
       console.log('[RecipeImport] Opened from import push notification - showing loading state');
-      setLoading(true);
-      setStatus('📥 Importing recipe from Instagram...');
 
       // Poll for new recipe every 2 seconds
+      let pollErrorCount = 0;
       pollInterval = setInterval(async () => {
         try {
           const token = localStorage.getItem('fridgy_token');
-          if (!token) return;
+          if (!token) {
+            clearInterval(pollInterval);
+            setError('Please sign in to continue.');
+            return;
+          }
 
           const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
           const response = await fetch(`${apiUrl}/saved-recipes?limit=1`, {
@@ -63,23 +68,35 @@ const RecipeImportPage = () => {
               if (recipeAge < 60000) {
                 console.log('[RecipeImport] New recipe detected!', latestRecipe.title);
                 clearInterval(pollInterval);
-                setLoading(false);
+                clearTimeout(timeoutId);
                 setStatus('✅ Recipe imported successfully!');
+                setError('');
+                // Brief success message, then navigate
                 setTimeout(() => navigate('/saved-recipes'), 1500);
               }
             }
+          } else if (response.status === 401) {
+            clearInterval(pollInterval);
+            setError('Session expired. Please sign in again.');
           }
         } catch (error) {
           console.error('[RecipeImport] Polling error:', error);
+          pollErrorCount++;
+          // If multiple consecutive errors, stop polling and show error
+          if (pollErrorCount >= 5) {
+            clearInterval(pollInterval);
+            clearTimeout(timeoutId);
+            setError('Connection issue while checking for your recipe. Please check your internet connection and try again.');
+          }
         }
       }, 2000);
 
-      // Stop polling after 60 seconds
+      // Stop polling after 60 seconds and show error
       timeoutId = setTimeout(() => {
         clearInterval(pollInterval);
-        setLoading(false);
-        setStatus('Import taking longer than expected. Check saved recipes.');
-        setTimeout(() => navigate('/saved-recipes'), 2000);
+        // Keep loading=true to stay on loading screen, but show error
+        setError('Import is taking longer than expected. The recipe might still be saved - check your saved recipes, or try importing again.');
+        setStatus('');
       }, 60000);
     }
 
@@ -473,14 +490,57 @@ const RecipeImportPage = () => {
           <img
             src={FridgyLogo}
             alt="Fridgy"
-            className="recipe-import-page__analyzing-icon"
+            className={`recipe-import-page__analyzing-icon ${error ? 'recipe-import-page__analyzing-icon--error' : ''}`}
           />
-          <div className="recipe-import-page__loading-title">
-            Importing your recipe...
-          </div>
-          <div className="recipe-import-page__loading-subtitle">
-            Fridgy is analyzing the Instagram post
-          </div>
+
+          {error ? (
+            // Error State
+            <>
+              <div className="recipe-import-page__error-icon">⚠️</div>
+              <div className="recipe-import-page__loading-title">
+                Import Issue
+              </div>
+              <div className="recipe-import-page__error-message">
+                {error}
+              </div>
+              <div className="recipe-import-page__action-buttons">
+                <button
+                  className="recipe-import-page__button recipe-import-page__button--secondary"
+                  onClick={() => navigate('/saved-recipes')}
+                >
+                  View Saved Recipes
+                </button>
+                <button
+                  className="recipe-import-page__button recipe-import-page__button--primary"
+                  onClick={() => navigate('/import')}
+                >
+                  Try Again
+                </button>
+              </div>
+            </>
+          ) : status && status.includes('✅') ? (
+            // Success State
+            <>
+              <div className="recipe-import-page__success-icon">✅</div>
+              <div className="recipe-import-page__loading-title">
+                Recipe Imported!
+              </div>
+              <div className="recipe-import-page__loading-subtitle">
+                Taking you to your saved recipes...
+              </div>
+            </>
+          ) : (
+            // Loading State
+            <>
+              <div className="recipe-import-page__loading-title">
+                {status || 'Importing your recipe...'}
+              </div>
+              <div className="recipe-import-page__loading-subtitle">
+                Fridgy is analyzing the Instagram post
+              </div>
+              <div className="recipe-import-page__loading-spinner"></div>
+            </>
+          )}
         </div>
       </div>
     );
