@@ -18,7 +18,7 @@
   grid-template-columns: repeat(5, 1fr);
   max-width: 100%;
   margin: 0 auto;
-  padding: 10px 0 5px 0; /* Reduced bottom padding - safe-area-inset handles the rest */
+  padding: 10px 0 3px 0; /* Minimal bottom padding - safe-area-inset handles the rest */
 }
 
 .nav-tab {
