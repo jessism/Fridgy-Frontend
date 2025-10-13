@@ -1,0 +1,258 @@
+/* PWA Test Page Styles */
+
+.pwa-test-page {
+  min-height: 100vh;
+  padding: 20px;
+  background: #f8f9fa;
+}
+
+.pwa-test-page__container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pwa-test-page__title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.pwa-test-page__section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pwa-test-page__section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+/* Status Grid */
+.pwa-test-page__status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.pwa-test-page__status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.pwa-test-page__status-label {
+  font-weight: 600;
+  color: #666;
+  font-size: 14px;
+}
+
+.pwa-test-page__status-value {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.pwa-test-page__status-value.active {
+  color: #4fcf61;
+}
+
+.pwa-test-page__status-value.inactive {
+  color: #999;
+}
+
+/* Debug Section */
+.pwa-test-page__debug {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.pwa-test-page__debug h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 16px 0 8px 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.pwa-test-page__debug h3:first-child {
+  margin-top: 0;
+}
+
+.pwa-test-page__debug ul {
+  list-style: none;
+  padding-left: 16px;
+  margin: 8px 0;
+}
+
+.pwa-test-page__debug li {
+  padding: 4px 0;
+  color: #666;
+}
+
+.pwa-test-page__debug p {
+  margin: 8px 0;
+  padding-left: 16px;
+  color: #666;
+}
+
+/* Test Actions */
+.pwa-test-page__actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.pwa-test-page__button {
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+}
+
+.pwa-test-page__button--primary {
+  background: #4fcf61;
+  color: white;
+}
+
+.pwa-test-page__button--primary:hover {
+  background: #3fb551;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3);
+}
+
+.pwa-test-page__button--secondary {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.pwa-test-page__button--secondary:hover {
+  background: #e0e0e0;
+}
+
+.pwa-test-page__button--danger {
+  background: #ff4444;
+  color: white;
+}
+
+.pwa-test-page__button--danger:hover {
+  background: #dd3333;
+}
+
+/* Test Result */
+.pwa-test-page__result {
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.pwa-test-page__result.success {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.pwa-test-page__result.error {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.pwa-test-page__result h3 {
+  font-size: 16px;
+  margin: 0 0 8px 0;
+}
+
+.pwa-test-page__result p {
+  margin: 4px 0;
+}
+
+/* Instructions */
+.pwa-test-page__instructions {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.pwa-test-page__instructions h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 16px 0 12px 0;
+}
+
+.pwa-test-page__instructions h3:first-child {
+  margin-top: 0;
+}
+
+.pwa-test-page__instructions ol,
+.pwa-test-page__instructions ul {
+  margin: 8px 0;
+  padding-left: 24px;
+}
+
+.pwa-test-page__instructions li {
+  padding: 4px 0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.pwa-test-page__instructions strong {
+  color: #333;
+  font-weight: 600;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .pwa-test-page {
+    padding: 16px;
+  }
+
+  .pwa-test-page__title {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  .pwa-test-page__section {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .pwa-test-page__section-title {
+    font-size: 18px;
+  }
+
+  .pwa-test-page__status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pwa-test-page__actions {
+    grid-template-columns: 1fr;
+  }
+
+  .pwa-test-page__debug {
+    font-size: 12px;
+    padding: 12px;
+  }
+}

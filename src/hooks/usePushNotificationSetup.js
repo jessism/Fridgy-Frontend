@@ -2,9 +2,19 @@ import { requestNotificationPermission, subscribeToPush } from '../serviceWorker
 import { validateStoredToken, ensureValidToken, debugTokenStatus } from '../utils/tokenValidator';
 
 export const usePushNotificationSetup = () => {
+  // Helper function to detect PWA mode
+  const isPWA = () => {
+    return window.matchMedia('(display-mode: standalone)').matches ||
+           window.navigator.standalone === true ||
+           document.referrer.includes('android-app://') ||
+           window.matchMedia('(display-mode: fullscreen)').matches ||
+           window.matchMedia('(display-mode: minimal-ui)').matches;
+  };
+
   const setupPushNotifications = async (providedToken) => {
     try {
       console.log('Starting automatic push notification setup...');
+      console.log('PWA Mode:', isPWA() ? 'Yes' : 'No (Browser)');
 
       // Use provided token or validate stored token
       let token = providedToken;
@@ -42,6 +52,7 @@ export const usePushNotificationSetup = () => {
       // Check if it's iOS Safari (requires installation from home screen)
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
       const isStandalone = window.navigator.standalone === true;
+      const isInPWAMode = isPWA();
 
       if (isIOS && !isStandalone) {
         console.log('iOS Safari detected - notifications require adding to home screen first');
@@ -50,6 +61,11 @@ export const usePushNotificationSetup = () => {
           requiresInstall: true,
           message: 'Add to home screen to enable notifications'
         };
+      }
+
+      // Log PWA-specific information
+      if (isInPWAMode) {
+        console.log('Running in PWA mode - enhanced notification experience available');
       }
 
       // Request notification permission
@@ -100,9 +116,14 @@ export const usePushNotificationSetup = () => {
 
       if (response.ok) {
         console.log('✅ Push notifications enabled successfully!');
+        const successMessage = isPWA()
+          ? 'Notifications enabled for your installed app!'
+          : 'Notifications enabled successfully!';
+
         return {
           success: true,
-          message: 'Notifications enabled successfully!'
+          message: successMessage,
+          isPWA: isPWA()
         };
       } else {
         const error = await response.json();

@@ -1,0 +1,240 @@
+/* PWA Notification Prompt Styles */
+
+.pwa-notification-prompt__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: pwa-notification-prompt__fadeIn 0.3s ease-out;
+}
+
+.pwa-notification-prompt__modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 420px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: pwa-notification-prompt__slideUp 0.3s ease-out;
+  padding: 24px;
+}
+
+.pwa-notification-prompt__icon-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.pwa-notification-prompt__icon {
+  font-size: 64px;
+  line-height: 1;
+  animation: pwa-notification-prompt__bounce 1s ease-in-out infinite;
+}
+
+.pwa-notification-prompt__content {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.pwa-notification-prompt__title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+}
+
+.pwa-notification-prompt__subtitle {
+  font-size: 16px;
+  color: #4fcf61;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+}
+
+.pwa-notification-prompt__description {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+  margin: 0 0 20px 0;
+}
+
+.pwa-notification-prompt__benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.pwa-notification-prompt__benefit {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: #333;
+}
+
+.pwa-notification-prompt__benefit-icon {
+  font-size: 20px;
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.pwa-notification-prompt__benefit-text {
+  text-align: left;
+  flex: 1;
+}
+
+.pwa-notification-prompt__error {
+  background: #fee;
+  color: #c00;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 16px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.pwa-notification-prompt__error p {
+  margin: 0;
+}
+
+.pwa-notification-prompt__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.pwa-notification-prompt__button {
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+}
+
+.pwa-notification-prompt__button--primary {
+  background: #4fcf61;
+  color: white;
+}
+
+.pwa-notification-prompt__button--primary:hover:not(:disabled) {
+  background: #3fb551;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3);
+}
+
+.pwa-notification-prompt__button--primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.pwa-notification-prompt__button--secondary {
+  background: transparent;
+  color: #666;
+  border: 1px solid #ddd;
+}
+
+.pwa-notification-prompt__button--secondary:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #ccc;
+}
+
+.pwa-notification-prompt__button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pwa-notification-prompt__privacy {
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Animations */
+@keyframes pwa-notification-prompt__fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pwa-notification-prompt__slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pwa-notification-prompt__bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .pwa-notification-prompt__modal {
+    padding: 20px;
+    margin: 16px;
+  }
+
+  .pwa-notification-prompt__icon {
+    font-size: 48px;
+  }
+
+  .pwa-notification-prompt__title {
+    font-size: 20px;
+  }
+
+  .pwa-notification-prompt__subtitle {
+    font-size: 14px;
+  }
+
+  .pwa-notification-prompt__description {
+    font-size: 13px;
+  }
+
+  .pwa-notification-prompt__button {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .pwa-notification-prompt__benefits {
+    padding: 12px;
+  }
+
+  .pwa-notification-prompt__benefit {
+    font-size: 13px;
+  }
+
+  .pwa-notification-prompt__benefit-icon {
+    font-size: 18px;
+    width: 24px;
+  }
+}

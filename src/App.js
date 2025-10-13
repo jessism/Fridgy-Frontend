@@ -30,6 +30,7 @@ import OnboardingFlow from './features/onboarding/components/OnboardingFlow';
 import ShortcutSetupPage from './pages/ShortcutSetupPage';
 import ShoppingListDetailPage from './pages/ShoppingListDetailPage';
 import JoinShoppingList from './components/JoinShoppingList';
+import PWATestPage from './pages/PWATestPage';
 
 // Navigation listener component to handle service worker messages
 function NavigationListener() {
@@ -198,6 +199,11 @@ function App() {
           <Route path="/join/:shareCode" element={
             <AuthGuard>
               <JoinShoppingList />
+            </AuthGuard>
+          } />
+          <Route path="/pwa-test" element={
+            <AuthGuard>
+              <PWATestPage />
             </AuthGuard>
           } />
         </Routes>

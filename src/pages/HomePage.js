@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import { useAuth } from '../features/auth/context/AuthContext';
 import useInventory from '../hooks/useInventory';
 import IOSInstallPrompt from '../components/IOSInstallPrompt';
+import { usePWADetection } from '../hooks/usePWADetection';
+import PWANotificationPrompt from '../components/PWANotificationPrompt';
 import { ReactComponent as AddToFridgeIcon } from '../assets/icons/quickaccess/add-to-fridge.svg';
 import { ReactComponent as MyFridgeIcon } from '../assets/icons/quickaccess/my-fridge.svg';
 import { ReactComponent as ShopListsIcon } from '../assets/icons/quickaccess/shop-lists.svg';
@@ -31,6 +33,61 @@ const HomePage = () => {
   const { user } = useAuth();
   const { items } = useInventory();
   const navigate = useNavigate();
+
+  // PWA Detection for first-time notification prompt
+  const {
+    isPWA,
+    isFirstPWALaunch,
+    shouldShowNotificationPrompt,
+    platform,
+    markFirstLaunchComplete,
+    markNotificationPromptShown,
+    markNotificationPromptDismissed,
+    getDebugInfo
+  } = usePWADetection();
+
+  const [showPWAPrompt, setShowPWAPrompt] = useState(false);
+
+  // Check for first PWA launch and show notification prompt
+  useEffect(() => {
+    // Only check if user is logged in
+    if (!user) return;
+
+    // Log debug info in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[HomePage] PWA Debug Info:', getDebugInfo());
+    }
+
+    // Check if we should show the notification prompt
+    if (isPWA && shouldShowNotificationPrompt) {
+      // Delay showing the prompt slightly to let the page load
+      const timer = setTimeout(() => {
+        setShowPWAPrompt(true);
+      }, 1500); // 1.5 second delay
+
+      return () => clearTimeout(timer);
+    }
+
+    // Mark first launch complete if it's the first PWA launch
+    if (isFirstPWALaunch) {
+      markFirstLaunchComplete();
+    }
+  }, [isPWA, isFirstPWALaunch, shouldShowNotificationPrompt, user, markFirstLaunchComplete, getDebugInfo]);
+
+  // Handle PWA notification prompt close
+  const handlePWAPromptClose = (notificationsEnabled) => {
+    setShowPWAPrompt(false);
+
+    if (notificationsEnabled) {
+      // Notifications were successfully enabled
+      markNotificationPromptShown();
+      console.log('PWA notifications enabled successfully');
+    } else {
+      // User chose "Maybe Later"
+      markNotificationPromptDismissed();
+      console.log('PWA notification prompt dismissed');
+    }
+  };
 
   // Function to navigate and scroll to top
   const navigateToPage = (path) => {
@@ -693,6 +750,15 @@ const HomePage = () => {
       
       <MobileBottomNav />
       <IOSInstallPrompt />
+
+      {/* PWA First Launch Notification Prompt */}
+      {showPWAPrompt && (
+        <PWANotificationPrompt
+          onClose={handlePWAPromptClose}
+          onSuccess={() => console.log('Notifications setup successful')}
+          platform={platform}
+        />
+      )}
     </div>
   );
 };
