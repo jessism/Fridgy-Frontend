@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-globals */
 
 // Cache name versioning
-const CACHE_NAME = 'trackabite-v5'; // v5: Added Web Share Target API support
+const CACHE_NAME = 'trackabite-v6'; // v6: Added import loading screen with polling
 const urlsToCache = [
   // Removed '/' to prevent caching landing page - fixes auth redirect issue
   '/static/css/main.css',
@@ -257,17 +257,25 @@ self.addEventListener('notificationclick', event => {
     urlToOpen = event.notification.data.url;
   }
 
+  console.log('[Service Worker] Navigating to:', urlToOpen);
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then(clientList => {
         // Check if there's already a window/tab open
         for (let client of clientList) {
           if (client.url.includes(self.location.origin) && 'focus' in client) {
-            client.navigate(urlToOpen);
+            console.log('[Service Worker] App already open, sending navigation message');
+            // Use postMessage to trigger React Router navigation
+            client.postMessage({
+              type: 'NAVIGATE',
+              url: urlToOpen
+            });
             return client.focus();
           }
         }
-        // If no window is open, open a new one
+        // If no window is open, open a new one with the URL
+        console.log('[Service Worker] Opening new window with URL:', urlToOpen);
         if (clients.openWindow) {
           return clients.openWindow(urlToOpen);
         }

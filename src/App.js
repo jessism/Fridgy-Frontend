@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
 import { AuthProvider } from './features/auth/context/AuthContext';
 import AuthGuard from './features/auth/components/AuthGuard';
@@ -31,11 +31,40 @@ import ShortcutSetupPage from './pages/ShortcutSetupPage';
 import ShoppingListDetailPage from './pages/ShoppingListDetailPage';
 import JoinShoppingList from './components/JoinShoppingList';
 
+// Navigation listener component to handle service worker messages
+function NavigationListener() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Listen for navigation messages from service worker
+    const handleMessage = (event) => {
+      console.log('[App] Received message from service worker:', event.data);
+
+      if (event.data && event.data.type === 'NAVIGATE') {
+        const url = event.data.url;
+        console.log('[App] Navigating to:', url);
+        navigate(url);
+      }
+    };
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', handleMessage);
+
+      return () => {
+        navigator.serviceWorker.removeEventListener('message', handleMessage);
+      };
+    }
+  }, [navigate]);
+
+  return null;
+}
+
 function App() {
   return (
     <div className="App">
       <AuthProvider>
         <Router>
+          <NavigationListener />
                   <Routes>
           <Route path="/" element={<NewLandingPage />} />
           <Route path="/onboarding" element={<OnboardingFlow />} />
