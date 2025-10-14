@@ -50,31 +50,27 @@ const PWANotificationPrompt = ({ onClose, onSuccess, platform }) => {
     switch (platform) {
       case 'ios':
         return {
-          title: 'Stay Updated with Trackabite',
-          subtitle: 'Never let food go to waste!',
+          title: 'Never let food go to waste',
           description: 'Get timely reminders about expiring items and smart meal suggestions.',
-          icon: '🔔'
+          icon: '🔕'
         };
       case 'android':
         return {
-          title: 'Enable Smart Reminders',
-          subtitle: 'Your food tracker assistant',
+          title: 'Never let food go to waste',
           description: 'Receive notifications for expiring items and personalized meal recommendations.',
-          icon: '📱'
+          icon: '🔕'
         };
       case 'desktop':
         return {
-          title: 'Desktop Notifications',
-          subtitle: 'Stay organized with Trackabite',
+          title: 'Never let food go to waste',
           description: 'Get browser notifications for expiring items and meal planning reminders.',
-          icon: '💻'
+          icon: '🔕'
         };
       default:
         return {
-          title: 'Enable Notifications',
-          subtitle: 'Never waste food again',
+          title: 'Never let food go to waste',
           description: 'Get reminders about expiring items and smart recipe suggestions.',
-          icon: '🔔'
+          icon: '🔕'
         };
     }
   };
@@ -92,21 +88,17 @@ const PWANotificationPrompt = ({ onClose, onSuccess, platform }) => {
         {/* Title and Description */}
         <div className="pwa-notification-prompt__content">
           <h2 className="pwa-notification-prompt__title">{message.title}</h2>
-          <p className="pwa-notification-prompt__subtitle">{message.subtitle}</p>
           <p className="pwa-notification-prompt__description">{message.description}</p>
 
           {/* Benefits List */}
           <div className="pwa-notification-prompt__benefits">
             <div className="pwa-notification-prompt__benefit">
-              <span className="pwa-notification-prompt__benefit-icon">⏰</span>
               <span className="pwa-notification-prompt__benefit-text">Expiration alerts</span>
             </div>
             <div className="pwa-notification-prompt__benefit">
-              <span className="pwa-notification-prompt__benefit-icon">🍳</span>
               <span className="pwa-notification-prompt__benefit-text">Meal reminders</span>
             </div>
             <div className="pwa-notification-prompt__benefit">
-              <span className="pwa-notification-prompt__benefit-icon">🛒</span>
               <span className="pwa-notification-prompt__benefit-text">Shopping list updates</span>
             </div>
           </div>

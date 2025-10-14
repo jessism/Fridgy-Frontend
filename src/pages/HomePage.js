@@ -63,7 +63,7 @@ const HomePage = () => {
       // Delay showing the prompt slightly to let the page load
       const timer = setTimeout(() => {
         setShowPWAPrompt(true);
-      }, 1500); // 1.5 second delay
+      }, 2000); // 2 second delay
 
       return () => clearTimeout(timer);
     }

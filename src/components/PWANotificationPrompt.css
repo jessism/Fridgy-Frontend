@@ -35,7 +35,6 @@
 .pwa-notification-prompt__icon {
   font-size: 64px;
   line-height: 1;
-  animation: pwa-notification-prompt__bounce 1s ease-in-out infinite;
 }
 
 .pwa-notification-prompt__content {
@@ -185,15 +184,6 @@
   to {
     transform: translateY(0);
     opacity: 1;
-  }
-}
-
-@keyframes pwa-notification-prompt__bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
   }
 }
 
