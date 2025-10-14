@@ -1,6 +1,6 @@
 .notification-settings-page {
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background-color: white;
 }
 
 .notification-settings-page__header {
@@ -8,8 +8,7 @@
   align-items: center;
   padding: 20px;
   background-color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
+  /* Removed box-shadow and margin-bottom for seamless look */
 }
 
 .notification-settings-page__back-button {

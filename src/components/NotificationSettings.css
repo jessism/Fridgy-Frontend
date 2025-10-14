@@ -1,10 +1,6 @@
 .notification-settings {
-  max-width: 600px;
-  margin: 20px auto;
   padding: 20px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  /* Removed container styling for seamless integration with page */
 }
 
 .notification-settings__title {
@@ -124,14 +120,16 @@
   display: flex;
   align-items: center;
   padding: 6px 12px;
-  background-color: #f5f5f5;
+  background-color: white;
+  border: 1px solid #e0e0e0;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: border-color 0.2s;
 }
 
 .day-checkbox:hover {
-  background-color: #eeeeee;
+  border-color: #ccc;
+  background-color: #fafafa;
 }
 
 .day-checkbox input[type="checkbox"] {
@@ -175,7 +173,8 @@
 }
 
 .daily-reminder-item {
-  background: #f8f9fa;
+  background: white;
+  border: 1px solid #f0f0f0;
   border-radius: 8px;
   padding: 15px;
   margin-bottom: 15px;
@@ -183,7 +182,7 @@
 }
 
 .daily-reminder-item:hover {
-  background: #f0f1f3;
+  border-color: #e0e0e0;
 }
 
 .daily-reminder-header {
@@ -274,8 +273,8 @@
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .notification-settings {
-    margin: 10px;
     padding: 16px;
+    /* Removed margins for seamless integration */
   }
 
   .notification-settings__title {

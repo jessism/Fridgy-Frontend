@@ -6,7 +6,7 @@ import { ensureValidToken, debugTokenStatus } from '../utils/tokenValidator';
 const NotificationSettings = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showDebugConsole, setShowDebugConsole] = useState(true); // Changed to true to always show
+  const [showDebugConsole, setShowDebugConsole] = useState(false); // Hidden by default, use ?debug=true or localStorage
   const [debugLogs, setDebugLogs] = useState([]);
   const [deviceInfo, setDeviceInfo] = useState({});
   const [permissionStatus, setPermissionStatus] = useState('unknown');
@@ -222,6 +222,24 @@ const NotificationSettings = () => {
       console.error('Error loading daily reminders:', error);
     }
   }, [API_BASE_URL]);
+
+  // Check for debug mode from URL params or localStorage
+  useEffect(() => {
+    // Check URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const debugParam = urlParams.get('debug');
+
+    // Check localStorage
+    const debugFlag = localStorage.getItem('fridgy_debug_mode');
+
+    // Enable debug console if either condition is true
+    if (debugParam === 'true' || debugFlag === 'true') {
+      setShowDebugConsole(true);
+      addDebugLog('Debug mode enabled', 'info', {
+        source: debugParam === 'true' ? 'URL parameter' : 'localStorage flag'
+      });
+    }
+  }, [addDebugLog]);
 
   // Check browser notification permission on component mount and update
   useEffect(() => {
@@ -813,271 +831,6 @@ const NotificationSettings = () => {
 
   return (
     <div className="notification-settings">
-      <h2 className="notification-settings__title">Push Notifications</h2>
-
-      {/* Notification Permission Status Panel - Always Visible */}
-      <div style={{
-        background: '#f8f9fa',
-        borderRadius: '12px',
-        padding: '16px',
-        marginBottom: '20px'
-      }}>
-        <h3 style={{ marginTop: 0, marginBottom: '16px', fontSize: '18px', color: '#333' }}>
-          📱 Notification Status
-        </h3>
-
-        {/* Row 1: Browser/iOS Permission */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: '12px',
-          background: 'white',
-          borderRadius: '8px',
-          marginBottom: '8px'
-        }}>
-          <span style={{ flex: 1, fontSize: '15px' }}>🔔 Browser Permission</span>
-          <span style={{
-            fontWeight: 'bold',
-            fontSize: '14px',
-            color: permissionStatus === 'granted' ? '#4fcf61' :
-                   permissionStatus === 'denied' ? '#ff4444' : '#ff9800'
-          }}>
-            {permissionStatus === 'granted' ? '✅ Allowed' :
-             permissionStatus === 'denied' ? '❌ Blocked' : '⚠️ Not Set'}
-          </span>
-        </div>
-
-        {/* Row 2: Service Worker */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: '12px',
-          background: 'white',
-          borderRadius: '8px',
-          marginBottom: '8px'
-        }}>
-          <span style={{ flex: 1, fontSize: '15px' }}>⚙️ Service Worker</span>
-          <span style={{
-            fontWeight: 'bold',
-            fontSize: '14px',
-            color: swStatus === 'active' ? '#4fcf61' :
-                   swStatus === 'error' ? '#ff4444' : '#ff9800'
-          }}>
-            {swStatus === 'active' ? '✅ Active' :
-             swStatus === 'checking' ? '⏳ Loading' :
-             swStatus === 'error' ? '❌ Error' : '❌ Inactive'}
-          </span>
-        </div>
-
-        {/* Row 3: Push Subscription (Server Connection) */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: '12px',
-          background: 'white',
-          borderRadius: '8px'
-        }}>
-          <span style={{ flex: 1, fontSize: '15px' }}>🌐 Server Connection</span>
-          <span style={{
-            fontWeight: 'bold',
-            fontSize: '14px',
-            color: isSubscribed ? '#4fcf61' : '#ff9800'
-          }}>
-            {isSubscribed ? '✅ Connected' : '⚠️ Not Connected'}
-          </span>
-        </div>
-
-        {/* Help text when permission granted but not subscribed */}
-        {permissionStatus === 'granted' && !isSubscribed && (
-          <div style={{
-            marginTop: '12px',
-            padding: '10px',
-            background: '#fff3cd',
-            border: '1px solid #ffeeba',
-            borderRadius: '6px',
-            fontSize: '14px',
-            color: '#856404'
-          }}>
-            💡 iOS permissions enabled! Click "Connect to Server" below to complete setup.
-          </div>
-        )}
-
-        {/* Help text when permission denied */}
-        {permissionStatus === 'denied' && (
-          <div style={{
-            marginTop: '12px',
-            padding: '10px',
-            background: '#f8d7da',
-            border: '1px solid #f5c6cb',
-            borderRadius: '6px',
-            fontSize: '14px',
-            color: '#721c24'
-          }}>
-            ⚠️ Notifications blocked. Enable in iOS Settings → Safari → Notifications → trackabite.app
-          </div>
-        )}
-      </div>
-
-      {/* SUPER SIMPLE TEST BUTTON */}
-      <div style={{
-        marginBottom: '20px'
-      }}>
-        <button
-          onClick={testNotificationNow}
-          style={{
-            width: '100%',
-            padding: '20px',
-            fontSize: '18px',
-            fontWeight: 'bold',
-            background: '#FF6B6B',
-            color: 'white',
-            border: 'none',
-            borderRadius: '12px',
-            cursor: 'pointer',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-          }}
-        >
-          🔔 SHOW TEST NOTIFICATION NOW
-        </button>
-
-        {/* Simple feedback */}
-        {testSuccess && (
-          <div style={{
-            marginTop: '10px',
-            padding: '10px',
-            background: '#e8f5e9',
-            borderRadius: '8px',
-            color: '#2e7d32',
-            fontSize: '16px',
-            textAlign: 'center'
-          }}>
-            ✅ Look for the notification!
-          </div>
-        )}
-        {testError && (
-          <div style={{
-            marginTop: '10px',
-            padding: '10px',
-            background: '#ffebee',
-            borderRadius: '8px',
-            color: '#c62828',
-            fontSize: '16px',
-            textAlign: 'center'
-          }}>
-            {testError}
-          </div>
-        )}
-      </div>
-
-      {/* 5-Minute Test Section */}
-      <div style={{
-        background: '#fff3cd',
-        border: '2px solid #ffc107',
-        borderRadius: '12px',
-        padding: '20px',
-        marginBottom: '20px'
-      }}>
-        <h3 style={{
-          marginTop: 0,
-          marginBottom: '12px',
-          fontSize: '20px',
-          color: '#333'
-        }}>
-          🧪 5-Minute Push Test (iOS 16.4+)
-        </h3>
-
-        <p style={{
-          fontSize: '14px',
-          color: '#666',
-          marginBottom: '16px',
-          lineHeight: '1.5'
-        }}>
-          Test if background push notifications work on your device.
-          Notifications will arrive every 5 minutes for 1 hour, even when the app is closed!
-        </p>
-
-        {!testRunning ? (
-          <button
-            onClick={startFiveMinuteTest}
-            disabled={testLoading || !isSubscribed}
-            style={{
-              width: '100%',
-              padding: '16px',
-              background: !isSubscribed ? '#ccc' : '#28a745',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              cursor: testLoading || !isSubscribed ? 'not-allowed' : 'pointer',
-              opacity: testLoading ? 0.7 : 1
-            }}
-          >
-            {testLoading ? 'Starting...' :
-             !isSubscribed ? 'Subscribe First to Enable Test' :
-             '🚀 Start 5-Minute Test Notifications'}
-          </button>
-        ) : (
-          <>
-            <div style={{
-              marginBottom: '12px',
-              padding: '12px',
-              background: '#e8f5e9',
-              borderRadius: '8px',
-              fontSize: '14px',
-              color: '#2e7d32'
-            }}>
-              <strong>✅ Test Running!</strong><br/>
-              Next notification: {nextTestTime || 'calculating...'}
-            </div>
-            <button
-              onClick={stopFiveMinuteTest}
-              disabled={testLoading}
-              style={{
-                width: '100%',
-                padding: '16px',
-                background: '#dc3545',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                cursor: testLoading ? 'not-allowed' : 'pointer',
-                opacity: testLoading ? 0.7 : 1
-              }}
-            >
-              {testLoading ? 'Stopping...' : '🛑 Stop Test Notifications'}
-            </button>
-          </>
-        )}
-
-        {message && (
-          <div style={{
-            marginTop: '12px',
-            padding: '10px',
-            background: '#d4edda',
-            borderRadius: '8px',
-            color: '#155724',
-            fontSize: '14px'
-          }}>
-            {message}
-          </div>
-        )}
-
-        <div style={{
-          marginTop: '12px',
-          fontSize: '12px',
-          color: '#856404',
-          lineHeight: '1.4'
-        }}>
-          💡 <strong>Test Instructions:</strong><br/>
-          1. Click "Start" to begin test<br/>
-          2. Close this app completely<br/>
-          3. Watch for "Hey [name], right now is [time]" every 5 minutes<br/>
-          4. Auto-stops after 1 hour
-        </div>
-      </div>
-
       <div className="notification-settings__section">
         <h3>Notification Status</h3>
         <div className="notification-settings__status">
@@ -1175,11 +928,13 @@ const NotificationSettings = () => {
                     checked={reminder.enabled}
                     onChange={() => handleDailyReminderToggle(key)}
                   />
-                  <span className="reminder-emoji">{reminder.emoji}</span>
+                  {key !== 'inventory_check' && (
+                    <span className="reminder-emoji">{reminder.emoji}</span>
+                  )}
                   <span className="reminder-label">{formatReminderLabel(key)}</span>
                 </label>
 
-                {reminder.enabled && (
+                {reminder.enabled && key !== 'inventory_check' && (
                   <button
                     className="test-reminder-btn"
                     onClick={() => handleTestDailyReminder(key)}
@@ -1233,8 +988,8 @@ const NotificationSettings = () => {
         </div>
       )}
 
-      {/* Debug button for troubleshooting on mobile */}
-      {!isSubscribed && (
+      {/* Debug button only visible in debug mode */}
+      {!isSubscribed && showDebugConsole && (
         <button
           className="notification-settings__debug-btn"
           onClick={() => {
