@@ -51,26 +51,22 @@ const PWANotificationPrompt = ({ onClose, onSuccess, platform }) => {
       case 'ios':
         return {
           title: 'Never let food go to waste',
-          description: 'Get timely reminders about expiring items and smart meal suggestions.',
-          icon: '🔕'
+          description: 'Get timely reminders about expiring items and smart meal suggestions.'
         };
       case 'android':
         return {
           title: 'Never let food go to waste',
-          description: 'Receive notifications for expiring items and personalized meal recommendations.',
-          icon: '🔕'
+          description: 'Receive notifications for expiring items and personalized meal recommendations.'
         };
       case 'desktop':
         return {
           title: 'Never let food go to waste',
-          description: 'Get browser notifications for expiring items and meal planning reminders.',
-          icon: '🔕'
+          description: 'Get browser notifications for expiring items and meal planning reminders.'
         };
       default:
         return {
           title: 'Never let food go to waste',
-          description: 'Get reminders about expiring items and smart recipe suggestions.',
-          icon: '🔕'
+          description: 'Get reminders about expiring items and smart recipe suggestions.'
         };
     }
   };
@@ -82,7 +78,10 @@ const PWANotificationPrompt = ({ onClose, onSuccess, platform }) => {
       <div className="pwa-notification-prompt__modal">
         {/* Icon/Illustration */}
         <div className="pwa-notification-prompt__icon-container">
-          <span className="pwa-notification-prompt__icon">{message.icon}</span>
+          <svg className="pwa-notification-prompt__icon" width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C10.897 2 10 2.897 10 4C10 4.276 10.112 4.526 10.287 4.713C8.906 5.294 8 6.628 8 8.2V14L6 16V17H18V16L16 14V8.2C16 6.628 15.094 5.294 13.713 4.713C13.888 4.526 14 4.276 14 4C14 2.897 13.103 2 12 2Z" stroke="#4fcf61" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M10 18C10 19.103 10.897 20 12 20C13.103 20 14 19.103 14 18" stroke="#4fcf61" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </div>
 
         {/* Title and Description */}
