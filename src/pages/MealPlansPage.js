@@ -44,6 +44,9 @@ const MealPlansPage = ({ defaultTab }) => {
   const [recentMeals, setRecentMeals] = useState([]);
   const [recentMealsLoading, setRecentMealsLoading] = useState(true);
   const [recentMealsError, setRecentMealsError] = useState(null);
+
+  // Image preloading state for saved recipes
+  const [imageStates, setImageStates] = useState({});
   
   // Edamam test hook - COMMENTED OUT
   // const {
@@ -268,6 +271,55 @@ const MealPlansPage = ({ defaultTab }) => {
     fetchRecentMeals();
   }, [fetchSuggestions]);
 
+  // Preload saved recipe images to prevent glitching
+  useEffect(() => {
+    if (!savedRecipes || savedRecipes.length === 0) return;
+
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+    // Helper function to check if URL needs proxying
+    const needsProxy = (url) => {
+      return url &&
+             (url.includes('cdninstagram.com') ||
+              url.includes('instagram.com') ||
+              url.includes('fbcdn.net') ||
+              url.includes('instagram.')) &&
+             !url.includes('URL_OF_IMAGE') &&
+             !url.includes('example.com') &&
+             url !== 'URL of image';
+    };
+
+    // Function to get the correct image URL (same logic as in renderSavedRecipeCard)
+    const getImageUrl = (recipe) => {
+      const baseImageUrl = recipe.image || recipe.image_urls?.[0];
+
+      if (!baseImageUrl) {
+        return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+      } else if (needsProxy(baseImageUrl)) {
+        return `${API_BASE_URL}/proxy-image?url=${encodeURIComponent(baseImageUrl)}`;
+      } else {
+        return baseImageUrl;
+      }
+    };
+
+    // Preload each recipe's image
+    savedRecipes.forEach(recipe => {
+      const img = new Image();
+      const imageUrl = getImageUrl(recipe);
+
+      img.onload = () => {
+        setImageStates(prev => ({ ...prev, [recipe.id]: 'loaded' }));
+      };
+
+      img.onerror = () => {
+        setImageStates(prev => ({ ...prev, [recipe.id]: 'error' }));
+      };
+
+      // Start loading the image
+      img.src = imageUrl;
+    });
+  }, [savedRecipes]);
+
 
   // Debug: Log the data to see what we're working with
   console.log('🔍 MealPlansPage Debug:', {
@@ -443,12 +495,20 @@ const MealPlansPage = ({ defaultTab }) => {
     };
 
     // Get the base image URL
-    const baseImageUrl = recipe.image || recipe.image_urls?.[0] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+    const baseImageUrl = recipe.image || recipe.image_urls?.[0];
 
-    // Use proxy for Instagram images, direct URL for others
-    const imageUrl = needsProxy(baseImageUrl)
-      ? `${API_BASE_URL}/proxy-image?url=${encodeURIComponent(baseImageUrl)}`
-      : baseImageUrl;
+    // Determine the final image URL to use (no trial-and-error)
+    let imageUrl;
+    if (!baseImageUrl) {
+      // No image: Use fallback immediately
+      imageUrl = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+    } else if (needsProxy(baseImageUrl)) {
+      // Instagram images: Always use proxy (never try direct)
+      imageUrl = `${API_BASE_URL}/proxy-image?url=${encodeURIComponent(baseImageUrl)}`;
+    } else {
+      // Other images: Use direct URL
+      imageUrl = baseImageUrl;
+    }
 
     const handleClick = () => {
       if (showDetails) {
@@ -467,23 +527,27 @@ const MealPlansPage = ({ defaultTab }) => {
         onClick={handleClick}
       >
         <div className="meal-plans-page__saved-recipe-image">
+          {/* Show placeholder while image is loading */}
+          {imageStates[recipe.id] !== 'loaded' && (
+            <div className="meal-plans-page__image-placeholder" />
+          )}
           <img
             src={imageUrl}
             alt={recipe.title}
+            className={`meal-plans-page__recipe-img ${imageStates[recipe.id] === 'loaded' ? 'meal-plans-page__recipe-img--loaded' : ''}`}
             onError={(e) => {
-              // Check if this is an Instagram CDN URL that expired
-              const isExpiredInstagram = e.target.src.includes('cdninstagram.com') ||
-                                        e.target.src.includes('fbcdn.net') ||
-                                        e.target.src.includes('proxy-image');
-
-              if (e.target.src !== 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c') {
+              // Only fallback once to prevent multiple flashes
+              if (!e.target.dataset.failed) {
+                e.target.dataset.failed = 'true';
                 e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
-
-                // Log the error for debugging
-                if (isExpiredInstagram) {
-                  console.log('[RecipeCard] Instagram image expired for recipe:', recipe.title);
-                }
+                console.log('[RecipeCard] Image failed to load for recipe:', recipe.title);
+                // Mark as loaded even on error to show the fallback image
+                setImageStates(prev => ({ ...prev, [recipe.id]: 'loaded' }));
               }
+            }}
+            onLoad={() => {
+              // Mark as loaded when image successfully loads
+              setImageStates(prev => ({ ...prev, [recipe.id]: 'loaded' }));
             }}
           />
           {recipe.source_type === 'instagram' && (

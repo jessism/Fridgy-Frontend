@@ -7,14 +7,10 @@ const AuthGuard = ({ children }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  // Show loading spinner while checking authentication
+  // Don't show anything while checking authentication
+  // The initial green loading screen will remain visible
   if (loading) {
-    return (
-      <div className="auth-loading">
-        <div className="loading-spinner"></div>
-        <p>Loading...</p>
-      </div>
-    );
+    return null;
   }
 
   // If not authenticated, redirect to landing page

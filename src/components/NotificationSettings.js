@@ -850,12 +850,14 @@ const NotificationSettings = () => {
           </button>
         ) : (
           <div className="notification-settings__button-group">
+            {/* Hidden: Send Test Notification button - removed per user request
             <button
               onClick={handleTestNotification}
               className="notification-settings__button secondary"
             >
               Send Test Notification
             </button>
+            */}
             <button
               onClick={handleUnsubscribe}
               disabled={isLoading}
@@ -915,11 +917,41 @@ const NotificationSettings = () => {
       {isSubscribed && (
         <div className="notification-settings__section">
           <h3>Daily Reminders</h3>
-          <p className="daily-reminders-description">
-            Get daily notifications to help you stay on track with your food management
-          </p>
+          <div className="daily-reminders-main-section">
+            <label className="daily-reminders-description-label">
+              <input
+                type="checkbox"
+                checked={dailyReminders.inventory_check?.enabled || false}
+                onChange={(e) => {
+                  const newReminders = {
+                    ...dailyReminders,
+                    inventory_check: {
+                      ...dailyReminders.inventory_check,
+                      enabled: e.target.checked
+                    }
+                  };
+                  setDailyReminders(newReminders);
+                  updateDailyReminders(newReminders);
+                }}
+              />
+              <span>Get daily notifications to help you stay on track with your food management</span>
+            </label>
 
-          {Object.entries(dailyReminders).map(([key, reminder]) => (
+            {dailyReminders.inventory_check?.enabled && (
+              <div className="daily-reminder-time-section">
+                <input
+                  type="time"
+                  value={dailyReminders.inventory_check?.time || '17:30'}
+                  onChange={(e) => handleDailyReminderTimeChange('inventory_check', e.target.value)}
+                  className="reminder-time-input-standalone"
+                />
+              </div>
+            )}
+          </div>
+
+          {Object.entries(dailyReminders)
+            .filter(([key]) => key !== 'inventory_check')
+            .map(([key, reminder]) => (
             <div key={key} className="daily-reminder-item">
               <div className="daily-reminder-header">
                 <label className="daily-reminder-toggle">
@@ -928,13 +960,11 @@ const NotificationSettings = () => {
                     checked={reminder.enabled}
                     onChange={() => handleDailyReminderToggle(key)}
                   />
-                  {key !== 'inventory_check' && (
-                    <span className="reminder-emoji">{reminder.emoji}</span>
-                  )}
+                  <span className="reminder-emoji">{reminder.emoji}</span>
                   <span className="reminder-label">{formatReminderLabel(key)}</span>
                 </label>
 
-                {reminder.enabled && key !== 'inventory_check' && (
+                {reminder.enabled && (
                   <button
                     className="test-reminder-btn"
                     onClick={() => handleTestDailyReminder(key)}

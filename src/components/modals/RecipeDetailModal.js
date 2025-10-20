@@ -333,6 +333,15 @@ const RecipeDetailModal = ({
   };
 
   const renderNutrition = () => {
+    console.log('[RecipeDetailModal] Nutrition data:', {
+      hasNutrition: !!recipe?.nutrition,
+      isAIEstimated: recipe?.nutrition?.isAIEstimated,
+      confidence: recipe?.nutrition?.confidence,
+      calories: recipe?.nutrition?.perServing?.calories?.amount,
+      sourceType: recipe?.source_type,
+      importMethod: recipe?.import_method
+    });
+
     if (!recipe?.nutrition) {
       return (
         <div className="nutrition-info">
@@ -485,12 +494,14 @@ const RecipeDetailModal = ({
         <div className="recipe-modal">
           {/* Header with close button */}
           <div className="recipe-modal-header">
-            <button 
+            <button
               className="recipe-modal-close"
               onClick={onClose}
               aria-label="Close modal"
             >
-              ×
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </button>
           </div>
 
@@ -502,10 +513,7 @@ const RecipeDetailModal = ({
               </div>
             ) : recipe ? (
               <div className="recipe-simple-layout">
-                {/* Recipe Title at Top */}
-                <h1 className="recipe-main-title">{recipe.title}</h1>
-                
-                {/* Recipe Image Below Title */}
+                {/* Recipe Image at Top */}
                 <div className="recipe-image-container">
                   <img
                     src={getImageUrl()}
@@ -537,6 +545,9 @@ const RecipeDetailModal = ({
                     }}
                   />
                 </div>
+
+                {/* Recipe Title Below Image */}
+                <h1 className="recipe-main-title">{recipe.title}</h1>
 
                 {/* Description and Info Text Below Image */}
                 <div className="recipe-meta-info">
@@ -574,15 +585,24 @@ const RecipeDetailModal = ({
 
                   {/* Action Buttons */}
                   <div className="recipe-action-buttons">
-                    <div className="servings-display">
-                      {recipe.servings || 2} servings
+                    <div className="recipe-action-row single-row">
+                      <div className="servings-display">
+                        {recipe.servings || 2} servings
+                      </div>
+                      <button
+                        className="recipe-add-items-button"
+                        onClick={handleAddToShoppingList}
+                        disabled={getIngredientsCount() === 0}
+                      >
+                        Shopping list
+                      </button>
+                      <button
+                        className="recipe-cook-button"
+                        onClick={customActionLabel ? () => onCookNow(recipe) : handleCookNow}
+                      >
+                        {customActionLabel || "Cook this"}
+                      </button>
                     </div>
-                    <button
-                      className="save-recipe-action-btn"
-                      onClick={() => console.log('Save recipe placeholder')}
-                    >
-                      Save recipe
-                    </button>
                   </div>
                 </div>
 
@@ -643,25 +663,6 @@ const RecipeDetailModal = ({
               </div>
             )}
           </div>
-
-          {/* Footer with action buttons */}
-          {recipe && !isLoading && (
-            <div className="recipe-modal-footer">
-              <button
-                className="recipe-cook-button"
-                onClick={customActionLabel ? () => onCookNow(recipe) : handleCookNow}
-              >
-                {customActionLabel || "Cook This Recipe"}
-              </button>
-              <button
-                className="recipe-add-items-button"
-                onClick={handleAddToShoppingList}
-                disabled={getIngredientsCount() === 0}
-              >
-                Add to shopping list
-              </button>
-            </div>
-          )}
         </div>
       </div>
 

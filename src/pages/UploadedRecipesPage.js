@@ -85,6 +85,18 @@ const UploadedRecipesPage = () => {
         uploaded: uploadedRecipes.length
       });
 
+      // Debug: Check image URLs in the received recipes
+      if (uploadedRecipes.length > 0) {
+        console.log('[UploadedRecipes] Checking image URLs in recipes:');
+        uploadedRecipes.forEach((recipe, index) => {
+          console.log(`[UploadedRecipes] Recipe ${index + 1}: "${recipe.title}"`, {
+            hasImage: !!recipe.image,
+            imageURL: recipe.image || 'NO IMAGE',
+            id: recipe.id
+          });
+        });
+      }
+
       setRecipes(uploadedRecipes);
     } catch (error) {
       console.error('Error fetching uploaded recipes:', error);
@@ -247,6 +259,14 @@ const UploadedRecipesPage = () => {
             <div className="uploaded-recipes-page__recipes-grid">
               {recipes.map(recipe => {
                 const imageUrl = recipe.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+
+                // Debug log for each recipe card
+                console.log(`[UploadedRecipes] Rendering recipe card: "${recipe.title}"`, {
+                  recipeId: recipe.id,
+                  hasImage: !!recipe.image,
+                  originalImage: recipe.image,
+                  displayingImage: imageUrl
+                });
 
                 return (
                   <div

@@ -334,6 +334,42 @@
   background: #f0f0f0;
 }
 
+/* Image placeholder loader */
+.meal-plans-page__image-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 50%, #f0f0f0 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  z-index: 1;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Image with fade-in transition */
+.meal-plans-page__recipe-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.meal-plans-page__recipe-img--loaded {
+  opacity: 1;
+}
+
+/* Legacy support for existing img tags without class */
 .meal-plans-page__saved-recipe-image img {
   width: 100%;
   height: 100%;

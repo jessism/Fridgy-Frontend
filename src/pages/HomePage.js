@@ -31,7 +31,7 @@ const getDaysUntilExpiry = (dateString) => {
 
 const HomePage = () => {
   const { user } = useAuth();
-  const { items } = useInventory();
+  const { items, loading: inventoryLoading } = useInventory();
   const navigate = useNavigate();
 
   // PWA Detection for first-time notification prompt
@@ -89,16 +89,16 @@ const HomePage = () => {
     }
   };
 
-  // Function to navigate and scroll to top
+  // Function to navigate to a page
   const navigateToPage = (path) => {
     navigate(path);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // ScrollToTop component will handle scrolling
   };
 
   // Function to navigate to inventory with category filter
   const navigateToCategory = (category) => {
     navigate(`/inventory?category=${encodeURIComponent(category)}`);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // ScrollToTop component will handle scrolling
   };
 
   // Calculate category counts from real inventory data
@@ -274,7 +274,19 @@ const HomePage = () => {
           </div>
           <div className="expiring-content" onClick={() => navigateToPage('/inventory')}>
             <div className="expiring-items">
-              {expiringItems.length > 0 ? (
+              {inventoryLoading ? (
+                // Show loading placeholder while inventory is loading
+                <>
+                  <div className="expiring-item">
+                    <div className="loading-placeholder" style={{ width: '150px', height: '20px', marginBottom: '8px' }}></div>
+                    <div className="loading-placeholder" style={{ width: '80px', height: '16px' }}></div>
+                  </div>
+                  <div className="expiring-item">
+                    <div className="loading-placeholder" style={{ width: '120px', height: '20px', marginBottom: '8px' }}></div>
+                    <div className="loading-placeholder" style={{ width: '60px', height: '16px' }}></div>
+                  </div>
+                </>
+              ) : expiringItems.length > 0 ? (
                 // Show expiring items (priority 1)
                 expiringItems.map((item) => {
                   const daysLeft = getDaysUntilExpiry(item.expiryDate);
@@ -327,7 +339,7 @@ const HomePage = () => {
                 </div>
               )}
             </div>
-            {expiringItems.length > 0 && (
+            {!inventoryLoading && expiringItems.length > 0 && (
               <>
                 <div className="expiring-subtitle">
                   <p>They are still good. See how to use them in Meals.</p>
@@ -338,7 +350,7 @@ const HomePage = () => {
                 </div>
               </>
             )}
-            {expiredItems.length > 0 && expiringItems.length === 0 && (
+            {!inventoryLoading && expiredItems.length > 0 && expiringItems.length === 0 && (
               <>
                 <div className="expiring-subtitle expired-subtitle">
                   <p>Check if these items are still good or dispose of them.</p>

@@ -3,6 +3,71 @@
   /* Removed container styling for seamless integration with page */
 }
 
+/* Custom checkbox styling - modern and minimal with green accent */
+.notification-settings input[type="checkbox"] {
+  /* Hide default checkbox */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  /* Custom checkbox design */
+  width: 20px;
+  height: 20px;
+  border: 2px solid #d0d0d0;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.notification-settings input[type="checkbox"]:hover {
+  border-color: #4fcf61;
+}
+
+.notification-settings input[type="checkbox"]:checked {
+  background-color: #4fcf61;
+  border-color: #4fcf61;
+}
+
+/* Modern minimal checkmark with animation - perfectly centered */
+.notification-settings input[type="checkbox"]::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 3px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+  transition: transform 0.15s ease;
+}
+
+.notification-settings input[type="checkbox"]:checked::after {
+  transform: rotate(45deg) scale(1);
+}
+
+/* Focus state for accessibility */
+.notification-settings input[type="checkbox"]:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(79, 207, 97, 0.2);
+}
+
+/* Disabled state */
+.notification-settings input[type="checkbox"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: #e0e0e0;
+}
+
+.notification-settings input[type="checkbox"]:disabled:checked {
+  background-color: #a0d4a8;
+  border-color: #a0d4a8;
+}
+
 .notification-settings__title {
   font-size: 1.5rem; /* 24px */
   font-weight: 600;
@@ -99,14 +164,12 @@
 }
 
 .notification-settings__preference label {
-  display: block;
+  display: flex;
+  align-items: center;
   font-size: 0.875rem; /* 14px */
   color: #666;
   margin-bottom: 8px;
-}
-
-.notification-settings__preference input[type="checkbox"] {
-  margin-right: 8px;
+  cursor: pointer;
 }
 
 .notification-settings__days {
@@ -124,20 +187,22 @@
   border: 1px solid #e0e0e0;
   border-radius: 6px;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .day-checkbox:hover {
-  border-color: #ccc;
-  background-color: #fafafa;
+  border-color: #4fcf61;
+  background-color: #f8fdf9;
 }
 
-.day-checkbox input[type="checkbox"] {
-  margin-right: 6px;
+.day-checkbox:has(input:checked) {
+  border-color: #4fcf61;
+  background-color: #f0faf2;
 }
 
 .time-input {
-  display: block;
+  display: inline-block;
+  margin-left: 12px;
   margin-top: 8px;
   padding: 8px 12px;
   border: 1px solid #ddd;
@@ -172,6 +237,19 @@
   margin-bottom: 20px;
 }
 
+.daily-reminders-description-label {
+  display: flex;
+  align-items: center;
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.daily-reminders-description-label span {
+  margin-left: 2px;
+}
+
 .daily-reminder-item {
   background: white;
   border: 1px solid #f0f0f0;
@@ -183,6 +261,24 @@
 
 .daily-reminder-item:hover {
   border-color: #e0e0e0;
+}
+
+/* Daily reminder main section */
+.daily-reminders-main-section {
+  margin-bottom: 25px;
+}
+
+.daily-reminder-time-section {
+  margin-top: 15px;
+  margin-left: 28px; /* Align with checkbox text */
+}
+
+.reminder-time-input-standalone {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
 }
 
 .daily-reminder-header {
@@ -197,12 +293,6 @@
   align-items: center;
   cursor: pointer;
   gap: 10px;
-}
-
-.daily-reminder-toggle input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
 }
 
 .reminder-emoji {

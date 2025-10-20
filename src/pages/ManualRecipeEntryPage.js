@@ -283,11 +283,13 @@ const ManualRecipeEntryPage = () => {
 
       if (recipeData.image && recipeData.image.startsWith('data:image')) {
         console.log('[Manual Recipe] Uploading user photo...');
+        console.log('[Manual Recipe] Image data URL length:', recipeData.image.length);
 
         try {
           // Convert base64 to blob
           const base64Response = await fetch(recipeData.image);
           const blob = await base64Response.blob();
+          console.log('[Manual Recipe] Blob size:', blob.size, 'bytes, type:', blob.type);
 
           // Create FormData for upload
           const formData = new FormData();
@@ -295,6 +297,8 @@ const ManualRecipeEntryPage = () => {
 
           // Upload to backend
           const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+          console.log('[Manual Recipe] Uploading to:', `${apiUrl}/recipes/upload-image`);
+
           const uploadResponse = await fetch(`${apiUrl}/recipes/upload-image`, {
             method: 'POST',
             headers: {
@@ -303,21 +307,29 @@ const ManualRecipeEntryPage = () => {
             body: formData
           });
 
+          console.log('[Manual Recipe] Upload response status:', uploadResponse.status);
           const uploadResult = await uploadResponse.json();
+          console.log('[Manual Recipe] Upload response:', uploadResult);
 
-          if (uploadResult.success) {
+          if (uploadResult.success && uploadResult.imageUrl) {
             finalImageUrl = uploadResult.imageUrl;
-            console.log('[Manual Recipe] Photo uploaded successfully:', finalImageUrl);
+            console.log('[Manual Recipe] ✅ Photo uploaded successfully!');
+            console.log('[Manual Recipe] Final image URL:', finalImageUrl);
           } else {
-            console.error('[Manual Recipe] Photo upload failed:', uploadResult.error);
+            console.error('[Manual Recipe] ❌ Photo upload failed:', uploadResult.error || 'No imageUrl in response');
+            console.error('[Manual Recipe] Full response:', uploadResult);
+            setError('Warning: Photo upload failed. Recipe will be saved without image.');
             // Continue without image if upload fails
           }
         } catch (uploadError) {
-          console.error('[Manual Recipe] Error uploading photo:', uploadError);
+          console.error('[Manual Recipe] ❌ Exception during photo upload:', uploadError);
+          setError('Warning: Could not upload photo. Recipe will be saved without image.');
           // Continue without image if upload fails
         }
       } else if (recipeData.imageFile) {
         console.log('[Manual Recipe] Uploading selected image file...');
+        console.log('[Manual Recipe] File name:', recipeData.imageFile.name);
+        console.log('[Manual Recipe] File size:', recipeData.imageFile.size, 'bytes');
 
         try {
           // Upload file directly
@@ -325,6 +337,8 @@ const ManualRecipeEntryPage = () => {
           formData.append('image', recipeData.imageFile);
 
           const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+          console.log('[Manual Recipe] Uploading to:', `${apiUrl}/recipes/upload-image`);
+
           const uploadResponse = await fetch(`${apiUrl}/recipes/upload-image`, {
             method: 'POST',
             headers: {
@@ -333,16 +347,22 @@ const ManualRecipeEntryPage = () => {
             body: formData
           });
 
+          console.log('[Manual Recipe] Upload response status:', uploadResponse.status);
           const uploadResult = await uploadResponse.json();
+          console.log('[Manual Recipe] Upload response:', uploadResult);
 
-          if (uploadResult.success) {
+          if (uploadResult.success && uploadResult.imageUrl) {
             finalImageUrl = uploadResult.imageUrl;
-            console.log('[Manual Recipe] Image file uploaded successfully:', finalImageUrl);
+            console.log('[Manual Recipe] ✅ Image file uploaded successfully!');
+            console.log('[Manual Recipe] Final image URL:', finalImageUrl);
           } else {
-            console.error('[Manual Recipe] Image file upload failed:', uploadResult.error);
+            console.error('[Manual Recipe] ❌ Image file upload failed:', uploadResult.error || 'No imageUrl in response');
+            console.error('[Manual Recipe] Full response:', uploadResult);
+            setError('Warning: Photo upload failed. Recipe will be saved without image.');
           }
         } catch (uploadError) {
-          console.error('[Manual Recipe] Error uploading image file:', uploadError);
+          console.error('[Manual Recipe] ❌ Exception during image file upload:', uploadError);
+          setError('Warning: Could not upload photo. Recipe will be saved without image.');
         }
       }
 
@@ -406,6 +426,8 @@ const ManualRecipeEntryPage = () => {
       };
 
       console.log('[Manual Recipe] Saving recipe:', recipeToSave.title);
+      console.log('[Manual Recipe] Recipe image URL to save:', recipeToSave.image || 'NO IMAGE');
+      console.log('[Manual Recipe] Full recipe object:', JSON.stringify(recipeToSave, null, 2));
 
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
       const response = await fetch(`${apiUrl}/recipes/save`, {

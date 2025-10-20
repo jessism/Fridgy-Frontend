@@ -31,6 +31,7 @@ import ShortcutSetupPage from './pages/ShortcutSetupPage';
 import ShoppingListDetailPage from './pages/ShoppingListDetailPage';
 import JoinShoppingList from './components/JoinShoppingList';
 import PWATestPage from './pages/PWATestPage';
+import ScrollToTop from './components/ScrollToTop';
 
 // Navigation listener component to handle service worker messages
 function NavigationListener() {
@@ -65,8 +66,9 @@ function App() {
     <div className="App">
       <AuthProvider>
         <Router>
+          <ScrollToTop />
           <NavigationListener />
-                  <Routes>
+          <Routes>
           <Route path="/" element={<NewLandingPage />} />
           <Route path="/onboarding" element={<OnboardingFlow />} />
           <Route path="/signup" element={<SignUpPage />} />

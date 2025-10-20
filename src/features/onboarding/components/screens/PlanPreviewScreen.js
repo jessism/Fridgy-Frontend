@@ -38,29 +38,35 @@ const PlanPreviewScreen = ({ data, updateData, onNext, onBack }) => {
             <div
               className={`checkbox-item checkbox-item--no-input ${reminderEnabled ? 'checkbox-item--selected' : ''}`}
               onClick={() => selectReminders(true)}
+              style={{ padding: reminderEnabled ? '12px 16px' : '12px 16px' }}
             >
-              <label className="checkbox-item__label">
-                Yes, remind me
-              </label>
-              {reminderEnabled && (
-                <span style={{ fontSize: '12px', color: '#888', display: 'block', marginTop: '4px', paddingLeft: '4px' }}>
-                  We'll set this up after creating your account
-                </span>
-              )}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                <label className="checkbox-item__label" style={{ marginBottom: 0 }}>
+                  Yes, remind me
+                </label>
+                {reminderEnabled && (
+                  <span style={{ fontSize: '12px', color: '#888', marginTop: '6px', textAlign: 'center', lineHeight: '1.4' }}>
+                    We'll set this up after creating your account
+                  </span>
+                )}
+              </div>
             </div>
 
             <div
               className={`checkbox-item checkbox-item--no-input ${!reminderEnabled ? 'checkbox-item--selected' : ''}`}
               onClick={() => selectReminders(false)}
+              style={{ padding: !reminderEnabled ? '12px 16px' : '12px 16px' }}
             >
-              <label className="checkbox-item__label">
-                No thanks
-              </label>
-              {!reminderEnabled && (
-                <span style={{ fontSize: '12px', color: '#888', display: 'block', marginTop: '4px', paddingLeft: '4px' }}>
-                  You can always enable this later in settings
-                </span>
-              )}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                <label className="checkbox-item__label" style={{ marginBottom: 0 }}>
+                  No thanks
+                </label>
+                {!reminderEnabled && (
+                  <span style={{ fontSize: '12px', color: '#888', marginTop: '6px', textAlign: 'center', lineHeight: '1.4' }}>
+                    You can always enable this later in settings
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
