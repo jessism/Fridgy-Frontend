@@ -1813,7 +1813,7 @@ h2.section-title::after {
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   width: 100%;
   border: 1px solid rgba(0, 0, 0, 0.04);
 }
@@ -2343,11 +2343,10 @@ h2.section-title::after {
 .meal-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
 }
 
 .meal-card {
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Modern Recipe Detail Modal Styles */

@@ -317,7 +317,7 @@
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease; /* Only transition hover effects, not appearance/disappearance */
   border: 1px solid #f0f0f0;
 }
 

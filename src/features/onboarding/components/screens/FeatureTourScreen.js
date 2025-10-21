@@ -277,72 +277,60 @@ const FeatureTourScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
               </p>
             </>
           ) : (
-            // Smart Shopping Lists - show animated GIF
-            <div style={{
-              background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
-              borderRadius: '16px',
-              padding: '40px',
-              width: '100%',
-              minHeight: '300px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
+            // Smart Shopping Lists - modern minimal design without green background
+            <>
+              <h2 style={{
+                fontSize: '22px',
+                fontWeight: '700',
+                color: '#1a1a1a',
+                marginBottom: '16px',
+                textAlign: 'center'
+              }}>
+                {feature.title}
+              </h2>
+
               <div style={{
-                marginBottom: '24px',
-                width: '180px',
-                height: '180px',
+                marginBottom: '16px',
+                width: '220px',
+                height: '220px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <img
-                  src="/images/friends-handshake.gif"
-                  alt="Shared Shopping Lists"
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
                   style={{
                     width: '100%',
                     height: '100%',
                     objectFit: 'contain'
                   }}
                   onError={(e) => {
-                    // Fallback to emoji if GIF doesn't load
+                    // Fallback to emoji if video doesn't load
                     e.target.style.display = 'none';
                     e.target.nextSibling.style.display = 'block';
                   }}
-                />
+                >
+                  <source src="/videos/Trackabite - Shared list.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
                 <div style={{ fontSize: '64px', display: 'none' }}>
                   {feature.icon}
                 </div>
               </div>
-
-              <h2 style={{
-                fontSize: '20px',
-                fontWeight: '700',
-                color: '#1a1a1a',
-                marginBottom: '12px'
-              }}>
-                {feature.title}
-              </h2>
 
               <p style={{
                 fontSize: '15px',
                 color: '#666',
                 textAlign: 'center',
                 lineHeight: '1.5',
-                marginBottom: '24px',
                 maxWidth: '320px'
               }}>
                 {feature.description}
               </p>
-
-              <div style={{
-                fontSize: '24px',
-                letterSpacing: '8px'
-              }}>
-                {feature.preview}
-              </div>
-            </div>
+            </>
           )}
         </div>
         
