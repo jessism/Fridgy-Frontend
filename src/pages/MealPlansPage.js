@@ -79,6 +79,9 @@ const MealPlansPage = ({ defaultTab }) => {
   // Recipe creation modal state
   const [showRecipeCreationModal, setShowRecipeCreationModal] = useState(false);
 
+  // Track hidden recipes (for session-only deletion)
+  const [hiddenRecipeIds, setHiddenRecipeIds] = useState(new Set());
+
   // API base URL
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -333,10 +336,14 @@ const MealPlansPage = ({ defaultTab }) => {
   });
 
   // Get high-match recipes for "Cook what you have" section
-  const cookWhatYouHaveRecipes = getHighMatchRecipes(30); // Lowered threshold
-  
-  // Get all recipes for "Inspired by your preference" section  
-  const preferenceRecipes = suggestions; // Show all suggestions to ensure section appears
+  const cookWhatYouHaveRecipes = getHighMatchRecipes(30).filter(
+    recipe => !hiddenRecipeIds.has(recipe.id)
+  ); // Filter out hidden recipes
+
+  // Get all recipes for "Inspired by your preference" section
+  const preferenceRecipes = suggestions.filter(
+    recipe => !hiddenRecipeIds.has(recipe.id)
+  ); // Filter out hidden recipes
 
   const handleCookNow = async (recipe) => {
     try {
@@ -386,6 +393,53 @@ const MealPlansPage = ({ defaultTab }) => {
     setSelectedRecipe(null);
     setIsLoadingRecipe(false);
     setRecipeError(null);
+  };
+
+  // Handle recipe deletion (removes from current view)
+  const handleDeleteRecipe = async (recipeId) => {
+    console.log('[MealPlans] Deleting recipe:', recipeId);
+
+    // Check if this is a saved/uploaded recipe (needs API call) or suggested recipe (just hide)
+    const isSavedRecipe = savedRecipes.some(r => r.id === recipeId);
+    const isUploadedRecipe = userUploadedRecipes.some(r => r.id === recipeId);
+
+    if (isSavedRecipe || isUploadedRecipe) {
+      // This is a database recipe - actually delete it
+      try {
+        const token = localStorage.getItem('fridgy_token');
+        const url = `${API_BASE_URL}/saved-recipes/${recipeId}`;
+
+        const response = await fetch(url, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          console.log('[MealPlans] Recipe deleted from database successfully');
+
+          // Update the appropriate state array
+          if (isSavedRecipe) {
+            setSavedRecipes(prev => prev.filter(r => r.id !== recipeId));
+          }
+          if (isUploadedRecipe) {
+            setUserUploadedRecipes(prev => prev.filter(r => r.id !== recipeId));
+          }
+        } else {
+          console.error('[MealPlans] Failed to delete recipe from database');
+        }
+      } catch (error) {
+        console.error('[MealPlans] Error deleting recipe:', error);
+      }
+    } else {
+      // This is a suggested recipe - just hide it for the session
+      setHiddenRecipeIds(prev => new Set([...prev, recipeId]));
+    }
+
+    // Close the modal
+    setIsModalOpen(false);
+    setSelectedRecipe(null);
   };
 
   const renderRecipeCard = (recipe, isPreference = false) => (
@@ -1119,6 +1173,7 @@ const MealPlansPage = ({ defaultTab }) => {
         recipe={selectedRecipe}
         isLoading={isLoadingRecipe}
         onCookNow={handleActuallyCook}
+        onDelete={handleDeleteRecipe}
       />
 
       {/* Meal Detail Modal */}

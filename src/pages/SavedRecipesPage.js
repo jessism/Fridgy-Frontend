@@ -202,7 +202,8 @@ const SavedRecipesPage = () => {
         // Log detailed error information
         const errorText = await response.text();
         console.error('[Delete] Server error:', response.status, errorText);
-        alert(`Failed to delete recipe: ${response.status} - ${errorText || 'Unknown error'}`);
+        // Don't show alert - just log the error
+        console.error(`Failed to delete recipe: ${response.status} - ${errorText || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('[Delete] Exception caught:', error);
@@ -211,7 +212,8 @@ const SavedRecipesPage = () => {
         stack: error.stack,
         name: error.name
       });
-      alert(`Failed to delete recipe: ${error.message}`);
+      // Don't show alert - just log the error
+      console.error(`Failed to delete recipe: ${error.message}`);
     } finally {
       setDeletingRecipeId(null); // Reset loading state
     }
@@ -578,6 +580,12 @@ const SavedRecipesPage = () => {
           }}
           onCookNow={() => handleCookRecipe(selectedRecipe)}
           isLoading={false}
+          onDelete={async (recipeId) => {
+            // Create a proper event object for handleDeleteRecipe
+            await handleDeleteRecipe(recipeId, { stopPropagation: () => {} });
+            // The modal will close automatically if deletion is successful
+            // because handleDeleteRecipe sets selectedRecipe to null
+          }}
         />
       )}
 

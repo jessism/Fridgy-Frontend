@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import RecipeCookingConfirmation from '../../features/recipe-cooking/components/RecipeCookingConfirmation';
 import useShoppingLists from '../../hooks/useShoppingLists';
 import ShoppingListSelectionModal from '../ShoppingListSelectionModal';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 
 const RecipeDetailModal = ({
   isOpen,
@@ -10,10 +11,12 @@ const RecipeDetailModal = ({
   recipe,
   isLoading,
   onCookNow,
-  customActionLabel
+  customActionLabel,
+  onDelete
 }) => {
   const [activeTab, setActiveTab] = useState('ingredients');
   const [showCookingConfirmation, setShowCookingConfirmation] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   // Shopping list selection modal state
   const [showShoppingListModal, setShowShoppingListModal] = useState(false);
@@ -250,6 +253,22 @@ const RecipeDetailModal = ({
     setSelectedIngredientsForList(null);
   };
 
+  const handleDeleteRecipe = () => {
+    if (!recipe) return;
+    setShowDeleteConfirmation(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (onDelete && recipe) {
+      onDelete(recipe.id);
+    }
+    setShowDeleteConfirmation(false);
+    onClose(); // Close the modal after deletion
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirmation(false);
+  };
 
   const renderIngredients = () => {
     if (!recipe?.extendedIngredients || recipe.extendedIngredients.length === 0) {
@@ -492,7 +511,7 @@ const RecipeDetailModal = ({
     <>
       <div className="recipe-modal-overlay" onClick={handleOverlayClick}>
         <div className="recipe-modal">
-          {/* Header with close button */}
+          {/* Header with close and delete buttons */}
           <div className="recipe-modal-header">
             <button
               className="recipe-modal-close"
@@ -503,6 +522,18 @@ const RecipeDetailModal = ({
                 <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
+            {onDelete && recipe && (
+              <button
+                className="recipe-modal-delete"
+                onClick={handleDeleteRecipe}
+                aria-label="Delete recipe"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M8 12h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </button>
+            )}
           </div>
 
           <div className="recipe-modal-content">
@@ -691,6 +722,15 @@ const RecipeDetailModal = ({
         onAddToExistingList={handleAddToExistingList}
         onCreateNewListAndAdd={handleCreateNewListAndAdd}
         recipeTitle={recipe?.title}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteConfirmation}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        itemName={recipe?.title}
+        itemType="recipe"
       />
     </>
   );

@@ -1,11 +1,15 @@
 # Public Video Assets
 
-## Quick Setup for Snap Groceries Demo Video
+## Quick Setup for Onboarding Videos
 
-### Step 1: Add Your Video
-Place your video file in this folder with the name: **`snap-groceries-demo.mp4`**
+### Required Videos:
+1. **`snap-groceries-demo.mp4`** - For the "Snap Your Groceries" feature (screen content only)
+2. **`ai-recipes-demo-noframe.mp4`** - For the "AI-Powered Recipe Suggestions" feature (screen content only)
 
-That's it! The video will automatically appear in the onboarding flow.
+### Step 1: Add Your Videos
+Place both video files in this folder with the exact names above.
+
+That's it! The videos will automatically appear in the onboarding flow.
 
 ### Video Recommendations
 - **Format**: MP4 (best compatibility)
@@ -17,12 +21,20 @@ That's it! The video will automatically appear in the onboarding flow.
 React serves files from the `public` folder directly, making it the easiest way to add static assets like videos without dealing with webpack imports.
 
 ### Testing
-1. Add your video file here
+1. Add both video files here
 2. Go to http://localhost:3000/onboarding
 3. Navigate to the "Discover what Trackabite can do" screen
-4. Your video should autoplay in the first feature slide
+4. First slide: "Snap Your Groceries" video should autoplay
+5. Second slide: "AI-Powered Recipe Suggestions" video should autoplay
 
 ### Troubleshooting
-- If video doesn't show, check browser console for 404 errors
-- Ensure the filename is exactly: `snap-groceries-demo.mp4`
+- If videos don't show, check browser console for 404 errors
+- Ensure the filenames are exactly:
+  - `snap-groceries-demo.mp4`
+  - `ai-recipes-demo-noframe.mp4`
 - Try refreshing the page (Ctrl/Cmd + Shift + R for hard refresh)
+
+### Important Notes
+- Both videos should contain ONLY the screen content (no iPhone frame)
+- The CSS iPhone frame will be applied automatically in the code
+- This ensures consistent styling across all features

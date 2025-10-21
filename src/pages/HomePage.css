@@ -2392,9 +2392,10 @@ h2.section-title::after {
 }
 
 .recipe-modal-header {
-  padding: 0.75rem 2rem 0.5rem 1rem; /* Reduced left padding to move arrow left */
+  padding: 0.75rem 1rem 0.5rem 1rem; /* Reduced left padding to move arrow left */
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between; /* Changed to space-between to separate close and delete */
+  align-items: center;
   position: relative; /* Changed from absolute to relative */
   background: transparent;
   z-index: 10;
@@ -2423,6 +2424,35 @@ h2.section-title::after {
 .recipe-modal-close svg {
   width: 24px;
   height: 24px;
+}
+
+/* Delete button styling - minimal circle with minus */
+.recipe-modal-delete {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af; /* Gray */
+  padding: 0.5rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+  border-radius: 50%;
+}
+
+.recipe-modal-delete:hover {
+  color: #6b7280; /* Darker gray on hover */
+}
+
+.recipe-modal-delete:active {
+  transform: scale(0.95);
+}
+
+.recipe-modal-delete svg {
+  width: 20px;
+  height: 20px;
 }
 
 .recipe-modal-content {

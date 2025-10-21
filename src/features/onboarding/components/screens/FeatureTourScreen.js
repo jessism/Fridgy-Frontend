@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import './ScreenStyles.css';
 
-// Video import - comment out or update with your actual video file
-// import snapGroceriesVideo from '../../../../assets/videos/snap-groceries-demo.mp4';
+// Video setup:
+// Both videos use CSS iPhone frame for consistent styling
+// Videos should be placed in: Frontend/public/videos/
+// - snap-groceries-demo.mp4 (screen content only)
+// - ai-recipes-demo-noframe.mp4 (screen content only)
 
 const FeatureTourScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
   const [currentFeature, setCurrentFeature] = useState(0);
@@ -93,8 +96,8 @@ const FeatureTourScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
           alignItems: 'center',
           justifyContent: 'center'
         }}>
-          {currentFeature === 0 ? (
-            // Video for "Snap Your Groceries" feature
+          {currentFeature === 0 || currentFeature === 1 ? (
+            // Video for "Snap Your Groceries" and "AI-Powered Recipe Suggestions" features
             <>
               <h2 style={{
                 fontSize: '22px',
@@ -106,7 +109,7 @@ const FeatureTourScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
                 {feature.title}
               </h2>
 
-              {/* iPhone Frame Container */}
+              {/* iPhone Frame Container - both videos use CSS frame */}
               <div style={{
                 marginBottom: '16px',
                 position: 'relative',
@@ -143,6 +146,7 @@ const FeatureTourScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
                   position: 'relative'
                 }}>
                   <video
+                    key={`video-${currentFeature}`}
                     autoPlay
                     loop
                     muted
@@ -158,61 +162,108 @@ const FeatureTourScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
                       e.target.nextSibling.style.display = 'flex';
                     }}
                   >
-                  {/*
-                    TO ADD YOUR VIDEO (Choose one method):
-
-                    Method 1 - Public Folder (Recommended):
-                    1. Add your video file to: Frontend/public/videos/snap-groceries-demo.mp4
-                    2. The src below will work automatically
-
-                    Method 2 - Assets Folder:
-                    1. Add your video file to: Frontend/src/assets/videos/snap-groceries-demo.mp4
-                    2. Uncomment the import at the top of this file
-                    3. Replace the src below with: src={snapGroceriesVideo}
-                  */}
-                    <source src="/videos/snap-groceries-demo.mp4" type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
-                  {/* Fallback placeholder - shown if video doesn't load */}
-                  <div style={{
-                    textAlign: 'center',
-                    width: '100%',
-                    height: '100%',
-                    display: 'none',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexDirection: 'column',
-                    gap: '20px',
-                    backgroundColor: '#f9f9f9',
-                    borderRadius: '26px',
-                    padding: '30px 15px'
-                  }}>
-                    <div style={{ fontSize: '64px' }}>{feature.icon}</div>
-                    <div>
-                      <p style={{ fontSize: '16px', fontWeight: '600', color: '#333', margin: '0 0 10px 0' }}>
-                        Video Not Found
-                      </p>
-                      <p style={{ fontSize: '14px', color: '#666', margin: '0 0 15px 0' }}>
-                        To add your iPhone demo video:
-                      </p>
-                      <ol style={{
-                        fontSize: '13px',
-                        color: '#666',
-                        textAlign: 'left',
-                        margin: '0 auto',
-                        maxWidth: '250px',
-                        lineHeight: '1.6'
-                      }}>
-                        <li>Place your video file at:<br/>
-                          <code style={{ fontSize: '11px', backgroundColor: '#f0f0f0', padding: '2px 4px', borderRadius: '3px' }}>
-                            Frontend/public/videos/snap-groceries-demo.mp4
-                          </code>
-                        </li>
-                        <li>Refresh the page</li>
-                      </ol>
+                    <source
+                      src={currentFeature === 0 ? "/videos/snap-groceries-demo.mp4" : "/videos/ai-recipes-demo-noframe.mp4"}
+                      type="video/mp4"
+                    />
+                      Your browser does not support the video tag.
+                    </video>
+                    {/* Fallback placeholder - shown if video doesn't load */}
+                    <div style={{
+                      textAlign: 'center',
+                      width: '100%',
+                      height: '100%',
+                      display: 'none',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexDirection: 'column',
+                      gap: '20px',
+                      backgroundColor: '#f9f9f9',
+                      borderRadius: '26px',
+                      padding: '30px 15px'
+                    }}>
+                      <div style={{ fontSize: '64px' }}>{feature.icon}</div>
+                      <div>
+                        <p style={{ fontSize: '16px', fontWeight: '600', color: '#333', margin: '0 0 10px 0' }}>
+                          Video Not Found
+                        </p>
+                        <p style={{ fontSize: '14px', color: '#666', margin: '0 0 15px 0' }}>
+                          To add your iPhone demo video:
+                        </p>
+                        <ol style={{
+                          fontSize: '13px',
+                          color: '#666',
+                          textAlign: 'left',
+                          margin: '0 auto',
+                          maxWidth: '250px',
+                          lineHeight: '1.6'
+                        }}>
+                          <li>Place your video file at:<br/>
+                            <code style={{ fontSize: '11px', backgroundColor: '#f0f0f0', padding: '2px 4px', borderRadius: '3px' }}>
+                              {currentFeature === 0
+                                ? 'Frontend/public/videos/snap-groceries-demo.mp4'
+                                : 'Frontend/public/videos/ai-recipes-demo-noframe.mp4'}
+                            </code>
+                          </li>
+                          <li>Refresh the page</li>
+                        </ol>
+                      </div>
                     </div>
                   </div>
                 </div>
+
+              <p style={{
+                fontSize: '15px',
+                color: '#666',
+                textAlign: 'center',
+                lineHeight: '1.5',
+                maxWidth: '320px'
+              }}>
+                {feature.description}
+              </p>
+            </>
+          ) : currentFeature === 2 ? (
+            // Track Your Savings - show full screenshot without green background
+            <>
+              <h2 style={{
+                fontSize: '22px',
+                fontWeight: '700',
+                color: '#1a1a1a',
+                marginBottom: '16px',
+                textAlign: 'center'
+              }}>
+                {feature.title}
+              </h2>
+
+              <div style={{
+                marginBottom: '16px',
+                width: '280px',
+                maxHeight: '450px',
+                overflow: 'hidden',
+                borderRadius: '12px',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.15)'
+              }}>
+                <img
+                  src="/images/track-savings-screenshot.png"
+                  alt="Track Your Savings"
+                  style={{
+                    width: '100%',
+                    height: 'auto',
+                    display: 'block'
+                  }}
+                  onError={(e) => {
+                    // Fallback to emoji if image doesn't load
+                    e.target.style.display = 'none';
+                    e.target.parentElement.nextSibling.style.display = 'block';
+                  }}
+                />
+              </div>
+              <div style={{
+                fontSize: '64px',
+                marginBottom: '24px',
+                display: 'none'
+              }}>
+                {feature.icon}
               </div>
 
               <p style={{
@@ -226,7 +277,7 @@ const FeatureTourScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
               </p>
             </>
           ) : (
-            // Original display for other features with green background
+            // Smart Shopping Lists - show animated GIF
             <div style={{
               background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
               borderRadius: '16px',
@@ -238,8 +289,31 @@ const FeatureTourScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <div style={{ fontSize: '64px', marginBottom: '24px' }}>
-                {feature.icon}
+              <div style={{
+                marginBottom: '24px',
+                width: '180px',
+                height: '180px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <img
+                  src="/images/friends-handshake.gif"
+                  alt="Shared Shopping Lists"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain'
+                  }}
+                  onError={(e) => {
+                    // Fallback to emoji if GIF doesn't load
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'block';
+                  }}
+                />
+                <div style={{ fontSize: '64px', display: 'none' }}>
+                  {feature.icon}
+                </div>
               </div>
 
               <h2 style={{
