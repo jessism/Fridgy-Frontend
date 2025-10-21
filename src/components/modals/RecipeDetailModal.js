@@ -594,12 +594,20 @@ const RecipeDetailModal = ({
                         onClick={handleAddToShoppingList}
                         disabled={getIngredientsCount() === 0}
                       >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M9 2L3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-6-5H9z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <line x1="12" y1="7" x2="12" y2="13" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                          <line x1="9" y1="10" x2="15" y2="10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
                         Shopping list
                       </button>
                       <button
                         className="recipe-cook-button"
                         onClick={customActionLabel ? () => onCookNow(recipe) : handleCookNow}
                       >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M20 6L9 17l-5-5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
                         {customActionLabel || "Cook this"}
                       </button>
                     </div>

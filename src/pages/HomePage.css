@@ -2392,7 +2392,7 @@ h2.section-title::after {
 }
 
 .recipe-modal-header {
-  padding: 0.75rem 2rem 0.5rem; /* Reduced padding to move content up */
+  padding: 0.75rem 2rem 0.5rem 1rem; /* Reduced left padding to move arrow left */
   display: flex;
   justify-content: flex-start;
   position: relative; /* Changed from absolute to relative */
@@ -2585,20 +2585,23 @@ h2.section-title::after {
 
 /* Single row layout for all action items */
 .recipe-action-row.single-row {
-  gap: 1rem;
+  gap: 1.25rem;
   justify-content: space-between;
-  padding: 0 0.5rem;
+  padding: 0;
+  width: 100%;
 }
 
 .recipe-action-row.single-row .servings-display {
   flex: 0 0 auto;
   min-width: fit-content;
-  padding: 0.625rem 1rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
 }
 
 .recipe-action-row.single-row button {
-  flex: 1;
-  max-width: 150px;
+  flex: 0 0 auto;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.9rem;
 }
 
 /* Make primary action buttons equal width on second row */
@@ -2672,18 +2675,19 @@ h2.section-title::after {
   .recipe-action-row.single-row {
     flex-wrap: nowrap;
     gap: 0.5rem;
-    padding: 0 0.25rem;
+    padding: 0;
+    justify-content: space-between;
+    width: 100%;
   }
 
   .recipe-action-row.single-row .servings-display {
     font-size: 0.85rem;
-    padding: 0.5rem 0.75rem;
+    padding: 0.45rem 0.75rem;
   }
 
   .recipe-action-row.single-row button {
     font-size: 0.85rem;
-    padding: 0.5rem 0.75rem;
-    max-width: none;
+    padding: 0.45rem 1rem;
   }
 
   .recipe-action-row:nth-child(2) button {
@@ -2872,7 +2876,7 @@ h2.section-title::after {
 }
 
 .recipe-cook-button {
-  padding: 0.625rem 2rem;
+  padding: 0.5rem 1.25rem;
   border: none;
   background: #000000;
   color: white;
@@ -2880,7 +2884,11 @@ h2.section-title::after {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
 }
 
 .recipe-cook-button:hover {
@@ -3001,7 +3009,7 @@ h2.section-title::after {
   }
 
   .recipe-modal-header {
-    padding: 0.75rem 1rem 0.5rem;
+    padding: 0.75rem 1rem 0.5rem 0.5rem; /* Reduced left padding for mobile */
   }
 
   /* Footer styles removed - buttons now in top action area */
@@ -3975,17 +3983,19 @@ h2.section-title::after {
 
 /* Add Items Button in Footer */
 .recipe-add-items-button {
-  padding: 0.625rem 2rem;
+  padding: 0.5rem 1.25rem;
   background: #000000;
   color: white;
   border: none;
   border-radius: 50px;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  flex: 1;
-  min-width: 160px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
 }
 
 .recipe-add-items-button:hover:not(:disabled) {
@@ -3997,6 +4007,14 @@ h2.section-title::after {
   background: #d1d5db;
   cursor: not-allowed;
   transform: none;
+}
+
+/* Icon styles inside buttons */
+.recipe-add-items-button svg,
+.recipe-cook-button svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
 }
 
 /* Ingredients Preview Modal */

@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/context/AuthContext';
 import { safeJSONStringify } from '../../../utils/jsonSanitizer';
-import { usePushNotificationSetup } from '../../../hooks/usePushNotificationSetup';
 
 const ONBOARDING_STORAGE_KEY = 'fridgy_onboarding_data';
 const ONBOARDING_STEP_KEY = 'fridgy_onboarding_step';
@@ -12,7 +11,6 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api
 const useOnboarding = () => {
   const navigate = useNavigate();
   const { signUp } = useAuth();
-  const { setupPushNotifications } = usePushNotificationSetup();
   
   const [currentStep, setCurrentStep] = useState(1);
   const [onboardingData, setOnboardingData] = useState({
@@ -41,7 +39,7 @@ const useOnboarding = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const totalSteps = 13;
+  const totalSteps = 12;
 
   useEffect(() => {
     // Always start fresh - clear any existing onboarding data
@@ -195,29 +193,6 @@ const useOnboarding = () => {
 
         localStorage.removeItem(ONBOARDING_STORAGE_KEY);
         localStorage.removeItem(ONBOARDING_STEP_KEY);
-
-        // Auto-setup push notifications if user opted in during onboarding
-        if (preferences.notificationPreferences?.enabled === true) {
-          console.log('User opted in for notifications during onboarding, setting up...');
-
-          // Delay slightly to let the user see the success state before permission prompt
-          setTimeout(async () => {
-            const result = await setupPushNotifications(token);
-
-            if (result.success) {
-              console.log('✅ Push notifications auto-enabled from onboarding');
-            } else if (result.requiresInstall) {
-              // iOS requires installation from home screen
-              console.log('📱 iOS detected - user needs to add to home screen first');
-              // Could show a banner or store this info to show later
-            } else if (result.permissionDenied) {
-              console.log('❌ User denied notification permission');
-              // User can still enable from settings later
-            } else {
-              console.log('⚠️ Push notification setup failed:', result.message);
-            }
-          }, 1500);
-        }
 
         navigate('/home');
       }
