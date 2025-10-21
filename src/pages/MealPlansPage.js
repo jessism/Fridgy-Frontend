@@ -254,13 +254,16 @@ const MealPlansPage = ({ defaultTab }) => {
     }
   }, [location, defaultTab]);
 
+  // useEffect for recipe suggestions - can update when inventory changes
   useEffect(() => {
-    // Fetch recipe suggestions when component mounts
     fetchSuggestions({
       limit: 8, // Reduced total recipes
       ranking: 1 // Maximize used ingredients
     });
+  }, [fetchSuggestions]);
 
+  // useEffect for saved recipes and meals - only fetch once on mount
+  useEffect(() => {
     // Fetch saved recipes
     fetchSavedRecipes();
 
@@ -269,7 +272,7 @@ const MealPlansPage = ({ defaultTab }) => {
 
     // Fetch recent meals
     fetchRecentMeals();
-  }, [fetchSuggestions]);
+  }, []); // Empty dependency array - only runs once on component mount
 
   // Preload saved recipe images to prevent glitching
   useEffect(() => {
