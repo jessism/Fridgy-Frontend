@@ -215,3 +215,29 @@ function urlBase64ToUint8Array(base64String) {
   }
   return outputArray;
 }
+
+// Check for service worker updates manually
+export async function checkForUpdate() {
+  if ('serviceWorker' in navigator) {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      await registration.update();
+      return registration;
+    } catch (error) {
+      console.error('Error checking for updates:', error);
+      return null;
+    }
+  }
+  return null;
+}
+
+// Apply waiting service worker update
+export function applyUpdate() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(registration => {
+      if (registration.waiting) {
+        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+    });
+  }
+}

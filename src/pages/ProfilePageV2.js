@@ -1,11 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/context/AuthContext';
+import useAppUpdate from '../hooks/useAppUpdate';
 import './ProfilePageV2.css';
 
 const ProfilePageV2 = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { updateStatus, checkForUpdates, applyUpdate } = useAppUpdate();
 
   // Get user initials for avatar
   const getUserInitials = (name) => {
@@ -52,6 +54,17 @@ const ProfilePageV2 = () => {
 
   const handleNotificationSettings = () => {
     navigate('/notification-settings');
+  };
+
+  const handleAppUpdate = () => {
+    if (updateStatus === 'available') {
+      // Apply the update
+      applyUpdate();
+    } else if (updateStatus === 'current') {
+      // Check for updates
+      checkForUpdates();
+    }
+    // Do nothing if checking or updating
   };
 
   return (
@@ -118,6 +131,46 @@ const ProfilePageV2 = () => {
             </svg>
           </div>
           <span className="profile-v2__menu-text">Notification settings</span>
+        </div>
+
+        {/* App Update */}
+        <div
+          className={`profile-v2__menu-item ${updateStatus === 'available' ? 'profile-v2__menu-item--has-update' : ''}`}
+          onClick={handleAppUpdate}
+        >
+          <div className="profile-v2__menu-icon">
+            {updateStatus === 'checking' || updateStatus === 'updating' ? (
+              <svg className="profile-v2__update-icon--spinning" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            ) : updateStatus === 'available' ? (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            ) : (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="22,4 12,14.01 9,11.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
+          </div>
+          <div className="profile-v2__menu-content">
+            <span className="profile-v2__menu-text">App Update</span>
+            <span className="profile-v2__menu-subtext">
+              {updateStatus === 'checking' && 'Checking for updates...'}
+              {updateStatus === 'updating' && 'Updating app...'}
+              {updateStatus === 'available' && 'New version available'}
+              {updateStatus === 'current' && "You're up to date"}
+            </span>
+            {updateStatus === 'available' && (
+              <button className="profile-v2__update-button" onClick={(e) => { e.stopPropagation(); applyUpdate(); }}>
+                Update Now →
+              </button>
+            )}
+          </div>
+          {updateStatus === 'available' && (
+            <div className="profile-v2__update-badge"></div>
+          )}
         </div>
 
         {/* Manage Subscription */}
