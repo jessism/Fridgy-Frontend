@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import './CheckoutModal.css';
@@ -6,14 +7,25 @@ import './CheckoutModal.css';
 // Initialize Stripe
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || 'pk_test_51SKtYdPxciP71bVE1Y1v0hT56aelWLNmMOyFEP7ubIdFt0Aq88HdN4vzVUwKCHlegMMui7dxPlyzit7cfdUyyyFd0045RlcApx');
 
-export const CheckoutModal = ({ clientSecret, onClose }) => {
+export const CheckoutModal = ({ clientSecret, onClose, onSuccess }) => {
   console.log('[CheckoutModal] RENDERING - clientSecret:', clientSecret ? 'Present' : 'Missing');
+  const navigate = useNavigate();
 
   // Callback for when checkout completes
   const handleComplete = useCallback(() => {
-    console.log('[CheckoutModal] Checkout completed!');
-    // Modal will auto-close and user will be redirected via return_url
-  }, []);
+    console.log('[CheckoutModal] ✅ Checkout completed successfully!');
+
+    // Close the checkout modal immediately
+    onClose();
+
+    // Call success callback if provided
+    if (onSuccess) {
+      onSuccess();
+    }
+
+    // Navigate to success page (stays in PWA - no external redirect)
+    navigate('/subscription-success?session_id=completed');
+  }, [onClose, onSuccess, navigate]);
 
   if (!clientSecret) {
     console.log('[CheckoutModal] No clientSecret, returning null');

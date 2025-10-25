@@ -18,6 +18,12 @@ function SubscriptionSuccessPage() {
     // Refresh subscription status to get updated tier
     refresh();
 
+    // Check if this was opened from external redirect (PWA fallback)
+    const isPwaFallback = searchParams.get('pwa') === 'true';
+    if (isPwaFallback) {
+      console.log('[SubscriptionSuccess] Detected external redirect - user should stay in PWA');
+    }
+
     // Countdown timer
     const timer = setInterval(() => {
       setCountdown((prev) => {
@@ -31,7 +37,7 @@ function SubscriptionSuccessPage() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [refresh, navigate]);
+  }, [refresh, navigate, searchParams]);
 
   const sessionId = searchParams.get('session_id');
 
