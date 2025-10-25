@@ -5,6 +5,14 @@ import MobileBottomNav from '../components/MobileBottomNav';
 import { EditIcon, DeleteIcon, PlusIcon } from '../components/icons';
 import useInventory from '../hooks/useInventory';
 import useShoppingLists from '../hooks/useShoppingLists';
+import { useSubscription } from '../hooks/useSubscription';
+import { UpgradeModal } from '../components/modals/UpgradeModal';
+import { useGuidedTourContext } from '../contexts/GuidedTourContext';
+import CelebrationModal from '../components/guided-tour/CelebrationModal';
+import IntroductionModal from '../components/guided-tour/IntroductionModal';
+import ShortcutInstallModal from '../components/guided-tour/ShortcutInstallModal';
+import { isIOS } from '../utils/welcomeFlowHelpers';
+import '../components/guided-tour/GuidedTour.css';
 import { getItemIconIcons8, getExpiryStatus, formatQuantity } from '../assets/inventory_emojis/iconHelpers.js';
 import IngredientImage from '../components/IngredientImage';
 import ShoppingListSection from '../components/ShoppingListSection';
@@ -14,6 +22,8 @@ import './InventoryPage.css';
 const InventoryPage = ({ defaultTab }) => {
   const { items: inventoryItems, loading, error, refreshInventory, deleteItem, updateItem } = useInventory();
   const { lists: shoppingLists, addItem: addToShoppingList, createList } = useShoppingLists();
+  const { canAccess } = useSubscription();
+  const { shouldShowTooltip, nextStep, STEPS } = useGuidedTourContext();
   const navigate = useNavigate();
   const location = useLocation();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -23,6 +33,7 @@ const InventoryPage = ({ defaultTab }) => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState(defaultTab || 'inventory'); // New state for tab navigation
+  const [upgradeModal, setUpgradeModal] = useState({ isOpen: false, feature: '', current: 0, limit: 0 });
   const [clickedIcon, setClickedIcon] = useState(null); // Track which icon was clicked
 
   // Touch/swipe state for mobile navigation
@@ -229,6 +240,24 @@ const InventoryPage = ({ defaultTab }) => {
     return statusColors[status] || statusColors['Good'];
   };
 
+  // Check limit before adding items
+  const handleAddItemClick = () => {
+    const check = canAccess('grocery_items');
+
+    if (!check.allowed) {
+      // User hit the limit, show upgrade modal
+      setUpgradeModal({
+        isOpen: true,
+        feature: 'grocery items',
+        current: check.current,
+        limit: check.limit
+      });
+      return;
+    }
+
+    // User has not hit limit, proceed to camera
+    navigate('/batchcamera');
+  };
 
   const handleDeleteItem = (item) => {
     console.log('Delete button clicked for item:', item);
@@ -558,9 +587,9 @@ const InventoryPage = ({ defaultTab }) => {
             </div>
 
             {/* Add Item Plus Button */}
-            <button 
+            <button
               className="inventory-page__add-button"
-              onClick={() => navigate('/batchcamera')}
+              onClick={handleAddItemClick}
               title="Add item"
             >
               +
@@ -692,19 +721,27 @@ const InventoryPage = ({ defaultTab }) => {
             }}>
               <h3 style={{ color: '#666', marginBottom: '1rem' }}>No items in your inventory yet</h3>
               <p style={{ color: '#999', marginBottom: '2rem' }}>Start by scanning some food items with your camera!</p>
-              <button 
+              <button
                 style={{
-                  padding: '0.75rem 2rem',
+                  padding: '0.875rem 2.5rem',
                   background: 'var(--primary-green)',
                   color: 'white',
                   border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  cursor: 'pointer'
+                  borderRadius: '12px',
+                  fontSize: '1.05rem',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
                 }}
-                onClick={() => navigate('/batchcamera')}
+                onClick={handleAddItemClick}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#45b857';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'var(--primary-green)';
+                }}
               >
-                📷 Scan Items
+                Scan Items
               </button>
             </div>
           )}
@@ -1690,6 +1727,52 @@ const InventoryPage = ({ defaultTab }) => {
         onCreateNewListAndAdd={handleCreateNewListAndAdd}
       />
 
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={upgradeModal.isOpen}
+        onClose={() => setUpgradeModal({ isOpen: false, feature: '', current: 0, limit: 0 })}
+        feature={upgradeModal.feature}
+        current={upgradeModal.current}
+        limit={upgradeModal.limit}
+      />
+
+      {/* Celebration Modal - Part 1 Complete */}
+      {shouldShowTooltip(STEPS.GO_TO_MEALS) && (
+        <CelebrationModal
+          message="You've added your first item. Great job!"
+          onContinue={() => {
+            console.log('[Inventory] Part 1 complete - advancing to RECIPE_INTRO');
+            nextStep(); // Advances to RECIPE_INTRO
+          }}
+          continueLabel="Continue"
+        />
+      )}
+
+      {/* Introduction Modal - Part 2: Recipe Import */}
+      {shouldShowTooltip(STEPS.RECIPE_INTRO) && (
+        <IntroductionModal
+          message="Great! Now let's import your first recipe"
+          onContinue={() => {
+            console.log('[Inventory] Starting Part 2 - advancing to shortcut install');
+            nextStep(); // Advances to INSTALL_SHORTCUT or skips to IMPORT_RECIPE if not iOS
+          }}
+          continueLabel="Continue"
+        />
+      )}
+
+      {/* Shortcut Install Modal - iOS Only */}
+      {shouldShowTooltip(STEPS.INSTALL_SHORTCUT) && isIOS() && (
+        <ShortcutInstallModal
+          onInstall={() => {
+            console.log('[Inventory] User clicked Install Shortcut');
+            nextStep(); // Advances to IMPORT_RECIPE
+          }}
+          onSkip={() => {
+            console.log('[Inventory] User skipped shortcut install');
+            nextStep(); // Advances to IMPORT_RECIPE
+          }}
+        />
+      )}
 
       <MobileBottomNav />
     </div>

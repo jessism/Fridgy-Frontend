@@ -194,7 +194,45 @@ const useOnboarding = () => {
         localStorage.removeItem(ONBOARDING_STORAGE_KEY);
         localStorage.removeItem(ONBOARDING_STEP_KEY);
 
-        navigate('/home');
+        // Check if user wants to start trial
+        const wantsTrial = localStorage.getItem('fridgy_wants_trial') === 'true' ||
+                           onboardingData.wantsTrial === true;
+
+        if (wantsTrial) {
+          // User chose to start trial - redirect to Stripe Checkout
+          console.log('[Onboarding] User wants trial, redirecting to checkout...');
+          try {
+            const checkoutResponse = await fetch(`${API_BASE_URL}/subscriptions/create-checkout`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+            });
+
+            const checkoutData = await checkoutResponse.json();
+
+            if (checkoutData.url) {
+              // Clear trial preference
+              localStorage.removeItem('fridgy_wants_trial');
+              // Redirect to Stripe Checkout
+              window.location.href = checkoutData.url;
+              return; // Don't navigate to /home
+            } else {
+              console.error('[Onboarding] No checkout URL received');
+              // Fallback to home if checkout fails
+              navigate('/home');
+            }
+          } catch (checkoutError) {
+            console.error('[Onboarding] Checkout error:', checkoutError);
+            // Fallback to home if checkout fails
+            navigate('/home');
+          }
+        } else {
+          // User chose free tier - go to home
+          localStorage.removeItem('fridgy_wants_trial');
+          navigate('/home');
+        }
       }
     } catch (err) {
       console.error('Onboarding completion error:', err);

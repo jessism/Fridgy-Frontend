@@ -8,54 +8,66 @@ const ChefIcon = ({ size = 32, color = "#81e053" }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    {/* Chef hat outline */}
+    {/* Elegant chef hat - top puffy part */}
     <path
-      d="M10 14C10 10.686 12.686 8 16 8C19.314 8 22 10.686 22 14V16H10V14Z"
+      d="M12 11 C12 9 13 7 15 7 C15.5 5 17.5 5 18 7 C20 7 21 9 21 11 L21 14 L12 14 L12 11Z"
       stroke={color}
       strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       fill="none"
     />
-    
-    {/* Hat band */}
-    <line
-      x1="9"
-      y1="16"
-      x2="23"
-      y2="16"
-      stroke={color}
-      strokeWidth="2"
-    />
-    
-    {/* Simple utensils */}
-    <line
-      x1="14"
-      y1="22"
-      x2="14"
-      y2="26"
+
+    {/* Chef hat band */}
+    <path
+      d="M11 14 L22 14 C22 14 22.5 14.5 22.5 16 L22.5 17 C22.5 17.5 22 18 21.5 18 L11.5 18 C11 18 10.5 17.5 10.5 17 L10.5 16 C10.5 14.5 11 14 11 14Z"
       stroke={color}
       strokeWidth="2"
       strokeLinecap="round"
+      strokeLinejoin="round"
+      fill="none"
     />
-    <line
-      x1="18"
-      y1="22"
-      x2="18"
-      y2="26"
+
+    {/* Cooking pan */}
+    <ellipse
+      cx="16"
+      cy="24"
+      rx="5"
+      ry="2"
       stroke={color}
-      strokeWidth="2"
+      strokeWidth="1.8"
+      fill="none"
+    />
+
+    {/* Pan handle */}
+    <path
+      d="M21 24 L24 24"
+      stroke={color}
+      strokeWidth="1.8"
       strokeLinecap="round"
     />
-    <circle
-      cx="14"
-      cy="21"
-      r="1"
-      fill={color}
+
+    {/* Steam wisps - modern touch */}
+    <path
+      d="M14 21 C14 21 14 20 14.5 20"
+      stroke={color}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      opacity="0.5"
     />
     <path
-      d="M17 21L19 21"
+      d="M16 21 C16 21 16 19.5 16.5 19.5"
       stroke={color}
-      strokeWidth="2"
+      strokeWidth="1.5"
       strokeLinecap="round"
+      opacity="0.5"
+    />
+    <path
+      d="M18 21 C18 21 18 20 18.5 20"
+      stroke={color}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      opacity="0.5"
     />
   </svg>
 );

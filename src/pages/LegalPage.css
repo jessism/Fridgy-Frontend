@@ -1,0 +1,110 @@
+/* Shared Legal Page Styles (Terms & Privacy) */
+
+.legal-page {
+  min-height: 100vh;
+  background: #f5f6f8;
+  padding: 40px 20px;
+}
+
+.legal-page__container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 16px;
+  padding: 50px 60px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.legal-page__title {
+  font-size: 42px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 12px;
+}
+
+.legal-page__updated {
+  font-size: 14px;
+  color: #999;
+  margin-bottom: 40px;
+}
+
+.legal-page__content {
+  line-height: 1.8;
+  color: #333;
+}
+
+.legal-page__section {
+  margin-bottom: 40px;
+}
+
+.legal-page__section h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+  margin-top: 32px;
+}
+
+.legal-page__section h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-top: 20px;
+  margin-bottom: 12px;
+}
+
+.legal-page__section p {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 16px;
+}
+
+.legal-page__section ul {
+  margin: 16px 0;
+  padding-left: 24px;
+}
+
+.legal-page__section li {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.legal-page__section strong {
+  color: #333;
+  font-weight: 600;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .legal-page {
+    padding: 20px 16px;
+  }
+
+  .legal-page__container {
+    padding: 30px 24px;
+    border-radius: 12px;
+  }
+
+  .legal-page__title {
+    font-size: 32px;
+  }
+
+  .legal-page__section h2 {
+    font-size: 20px;
+  }
+
+  .legal-page__section h3 {
+    font-size: 16px;
+  }
+
+  .legal-page__section p,
+  .legal-page__section li {
+    font-size: 14px;
+  }
+
+  .legal-page__section ul {
+    padding-left: 20px;
+  }
+}

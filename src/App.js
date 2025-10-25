@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
 import { AuthProvider } from './features/auth/context/AuthContext';
+import { GuidedTourProvider } from './contexts/GuidedTourContext';
 import AuthGuard from './features/auth/components/AuthGuard';
 import NewLandingPage from './pages/NewLandingPage';
 import SignUpPage from './pages/SignUpPage';
@@ -32,6 +33,11 @@ import ShoppingListDetailPage from './pages/ShoppingListDetailPage';
 import JoinShoppingList from './components/JoinShoppingList';
 import PWATestPage from './pages/PWATestPage';
 import ScrollToTop from './components/ScrollToTop';
+import BillingPage from './pages/BillingPage';
+import SubscriptionPage from './pages/SubscriptionPage';
+import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
 
 // Navigation listener component to handle service worker messages
 function NavigationListener() {
@@ -65,10 +71,11 @@ function App() {
   return (
     <div className="App">
       <AuthProvider>
-        <Router>
-          <ScrollToTop />
-          <NavigationListener />
-          <Routes>
+        <GuidedTourProvider>
+          <Router>
+            <ScrollToTop />
+            <NavigationListener />
+            <Routes>
           <Route path="/" element={<NewLandingPage />} />
           <Route path="/onboarding" element={<OnboardingFlow />} />
           <Route path="/signup" element={<SignUpPage />} />
@@ -208,8 +215,30 @@ function App() {
               <PWATestPage />
             </AuthGuard>
           } />
+
+          {/* Billing & Subscription Routes */}
+          <Route path="/billing" element={
+            <AuthGuard>
+              <BillingPage />
+            </AuthGuard>
+          } />
+          <Route path="/subscription" element={
+            <AuthGuard>
+              <SubscriptionPage />
+            </AuthGuard>
+          } />
+          <Route path="/subscription-success" element={
+            <AuthGuard>
+              <SubscriptionSuccessPage />
+            </AuthGuard>
+          } />
+
+          {/* Legal Pages (Public - No Auth Required) */}
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
         </Routes>
-        </Router>
+          </Router>
+        </GuidedTourProvider>
       </AuthProvider>
     </div>
   );

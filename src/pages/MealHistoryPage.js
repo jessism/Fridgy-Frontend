@@ -5,13 +5,17 @@ import MobileBottomNav from '../components/MobileBottomNav';
 import { EditIcon, DeleteIcon } from '../components/icons';
 import MealDetailModal from '../components/modals/MealDetailModal.jsx';
 import { ChevronLeft } from 'lucide-react';
+import { useSubscription } from '../hooks/useSubscription';
+import { UpgradeModal } from '../components/modals/UpgradeModal';
 import './MealHistoryPage.css';
 
 const MealHistoryPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isPremium } = useSubscription();
   const [selectedDate, setSelectedDate] = useState(new Date()); // Default to today
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0); // 0 = current week, -1 = previous week, 1 = next week
+  const [upgradeModal, setUpgradeModal] = useState({ isOpen: false });
   const [dailyMeals, setDailyMeals] = useState({
     breakfast: [],
     lunch: [],
@@ -86,7 +90,20 @@ const MealHistoryPage = () => {
 
   // Week navigation functions
   const navigateToWeek = (direction) => {
-    setCurrentWeekOffset(prev => prev + direction);
+    const newOffset = currentWeekOffset + direction;
+
+    // Free tier: limit to 1 week back (7 days)
+    if (!isPremium && newOffset < -1) {
+      setUpgradeModal({
+        isOpen: true,
+        feature: 'meal history beyond 7 days',
+        current: null,
+        limit: null
+      });
+      return;
+    }
+
+    setCurrentWeekOffset(newOffset);
   };
 
   const goToPreviousWeek = () => navigateToWeek(-1);
@@ -196,6 +213,27 @@ const MealHistoryPage = () => {
       event.preventDefault();
       event.stopPropagation();
     }
+
+    // Check if date is more than 7 days ago for free users
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const selectedDay = new Date(dateObj);
+    selectedDay.setHours(0, 0, 0, 0);
+
+    const daysDiff = Math.floor((today - selectedDay) / (1000 * 60 * 60 * 24));
+
+    if (!isPremium && daysDiff > 7) {
+      // Free user trying to view more than 7 days back
+      setUpgradeModal({
+        isOpen: true,
+        feature: 'meal history beyond 7 days',
+        current: null,
+        limit: null
+      });
+      return;
+    }
+
     setSelectedDate(dateObj);
     await fetchMealsForDate(dateObj);
   };
@@ -399,21 +437,52 @@ const MealHistoryPage = () => {
 
   // Handle date selection from month calendar
   const handleMonthCalendarDateSelect = (date) => {
+    // Check if date is more than 7 days ago (use date-only comparison)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset to start of day
+
+    const selectedDay = new Date(date);
+    selectedDay.setHours(0, 0, 0, 0); // Reset to start of day
+
+    const sevenDaysAgo = new Date(today);
+    sevenDaysAgo.setDate(today.getDate() - 7);
+
+    const daysDiff = Math.floor((today - selectedDay) / (1000 * 60 * 60 * 24));
+
+    console.log('[MealHistory] Date selection check:', {
+      selectedDate: selectedDay.toLocaleDateString(),
+      today: today.toLocaleDateString(),
+      daysDiff,
+      isPremium,
+      shouldBlock: !isPremium && daysDiff > 7
+    });
+
+    if (!isPremium && daysDiff > 7) {
+      // Free user trying to view more than 7 days back
+      setUpgradeModal({
+        isOpen: true,
+        feature: 'meal history beyond 7 days',
+        current: null,
+        limit: null
+      });
+      setShowMonthCalendar(false); // Close calendar
+      return;
+    }
+
     // Update selected date
     setSelectedDate(date);
-    
+
     // Calculate week offset to show the week containing the selected date
-    const today = new Date();
     const todayWeekStart = new Date(today);
     todayWeekStart.setDate(today.getDate() - today.getDay()); // Start of current week
-    
+
     const selectedWeekStart = new Date(date);
     selectedWeekStart.setDate(date.getDate() - date.getDay()); // Start of selected date's week
-    
+
     // Calculate difference in weeks
     const diffTime = selectedWeekStart.getTime() - todayWeekStart.getTime();
     const diffWeeks = Math.round(diffTime / (7 * 24 * 60 * 60 * 1000));
-    
+
     setCurrentWeekOffset(diffWeeks);
     
     // Fetch meals for the selected date
@@ -489,7 +558,16 @@ const MealHistoryPage = () => {
     };
     
     const days = getDaysInMonth(calendarMonth);
-    
+
+    // Debug: Log the days being generated
+    console.log('[MealHistory] Month calendar dates:', {
+      totalDays: days.length,
+      realDates: days.filter(d => d !== null).length,
+      firstDate: days.find(d => d !== null)?.toDateString(),
+      lastDate: days.filter(d => d !== null).pop()?.toDateString(),
+      month: calendarMonth.toDateString()
+    });
+
     return (
       <div className="meal-history-page__month-modal-overlay" onClick={() => setShowMonthCalendar(false)}>
         <div className="meal-history-page__month-modal" onClick={(e) => e.stopPropagation()}>
@@ -527,34 +605,68 @@ const MealHistoryPage = () => {
           
           {/* Calendar Grid */}
           <div className="meal-history-page__month-grid">
-            {days.map((date, index) => (
-              <div
-                key={`cell-${index}`}
-                className={`meal-history-page__month-day ${
-                  !date ? 'meal-history-page__month-day--empty' : ''
-                } ${
-                  isToday(date) ? 'meal-history-page__month-day--today' : ''
-                } ${
-                  isSelectedDate(date) ? 'meal-history-page__month-day--selected' : ''
-                }`}
-                onClick={(e) => {
-                  if (date) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleMonthCalendarDateSelect(date);
-                  }
-                }}
-                onTouchEnd={(e) => {
-                  if (date) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleMonthCalendarDateSelect(date);
-                  }
-                }}
-              >
-                {date && date.getDate()}
-              </div>
-            ))}
+            {days.map((date, index) => {
+              // Check if date is locked for free users
+              let isLocked = false;
+              if (date && !isPremium) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const dateDay = new Date(date);
+                dateDay.setHours(0, 0, 0, 0);
+                const daysDiff = Math.floor((today - dateDay) / (1000 * 60 * 60 * 24));
+                isLocked = daysDiff > 7;
+
+                // Debug first few dates
+                if (date.getDate() <= 3) {
+                  console.log(`[MealHistory] Date ${date.getDate()}: daysDiff=${daysDiff}, isLocked=${isLocked}`);
+                }
+              }
+
+              return (
+                <div
+                  key={`cell-${index}`}
+                  className={`meal-history-page__month-day ${
+                    !date ? 'meal-history-page__month-day--empty' : ''
+                  } ${
+                    isToday(date) ? 'meal-history-page__month-day--today' : ''
+                  } ${
+                    isSelectedDate(date) ? 'meal-history-page__month-day--selected' : ''
+                  } ${
+                    isLocked ? 'meal-history-page__month-day--locked' : ''
+                  }`}
+                  onClick={(e) => {
+                    if (date) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleMonthCalendarDateSelect(date);
+                    }
+                  }}
+                  onTouchEnd={(e) => {
+                    if (date) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleMonthCalendarDateSelect(date);
+                    }
+                  }}
+                  style={{
+                    cursor: isLocked ? 'not-allowed' : 'pointer',
+                    position: 'relative'
+                  }}
+                >
+                  {date && (
+                    <>
+                      {date.getDate()}
+                      {isLocked && (
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" style={{ position: 'absolute', bottom: '3px', right: '3px', opacity: 0.6 }}>
+                          <rect x="6" y="10" width="12" height="10" rx="2" stroke="currentColor" strokeWidth="2.5" fill="none"/>
+                          <path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+                        </svg>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </div>
           
           {/* Today Button */}
@@ -668,41 +780,56 @@ const MealHistoryPage = () => {
           {/* Calendar */}
           <div className="meal-history-page__calendar">
             {/* Month/Year Header with Navigation */}
-            <div className="meal-history-page__calendar-header">
-              <button 
-                className="meal-history-page__nav-arrow meal-history-page__nav-arrow--left"
-                onClick={goToPreviousWeek}
-                aria-label="Previous week"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-              
-              <div 
-                className="meal-history-page__month-year"
-                onClick={() => {
-                  setCalendarMonth(new Date(selectedDate));
-                  setShowMonthCalendar(true);
-                }}
-              >
-                <span className="meal-history-page__month-year-text">
-                  {getCurrentMonthYear()}
-                </span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+              <div className="meal-history-page__calendar-header" style={{ marginBottom: 0 }}>
+                <button
+                  className="meal-history-page__nav-arrow meal-history-page__nav-arrow--left"
+                  onClick={goToPreviousWeek}
+                  aria-label="Previous week"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+
+                <div
+                  className="meal-history-page__month-year"
+                  onClick={() => {
+                    setCalendarMonth(new Date(selectedDate));
+                    setShowMonthCalendar(true);
+                  }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                >
+                  <span className="meal-history-page__month-year-text">
+                    {getCurrentMonthYear()}
+                  </span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+
+                <button
+                  className="meal-history-page__nav-arrow meal-history-page__nav-arrow--right"
+                  onClick={goToNextWeek}
+                  aria-label="Next week"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
               </div>
 
-              <button 
-                className="meal-history-page__nav-arrow meal-history-page__nav-arrow--right"
-                onClick={goToNextWeek}
-                aria-label="Next week"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
+              {!isPremium && (
+                <div style={{ textAlign: 'center', marginTop: '-4px', marginBottom: '12px' }}>
+                  <span style={{
+                    fontSize: '11px',
+                    color: '#999',
+                    opacity: 1
+                  }}>
+                    7 day look back window. Upgrade to Pro to view more.
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Days of Week */}
@@ -722,26 +849,52 @@ const MealHistoryPage = () => {
               onTouchEnd={handleTouchEnd}
             >
               <div className="meal-history-page__dates-row">
-                {getCurrentWeekDates().map((dateInfo, index) => (
-                  <div
-                    key={index}
-                    className={`meal-history-page__date-cell ${
-                      isToday(dateInfo.fullDate) ? 'meal-history-page__date-cell--today' : ''
-                    } ${
-                      isSelectedDate(dateInfo.fullDate) ? 'meal-history-page__date-cell--selected' : ''
-                    }`}
-                    onClick={(e) => handleDateClick(dateInfo.fullDate, e)}
-                    onTouchEnd={(e) => {
-                      e.preventDefault();
-                      handleDateClick(dateInfo.fullDate, e);
-                    }}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <span className="meal-history-page__date-number">
-                      {dateInfo.date}
-                    </span>
-                  </div>
-                ))}
+                {getCurrentWeekDates().map((dateInfo, index) => {
+                  // Check if date is more than 7 days ago for free users
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  const dateDay = new Date(dateInfo.fullDate);
+                  dateDay.setHours(0, 0, 0, 0);
+                  const daysDiff = Math.floor((today - dateDay) / (1000 * 60 * 60 * 24));
+                  const isLocked = !isPremium && daysDiff > 7;
+
+                  return (
+                    <div
+                      key={index}
+                      className={`meal-history-page__date-cell ${
+                        isToday(dateInfo.fullDate) ? 'meal-history-page__date-cell--today' : ''
+                      } ${
+                        isSelectedDate(dateInfo.fullDate) ? 'meal-history-page__date-cell--selected' : ''
+                      }`}
+                      onClick={(e) => handleDateClick(dateInfo.fullDate, e)}
+                      onTouchEnd={(e) => {
+                        e.preventDefault();
+                        handleDateClick(dateInfo.fullDate, e);
+                      }}
+                      style={{
+                        cursor: 'pointer',
+                        opacity: isLocked ? 0.4 : 1,
+                        color: isLocked ? '#999' : 'inherit',
+                        position: 'relative'
+                      }}
+                    >
+                      <span className="meal-history-page__date-number">
+                        {dateInfo.date}
+                      </span>
+                      {isLocked && (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style={{
+                          position: 'absolute',
+                          bottom: '4px',
+                          right: '4px',
+                          opacity: 0.6
+                        }}>
+                          <rect x="6" y="10" width="12" height="10" rx="2" stroke="currentColor" strokeWidth="2.5" fill="none"/>
+                          <path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+                        </svg>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -955,6 +1108,15 @@ const MealHistoryPage = () => {
       
       {/* Month Calendar Modal */}
       {showMonthCalendar && <MonthCalendarModal />}
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={upgradeModal.isOpen}
+        onClose={() => setUpgradeModal({ isOpen: false })}
+        feature={upgradeModal.feature}
+        current={upgradeModal.current}
+        limit={upgradeModal.limit}
+      />
     </div>
   );
 };

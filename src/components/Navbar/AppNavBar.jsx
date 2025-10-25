@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../features/auth/context/AuthContext';
+import { useGuidedTourContext } from '../../contexts/GuidedTourContext';
+import GuidedTooltip from '../guided-tour/GuidedTooltip';
+import '../guided-tour/GuidedTour.css'; // Import guided tour styles
 import './AppNavBar.css';
 import appLogo from '../../assets/images/Logo.png';
 
@@ -11,8 +14,19 @@ const AppNavBar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { shouldShowTooltip, completeStep, STEPS, currentStep, isActive } = useGuidedTourContext();
   const dropdownRef = useRef(null);
   const addModalRef = useRef(null);
+
+  // Debug logging
+  useEffect(() => {
+    console.log('[AppNavBar] Guided tour state:', {
+      isActive,
+      currentStep,
+      shouldShowAddGroceries: shouldShowTooltip(STEPS.ADD_GROCERIES),
+      STEPS
+    });
+  }, [isActive, currentStep, shouldShowTooltip, STEPS]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -79,11 +93,21 @@ const AppNavBar = () => {
 
   const handleAddButtonClick = () => {
     setIsAddModalOpen(true);
+
+    // Mark step 1 complete when user clicks "+"
+    if (shouldShowTooltip(STEPS.ADD_GROCERIES)) {
+      completeStep(STEPS.ADD_GROCERIES);
+    }
   };
 
   const handleAddGrocery = () => {
     setIsAddModalOpen(false);
     navigate('/batchcamera');
+
+    // Mark step 2 complete when user clicks "Add Grocery"
+    if (shouldShowTooltip(STEPS.ADD_ITEMS_MENU)) {
+      completeStep(STEPS.ADD_ITEMS_MENU);
+    }
   };
 
   const handleAddRecipe = () => {
@@ -221,6 +245,34 @@ const AppNavBar = () => {
 
       </div>
 
+      {/* Guided Tour Tooltips */}
+      {shouldShowTooltip(STEPS.ADD_GROCERIES) && (
+        <>
+          {console.log('[AppNavBar] 🎯 Rendering GuidedTooltip component NOW')}
+          <GuidedTooltip
+            targetSelector=".add-button, .add-to-fridge-button"
+            message="Start by adding groceries"
+            position="top"
+            onAction={handleAddButtonClick}
+            actionLabel="Add groceries"
+            highlight={true}
+            offset={16}
+          />
+        </>
+      )}
+
+      {shouldShowTooltip(STEPS.ADD_ITEMS_MENU) && isAddModalOpen && (
+        <GuidedTooltip
+          targetSelector=".add-modal-option-grocery"
+          message="Tap here to scan your first items"
+          position="bottom"
+          onAction={handleAddGrocery}
+          actionLabel="Scan items"
+          highlight={true}
+        />
+      )}
+
+
       {/* Add Options Modal */}
       {isAddModalOpen && (
         <div className="add-modal-overlay" onClick={() => setIsAddModalOpen(false)}>
@@ -229,7 +281,7 @@ const AppNavBar = () => {
               <div className="add-modal-handle"></div>
             </div>
             <div className="add-modal-options">
-              <button className="add-modal-option" onClick={handleAddGrocery}>
+              <button className="add-modal-option add-modal-option-grocery" onClick={handleAddGrocery}>
                 <div className="add-modal-option-icon">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>

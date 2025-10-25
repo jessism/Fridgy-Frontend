@@ -3,6 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import useRecipes from '../hooks/useRecipes';
+import { useSubscription } from '../hooks/useSubscription';
+import { PremiumBadge } from '../components/common/PremiumBadge';
+import { CheckoutModal } from '../components/modals/CheckoutModal';
+import { useGuidedTourContext } from '../contexts/GuidedTourContext';
+import GuidedTooltip from '../components/guided-tour/GuidedTooltip';
+import '../components/guided-tour/GuidedTour.css'; // Import guided tour styles
 // import useEdamamTest from '../hooks/useEdamamTest';
 // import useTastyRecipes from '../hooks/useTastyRecipes';
 import RecipeDetailModal from '../components/modals/RecipeDetailModal';
@@ -15,6 +21,8 @@ import './MealPlansPage.css';
 const MealPlansPage = ({ defaultTab }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isPremium, startCheckout, loading: subscriptionLoading, checkoutSecret, closeCheckout } = useSubscription();
+  const { shouldShowTooltip, completeStep, STEPS } = useGuidedTourContext();
   const {
     suggestions,
     loading,
@@ -660,6 +668,21 @@ const MealPlansPage = ({ defaultTab }) => {
     </div>
   );
 
+  // Render import prompt card (to encourage first import)
+  const renderImportPromptCard = () => (
+    <div
+      className="meal-plans-page__import-prompt-card"
+      onClick={() => navigate('/import')}
+    >
+      <div className="meal-plans-page__import-prompt-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M12 5V19M5 12H19" stroke="var(--primary-green)" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+      </div>
+      <p className="meal-plans-page__import-prompt-text">Import your first recipe</p>
+    </div>
+  );
+
   // Helper function to format meal date
   const formatMealDate = (dateString) => {
     const date = new Date(dateString);
@@ -925,6 +948,7 @@ const MealPlansPage = ({ defaultTab }) => {
                 ) : savedRecipes.length > 0 ? (
                   <div className="meal-plans-page__saved-recipes-grid">
                     {savedRecipes.slice(0, 2).map(recipe => renderSavedRecipeCard(recipe, true))}
+                    {savedRecipes.length === 1 && renderImportPromptCard()}
                   </div>
                 ) : (
                   renderSavedRecipesEmptyState()
@@ -975,8 +999,56 @@ const MealPlansPage = ({ defaultTab }) => {
                 )}
               </div>
 
-              {/* AI Recipe Section - Get perfect match with AI */}
-              <AIRecipeSection />
+              {/* AI Recipe Section - Get perfect match with AI (PREMIUM ONLY) */}
+              {isPremium ? (
+                <AIRecipeSection />
+              ) : (
+                <div style={{
+                  background: 'linear-gradient(135deg, rgba(79, 207, 97, 0.1), rgba(69, 184, 84, 0.05))',
+                  borderRadius: '16px',
+                  padding: '40px 30px',
+                  textAlign: 'center',
+                  margin: '20px 0',
+                  border: '2px dashed rgba(79, 207, 97, 0.3)'
+                }}>
+                  <div style={{ marginBottom: '16px' }}>
+                    <PremiumBadge size="large" text="Pro" />
+                  </div>
+                  <h3 style={{ fontSize: '24px', fontWeight: '600', color: '#333', marginBottom: '12px' }}>
+                    AI Recipe Recommendations
+                  </h3>
+                  <p style={{ fontSize: '16px', color: '#666', marginBottom: '24px', lineHeight: '1.6' }}>
+                    AI creates personalized recipes using what's actually in your fridge right now.
+                  </p>
+                  <button
+                    onClick={startCheckout}
+                    style={{
+                      padding: '14px 32px',
+                      background: '#4fcf61',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '12px',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.background = '#45b854';
+                      e.target.style.transform = 'translateY(-2px)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.background = '#4fcf61';
+                      e.target.style.transform = 'translateY(0)';
+                    }}
+                  >
+                    Upgrade to Premium
+                  </button>
+                  <p style={{ fontSize: '13px', color: '#999', marginTop: '12px' }}>
+                    7-day free trial, then $4.99/month
+                  </p>
+                </div>
+              )}
             </>
           )}
 
@@ -1188,6 +1260,29 @@ const MealPlansPage = ({ defaultTab }) => {
         isOpen={showRecipeCreationModal}
         onClose={() => setShowRecipeCreationModal(false)}
       />
+
+      {/* Embedded Checkout Modal */}
+      {checkoutSecret && (
+        <CheckoutModal
+          clientSecret={checkoutSecret}
+          onClose={closeCheckout}
+        />
+      )}
+
+      {/* Guided Tour Tooltips */}
+      {shouldShowTooltip(STEPS.IMPORT_RECIPE) && activeTab === 'recipes' && (
+        <GuidedTooltip
+          targetSelector=".meal-plans-page__import-add-button"
+          message="Import your first recipe from Instagram"
+          position="bottom"
+          onAction={() => {
+            navigate('/import');
+            completeStep(STEPS.IMPORT_RECIPE);
+          }}
+          actionLabel="Import recipe"
+          highlight={true}
+        />
+      )}
     </div>
   );
 };

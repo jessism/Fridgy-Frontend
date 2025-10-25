@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ListIcon from './ListIcon';
 import MealsIcon from './MealsIcon';
+import { useGuidedTourContext } from '../../contexts/GuidedTourContext';
+import GuidedTooltip from '../guided-tour/GuidedTooltip';
+import '../guided-tour/GuidedTour.css';
 import './MobileBottomNav.css';
 
 const MobileBottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { shouldShowTooltip, completeStep, STEPS } = useGuidedTourContext();
 
   const isActiveTab = (path) => {
     return location.pathname === path;
@@ -15,6 +19,11 @@ const MobileBottomNav = () => {
 
   const handlePlusButtonClick = () => {
     setIsModalOpen(true);
+
+    // Mark step 1 complete when user clicks "+"
+    if (shouldShowTooltip(STEPS.ADD_GROCERIES)) {
+      completeStep(STEPS.ADD_GROCERIES);
+    }
   };
 
   const handleCloseModal = () => {
@@ -23,6 +32,12 @@ const MobileBottomNav = () => {
 
   const handleLogGrocery = () => {
     setIsModalOpen(false);
+
+    // Mark step 2 complete and advance to ITEMS_ADDED when user clicks "Add Grocery"
+    if (shouldShowTooltip(STEPS.ADD_ITEMS_MENU)) {
+      completeStep(STEPS.ADD_ITEMS_MENU); // This advances to ITEMS_ADDED
+    }
+
     navigate('/batchcamera');
   };
 
@@ -151,6 +166,35 @@ const MobileBottomNav = () => {
         </div>
       </nav>
 
+      {/* Guided Tour Tooltips for Mobile */}
+      {shouldShowTooltip(STEPS.ADD_GROCERIES) && (
+        <>
+          {console.log('[MobileBottomNav] 🎯 Rendering tooltip for ADD_GROCERIES')}
+          <GuidedTooltip
+            targetSelector=".mobile-bottom-nav .add-button"
+            message="Start by adding groceries"
+            position="top"
+            onAction={handlePlusButtonClick}
+            actionLabel="Add groceries"
+            highlight={true}
+            offset={20}
+          />
+        </>
+      )}
+
+      {shouldShowTooltip(STEPS.ADD_ITEMS_MENU) && isModalOpen && (
+        <GuidedTooltip
+          targetSelector=".modal-option-grocery"
+          message='Tap "Add Grocery" to add your recent purchases to your fridge.'
+          position="centered-above-modal"
+          showAction={false}
+          onDismiss={null}
+          highlight={true}
+          offset={180}
+        />
+      )}
+
+
       {/* Bottom Slide-Up Modal */}
       {isModalOpen && (
         <div className="modal-overlay" onClick={handleCloseModal}>
@@ -159,7 +203,7 @@ const MobileBottomNav = () => {
               <div className="modal-handle"></div>
             </div>
             <div className="modal-options">
-              <button className="modal-option" onClick={handleLogGrocery}>
+              <button className="modal-option modal-option-grocery" onClick={handleLogGrocery}>
                 <div className="modal-option-icon">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>

@@ -3,12 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import { useAuth } from '../features/auth/context/AuthContext';
+import { useSubscription } from '../hooks/useSubscription';
+import { PremiumBadge } from '../components/common/PremiumBadge';
 import useInventoryAnalytics from '../hooks/useInventoryAnalytics';
 import './InventoryUsagePage.css';
 
 const InventoryUsagePage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isPremium, startCheckout, loading: subscriptionLoading } = useSubscription();
   const [dateRange, setDateRange] = useState('30'); // Default to last 30 days
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   
@@ -154,6 +157,91 @@ const InventoryUsagePage = () => {
     });
   };
 
+  // Show loading state while checking subscription (prevents flash)
+  if (subscriptionLoading) {
+    return (
+      <div className="inventory-usage-page">
+        <AppNavBar />
+        <div className="page-header">
+          <div className="header-content">
+            <h1 className="page-title">Inventory Usage</h1>
+            <p className="page-subtitle">Loading...</p>
+          </div>
+        </div>
+        <MobileBottomNav />
+      </div>
+    );
+  }
+
+  // Premium gate - show upgrade screen for free users (CHECK THIS FIRST!)
+  if (!isPremium) {
+    return (
+      <div className="inventory-usage-page">
+        <AppNavBar />
+
+        <div className="page-header">
+          <div className="header-content">
+            <div className="header-top">
+              <h1 className="page-title">Inventory Usage Analytics</h1>
+            </div>
+          </div>
+        </div>
+
+        <div style={{
+          maxWidth: '600px',
+          margin: '60px auto',
+          padding: '40px 30px',
+          background: 'linear-gradient(135deg, rgba(79, 207, 97, 0.1), rgba(69, 184, 84, 0.05))',
+          borderRadius: '20px',
+          textAlign: 'center',
+          border: '2px dashed rgba(79, 207, 97, 0.3)'
+        }}>
+          <div style={{ marginBottom: '20px' }}>
+            <PremiumBadge size="large" />
+          </div>
+          <div style={{ fontSize: '64px', marginBottom: '20px' }}>📊</div>
+          <h2 style={{ fontSize: '28px', fontWeight: '600', color: '#333', marginBottom: '16px' }}>
+            Advanced Analytics
+          </h2>
+          <p style={{ fontSize: '16px', color: '#666', marginBottom: '30px', lineHeight: '1.6' }}>
+            Track your inventory usage patterns, waste reduction, cost savings, and consumption trends over time.
+            This feature is available with a premium subscription.
+          </p>
+          <button
+            onClick={startCheckout}
+            style={{
+              padding: '16px 40px',
+              background: '#4fcf61',
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px',
+              fontSize: '18px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.background = '#45b854';
+              e.target.style.transform = 'translateY(-2px)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.background = '#4fcf61';
+              e.target.style.transform = 'translateY(0)';
+            }}
+          >
+            Upgrade to Premium
+          </button>
+          <p style={{ fontSize: '14px', color: '#999', marginTop: '16px' }}>
+            7-day free trial, then $4.99/month
+          </p>
+        </div>
+
+        <MobileBottomNav />
+      </div>
+    );
+  }
+
+  // Error handling - only for premium users (free users already saw upgrade screen above)
   if (error) {
     return (
       <div className="inventory-usage-page">
@@ -162,9 +250,7 @@ const InventoryUsagePage = () => {
           <div className="header-content">
             <h1 className="page-title">Inventory Usage</h1>
             <p className="page-subtitle" style={{ color: '#ff6b6b' }}>
-              {error === 'Authentication required. Please log in again.' 
-                ? 'Please log in to view your analytics.'
-                : 'Unable to load analytics data. Please try again later.'}
+              Unable to load analytics data. Please try again later.
             </p>
           </div>
         </div>
@@ -176,7 +262,7 @@ const InventoryUsagePage = () => {
   return (
     <div className="inventory-usage-page">
       <AppNavBar />
-      
+
       <div className="page-header">
         <div className="header-content">
           <div className="header-top">

@@ -1,0 +1,564 @@
+/* SUBSCRIPTION PAGE STYLES */
+
+.subscription-page {
+  min-height: 100vh;
+  background: white;
+  padding-bottom: 4rem;
+}
+
+/* Header */
+.subscription-page__header {
+  background: white;
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.subscription-page__back-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.subscription-page__back-btn:hover {
+  background: #f0f0f0;
+  color: #000;
+}
+
+.subscription-page__title {
+  font-family: var(--header-font);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+}
+
+/* Container */
+.subscription-page__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Loading */
+.subscription-page__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 1rem;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--primary-green, #4fcf61);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Hero Section */
+.subscription-page__hero {
+  background: linear-gradient(135deg, #4fcf61 0%, #45b857 100%);
+  border-radius: 20px;
+  padding: 3rem;
+  color: white;
+  text-align: center;
+  margin-bottom: 3rem;
+  box-shadow: 0 10px 30px rgba(79, 207, 97, 0.3);
+}
+
+.subscription-page__plan-badge-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.subscription-page__plan-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.subscription-page__plan-badge--premium {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+}
+
+.subscription-page__plan-badge--free {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+}
+
+.subscription-page__grandfathered-badge {
+  background: rgba(255, 215, 0, 0.25);
+  backdrop-filter: blur(10px);
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.subscription-page__hero-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+}
+
+.subscription-page__hero-subtitle {
+  font-size: 1.25rem;
+  opacity: 0.95;
+  margin: 0 0 2rem 0;
+}
+
+.subscription-page__billing-info {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.billing-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+}
+
+.info-label {
+  opacity: 0.9;
+}
+
+.info-value {
+  font-weight: 600;
+}
+
+.billing-info-warning {
+  background: rgba(255, 193, 7, 0.2);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.subscription-page__hero-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.subscription-page__primary-btn {
+  background: white;
+  color: var(--primary-green, #4fcf61);
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.subscription-page__primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.subscription-page__secondary-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid white;
+  padding: 1rem 2.5rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.subscription-page__secondary-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.subscription-page__secondary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Section Title */
+.subscription-page__section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0;
+  color: #222222;
+}
+
+/* Plan Comparison */
+.subscription-page__comparison {
+  margin-bottom: 3rem;
+}
+
+.subscription-page__comparison-header {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  margin-bottom: 2rem;
+  transition: all 0.2s ease;
+}
+
+.subscription-page__comparison-header:hover {
+  opacity: 0.7;
+}
+
+.subscription-page__comparison-header .subscription-page__section-title {
+  margin: 0;
+}
+
+.comparison-arrow {
+  color: #666;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.comparison-arrow--expanded {
+  transform: rotate(180deg);
+}
+
+/* Comparison Table */
+.comparison-table {
+  background: white;
+  border-radius: 16px;
+  border: none;
+  overflow: hidden;
+  animation: slideDown 0.3s ease-out;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.comparison-table__header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.comparison-table__row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.comparison-table__row:last-child {
+  border-bottom: none;
+}
+
+.comparison-table__cta-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+}
+
+.comparison-table__cell {
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.comparison-table__cell--feature {
+  justify-content: flex-start;
+  text-align: left;
+  font-weight: 500;
+  color: #333;
+}
+
+.comparison-table__cell--plan {
+  flex-direction: column;
+  padding: 1.5rem 1rem;
+  position: relative;
+}
+
+.comparison-table__cell--premium {
+  background: rgba(129, 224, 83, 0.08);
+}
+
+
+.comparison-table__cell--plan h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: #000;
+}
+
+.plan-price {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #666;
+  margin: 0;
+}
+
+.check-icon, .x-icon {
+  flex-shrink: 0;
+}
+
+.plan-card__btn {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.plan-card__btn--primary {
+  background: var(--primary-green, #4fcf61);
+  color: white;
+}
+
+.plan-card__btn--primary:hover {
+  background: #45b857;
+}
+
+/* Usage Section */
+.subscription-page__usage {
+  margin-bottom: 3rem;
+}
+
+.subscription-page__usage-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.usage-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.usage-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.usage-card__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.usage-card__count {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #000;
+}
+
+.usage-card__bar {
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 50px;
+  overflow: hidden;
+}
+
+.usage-bar__fill {
+  height: 100%;
+  border-radius: 50px;
+  transition: width 0.5s ease, background-color 0.3s ease;
+}
+
+.usage-bar__fill--green {
+  background: var(--primary-green, #4fcf61);
+}
+
+.usage-bar__fill--yellow {
+  background: #ffc107;
+}
+
+.usage-bar__fill--red {
+  background: #ff5252;
+}
+
+.usage-card__unlimited {
+  color: var(--primary-green, #4fcf61);
+  font-weight: 600;
+  margin: 0;
+}
+
+.subscription-page__usage-cta {
+  background: linear-gradient(135deg, #4fcf61 0%, #45b857 100%);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  color: white;
+}
+
+.subscription-page__usage-cta p {
+  font-size: 1.25rem;
+  margin: 0 0 1.5rem 0;
+}
+
+.subscription-page__usage-cta .subscription-page__primary-btn {
+  background: white;
+  color: var(--primary-green, #4fcf61);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .subscription-page__header {
+    padding: 1rem 1.5rem;
+  }
+
+  .subscription-page__title {
+    font-size: 1.5rem;
+  }
+
+  .subscription-page__container {
+    padding: 1.5rem 1rem;
+  }
+
+  .subscription-page__hero {
+    padding: 2rem 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .subscription-page__hero-title {
+    font-size: 1.75rem;
+  }
+
+  .subscription-page__hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .subscription-page__section-title {
+    font-size: 1.125rem;
+  }
+
+  .comparison-table__header,
+  .comparison-table__row,
+  .comparison-table__cta-row {
+    grid-template-columns: 1.5fr 1fr 1fr;
+  }
+
+  .comparison-table__cell {
+    padding: 1rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .comparison-table__cell--plan h3 {
+    font-size: 1.1rem;
+  }
+
+  .plan-price {
+    font-size: 0.95rem;
+  }
+
+  .plan-card__btn {
+    font-size: 0.9rem;
+    padding: 0.75rem 1.25rem;
+  }
+
+  .subscription-page__hero-actions {
+    flex-direction: column;
+  }
+
+  .subscription-page__primary-btn,
+  .subscription-page__secondary-btn {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .subscription-page__usage-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .subscription-page__header {
+    padding: 0.75rem 1rem;
+  }
+
+  .subscription-page__title {
+    font-size: 1.25rem;
+  }
+
+  .subscription-page__container {
+    padding: 1rem;
+  }
+
+  .subscription-page__hero {
+    padding: 1.5rem 1rem;
+  }
+
+  .subscription-page__hero-title {
+    font-size: 1.5rem;
+  }
+
+  .comparison-table__header,
+  .comparison-table__row,
+  .comparison-table__cta-row {
+    grid-template-columns: 1.5fr 1fr 1fr;
+  }
+
+  .comparison-table__cell {
+    padding: 0.875rem 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .comparison-table__cell--plan h3 {
+    font-size: 1rem;
+  }
+
+  .plan-price {
+    font-size: 0.9rem;
+  }
+}

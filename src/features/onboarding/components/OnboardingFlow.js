@@ -110,7 +110,8 @@ const OnboardingFlow = () => {
         return (
           <PremiumUpsellScreenWhite
             data={onboardingData}
-            onNext={() => {}} // Do nothing when clicked
+            updateData={updateData}
+            onNext={() => {}} // Not used anymore
             onBack={goToPreviousStep}
             onSkip={() => jumpToStep(12)} // Skip directly to account creation
             jumpToStep={jumpToStep}

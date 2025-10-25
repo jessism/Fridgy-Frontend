@@ -2,15 +2,33 @@ import React from 'react';
 import './ScreenStyles.css';
 import Logo from '../../../../assets/images/Logo.png';
 
-const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep }) => {
+const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep, updateData }) => {
   const premiumFeatures = [
     'AI-powered food recognition from photos',
     'Smart expiration date tracking',
-    'Personalized recipe recommendations', 
+    'Personalized recipe recommendations',
     'Inventory management & notifications',
     'Meal planning based on your fridge',
     'Reduce food waste & save money'
   ];
+
+  const handleStartTrial = () => {
+    // Save user's choice to start trial
+    if (updateData) {
+      updateData({ wantsTrial: true });
+    }
+    localStorage.setItem('fridgy_wants_trial', 'true');
+    jumpToStep(12); // Go to account creation
+  };
+
+  const handleContinueFree = () => {
+    // Save user's choice for free tier
+    if (updateData) {
+      updateData({ wantsTrial: false });
+    }
+    localStorage.setItem('fridgy_wants_trial', 'false');
+    jumpToStep(12); // Go to account creation
+  };
 
   return (
     <div className="onboarding-screen" style={{
@@ -32,8 +50,8 @@ const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep }) 
       padding: '40px 20px'
     }}>
       
-      <button 
-        onClick={onSkip}
+      <button
+        onClick={handleContinueFree}
         style={{
           position: 'absolute',
           top: '16px',
@@ -132,26 +150,25 @@ const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep }) 
         
         <div style={{
           textAlign: 'center',
-          marginBottom: '12px'
+          marginBottom: '20px'
         }}>
-          <div style={{ 
-            fontSize: '14px', 
+          <div style={{
+            fontSize: '14px',
             color: '#666',
             marginBottom: '4px'
           }}>
-            Try 7 days free, then $2.99/month
+            Try 7 days free, then $4.99/month
           </div>
         </div>
-        
-        
+
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '0',
+          gap: '12px',
           alignItems: 'center'
         }}>
-          <button 
-            onClick={onNext}
+          <button
+            onClick={handleStartTrial}
             style={{
               width: '100%',
               padding: '16px 32px',
@@ -163,7 +180,6 @@ const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep }) 
               borderRadius: '25px',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
-              marginBottom: '8px'
             }}
             onMouseOver={(e) => {
               e.target.style.background = 'linear-gradient(135deg, #6bc93f 0%, #5eb849 100%)';
@@ -174,17 +190,43 @@ const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep }) 
               e.target.style.transform = 'translateY(0)';
             }}
           >
-            Start Free Trial
+            Start 7-Day Free Trial
+          </button>
+
+          <button
+            onClick={handleContinueFree}
+            style={{
+              width: '100%',
+              padding: '14px 32px',
+              fontSize: '16px',
+              fontWeight: '500',
+              background: 'transparent',
+              color: '#666',
+              border: '2px solid #e0e0e0',
+              borderRadius: '25px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseOver={(e) => {
+              e.target.style.background = '#f5f5f5';
+              e.target.style.borderColor = '#ccc';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.background = 'transparent';
+              e.target.style.borderColor = '#e0e0e0';
+            }}
+          >
+            Continue with Free Plan
           </button>
         </div>
-        
+
         <p style={{
           fontSize: '13px',
           color: '#999',
-          marginTop: '6px',
+          marginTop: '12px',
           textAlign: 'center'
         }}>
-          Cancel anytime
+          Cancel anytime. No commitments.
         </p>
       </div>
     </div>

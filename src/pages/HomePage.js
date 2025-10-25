@@ -3,10 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import { useAuth } from '../features/auth/context/AuthContext';
+import { useGuidedTourContext } from '../contexts/GuidedTourContext';
+import WelcomePrompt from '../components/guided-tour/WelcomePrompt';
 import useInventory from '../hooks/useInventory';
 import IOSInstallPrompt from '../components/IOSInstallPrompt';
 import { usePWADetection } from '../hooks/usePWADetection';
 import PWANotificationPrompt from '../components/PWANotificationPrompt';
+import { useSubscription } from '../hooks/useSubscription';
+import { PremiumBadge } from '../components/common/PremiumBadge';
+import { UpgradeModal } from '../components/modals/UpgradeModal';
+import { CheckoutModal } from '../components/modals/CheckoutModal';
 import { ReactComponent as AddToFridgeIcon } from '../assets/icons/quickaccess/add-to-fridge.svg';
 import { ReactComponent as MyFridgeIcon } from '../assets/icons/quickaccess/my-fridge.svg';
 import { ReactComponent as ShopListsIcon } from '../assets/icons/quickaccess/shop-lists.svg';
@@ -33,6 +39,8 @@ const HomePage = () => {
   const { user } = useAuth();
   const { items, loading: inventoryLoading } = useInventory();
   const navigate = useNavigate();
+  const { isPremium, startCheckout, checkoutSecret, closeCheckout } = useSubscription();
+  const { shouldShowTooltip, nextStep, dismissTour, STEPS } = useGuidedTourContext();
 
   // PWA Detection for first-time notification prompt
   const {
@@ -47,6 +55,19 @@ const HomePage = () => {
   } = usePWADetection();
 
   const [showPWAPrompt, setShowPWAPrompt] = useState(false);
+  const [upgradeModal, setUpgradeModal] = useState({ isOpen: false });
+
+  // Color palette - Option 2 (Medium Green)
+  const colors = {
+    primary: '#81e053',
+    primaryLight: 'rgba(129, 224, 83, 0.3)',
+    primaryDark: '#6bc93f',
+  };
+
+  // Debug: Log checkoutSecret changes
+  useEffect(() => {
+    console.log('[HomePage] checkoutSecret changed:', checkoutSecret ? 'Present ✅' : 'Null');
+  }, [checkoutSecret]);
 
   // Check for first PWA launch and show notification prompt
   useEffect(() => {
@@ -153,7 +174,11 @@ const HomePage = () => {
   const expiredItems = getExpiredItems();
   
   return (
-    <div className="homepage">
+    <div className="homepage" style={{
+      '--primary-green': colors.primary,
+      '--primary-green-light': colors.primaryLight,
+      '--primary-green-dark': colors.primaryDark,
+    }}>
       <AppNavBar />
 
       {/* Mobile Header - Only visible on mobile - COMMENTED OUT FOR NOW
@@ -258,7 +283,7 @@ const HomePage = () => {
               <div className="category-image">
                 <img src={fatsIcon} alt="Fats and Oils" className="food-group-icon" />
               </div>
-              <h3>Fats and Oils</h3>
+              <h3>Fats</h3>
             </div>
           </div>
          </div>
@@ -267,12 +292,15 @@ const HomePage = () => {
       {/* Need Attention Section */}
       <section className="expiring-soon">
         <div className="container">
-          <div className="section-header">
-            <h2 className="section-title">
-              Need Attention
-            </h2>
-          </div>
-          <div className="expiring-content" onClick={() => navigateToPage('/inventory')}>
+          {/* Only show "Need Attention" headline if user has items */}
+          {!inventoryLoading && items.length > 0 && (
+            <div className="section-header">
+              <h2 className="section-title">
+                Need Attention
+              </h2>
+            </div>
+          )}
+          <div className="expiring-content" onClick={() => navigateToPage(items.length === 0 ? '/batchcamera' : '/inventory')}>
             <div className="expiring-items">
               {inventoryLoading ? (
                 // Show loading placeholder while inventory is loading
@@ -291,10 +319,10 @@ const HomePage = () => {
                 expiringItems.map((item) => {
                   const daysLeft = getDaysUntilExpiry(item.expiryDate);
                   const isUrgent = daysLeft <= 1;
-                  const daysText = daysLeft === 0 ? 'Today' : 
-                                  daysLeft === 1 ? '1 day' : 
+                  const daysText = daysLeft === 0 ? 'Today' :
+                                  daysLeft === 1 ? '1 day' :
                                   `${daysLeft} days`;
-                  
+
                   return (
                     <div key={item.id} className="expiring-item">
                       <div className="item-info">
@@ -315,7 +343,7 @@ const HomePage = () => {
                   const daysText = daysExpired === 0 ? 'Expired today' :
                                   daysExpired === 1 ? '1 day ago' :
                                   `${daysExpired} days ago`;
-                  
+
                   return (
                     <div key={item.id} className="expiring-item">
                       <div className="item-info">
@@ -329,8 +357,30 @@ const HomePage = () => {
                     </div>
                   );
                 })
+              ) : items.length === 0 ? (
+                // Show empty state for brand new users (priority 3)
+                <div className="empty-fridge-state">
+                  <div className="empty-state-icon">
+                    <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="10" y="15" width="25" height="30" rx="2" stroke="#4fcf61" strokeWidth="2.5" fill="none"/>
+                      <line x1="10" y1="27" x2="35" y2="27" stroke="#4fcf61" strokeWidth="2.5"/>
+                      <rect x="32" y="20" width="2" height="3" rx="1" fill="#4fcf61"/>
+                      <rect x="32" y="32" width="2" height="4" rx="1" fill="#4fcf61"/>
+                      <circle cx="45" cy="25" r="12" fill="#4fcf61"/>
+                      <path d="M45 20v10M40 25h10" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                    </svg>
+                  </div>
+                  <h4 className="empty-state-title">Let's get your fridge started!</h4>
+                  <p className="empty-state-subtitle">Add your groceries to begin tracking freshness and reducing waste</p>
+                  <button
+                    className="empty-state-cta"
+                    onClick={(e) => { e.stopPropagation(); navigateToPage('/batchcamera'); }}
+                  >
+                    + Add Your First Items
+                  </button>
+                </div>
               ) : (
-                // Show all fresh message (priority 3)
+                // Show all fresh message (priority 4 - has items but none expiring)
                 <div className="expiring-item">
                   <div className="item-info">
                     <h4 className="item-name">No items expiring soon</h4>
@@ -728,9 +778,26 @@ const HomePage = () => {
             <h2 className="section-title">Your Analytics</h2>
           </div>
           <div className="analytics-grid">
-            <div 
+            {/* Inventory Usage - Premium Only */}
+            <div
               className="analytics-item"
-              onClick={() => navigateToPage('/analytics/inventory')}
+              onClick={() => {
+                if (isPremium) {
+                  navigateToPage('/analytics/inventory');
+                } else {
+                  setUpgradeModal({
+                    isOpen: true,
+                    feature: 'inventory analytics',
+                    current: null,
+                    limit: null
+                  });
+                }
+              }}
+              style={{
+                position: 'relative',
+                opacity: isPremium ? 1 : 0.7,
+                cursor: 'pointer'
+              }}
             >
               <div className="analytics-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -741,16 +808,36 @@ const HomePage = () => {
                 </svg>
               </div>
               <span className="analytics-label">Inventory Usage</span>
+              {!isPremium && (
+                <div style={{
+                  position: 'absolute',
+                  top: '8px',
+                  right: '8px',
+                  background: '#ffd700',
+                  color: '#000',
+                  padding: '4px 12px',
+                  borderRadius: '12px',
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  <span>Pro</span>
+                </div>
+              )}
             </div>
-            <div 
+
+            {/* Meals Analytics - Free for all */}
+            <div
               className="analytics-item"
               onClick={() => navigateToPage('/meal-history')}
             >
               <div className="analytics-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   {/* Modern pie chart icon for meals analytics */}
-                  <circle cx="12" cy="12" r="8" stroke-width="2.5"/>
-                  <path d="M12 4 L12 12 L18.5 8" stroke-width="2.5"/>
+                  <circle cx="12" cy="12" r="8" strokeWidth="2.5"/>
+                  <path d="M12 4 L12 12 L18.5 8" strokeWidth="2.5"/>
                   <circle cx="12" cy="12" r="2" fill="currentColor"/>
                 </svg>
               </div>
@@ -769,6 +856,38 @@ const HomePage = () => {
           onClose={handlePWAPromptClose}
           onSuccess={() => console.log('Notifications setup successful')}
           platform={platform}
+        />
+      )}
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={upgradeModal.isOpen}
+        onClose={() => setUpgradeModal({ isOpen: false })}
+        feature={upgradeModal.feature}
+        current={upgradeModal.current}
+        limit={upgradeModal.limit}
+        startCheckout={startCheckout}
+      />
+
+      {/* Embedded Checkout Modal */}
+      {checkoutSecret && (
+        <CheckoutModal
+          clientSecret={checkoutSecret}
+          onClose={closeCheckout}
+        />
+      )}
+
+      {/* Welcome Prompt for Guided Tour */}
+      {shouldShowTooltip(STEPS.WELCOME_SCREEN) && (
+        <WelcomePrompt
+          onStart={() => {
+            console.log('[HomePage] User clicked Start Tour');
+            nextStep(); // Move to ADD_GROCERIES step
+          }}
+          onSkip={() => {
+            console.log('[HomePage] User clicked Skip Tour');
+            dismissTour(); // Dismiss the tour completely
+          }}
         />
       )}
     </div>

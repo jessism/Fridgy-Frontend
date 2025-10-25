@@ -1,0 +1,730 @@
+/* ============================================
+   GUIDED TOUR - CONTEXTUAL TOOLTIPS
+   Small tooltips that appear over UI elements
+   ============================================ */
+
+/* Guided Tooltip - Small floating hint */
+.guided-tooltip {
+  position: fixed;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 0 0 3px var(--primary-green);
+  padding: 1rem 1.25rem;
+  max-width: 280px;
+  z-index: 999999 !important; /* Much higher than modal (2000) */
+  animation: guided-tooltip-pop-in 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  pointer-events: auto !important;
+}
+
+@keyframes guided-tooltip-pop-in {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+/* Tooltip Content */
+.guided-tooltip__content {
+  position: relative;
+}
+
+.guided-tooltip__message {
+  font-size: 0.9rem;
+  color: #333;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* Tooltip Actions */
+.guided-tooltip__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.guided-tooltip__button {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.guided-tooltip__button--primary {
+  background: var(--primary-green);
+  color: white;
+}
+
+.guided-tooltip__button--primary:hover {
+  background: #45b854;
+}
+
+.guided-tooltip__button--text {
+  background: transparent;
+  color: #999;
+}
+
+.guided-tooltip__button--text:hover {
+  color: #666;
+  background: #f5f5f5;
+}
+
+/* Close Button (X) */
+.guided-tooltip__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #999;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.guided-tooltip__close:hover {
+  background: #f0f0f0;
+  color: #666;
+}
+
+/* Tooltip Arrow */
+.guided-tooltip__arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+.guided-tooltip__arrow--top {
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 8px 8px 0 8px;
+  border-color: white transparent transparent transparent;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+.guided-tooltip__arrow--bottom {
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 8px 8px 8px;
+  border-color: transparent transparent white transparent;
+  filter: drop-shadow(0 -2px 2px rgba(0, 0, 0, 0.1));
+}
+
+.guided-tooltip__arrow--left {
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 8px 0 8px 8px;
+  border-color: transparent transparent transparent white;
+  filter: drop-shadow(2px 0 2px rgba(0, 0, 0, 0.1));
+}
+
+.guided-tooltip__arrow--right {
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 8px 8px 8px 0;
+  border-color: transparent white transparent transparent;
+  filter: drop-shadow(-2px 0 2px rgba(0, 0, 0, 0.1));
+}
+
+/* Highlight effect on target element */
+.guided-tour__highlight {
+  position: relative;
+  z-index: 9998 !important;
+  animation: guided-highlight-pulse 2s ease-in-out infinite;
+}
+
+@keyframes guided-highlight-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(79, 207, 97, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(79, 207, 97, 0);
+  }
+}
+
+/* Success Celebration - Small toast notification */
+.guided-tour__success-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  z-index: 10000;
+  text-align: center;
+  max-width: 320px;
+  animation: guided-toast-pop-in 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes guided-toast-pop-in {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.guided-tour__success-icon {
+  width: 60px;
+  height: 60px;
+  background: var(--primary-green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  animation: guided-success-bounce 0.6s ease;
+}
+
+@keyframes guided-success-bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+.guided-tour__success-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 0.5rem 0;
+}
+
+.guided-tour__success-text {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0 0 1.5rem 0;
+}
+
+/* Progress Indicator - Minimal */
+.guided-tour__progress {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  z-index: 9997;
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Backdrop - Very subtle, optional */
+.guided-tour__backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 9996;
+  animation: guided-backdrop-fade-in 0.3s ease;
+}
+
+@keyframes guided-backdrop-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Welcome Prompt - Initial screen */
+.guided-tour__welcome-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  animation: guided-backdrop-fade-in 0.3s ease;
+}
+
+.guided-tour__welcome-card {
+  background: white;
+  border-radius: 24px;
+  padding: 2.5rem 2rem;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: guided-tooltip-pop-in 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.guided-tour__welcome-logo {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  animation: guided-welcome-bounce 1s ease;
+}
+
+@keyframes guided-welcome-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.guided-tour__welcome-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 1rem 0;
+  font-family: var(--header-font, sans-serif);
+}
+
+.guided-tour__welcome-text {
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.6;
+  margin: 0 0 2rem 0;
+}
+
+.guided-tour__welcome-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.guided-tour__welcome-button {
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.guided-tour__welcome-button--primary {
+  background: var(--primary-green, #4fcf61);
+  color: white;
+}
+
+.guided-tour__welcome-button--primary:hover {
+  background: #45b854;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3);
+}
+
+.guided-tour__welcome-button--secondary {
+  background: transparent;
+  color: #999;
+  border: 1px solid #ddd;
+}
+
+.guided-tour__welcome-button--secondary:hover {
+  background: #f5f5f5;
+  border-color: #999;
+}
+
+.guided-tour__welcome-hint {
+  font-size: 0.85rem;
+  color: #999;
+  margin: 0;
+}
+
+/* Celebration Modal - Center screen success message */
+.guided-tour__celebration-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+  animation: guided-backdrop-fade-in 0.3s ease;
+}
+
+.guided-tour__celebration-card {
+  background: white;
+  border-radius: 24px;
+  padding: 2.5rem 2rem;
+  max-width: 350px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: guided-celebration-pop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes guided-celebration-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.guided-tour__celebration-icon {
+  width: 80px;
+  height: 80px;
+  background: var(--primary-green, #4fcf61);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  animation: guided-celebration-bounce 0.6s ease;
+}
+
+@keyframes guided-celebration-bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+.guided-tour__celebration-message {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 2rem 0;
+  line-height: 1.5;
+}
+
+.guided-tour__celebration-button {
+  background: var(--primary-green, #4fcf61);
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.guided-tour__celebration-button:hover {
+  background: #45b854;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3);
+}
+
+/* Introduction Modal Styles */
+.guided-tour__intro-emoji {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.guided-tour__intro-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 1rem 0;
+}
+
+/* Shortcut Install Modal Styles */
+.guided-tour__shortcut-card {
+  background: white;
+  border-radius: 24px;
+  padding: 2.5rem 2rem;
+  max-width: 450px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: guided-celebration-pop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.guided-tour__shortcut-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 0.75rem 0;
+}
+
+.guided-tour__shortcut-description {
+  font-size: 1rem;
+  color: #666;
+  margin: 0 0 2rem 0;
+  line-height: 1.5;
+}
+
+.guided-tour__shortcut-workflow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background: #f8f8f8;
+  border-radius: 12px;
+}
+
+.guided-tour__shortcut-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.guided-tour__shortcut-icon {
+  width: 50px;
+  height: 50px;
+  background: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.guided-tour__shortcut-label {
+  font-size: 0.75rem;
+  color: #666;
+  text-align: center;
+  max-width: 80px;
+}
+
+.guided-tour__shortcut-arrow {
+  color: #ccc;
+  font-size: 1.25rem;
+  margin: 0 -0.25rem;
+}
+
+.guided-tour__shortcut-benefits {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.guided-tour__shortcut-benefit {
+  font-size: 0.85rem;
+  color: #666;
+  background: rgba(79, 207, 97, 0.1);
+  padding: 0.4rem 0.75rem;
+  border-radius: 16px;
+}
+
+.guided-tour__shortcut-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.guided-tour__shortcut-skip {
+  background: transparent;
+  color: #999;
+  border: 1px solid #ddd;
+  padding: 0.875rem 2rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.guided-tour__shortcut-skip:hover {
+  background: #f5f5f5;
+  border-color: #999;
+}
+
+.guided-tour__shortcut-hint {
+  font-size: 0.85rem;
+  color: #999;
+  margin: 0;
+}
+
+.guided-tour__shortcut-instructions {
+  background: #f8f8f8;
+  padding: 1rem;
+  border-radius: 12px;
+  margin-top: 1.5rem;
+  text-align: left;
+}
+
+.guided-tour__shortcut-steps-list {
+  margin: 0.75rem 0 0 0;
+  padding-left: 1.25rem;
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.8;
+}
+
+.guided-tour__shortcut-steps-list li {
+  margin-bottom: 0.25rem;
+}
+
+/* Token Display Section */
+.guided-tour__token-section {
+  margin: 1.5rem 0;
+}
+
+.guided-tour__token-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #666;
+  margin: 0 0 0.5rem 0;
+  text-align: left;
+}
+
+.guided-tour__token-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f8f8f8;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+
+.guided-tour__token-code {
+  flex: 1;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: #333;
+  word-break: break-all;
+  background: transparent;
+  border: none;
+}
+
+.guided-tour__token-copy-btn {
+  background: var(--primary-green, #4fcf61);
+  color: white;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.guided-tour__token-copy-btn:hover {
+  background: #45b854;
+}
+
+.guided-tour__token-copied {
+  font-size: 0.85rem;
+  color: var(--primary-green, #4fcf61);
+  margin: 0.5rem 0 0 0;
+  font-weight: 500;
+  text-align: left;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .guided-tour__celebration-card {
+    padding: 2rem 1.5rem;
+    max-width: 320px;
+  }
+
+  .guided-tour__celebration-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .guided-tour__celebration-message {
+    font-size: 1.1rem;
+  }
+
+  .guided-tour__welcome-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .guided-tour__shortcut-card {
+    padding: 2rem 1.5rem;
+    max-width: 340px;
+  }
+
+  .guided-tour__shortcut-workflow {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .guided-tour__shortcut-arrow {
+    transform: rotate(90deg);
+  }
+
+  .guided-tour__shortcut-title {
+    font-size: 1.3rem;
+  }
+
+  .guided-tour__welcome-logo {
+    width: 60px;
+    height: 60px;
+  }
+
+  .guided-tour__welcome-title {
+    font-size: 1.5rem;
+  }
+
+  .guided-tour__welcome-text {
+    font-size: 0.95rem;
+  }
+
+  .guided-tooltip {
+    max-width: 260px;
+    padding: 0.875rem 1rem;
+  }
+
+  .guided-tooltip__message {
+    font-size: 0.85rem;
+  }
+
+  .guided-tooltip__button {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.875rem;
+  }
+
+  .guided-tour__success-toast {
+    max-width: 280px;
+    padding: 1.5rem;
+  }
+
+  .guided-tour__success-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .guided-tour__success-title {
+    font-size: 1.1rem;
+  }
+}

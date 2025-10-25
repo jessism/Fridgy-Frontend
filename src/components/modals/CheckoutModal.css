@@ -1,0 +1,91 @@
+/* Full-Screen Checkout Overlay */
+.checkout-modal__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+  z-index: 10000;
+  overflow-y: auto;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Close Button - Minimal X with Touch-Friendly Area */
+.checkout-modal__close-btn {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  font-size: 32px;
+  font-weight: 400;
+  color: #222;
+  cursor: pointer;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 999999;
+  pointer-events: all !important;
+  line-height: 1;
+  border-radius: 50%;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.checkout-modal__close-btn:hover,
+.checkout-modal__close-btn:active {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.05);
+}
+
+/* Stripe Wrapper - Full Width Normal Size */
+.checkout-modal__stripe-wrapper {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  min-height: auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .checkout-modal__close-btn {
+    top: 12px;
+    right: 12px;
+    width: 48px;
+    height: 48px;
+    font-size: 30px;
+  }
+
+  .checkout-modal__stripe-wrapper {
+    padding: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .checkout-modal__close-btn {
+    top: 10px;
+    right: 10px;
+    width: 48px;
+    height: 48px;
+    font-size: 30px;
+  }
+
+  .checkout-modal__stripe-wrapper {
+    padding: 0;
+  }
+}

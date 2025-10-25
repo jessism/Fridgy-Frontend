@@ -94,6 +94,27 @@
   line-height: 1.4;
 }
 
+/* Subscription Plan Badge */
+.profile-v2__plan-badge {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.875rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.profile-v2__plan-badge--premium {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #000;
+}
+
+.profile-v2__plan-badge--free {
+  background: #f0f0f0;
+  color: #666;
+}
+
 /* Menu Sections */
 .profile-v2__menu {
   flex: 1;
@@ -198,7 +219,12 @@
   .profile-v2__user-email {
     font-size: 0.9rem;
   }
-  
+
+  .profile-v2__plan-badge {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.75rem;
+  }
+
   .profile-v2__menu {
     padding: 0 1rem;
   }

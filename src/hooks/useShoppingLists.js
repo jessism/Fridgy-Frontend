@@ -58,11 +58,24 @@ const useShoppingLists = () => {
         body: JSON.stringify({ name, color, items })
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to create shopping list');
+      const data = await response.json();
+
+      // Handle limit exceeded
+      if (response.status === 402 || data.error === 'LIMIT_EXCEEDED') {
+        const error = new Error('LIMIT_EXCEEDED');
+        error.limitData = {
+          feature: data.feature || 'owned_shopping_lists',
+          current: data.current,
+          limit: data.limit,
+          upgradeRequired: data.upgradeRequired
+        };
+        throw error;
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create shopping list');
+      }
+
       await fetchLists(); // Refresh the list
       return data.list;
     } catch (err) {
@@ -328,11 +341,24 @@ const useShoppingLists = () => {
         }
       });
 
-      if (!response.ok) {
-        throw new Error('Invalid share code');
+      const data = await response.json();
+
+      // Handle limit exceeded
+      if (response.status === 402 || data.error === 'LIMIT_EXCEEDED') {
+        const error = new Error('LIMIT_EXCEEDED');
+        error.limitData = {
+          feature: data.feature || 'joined_shopping_lists',
+          current: data.current,
+          limit: data.limit,
+          upgradeRequired: data.upgradeRequired
+        };
+        throw error;
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Invalid share code');
+      }
+
       await fetchLists(); // Refresh lists after joining
       return data;
     } catch (err) {

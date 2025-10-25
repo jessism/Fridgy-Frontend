@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/context/AuthContext';
+import { useGuidedTourContext } from '../../../contexts/GuidedTourContext';
+import GuidedTooltip from '../../../components/guided-tour/GuidedTooltip';
+import '../../../components/guided-tour/GuidedTour.css';
 import SuccessModal from '../../../components/modals/SuccessModal';
 import { getItemIconIcons8, formatQuantity } from '../../../assets/inventory_emojis/iconHelpers.js';
 import { safeJSONStringify } from '../../../utils/jsonSanitizer';
@@ -10,6 +13,7 @@ import './DirectCameraInterfaceV2.css';
 const DirectCameraInterfaceV2 = ({ onComplete }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { shouldShowTooltip, goToStep, STEPS, currentStep, isActive } = useGuidedTourContext();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
@@ -31,6 +35,18 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successData, setSuccessData] = useState({ items: [], count: 0 });
   const [selectedItems, setSelectedItems] = useState(new Set());
+
+  // Debug: Log guided tour state when in edit mode
+  useEffect(() => {
+    console.log('[Camera] Mode changed:', {
+      editMode,
+      isCameraActive,
+      hasResults: !!editableResults,
+      photoCount: capturedPhotos.length,
+      currentStep,
+      shouldShowItemsAdded: shouldShowTooltip(STEPS.ITEMS_ADDED)
+    });
+  }, [editMode, isCameraActive, editableResults, capturedPhotos, currentStep, shouldShowTooltip, STEPS]);
 
   // Initialize camera on component mount
   useEffect(() => {
@@ -322,7 +338,14 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
       alert('No items to save');
       return;
     }
+
     await saveItems(editableResults);
+
+    // Advance guided tour step when user saves items
+    if (shouldShowTooltip(STEPS.ITEMS_ADDED)) {
+      console.log('[Camera] User added items - advancing tour to GO_TO_MEALS');
+      goToStep(STEPS.GO_TO_MEALS);
+    }
   };
 
   const handleBackToCamera = async () => {
@@ -417,8 +440,8 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
                         />
                       </div>
                       <div className="camera-v2__card-detail-group">
-                        <select 
-                          value={item.category} 
+                        <select
+                          value={item.category}
                           onChange={(e) => updateEditableItem(index, 'category', e.target.value)}
                           className="camera-v2__card-category-select"
                         >
@@ -427,6 +450,7 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
                           <option value="Dairy">Dairy</option>
                           <option value="Protein">Protein</option>
                           <option value="Grains">Grains</option>
+                          <option value="Beverages">Beverages</option>
                           <option value="Fats and oils">Fats and oils</option>
                           <option value="Other">Other</option>
                         </select>
@@ -467,6 +491,22 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
           savedItems={successData.items}
           itemCount={successData.count}
         />
+
+        {/* Guided Tour Tooltip for Confirmation Screen */}
+        {shouldShowTooltip(STEPS.ITEMS_ADDED) && (
+          <>
+            {console.log('[Camera] 🎯 Rendering CONFIRMATION tooltip on Review Items screen')}
+            <GuidedTooltip
+              targetSelector=".camera-v2__save-btn"
+              message="Add items to your inventory"
+              position="bottom"
+              showAction={false}
+              onDismiss={null}
+              highlight={true}
+              offset={20}
+            />
+          </>
+        )}
       </div>
     );
   }
@@ -614,6 +654,61 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
 
       {/* Hidden canvas for photo capture */}
       <canvas ref={canvasRef} style={{ display: 'none' }} />
+
+      {/* Guided Tour Tooltip for Camera */}
+      {shouldShowTooltip(STEPS.ITEMS_ADDED) && (
+        <>
+          {console.log('[Camera] Choosing tooltip:', {
+            hasResults: !!editableResults,
+            photoCount: capturedPhotos.length,
+            choice: editableResults ? 'CONFIRMATION' : capturedPhotos.length > 0 ? 'DONE' : 'CAPTURE'
+          })}
+
+          {/* Priority 1: Confirmation screen - show ONLY this if results exist */}
+          {editableResults ? (
+            <>
+              {console.log('[Camera] 🎯 Rendering CONFIRMATION tooltip')}
+              <GuidedTooltip
+                targetSelector=".camera-v2__save-btn"
+                message="Add items to your inventory"
+                position="bottom"
+                showAction={false}
+                onDismiss={null}
+                highlight={true}
+                offset={20}
+              />
+            </>
+          ) : capturedPhotos.length > 0 ? (
+            /* Priority 2: Photos taken - show Done button tooltip */
+            <>
+              {console.log('[Camera] 🎯 Rendering DONE tooltip')}
+              <GuidedTooltip
+                targetSelector=".camera-v2__done-button"
+                message='Tap "Done"'
+                position="top"
+                showAction={false}
+                onDismiss={null}
+                highlight={true}
+                offset={30}
+              />
+            </>
+          ) : (
+            /* Priority 3: No photos - show capture tooltip */
+            <>
+              {console.log('[Camera] 🎯 Rendering CAPTURE tooltip')}
+              <GuidedTooltip
+                targetSelector=".camera-v2__capture-button"
+                message="Snap photos of groceries and their expiration date all in one go!"
+                position="top"
+                showAction={false}
+                onDismiss={null}
+                highlight={true}
+                offset={30}
+              />
+            </>
+          )}
+        </>
+      )}
 
       {/* Success Modal */}
       <SuccessModal

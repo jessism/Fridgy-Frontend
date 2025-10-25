@@ -901,6 +901,17 @@
   box-shadow: 0 4px 12px rgba(79, 207, 97, 0.4);
 }
 
+.meal-history-page__month-day--locked {
+  opacity: 0.4;
+  color: #999;
+  cursor: not-allowed;
+  background-color: #f5f5f5;
+}
+
+.meal-history-page__month-day--locked:hover {
+  background-color: #f5f5f5;
+}
+
 /* Today Button */
 .meal-history-page__month-modal-footer {
   display: flex;

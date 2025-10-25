@@ -2,12 +2,16 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/context/AuthContext';
 import useAppUpdate from '../hooks/useAppUpdate';
+import { useSubscription } from '../hooks/useSubscription';
+import { useGuidedTourContext } from '../contexts/GuidedTourContext';
 import './ProfilePageV2.css';
 
 const ProfilePageV2 = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { updateStatus, checkForUpdates, applyUpdate } = useAppUpdate();
+  const { isPremium, loading: subscriptionLoading } = useSubscription();
+  const { resetTour, startTour } = useGuidedTourContext();
 
   // Get user initials for avatar
   const getUserInitials = (name) => {
@@ -43,8 +47,7 @@ const ProfilePageV2 = () => {
   };
 
   const handleManageSubscription = () => {
-    // TODO: Navigate to Manage Subscription page
-    console.log('Navigate to Manage Subscription');
+    navigate('/subscription');
   };
 
 
@@ -54,6 +57,19 @@ const ProfilePageV2 = () => {
 
   const handleNotificationSettings = () => {
     navigate('/notification-settings');
+  };
+
+  const handleReplayWelcomeTour = () => {
+    // Reset and restart the guided tour
+    console.log('[Profile] Replaying welcome tour');
+    resetTour();
+    localStorage.removeItem('has_imported_recipe');
+
+    // Start tour and navigate after a brief delay
+    setTimeout(() => {
+      startTour();
+      navigate('/home');
+    }, 100);
   };
 
   const handleAppUpdate = () => {
@@ -96,6 +112,9 @@ const ProfilePageV2 = () => {
           <p className="profile-v2__user-email">
             {user?.email || 'user@example.com'}
           </p>
+          <div className={`profile-v2__plan-badge ${isPremium ? 'profile-v2__plan-badge--premium' : 'profile-v2__plan-badge--free'}`}>
+            {isPremium ? 'Premium' : 'Free Plan'}
+          </div>
         </div>
       </div>
 
@@ -131,6 +150,16 @@ const ProfilePageV2 = () => {
             </svg>
           </div>
           <span className="profile-v2__menu-text">Notification settings</span>
+        </div>
+
+        {/* Replay Welcome Tour */}
+        <div className="profile-v2__menu-item" onClick={handleReplayWelcomeTour}>
+          <div className="profile-v2__menu-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <span className="profile-v2__menu-text">Replay welcome tour</span>
         </div>
 
         {/* App Update */}
@@ -198,7 +227,6 @@ const ProfilePageV2 = () => {
           <span className="profile-v2__menu-text">Logout</span>
         </div>
       </div>
-
     </div>
   );
 };

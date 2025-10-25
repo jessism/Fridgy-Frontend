@@ -2,10 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import FridgyLogo from '../assets/images/Logo.png';
 import './RecipeImportPage.css';
+import { useSubscription } from '../hooks/useSubscription';
+import { UpgradeModal } from '../components/modals/UpgradeModal';
+import { CheckoutModal } from '../components/modals/CheckoutModal';
+import { useGuidedTourContext } from '../contexts/GuidedTourContext';
+import GuidedTooltip from '../components/guided-tour/GuidedTooltip';
+import '../components/guided-tour/GuidedTour.css'; // Import guided tour styles
 
 const RecipeImportPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { canAccess, startCheckout, checkoutSecret, closeCheckout } = useSubscription();
+  const { shouldShowTooltip, completeStep, goToStep, STEPS } = useGuidedTourContext();
 
   // Check if coming from push notification
   const params = new URLSearchParams(location.search);
@@ -13,6 +21,7 @@ const RecipeImportPage = () => {
 
   const [importUrl, setImportUrl] = useState('');
   const [loading, setLoading] = useState(importing === 'true'); // Initialize from URL param
+  const [upgradeModal, setUpgradeModal] = useState({ isOpen: false });
   const [status, setStatus] = useState(importing === 'true' ? '📥 Importing recipe from Instagram...' : '');
   const [error, setError] = useState('');
   const [extractedRecipe, setExtractedRecipe] = useState(null);
@@ -28,6 +37,14 @@ const RecipeImportPage = () => {
 
   // Detect iOS device
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+  // Pre-fill URL if coming from guided tour
+  useEffect(() => {
+    if (shouldShowTooltip(STEPS.PASTE_URL) && !importUrl) {
+      console.log('[GuidedTour] Pre-filling default recipe URL');
+      setImportUrl('https://www.instagram.com/p/DGioQ5qOWij/');
+    }
+  }, [shouldShowTooltip, STEPS.PASTE_URL]);
 
   useEffect(() => {
     // Check if came from iOS Shortcut or Web Share Target with URL parameter
@@ -182,6 +199,18 @@ const RecipeImportPage = () => {
       return;
     }
 
+    // Check imported recipes limit
+    const limitCheck = canAccess('imported_recipes');
+    if (!limitCheck.allowed) {
+      setUpgradeModal({
+        isOpen: true,
+        feature: 'imported recipes',
+        current: limitCheck.current,
+        limit: limitCheck.limit
+      });
+      return;
+    }
+
     setLoading(true);
     setError('');
     setStatus('🔄 Extracting recipe from Instagram...');
@@ -209,6 +238,18 @@ const RecipeImportPage = () => {
 
       const data = await response.json();
       console.log('[RecipeImport] Import response:', data);
+
+      // Handle limit exceeded (backend fallback)
+      if (response.status === 402 || data.error === 'LIMIT_EXCEEDED') {
+        setUpgradeModal({
+          isOpen: true,
+          feature: 'imported recipes',
+          current: data.current,
+          limit: data.limit
+        });
+        setLoading(false);
+        return;
+      }
 
       if (data.success && data.recipe) {
         setStatus('✅ Recipe imported successfully!');
@@ -247,6 +288,18 @@ const RecipeImportPage = () => {
       return;
     }
 
+    // Check imported recipes limit
+    const limitCheck = canAccess('imported_recipes');
+    if (!limitCheck.allowed) {
+      setUpgradeModal({
+        isOpen: true,
+        feature: 'imported recipes',
+        current: limitCheck.current,
+        limit: limitCheck.limit
+      });
+      return;
+    }
+
     setApifyLoading(true);
     setError('');
     setStatus('🎥 Extracting recipe with video analysis...');
@@ -275,6 +328,18 @@ const RecipeImportPage = () => {
 
       const data = await response.json();
       console.log('[RecipeImport] Apify import response:', data);
+
+      // Handle limit exceeded (backend fallback)
+      if (response.status === 402 || data.error === 'LIMIT_EXCEEDED') {
+        setUpgradeModal({
+          isOpen: true,
+          feature: 'imported recipes',
+          current: data.current,
+          limit: data.limit
+        });
+        setApifyLoading(false);
+        return;
+      }
 
       if (data.success && data.recipe) {
         setStatus('✅ Recipe imported successfully with video analysis!');
@@ -433,8 +498,22 @@ const RecipeImportPage = () => {
       });
 
       if (response.ok) {
-        // Navigate to saved recipes
-        navigate('/saved-recipes');
+        // Mark guided tour step as complete
+        if (shouldShowTooltip(STEPS.PASTE_URL)) {
+          completeStep(STEPS.PASTE_URL);
+          localStorage.setItem('has_imported_recipe', 'true');
+
+          // Show success celebration before navigating
+          goToStep(STEPS.RECIPE_IMPORTED);
+
+          // Navigate after celebration (3 seconds)
+          setTimeout(() => {
+            navigate('/saved-recipes');
+          }, 3000);
+        } else {
+          // Normal flow - navigate immediately
+          navigate('/saved-recipes');
+        }
       } else {
         setError('Failed to save recipe. Please try again.');
       }
@@ -827,6 +906,71 @@ const RecipeImportPage = () => {
         )}
 
       </div>
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={upgradeModal.isOpen}
+        onClose={() => setUpgradeModal({ isOpen: false })}
+        feature={upgradeModal.feature}
+        current={upgradeModal.current}
+        limit={upgradeModal.limit}
+        startCheckout={startCheckout}
+      />
+
+      {/* Embedded Checkout Modal */}
+      {checkoutSecret && (
+        <CheckoutModal
+          clientSecret={checkoutSecret}
+          onClose={closeCheckout}
+        />
+      )}
+
+      {/* Guided Tour Tooltips */}
+      {shouldShowTooltip(STEPS.PASTE_URL) && (
+        <GuidedTooltip
+          targetSelector="#url"
+          message="We've prepared a delicious Rosemary Gnocchi recipe for you! Just tap Import below."
+          position="bottom"
+          onAction={() => {
+            if (importUrl) {
+              document.querySelector('.recipe-import-page__button--primary')?.click();
+            }
+          }}
+          actionLabel="Import recipe"
+          highlight={true}
+        />
+      )}
+
+      {/* Success Celebration Toast */}
+      {shouldShowTooltip(STEPS.RECIPE_IMPORTED) && (
+        <div className="guided-tour__success-toast">
+          <div className="guided-tour__success-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M20 6L9 17l-5-5"
+                stroke="white"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+          <h2 className="guided-tour__success-title">Recipe Imported!</h2>
+          <p className="guided-tour__success-text">
+            You've successfully imported your first recipe. Great job!
+          </p>
+          <button
+            className="welcome-step__button"
+            onClick={() => {
+              completeStep(STEPS.RECIPE_IMPORTED);
+              navigate('/saved-recipes');
+            }}
+            style={{ width: '100%' }}
+          >
+            View Recipe
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,14 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './ManualRecipeEntryPage.css';
+import { useSubscription } from '../hooks/useSubscription';
+import { UpgradeModal } from '../components/modals/UpgradeModal';
+import { CheckoutModal } from '../components/modals/CheckoutModal';
 
 const ManualRecipeEntryPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { canAccess, startCheckout, checkoutSecret, closeCheckout } = useSubscription();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentSection, setCurrentSection] = useState(1);
   const fileInputRef = useRef(null);
+  const [upgradeModal, setUpgradeModal] = useState({ isOpen: false });
 
   // Form data state
   const [recipeData, setRecipeData] = useState({
@@ -268,6 +273,18 @@ const ManualRecipeEntryPage = () => {
 
   // Save recipe
   const handleSave = async () => {
+    // Check uploaded recipes limit
+    const limitCheck = canAccess('uploaded_recipes');
+    if (!limitCheck.allowed) {
+      setUpgradeModal({
+        isOpen: true,
+        feature: 'uploaded recipes',
+        current: limitCheck.current,
+        limit: limitCheck.limit
+      });
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -446,6 +463,18 @@ const ManualRecipeEntryPage = () => {
 
       const data = await response.json();
 
+      // Handle limit exceeded (backend fallback)
+      if (response.status === 402 || data.error === 'LIMIT_EXCEEDED') {
+        setUpgradeModal({
+          isOpen: true,
+          feature: 'uploaded recipes',
+          current: data.current,
+          limit: data.limit
+        });
+        setLoading(false);
+        return;
+      }
+
       if (data.success) {
         console.log('[Manual Recipe] Recipe saved successfully!');
         // Clear draft
@@ -484,7 +513,7 @@ const ManualRecipeEntryPage = () => {
       <div className="manual-recipe-entry__header">
         <button
           className="manual-recipe-entry__back-button"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/meal-plans/recipes')}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -892,6 +921,24 @@ const ManualRecipeEntryPage = () => {
           </button>
         )}
       </div>
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={upgradeModal.isOpen}
+        onClose={() => setUpgradeModal({ isOpen: false })}
+        feature={upgradeModal.feature}
+        current={upgradeModal.current}
+        limit={upgradeModal.limit}
+        startCheckout={startCheckout}
+      />
+
+      {/* Embedded Checkout Modal */}
+      {checkoutSecret && (
+        <CheckoutModal
+          clientSecret={checkoutSecret}
+          onClose={closeCheckout}
+        />
+      )}
     </div>
   );
 };

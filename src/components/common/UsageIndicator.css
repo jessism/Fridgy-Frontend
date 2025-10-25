@@ -1,0 +1,110 @@
+/* UsageIndicator Styles */
+
+.usage-indicator {
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.usage-indicator--unlimited {
+  background: linear-gradient(135deg, #4fcf61, #45b854);
+  color: white;
+  text-align: center;
+  font-weight: 600;
+}
+
+.usage-indicator--warning {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+}
+
+.usage-indicator--danger {
+  background: #f8d7da;
+  border-left: 4px solid #dc3545;
+}
+
+.usage-indicator__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.usage-indicator__label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  text-transform: capitalize;
+}
+
+.usage-indicator--danger .usage-indicator__label,
+.usage-indicator--warning .usage-indicator__label {
+  color: #333;
+}
+
+.usage-indicator__count {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.usage-indicator__progress-container {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.usage-indicator__progress-bar {
+  height: 100%;
+  background: #4fcf61;
+  transition: width 0.3s ease, background-color 0.3s ease;
+  border-radius: 10px;
+}
+
+.usage-indicator--warning .usage-indicator__progress-bar {
+  background: #ffc107;
+}
+
+.usage-indicator--danger .usage-indicator__progress-bar {
+  background: #dc3545;
+}
+
+.usage-indicator__upgrade-btn {
+  width: 100%;
+  padding: 8px 16px;
+  background: #4fcf61;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.2s;
+}
+
+.usage-indicator__upgrade-btn:hover {
+  background: #45b854;
+  transform: translateY(-1px);
+}
+
+.usage-indicator__text {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .usage-indicator {
+    padding: 10px 12px;
+  }
+
+  .usage-indicator__label,
+  .usage-indicator__count {
+    font-size: 13px;
+  }
+}

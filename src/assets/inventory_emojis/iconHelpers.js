@@ -143,15 +143,16 @@ export const getItemIconIcons8 = (category, itemName = '', props = {}) => {
   // First, try to match based on item name for specific matches
   if (itemName) {
     const normalizedItemName = itemName.charAt(0).toUpperCase() + itemName.slice(1).toLowerCase();
-    
+
     // Check for exact item name matches
     if (ICONS8_CATEGORY_MAPPING[normalizedItemName]) {
       return renderIcons8Icon(ICONS8_CATEGORY_MAPPING[normalizedItemName], props);
     }
 
-    // Check for partial matches in item name
+    // Check for partial matches in item name (case-insensitive)
+    const lowerItemName = normalizedItemName.toLowerCase();
     for (const [key, IconComponent] of Object.entries(ICONS8_CATEGORY_MAPPING)) {
-      if (normalizedItemName.includes(key) || key.includes(normalizedItemName)) {
+      if (lowerItemName.includes(key.toLowerCase()) || key.toLowerCase().includes(lowerItemName)) {
         return renderIcons8Icon(IconComponent, props);
       }
     }
