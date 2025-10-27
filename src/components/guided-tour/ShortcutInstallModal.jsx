@@ -78,6 +78,13 @@ const ShortcutInstallModal = ({ onInstall, onSkip }) => {
   };
 
   const handleSkipClick = () => {
+    // Cancel install timer if user starts skip flow
+    if (installTimerRef) {
+      clearTimeout(installTimerRef);
+      setInstallTimerRef(null);
+      console.log('[ShortcutInstall] Timer cancelled - user clicked skip');
+    }
+
     // Store current modal to return to if user changes mind
     setReturnModal(currentModal);
     setCurrentModal('skip-confirm');

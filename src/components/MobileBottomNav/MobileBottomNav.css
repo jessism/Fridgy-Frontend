@@ -26,17 +26,33 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4px 4px;
+  padding: 6px 4px;
+  background: none;
+  border: none;
   text-decoration: none;
   color: #333; /* Softer dark gray instead of pure black */
   transition: all 0.2s ease;
-  min-height: 50px; /* Slightly increased for better balance */
+  min-height: 56px; /* Increased from 50px for better tap targets */
   position: relative;
+  cursor: pointer;
+  /* Mobile touch optimizations */
+  -webkit-tap-highlight-color: rgba(79, 207, 97, 0.1);
+  touch-action: manipulation; /* Prevents 300ms tap delay */
+  user-select: none; /* Prevents text selection on tap */
 }
 
-.nav-tab:hover {
-  color: var(--primary-green);
-  transform: translateY(-1px);
+/* Only apply hover effects on devices with hover capability (not touch screens) */
+@media (hover: hover) {
+  .nav-tab:hover {
+    color: var(--primary-green);
+    transform: translateY(-1px);
+  }
+}
+
+/* Active state feedback for immediate visual response */
+.nav-tab:active {
+  background-color: rgba(79, 207, 97, 0.05);
+  transform: scale(0.98);
 }
 
 .nav-tab.active {
@@ -97,8 +113,11 @@
   transition: all 0.3s ease;
 }
 
-.nav-tab.add-button:hover .nav-icon {
-  transform: scale(1.1);
+/* Only apply hover on hover-capable devices */
+@media (hover: hover) {
+  .nav-tab.add-button:hover .nav-icon {
+    transform: scale(1.1);
+  }
 }
 
 .nav-tab.add-button:active .nav-icon {

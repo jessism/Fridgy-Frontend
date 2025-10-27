@@ -147,10 +147,11 @@ const MobileBottomNav = () => {
             
             const isActive = isActiveTab(item.path);
             return (
-              <Link
+              <button
                 key={item.path}
-                to={item.path}
+                onClick={() => navigate(item.path)}
                 className={`nav-tab ${isActive ? 'active' : ''}`}
+                type="button"
               >
                 <div className="nav-icon">
                   {typeof item.icon === 'function' ? item.icon(isActive) : item.icon}
@@ -160,7 +161,7 @@ const MobileBottomNav = () => {
                     {item.label}
                   </span>
                 )}
-              </Link>
+              </button>
             );
           })}
         </div>
