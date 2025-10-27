@@ -14,7 +14,7 @@ import RecipeImportStepModal from '../components/guided-tour/RecipeImportStepMod
 import RecipeImportSuccessModal from '../components/guided-tour/RecipeImportSuccessModal';
 import { isIOS } from '../utils/welcomeFlowHelpers';
 import { detectRecipeImport } from '../utils/recipeImportDetection';
-import { checkRecipeImportPrerequisites, requestNotificationPermission } from '../utils/shortcutDetection';
+import { checkNotificationPermission, requestNotificationPermission } from '../utils/shortcutDetection';
 import useInventory from '../hooks/useInventory';
 import IOSInstallPrompt from '../components/IOSInstallPrompt';
 import { usePWADetection } from '../hooks/usePWADetection';
@@ -969,16 +969,14 @@ const HomePage = () => {
       {/* Recipe Import Intro Modal */}
       {shouldShowTooltip(STEPS.IMPORT_RECIPE_INTRO) && (
         <RecipeImportIntroModal
-          onShowMeHow={async () => {
-            console.log('[HomePage] Checking prerequisites...');
-
-            // Check prerequisites
-            const prerequisites = await checkRecipeImportPrerequisites();
+          onShowMeHow={() => {
+            console.log('[HomePage] Checking notification status');
+            // Check notification permission
+            const notificationStatus = checkNotificationPermission();
             setPreFlightStatus({
-              hasNotifications: prerequisites.hasNotifications,
-              hasShortcut: prerequisites.hasShortcut
+              hasNotifications: notificationStatus === 'granted',
+              hasShortcut: false // Will ask user manually
             });
-
             nextStep(); // Move to IMPORT_RECIPE_PREFLIGHT
           }}
           onSkip={() => {
@@ -988,11 +986,10 @@ const HomePage = () => {
         />
       )}
 
-      {/* Pre-Flight Check Modal */}
+      {/* Pre-Flight Check Modal - Two-step check */}
       {shouldShowTooltip(STEPS.IMPORT_RECIPE_PREFLIGHT) && (
         <PreFlightCheckModal
           hasNotifications={preFlightStatus.hasNotifications}
-          hasShortcut={preFlightStatus.hasShortcut}
           onContinue={() => {
             console.log('[HomePage] Continuing to recipe import steps');
             nextStep(); // Move to IMPORT_RECIPE_STEP_1
@@ -1005,7 +1002,7 @@ const HomePage = () => {
             }
           }}
           onInstallShortcut={() => {
-            console.log('[HomePage] Redirecting to shortcut installation');
+            console.log('[HomePage] User needs shortcut, redirecting to install flow');
             goToStep(STEPS.INSTALL_SHORTCUT);
           }}
           onSkip={() => {
