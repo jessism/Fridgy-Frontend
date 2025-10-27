@@ -282,7 +282,7 @@
   width: 90%;
   text-align: center;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  animation: guided-tooltip-pop-in 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  animation: modal-slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .guided-tour__welcome-logo {
@@ -385,6 +385,7 @@
   text-align: center;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   animation: modal-slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
 @keyframes guided-celebration-pop {
@@ -474,6 +475,25 @@
   color: #666;
   margin: 0 0 2rem 0;
   line-height: 1.6;
+}
+
+.guided-tour__intro-skip {
+  background: transparent;
+  border: none;
+  color: #999;
+  font-size: 0.9rem;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0.75rem 0;
+  margin-top: 0.5rem;
+  width: 100%;
+  text-align: center;
+  transition: color 0.2s;
+}
+
+.guided-tour__intro-skip:hover {
+  color: #666;
+  text-decoration: underline;
 }
 
 /* Shortcut Install Modal Styles */

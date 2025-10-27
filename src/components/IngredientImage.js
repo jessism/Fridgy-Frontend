@@ -26,8 +26,12 @@ const IngredientImage = ({
       return 'ingredient-image--blue-bg';
     } else if (cat.includes('protein') || cat.includes('meat') || cat.includes('fish')) {
       return 'ingredient-image--red-bg';
-    } else if (cat.includes('grain') || cat.includes('bread') || cat.includes('pasta')) {
+    } else if (cat.includes('beverage') || cat.includes('drink') || cat.includes('juice') || cat.includes('coffee') || cat.includes('tea')) {
+      return 'ingredient-image--orange-bg';
+    } else if (cat.includes('fats') || cat.includes('oil') || cat.includes('butter')) {
       return 'ingredient-image--yellow-bg';
+    } else if (cat.includes('grain') || cat.includes('bread') || cat.includes('pasta')) {
+      return 'ingredient-image--tan-bg';
     } else {
       return 'ingredient-image--pink-bg';
     }

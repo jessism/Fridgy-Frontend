@@ -24,7 +24,7 @@ const InventoryPage = ({ defaultTab }) => {
   const { items: inventoryItems, loading, error, refreshInventory, deleteItem, updateItem } = useInventory();
   const { lists: shoppingLists, addItem: addToShoppingList, createList } = useShoppingLists();
   const { canAccess } = useSubscription();
-  const { shouldShowTooltip, nextStep, STEPS } = useGuidedTourContext();
+  const { shouldShowTooltip, nextStep, dismissTour, STEPS } = useGuidedTourContext();
   const navigate = useNavigate();
   const location = useLocation();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -228,8 +228,9 @@ const InventoryPage = ({ defaultTab }) => {
       'Vegetables': { bg: '#f0f9f0', text: '#4a6741' },       // Very soft green
       'Protein': { bg: '#fff0f0', text: '#8b4561' },          // Very soft pink
       'Dairy': { bg: '#e6f3ff', text: '#4a6b8b' },           // Very soft blue
-      'Grains': { bg: '#fff7e6', text: '#8b6332' },          // Very soft orange (tan)
-      'Beverages': { bg: '#ffe8d1', text: '#cc6600' },       // Light orange (distinct from pink/peach)
+      'Grains': { bg: '#fff7e6', text: '#8b6332' },          // Light tan
+      'Fats and oils': { bg: '#fffde7', text: '#827717' },   // Light yellow
+      'Beverages': { bg: '#ffe8cc', text: '#cc6600' },       // Light orange
       'Snacks': { bg: '#fffcf0', text: '#8b7d4a' },          // Very soft yellow
       'Condiments': { bg: '#fff0f2', text: '#8b4a56' },      // Very soft coral
       'Pantry': { bg: '#f7f0ff', text: '#6b4a8b' },          // Very soft lavender
@@ -1217,7 +1218,7 @@ const InventoryPage = ({ defaultTab }) => {
                           <div className="inventory-page__mobile-card">
                             {/* Left: Ingredient image */}
                             <div className="inventory-page__card-icon">
-                              <IngredientImage 
+                              <IngredientImage
                                 item={item}
                                 size={64}
                                 className="inventory-page__card-image"
@@ -1319,7 +1320,7 @@ const InventoryPage = ({ defaultTab }) => {
                       <div className="inventory-page__mobile-card">
                         {/* Left: Ingredient image */}
                         <div className="inventory-page__card-icon">
-                          <IngredientImage 
+                          <IngredientImage
                             item={item}
                             size={64}
                             className="inventory-page__card-image"
@@ -1781,7 +1782,12 @@ const InventoryPage = ({ defaultTab }) => {
             console.log('[Inventory] Shortcut intro - advancing to INSTALL_SHORTCUT');
             nextStep(); // Advances to INSTALL_SHORTCUT
           }}
+          onClose={() => {
+            console.log('[Inventory] User skipped installing shortcut');
+            dismissTour();
+          }}
           continueLabel="Continue"
+          skipLabel="Skip installing shortcut"
         />
       )}
 
@@ -1792,6 +1798,10 @@ const InventoryPage = ({ defaultTab }) => {
           onContinue={() => {
             console.log('[Inventory] Starting Part 2 - advancing to shortcut install');
             nextStep(); // Advances to INSTALL_SHORTCUT or skips to IMPORT_RECIPE if not iOS
+          }}
+          onClose={() => {
+            console.log('[Inventory] User closed recipe intro');
+            dismissTour();
           }}
           continueLabel="Continue"
         />

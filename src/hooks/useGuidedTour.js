@@ -18,9 +18,9 @@ const STEPS = {
   PUSH_NOTIFICATION_PROMPT: 'push_notification_prompt', // Push notification setup
   SHORTCUT_INTRO: 'shortcut_intro',         // "Let's install your shortcut" intro
   INSTALL_SHORTCUT: 'install_shortcut',     // Part 2: iOS shortcut installation (Copy Magic Key)
-  RECIPE_INTRO: 'recipe_intro',             // Part 2: Intro to recipe import (after shortcut)
   SHORTCUT_CONFIRMATION: 'shortcut_confirmation',   // "Have you installed your shortcut?"
   SHORTCUT_SUCCESS_BRIDGE: 'shortcut_success_bridge', // "Awesome! Now let's import..."
+  RECIPE_INTRO: 'recipe_intro',             // Part 2: Intro to recipe import (after shortcut)
   IMPORT_RECIPE_INTRO: 'import_recipe_intro',       // "Let's import your first recipe"
   IMPORT_RECIPE_PREFLIGHT: 'import_recipe_preflight', // Check notifications + shortcut
   IMPORT_RECIPE_STEP_1: 'import_recipe_step_1',     // Step 1: Open Instagram post

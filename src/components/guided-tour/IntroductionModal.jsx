@@ -6,7 +6,7 @@ import './GuidedTour.css';
  * IntroductionModal - Simple centered modal for introducing new tour sections
  * Used between major milestones in the guided tour
  */
-const IntroductionModal = ({ title, message, onContinue, continueLabel = 'Continue', emoji }) => {
+const IntroductionModal = ({ title, message, onContinue, continueLabel = 'Continue', emoji, onClose, skipLabel }) => {
   return ReactDOM.createPortal(
     <div className="guided-tour__celebration-overlay">
       <div className="guided-tour__celebration-card">
@@ -32,6 +32,16 @@ const IntroductionModal = ({ title, message, onContinue, continueLabel = 'Contin
         >
           {continueLabel}
         </button>
+
+        {/* Skip Button - Text link below Continue button */}
+        {onClose && skipLabel && (
+          <button
+            className="guided-tour__intro-skip"
+            onClick={onClose}
+          >
+            {skipLabel}
+          </button>
+        )}
       </div>
     </div>,
     document.body

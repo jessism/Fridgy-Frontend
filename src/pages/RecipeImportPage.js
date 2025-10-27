@@ -7,13 +7,14 @@ import { UpgradeModal } from '../components/modals/UpgradeModal';
 import { CheckoutModal } from '../components/modals/CheckoutModal';
 import { useGuidedTourContext } from '../contexts/GuidedTourContext';
 import GuidedTooltip from '../components/guided-tour/GuidedTooltip';
+import RecipeImportSuccessModal from '../components/guided-tour/RecipeImportSuccessModal';
 import '../components/guided-tour/GuidedTour.css'; // Import guided tour styles
 
 const RecipeImportPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { canAccess, startCheckout, checkoutSecret, closeCheckout } = useSubscription();
-  const { shouldShowTooltip, completeStep, goToStep, STEPS } = useGuidedTourContext();
+  const { shouldShowTooltip, completeStep, goToStep, isActive, STEPS } = useGuidedTourContext();
 
   // Check if coming from push notification
   const params = new URLSearchParams(location.search);
@@ -34,6 +35,7 @@ const RecipeImportPage = () => {
   const [videoUrl, setVideoUrl] = useState(null);
   const [isTimeoutError, setIsTimeoutError] = useState(false);
   const [showIOSPrompt, setShowIOSPrompt] = useState(false);
+  const [tourSuccessRecipe, setTourSuccessRecipe] = useState(null); // Store recipe for tour success modal
 
   // Detect iOS device
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -63,7 +65,7 @@ const RecipeImportPage = () => {
       setLoading(true);
       setStatus('📥 Importing recipe from Instagram...');
 
-      // Poll for new recipe every 2 seconds
+      // Poll for new recipe every 500ms for faster detection
       let pollErrorCount = 0;
       pollInterval = setInterval(async () => {
         try {
@@ -92,8 +94,16 @@ const RecipeImportPage = () => {
                 clearTimeout(timeoutId);
                 setStatus('✅ Recipe imported successfully!');
                 setError('');
-                // Brief success message, then navigate
-                setTimeout(() => navigate('/saved-recipes'), 1500);
+
+                // Check if user is in guided tour
+                if (isActive) {
+                  console.log('[RecipeImport] User in tour - showing success celebration');
+                  setTourSuccessRecipe(latestRecipe);
+                  goToStep(STEPS.IMPORT_RECIPE_SUCCESS);
+                } else {
+                  // Normal flow - navigate to saved recipes
+                  setTimeout(() => navigate('/saved-recipes'), 1500);
+                }
               }
             }
           } else if (response.status === 401) {
@@ -110,7 +120,7 @@ const RecipeImportPage = () => {
             setError('Connection issue while checking for your recipe. Please check your internet connection and try again.');
           }
         }
-      }, 2000);
+      }, 500); // Poll every 500ms for faster detection
 
       // Stop polling after 60 seconds and show error
       timeoutId = setTimeout(() => {
@@ -259,10 +269,17 @@ const RecipeImportPage = () => {
         setStatus('✅ Recipe imported successfully!');
         setExtractedRecipe(data.recipe);
 
-        // Show success for 2 seconds then redirect
-        setTimeout(() => {
-          navigate('/saved-recipes');
-        }, 2000);
+        // Check if user is in guided tour
+        if (isActive) {
+          console.log('[RecipeImport] User in tour - showing success celebration (multi-modal)');
+          setTourSuccessRecipe(data.recipe);
+          goToStep(STEPS.IMPORT_RECIPE_SUCCESS);
+        } else {
+          // Normal flow - show success for 2 seconds then redirect
+          setTimeout(() => {
+            navigate('/saved-recipes');
+          }, 2000);
+        }
       } else if (data.requiresManualCaption) {
         // Need manual caption input
         setStatus('📋 Could not fetch caption automatically. Please paste it below.');
@@ -553,7 +570,16 @@ const RecipeImportPage = () => {
 
       if (data.success) {
         setStatus('✅ Recipe saved successfully!');
-        setTimeout(() => navigate('/saved-recipes'), 1500);
+
+        // Check if user is in guided tour
+        if (isActive) {
+          console.log('[RecipeImport] User in tour - showing success celebration (manual form)');
+          setTourSuccessRecipe(data.recipe || recipeData);
+          goToStep(STEPS.IMPORT_RECIPE_SUCCESS);
+        } else {
+          // Normal flow - navigate after delay
+          setTimeout(() => navigate('/saved-recipes'), 1500);
+        }
       } else {
         setError('Failed to save recipe. Please try again.');
       }
@@ -945,7 +971,7 @@ const RecipeImportPage = () => {
         />
       )}
 
-      {/* Success Celebration Toast */}
+      {/* Success Celebration Toast (Legacy) */}
       {shouldShowTooltip(STEPS.RECIPE_IMPORTED) && (
         <div className="guided-tour__success-toast">
           <div className="guided-tour__success-icon">
@@ -974,6 +1000,17 @@ const RecipeImportPage = () => {
             View Recipe
           </button>
         </div>
+      )}
+
+      {/* Recipe Import Success Modal - New Tour Flow */}
+      {shouldShowTooltip(STEPS.IMPORT_RECIPE_SUCCESS) && (
+        <RecipeImportSuccessModal
+          recipe={tourSuccessRecipe}
+          onViewRecipes={() => {
+            console.log('[RecipeImport] Tour complete - viewing recipes');
+            navigate('/saved-recipes');
+          }}
+        />
       )}
     </div>
   );

@@ -927,8 +927,8 @@ const HomePage = () => {
       {shouldShowTooltip(STEPS.WELCOME_SCREEN) && (
         <WelcomePrompt
           onStart={() => {
-            console.log('[HomePage] User clicked Start Tour');
-            nextStep(); // Move to GROCERIES_INTRO step
+            console.log('[HomePage] User clicked Start Tour - skipping groceries intro');
+            goToStep(STEPS.ADD_GROCERIES); // Skip groceries intro, go straight to ADD_GROCERIES
           }}
           onSkip={() => {
             console.log('[HomePage] User clicked Skip Tour');
@@ -946,7 +946,12 @@ const HomePage = () => {
             console.log('[HomePage] Groceries intro - advancing to ADD_GROCERIES');
             nextStep(); // Advances to ADD_GROCERIES
           }}
+          onClose={() => {
+            console.log('[HomePage] User skipped logging first item');
+            dismissTour();
+          }}
           continueLabel="Continue"
+          skipLabel="Skip logging first item"
         />
       )}
 
@@ -959,7 +964,12 @@ const HomePage = () => {
             console.log('[HomePage] Shortcut intro - advancing to INSTALL_SHORTCUT');
             nextStep(); // Advances to INSTALL_SHORTCUT
           }}
+          onClose={() => {
+            console.log('[HomePage] User skipped installing shortcut');
+            dismissTour();
+          }}
           continueLabel="Continue"
+          skipLabel="Skip installing shortcut"
         />
       )}
 

@@ -70,15 +70,23 @@
 }
 
 .ingredient-image--blue-bg {
-  background: #e3f2fd !important; /* Light blue for dairy */
+  background: #e6f3ff !important; /* Light blue for dairy */
 }
 
 .ingredient-image--red-bg {
-  background: #ffebee !important; /* Light red/pink for protein */
+  background: #fff0f0 !important; /* Light pink for protein */
 }
 
 .ingredient-image--yellow-bg {
-  background: #fffde7 !important; /* Light yellow for grains */
+  background: #fffde7 !important; /* Light yellow for fats and oils */
+}
+
+.ingredient-image--tan-bg {
+  background: #fff7e6 !important; /* Light tan for grains */
+}
+
+.ingredient-image--orange-bg {
+  background: #ffe8cc !important; /* Light orange for beverages */
 }
 
 .ingredient-image--pink-bg {
@@ -135,17 +143,25 @@
   }
   
   .ingredient-image--blue-bg {
-    background: #e3f2fd !important;
+    background: #e6f3ff !important;
   }
-  
+
   .ingredient-image--red-bg {
-    background: #ffebee !important;
+    background: #fff0f0 !important;
   }
-  
+
   .ingredient-image--yellow-bg {
     background: #fffde7 !important;
   }
-  
+
+  .ingredient-image--tan-bg {
+    background: #fff7e6 !important;
+  }
+
+  .ingredient-image--orange-bg {
+    background: #ffe8cc !important;
+  }
+
   .ingredient-image--pink-bg {
     background: #fce4ec !important;
   }

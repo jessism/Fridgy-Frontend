@@ -233,11 +233,8 @@ function App() {
               <SubscriptionPage />
             </AuthGuard>
           } />
-          <Route path="/subscription-success" element={
-            <AuthGuard>
-              <SubscriptionSuccessPage />
-            </AuthGuard>
-          } />
+          {/* Public success page - handles both PWA and Safari contexts */}
+          <Route path="/subscription-success" element={<SubscriptionSuccessPage />} />
 
           {/* Legal Pages (Public - No Auth Required) */}
           <Route path="/terms" element={<TermsPage />} />

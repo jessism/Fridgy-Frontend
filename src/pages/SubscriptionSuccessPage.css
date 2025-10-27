@@ -131,6 +131,31 @@
   box-shadow: 0 6px 20px rgba(79, 207, 97, 0.4);
 }
 
+/* Safari Return to App Button (extra prominent) */
+.subscription-success__cta--primary {
+  background: linear-gradient(135deg, #4fcf61, #45b854);
+  font-size: 20px;
+  padding: 20px 40px;
+  box-shadow: 0 8px 24px rgba(79, 207, 97, 0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.subscription-success__helper-text {
+  font-size: 15px;
+  color: #666;
+  margin-top: 16px;
+  font-weight: 500;
+}
+
 .subscription-success__secondary {
   width: 100%;
   padding: 14px 32px;

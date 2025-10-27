@@ -25,14 +25,12 @@ const RecipeImportSuccessModal = ({ recipe, onViewRecipes, onContinue }) => {
 
         {/* Title */}
         <h2 className="guided-tour__celebration-message">
-          🎉 Congratulations!
+          Congrats on importing your first recipe!
         </h2>
 
         {/* Description */}
         <p style={{ fontSize: '1rem', color: '#666', lineHeight: '1.6', margin: '0 0 2rem 0', maxWidth: '340px' }}>
-          {recipe
-            ? `You've successfully imported your first recipe: "${recipe.title}"!`
-            : 'You\'ve successfully imported your first recipe!'}
+          You're now ready to start cooking and tracking your meals.
         </p>
 
         {/* Recipe Preview (if available) */}

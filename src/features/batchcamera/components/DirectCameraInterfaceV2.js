@@ -26,8 +26,8 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
       'Protein': { bg: '#fff0f0', text: '#8b4561' },
       'Dairy': { bg: '#e6f3ff', text: '#4a6b8b' },
       'Grains': { bg: '#fff7e6', text: '#8b6332' },
-      'Beverages': { bg: '#ffe8d1', text: '#cc6600' },
-      'Fats and oils': { bg: '#fff9e6', text: '#8b7532' },
+      'Fats and oils': { bg: '#fffde7', text: '#827717' },
+      'Beverages': { bg: '#ffe8cc', text: '#cc6600' },
       'Other': { bg: '#f5f5f5', text: '#666666' }
     };
     return categoryColors[category] || categoryColors['Other'];
