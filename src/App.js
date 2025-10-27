@@ -13,6 +13,7 @@ import MealPlansPage from './pages/MealPlansPage';
 import { AIRecipePage } from './features/ai-recipes';
 import ShoppingListPage from './pages/ShoppingListPage';
 import ProfilePageV2 from './pages/ProfilePageV2';
+import WelcomeTourPage from './pages/WelcomeTourPage';
 import AboutYouPage from './pages/AboutYouPage';
 import DietaryPreferencesPage from './pages/DietaryPreferencesPage';
 import NotificationSettingsPage from './pages/NotificationSettingsPage';
@@ -123,6 +124,11 @@ function App() {
           <Route path="/profile" element={
             <AuthGuard>
               <ProfilePageV2 />
+            </AuthGuard>
+          } />
+          <Route path="/welcome-tour" element={
+            <AuthGuard>
+              <WelcomeTourPage />
             </AuthGuard>
           } />
           <Route path="/about-you" element={

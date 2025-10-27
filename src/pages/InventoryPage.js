@@ -213,9 +213,9 @@ const InventoryPage = ({ defaultTab }) => {
       'Fruits': { bg: '#fff5e6', text: '#8b6914' },           // Very soft peach
       'Vegetables': { bg: '#f0f9f0', text: '#4a6741' },       // Very soft green
       'Protein': { bg: '#fff0f0', text: '#8b4561' },          // Very soft pink
-      'Dairy': { bg: '#f5f0f7', text: '#6b4c7a' },           // Very soft purple
-      'Grains': { bg: '#fff7e6', text: '#8b6332' },          // Very soft orange
-      'Beverages': { bg: '#f0f7ff', text: '#4a6b8b' },       // Very soft blue
+      'Dairy': { bg: '#e6f3ff', text: '#4a6b8b' },           // Very soft blue
+      'Grains': { bg: '#fff7e6', text: '#8b6332' },          // Very soft orange (tan)
+      'Beverages': { bg: '#ffe8d1', text: '#cc6600' },       // Light orange (distinct from pink/peach)
       'Snacks': { bg: '#fffcf0', text: '#8b7d4a' },          // Very soft yellow
       'Condiments': { bg: '#fff0f2', text: '#8b4a56' },      // Very soft coral
       'Pantry': { bg: '#f7f0ff', text: '#6b4a8b' },          // Very soft lavender

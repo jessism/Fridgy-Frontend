@@ -59,6 +59,10 @@ const RecipeImportPage = () => {
     if (importing === 'true') {
       console.log('[RecipeImport] Opened from import push notification - showing loading state');
 
+      // Set loading state to show the loading screen (handles both fresh mount and re-render)
+      setLoading(true);
+      setStatus('📥 Importing recipe from Instagram...');
+
       // Poll for new recipe every 2 seconds
       let pollErrorCount = 0;
       pollInterval = setInterval(async () => {

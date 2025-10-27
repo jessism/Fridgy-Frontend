@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-globals */
 
 // Cache name versioning
-const CACHE_NAME = 'trackabite-v7'; // v7: Added HTML loading screen + postMessage navigation for push notifications
+const CACHE_NAME = 'trackabite-v8'; // v8: Context-aware beverage messages + auto-update on new versions
 const urlsToCache = [
   // Removed '/' to prevent caching landing page - fixes auth redirect issue
   '/static/css/main.css',

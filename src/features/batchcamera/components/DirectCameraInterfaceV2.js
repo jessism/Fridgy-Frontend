@@ -17,6 +17,21 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
+
+  // Category color helper - matches InventoryPage colors
+  const getCategoryColor = (category) => {
+    const categoryColors = {
+      'Fruits': { bg: '#fff5e6', text: '#8b6914' },
+      'Vegetables': { bg: '#f0f9f0', text: '#4a6741' },
+      'Protein': { bg: '#fff0f0', text: '#8b4561' },
+      'Dairy': { bg: '#e6f3ff', text: '#4a6b8b' },
+      'Grains': { bg: '#fff7e6', text: '#8b6332' },
+      'Beverages': { bg: '#ffe8d1', text: '#cc6600' },
+      'Fats and oils': { bg: '#fff9e6', text: '#8b7532' },
+      'Other': { bg: '#f5f5f5', text: '#666666' }
+    };
+    return categoryColors[category] || categoryColors['Other'];
+  };
   
   // Camera and photo states
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -398,11 +413,12 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
             {editableResults.map((item, index) => {
               const itemIcon = getItemIconIcons8(item.category, item.name, { size: 28 });
               const formattedQuantity = formatQuantity(item.quantity);
-              
+              const categoryColor = getCategoryColor(item.category);
+
               return (
                 <div key={index} className="camera-v2__inventory-card">
-                  {/* Left: Emoji icon */}
-                  <div className="camera-v2__card-icon">
+                  {/* Left: Emoji icon with category background */}
+                  <div className="camera-v2__card-icon" style={{ backgroundColor: categoryColor.bg }}>
                     {itemIcon}
                   </div>
                   

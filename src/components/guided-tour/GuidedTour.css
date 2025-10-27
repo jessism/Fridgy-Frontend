@@ -384,7 +384,7 @@
   width: 90%;
   text-align: center;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  animation: guided-celebration-pop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  animation: modal-slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes guided-celebration-pop {
@@ -440,10 +440,19 @@
   width: 100%;
 }
 
-.guided-tour__celebration-button:hover {
+.guided-tour__celebration-button:hover:not(:disabled):not(.guided-tour__button-disabled) {
   background: #45b854;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3);
+}
+
+.guided-tour__celebration-button:disabled,
+.guided-tour__celebration-button.guided-tour__button-disabled {
+  background: #e0e0e0;
+  color: #999;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Introduction Modal Styles */
@@ -468,7 +477,65 @@
   width: 90%;
   text-align: center;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  animation: guided-celebration-pop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  animation: modal-slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modal-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Simple/Compact Version */
+.guided-tour__shortcut-card--simple {
+  padding: 1.5rem 1.25rem;
+  max-width: 380px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.guided-tour__shortcut-simple-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 1rem 0;
+  line-height: 1.3;
+}
+
+.guided-tour__shortcut-simple-description {
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.5;
+  margin: 0 0 1.5rem 0;
+}
+
+.guided-tour__shortcut-instructions-simple {
+  background: #f8f8f8;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.guided-tour__shortcut-steps-numbered {
+  margin: 0;
+  padding-left: 1.5rem;
+  font-size: 0.9rem;
+  color: #333;
+  line-height: 1.8;
+}
+
+.guided-tour__shortcut-steps-numbered li {
+  margin-bottom: 0.75rem;
+}
+
+.guided-tour__shortcut-steps-numbered li:last-child {
+  margin-bottom: 0;
 }
 
 .guided-tour__shortcut-title {
@@ -566,6 +633,392 @@
   border-color: #999;
 }
 
+/* Secondary Button (Go back) */
+.guided-tour__shortcut-secondary-button {
+  background: #f8f8f8;
+  color: #666;
+  border: none;
+  padding: 0.875rem 2rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.guided-tour__shortcut-secondary-button:hover {
+  background: #efefef;
+  color: #333;
+}
+
+/* Text Link (Skip for now) */
+.guided-tour__shortcut-text-link {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 0.85rem;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0.75rem 0;
+  margin-top: 0.5rem;
+  text-align: center;
+  width: 100%;
+  transition: color 0.2s;
+}
+
+.guided-tour__shortcut-text-link:hover {
+  color: #666;
+  text-decoration: underline;
+}
+
+/* Recipe Import Step Modal Styles */
+.recipe-import-step__badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary-green, #4fcf61);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+  text-align: center;
+}
+
+.recipe-import-step__icon {
+  font-size: 3rem;
+  line-height: 1;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.recipe-import-step__checkmark-icon {
+  text-align: center;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.recipe-import-step__image-icon {
+  text-align: center;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.recipe-import-step__image-icon img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+}
+
+/* iPhone Frame for Screenshots */
+.recipe-import-step__phone-frame {
+  position: relative;
+  width: 120px;
+  height: 245px;
+  background-color: #1a1a1a;
+  border-radius: 18px;
+  padding: 5px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(255,255,255,0.1);
+  margin: 0 auto 1rem auto;
+}
+
+.recipe-import-step__phone-notch {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 55px;
+  height: 11px;
+  background-color: #1a1a1a;
+  border-radius: 0 0 6px 6px;
+  z-index: 2;
+}
+
+.recipe-import-step__phone-screen {
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  background-color: #000;
+  position: relative;
+}
+
+.recipe-import-step__phone-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Video Container (no frame) */
+.recipe-import-step__video-container {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  margin: 0.75rem auto 0.75rem auto;
+  overflow: hidden;
+  position: relative;
+}
+
+.recipe-import-step__video {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Recipe Import Guide Styles */
+.recipe-import-guide__steps {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.recipe-import-guide__step {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: #f8f8f8;
+  border-radius: 12px;
+  align-items: flex-start;
+}
+
+.recipe-import-guide__step-icon {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.recipe-import-guide__step-content {
+  flex: 1;
+}
+
+.recipe-import-guide__step-number {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary-green, #4fcf61);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.recipe-import-guide__step-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 0.25rem 0;
+}
+
+.recipe-import-guide__step-description {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Floating Guide Styles */
+.floating-guide {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: 90%;
+  max-width: 400px;
+  background: white;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.floating-guide--minimized {
+  height: 60px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0 1.25rem;
+}
+
+.floating-guide--minimized:hover {
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.2);
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.floating-guide__minimized-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.floating-guide__minimized-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.floating-guide__minimized-text {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.floating-guide--expanded {
+  max-height: 70vh;
+  border-radius: 20px 20px 0 0;
+  padding: 1.25rem;
+  overflow-y: auto;
+}
+
+.floating-guide__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.floating-guide__title {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.floating-guide__toggle,
+.floating-guide__close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: #666;
+  transition: color 0.2s;
+}
+
+.floating-guide__toggle:hover,
+.floating-guide__close:hover {
+  color: #333;
+}
+
+.floating-guide__close {
+  font-size: 1.5rem;
+  line-height: 1;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-guide__steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.floating-guide__step {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.floating-guide__step--completed {
+  opacity: 0.6;
+}
+
+.floating-guide__step--current {
+  background: rgba(79, 207, 97, 0.1);
+}
+
+.floating-guide__step-indicator {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #f0f0f0;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.floating-guide__step--completed .floating-guide__step-indicator {
+  background: var(--primary-green, #4fcf61);
+  color: white;
+}
+
+.floating-guide__step--current .floating-guide__step-indicator {
+  background: var(--primary-green, #4fcf61);
+  color: white;
+}
+
+.floating-guide__step-text {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.floating-guide__current-detail {
+  background: #f8f8f8;
+  padding: 0.875rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.floating-guide__current-text {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.floating-guide__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.floating-guide__button {
+  width: 100%;
+  padding: 0.875rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.floating-guide__button--primary {
+  background: var(--primary-green, #4fcf61);
+  color: white;
+}
+
+.floating-guide__button--primary:hover {
+  background: #45b854;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3);
+}
+
+.floating-guide__button--secondary {
+  background: #f8f8f8;
+  color: #666;
+}
+
+.floating-guide__button--secondary:hover {
+  background: #efefef;
+  color: #333;
+}
+
 .guided-tour__shortcut-hint {
   font-size: 0.85rem;
   color: #999;
@@ -645,8 +1098,184 @@
   font-size: 0.85rem;
   color: var(--primary-green, #4fcf61);
   margin: 0.5rem 0 0 0;
-  font-weight: 500;
+  font-weight: 400;
   text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.guided-tour__token-copied::before {
+  content: '✓';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary-green, #4fcf61);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* Progress Dots */
+.guided-tour__shortcut-progress {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 1.5rem 0 1rem 0;
+}
+
+.guided-tour__shortcut-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  cursor: pointer;
+}
+
+.guided-tour__shortcut-dot:hover {
+  transform: scale(1.2);
+}
+
+.guided-tour__shortcut-dot--active {
+  background-color: var(--primary-green, #4fcf61);
+  transform: scale(1.2);
+}
+
+/* Carousel Container */
+.guided-tour__shortcut-carousel {
+  width: 100%;
+  overflow: hidden;
+  margin: 1rem 0;
+  position: relative;
+  touch-action: pan-y pinch-zoom;
+}
+
+.guided-tour__shortcut-carousel-track {
+  display: flex;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+}
+
+.guided-tour__shortcut-slide {
+  min-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+/* Step Image Container */
+.guided-tour__shortcut-image-container {
+  width: 100%;
+  max-width: 280px;
+  height: 400px;
+  margin-bottom: 1.5rem;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f8f8f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.guided-tour__shortcut-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.guided-tour__shortcut-image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.guided-tour__shortcut-placeholder-icon {
+  font-size: 64px;
+  line-height: 1;
+}
+
+.guided-tour__shortcut-placeholder-text {
+  font-size: 0.85rem;
+  color: #999;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.guided-tour__shortcut-placeholder-text code {
+  display: block;
+  font-size: 0.75rem;
+  background: #fff;
+  padding: 0.5rem;
+  border-radius: 6px;
+  margin-top: 0.5rem;
+  word-break: break-all;
+  font-family: 'Courier New', monospace;
+}
+
+/* Step Content */
+.guided-tour__shortcut-step-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 0.75rem 0;
+  text-align: center;
+}
+
+.guided-tour__shortcut-step-description {
+  font-size: 0.95rem;
+  color: #666;
+  line-height: 1.6;
+  margin: 0;
+  text-align: center;
+  max-width: 340px;
+}
+
+/* Navigation Buttons */
+.guided-tour__shortcut-navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1.5rem 0 1rem 0;
+  width: 100%;
+}
+
+.guided-tour__shortcut-nav-btn {
+  flex: 1;
+  background: transparent;
+  color: var(--primary-green, #4fcf61);
+  border: 1.5px solid var(--primary-green, #4fcf61);
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.guided-tour__shortcut-nav-btn:hover:not(:disabled) {
+  background: var(--primary-green, #4fcf61);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(79, 207, 97, 0.3);
+}
+
+.guided-tour__shortcut-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  border-color: #ddd;
+  color: #999;
 }
 
 /* Mobile Responsive */
@@ -674,6 +1303,28 @@
     max-width: 340px;
   }
 
+  .guided-tour__shortcut-card--simple {
+    padding: 1.5rem 1.25rem;
+    max-width: 320px;
+  }
+
+  .guided-tour__shortcut-simple-title {
+    font-size: 1.2rem;
+  }
+
+  .guided-tour__shortcut-simple-description {
+    font-size: 0.85rem;
+  }
+
+  .guided-tour__shortcut-instructions-simple {
+    padding: 1rem;
+  }
+
+  .guided-tour__shortcut-steps-numbered {
+    font-size: 0.85rem;
+    padding-left: 1.25rem;
+  }
+
   .guided-tour__shortcut-workflow {
     flex-direction: column;
     gap: 1rem;
@@ -685,6 +1336,28 @@
 
   .guided-tour__shortcut-title {
     font-size: 1.3rem;
+  }
+
+  .guided-tour__shortcut-image-container {
+    max-width: 240px;
+    height: 340px;
+  }
+
+  .guided-tour__shortcut-step-title {
+    font-size: 1.1rem;
+  }
+
+  .guided-tour__shortcut-step-description {
+    font-size: 0.9rem;
+  }
+
+  .guided-tour__shortcut-navigation {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .guided-tour__shortcut-nav-btn {
+    width: 100%;
   }
 
   .guided-tour__welcome-logo {

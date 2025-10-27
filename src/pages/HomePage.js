@@ -5,6 +5,14 @@ import MobileBottomNav from '../components/MobileBottomNav';
 import { useAuth } from '../features/auth/context/AuthContext';
 import { useGuidedTourContext } from '../contexts/GuidedTourContext';
 import WelcomePrompt from '../components/guided-tour/WelcomePrompt';
+import ShortcutInstallModal from '../components/guided-tour/ShortcutInstallModal';
+import ShortcutConfirmationModal from '../components/guided-tour/ShortcutConfirmationModal';
+import ShortcutSuccessBridgeModal from '../components/guided-tour/ShortcutSuccessBridgeModal';
+import RecipeImportIntroModal from '../components/guided-tour/RecipeImportIntroModal';
+import RecipeImportStepModal from '../components/guided-tour/RecipeImportStepModal';
+import RecipeImportSuccessModal from '../components/guided-tour/RecipeImportSuccessModal';
+import { isIOS } from '../utils/welcomeFlowHelpers';
+import { detectRecipeImport } from '../utils/recipeImportDetection';
 import useInventory from '../hooks/useInventory';
 import IOSInstallPrompt from '../components/IOSInstallPrompt';
 import { usePWADetection } from '../hooks/usePWADetection';
@@ -23,7 +31,10 @@ import veggiesIcon from '../assets/images/food-groups/foodgroup_veggies.png';
 import fruitsIcon from '../assets/images/food-groups/foodgroup_fruits.png';
 import grainsIcon from '../assets/images/food-groups/foodgroup_carb.png';
 import fatsIcon from '../assets/images/food-groups/foodgroup_fats.png';
+import beveragesIcon from '../assets/images/food-groups/foodgroup_beverages.png';
 import { ReactComponent as RecipesIcon } from '../assets/icons/quickaccess/recipes.svg';
+import importRecipeStep1Image from '../assets/product mockup/Import Recipes/Import_recipe_open_instagram.jpeg';
+import cookingIcon from '../assets/icons/Cooking.png';
 import './HomePage.css';
 
 // Helper function to calculate days until expiry (reused from InventoryPage)
@@ -40,7 +51,7 @@ const HomePage = () => {
   const { items, loading: inventoryLoading } = useInventory();
   const navigate = useNavigate();
   const { isPremium, startCheckout, checkoutSecret, closeCheckout } = useSubscription();
-  const { shouldShowTooltip, nextStep, dismissTour, STEPS } = useGuidedTourContext();
+  const { shouldShowTooltip, nextStep, dismissTour, completeTour, goToStep, STEPS } = useGuidedTourContext();
 
   // PWA Detection for first-time notification prompt
   const {
@@ -56,6 +67,8 @@ const HomePage = () => {
 
   const [showPWAPrompt, setShowPWAPrompt] = useState(false);
   const [upgradeModal, setUpgradeModal] = useState({ isOpen: false });
+  const [recipeImportStep, setRecipeImportStep] = useState(1);
+  const [importedRecipe, setImportedRecipe] = useState(null);
 
   // Color palette - Option 2 (Medium Green)
   const colors = {
@@ -126,11 +139,12 @@ const HomePage = () => {
   const getCategoryCounts = () => {
     const counts = {
       'Protein': 0,
-      'Dairy': 0, 
+      'Dairy': 0,
       'Vegetables': 0,
       'Fruits': 0,
       'Grains': 0,
-      'Fats and Oils': 0
+      'Fats and Oils': 0,
+      'Beverages': 0
     };
 
     items.forEach(item => {
@@ -285,6 +299,14 @@ const HomePage = () => {
               </div>
               <h3>Fats</h3>
             </div>
+
+            <div className="category-card" onClick={() => navigateToCategory('Beverages')}>
+              <div className="category-count">{categoryCounts['Beverages']}</div>
+              <div className="category-image">
+                <img src={beveragesIcon} alt="Beverages" className="food-group-icon" />
+              </div>
+              <h3>Beverages</h3>
+            </div>
           </div>
          </div>
        </section>
@@ -392,7 +414,11 @@ const HomePage = () => {
             {!inventoryLoading && expiringItems.length > 0 && (
               <>
                 <div className="expiring-subtitle">
-                  <p>They are still good. See how to use them in Meals.</p>
+                  <p>
+                    {expiringItems.every(item => item.category === 'Beverages')
+                      ? 'Enjoy them before they expire!'
+                      : 'They are still good. See how to use them in Meals.'}
+                  </p>
                 </div>
                 <div className="expiring-reminders">
                   <span className="reminder-text">+{expiringItems.length} reminders</span>
@@ -887,6 +913,169 @@ const HomePage = () => {
           onSkip={() => {
             console.log('[HomePage] User clicked Skip Tour');
             dismissTour(); // Dismiss the tour completely
+          }}
+        />
+      )}
+
+      {/* Shortcut Install Modal - iOS Only */}
+      {shouldShowTooltip(STEPS.INSTALL_SHORTCUT) && isIOS() && (
+        <ShortcutInstallModal
+          onInstall={() => {
+            console.log('[HomePage] User clicked Install Shortcut, waiting 20 seconds...');
+            nextStep(); // Advances to SHORTCUT_CONFIRMATION after 20s delay
+          }}
+          onSkip={() => {
+            console.log('[HomePage] User skipped shortcut installation');
+            nextStep(); // Skip to next step
+          }}
+        />
+      )}
+
+      {/* Shortcut Confirmation Modal */}
+      {shouldShowTooltip(STEPS.SHORTCUT_CONFIRMATION) && (
+        <ShortcutConfirmationModal
+          onYes={() => {
+            console.log('[HomePage] User confirmed shortcut installed');
+            nextStep(); // Move to SHORTCUT_SUCCESS_BRIDGE
+          }}
+          onNo={() => {
+            console.log('[HomePage] User needs to install shortcut');
+            goToStep(STEPS.INSTALL_SHORTCUT); // Back to shortcut install flow
+          }}
+          onSkip={() => {
+            console.log('[HomePage] User skipped confirmation');
+            dismissTour();
+          }}
+        />
+      )}
+
+      {/* Shortcut Success Bridge Modal */}
+      {shouldShowTooltip(STEPS.SHORTCUT_SUCCESS_BRIDGE) && (
+        <ShortcutSuccessBridgeModal
+          onLetsGo={() => {
+            console.log('[HomePage] Starting recipe import flow');
+            nextStep(); // Move to IMPORT_RECIPE_INTRO
+          }}
+        />
+      )}
+
+      {/* Recipe Import Intro Modal */}
+      {shouldShowTooltip(STEPS.IMPORT_RECIPE_INTRO) && (
+        <RecipeImportIntroModal
+          onShowMeHow={() => {
+            console.log('[HomePage] User clicked Let\'s Go');
+            nextStep(); // Move to IMPORT_RECIPE_STEP_1
+          }}
+          onSkip={() => {
+            console.log('[HomePage] User skipped recipe import');
+            dismissTour();
+          }}
+        />
+      )}
+
+      {/* Step 1: Open an Instagram Post (Tutorial) */}
+      {shouldShowTooltip(STEPS.IMPORT_RECIPE_STEP_1) && (
+        <RecipeImportStepModal
+          stepNumber={1}
+          title="Open an Instagram Post"
+          description="First, you'll need to find a recipe on Instagram that you want to save."
+          showPhoneFrame={true}
+          frameImage={importRecipeStep1Image}
+          buttonText="Next"
+          showBackButton={false}
+          onNext={() => {
+            console.log('[HomePage] Step 1 complete, moving to Step 2');
+            nextStep();
+          }}
+          onSkip={() => dismissTour()}
+        />
+      )}
+
+      {/* Step 2: Tap the Share Icon (Tutorial) */}
+      {shouldShowTooltip(STEPS.IMPORT_RECIPE_STEP_2) && (
+        <RecipeImportStepModal
+          stepNumber={2}
+          title="Tap the Share Icon"
+          description="Find the paper airplane icon at the bottom of the Instagram post and tap it."
+          videoSrc="/videos/import-tutorial/step2-tap-share.mp4"
+          buttonText="Next"
+          onNext={() => nextStep()}
+          onBack={() => goToStep(STEPS.IMPORT_RECIPE_STEP_1)}
+          onSkip={() => dismissTour()}
+        />
+      )}
+
+      {/* Step 3: Scroll Down and Select (Tutorial - Combined) */}
+      {shouldShowTooltip(STEPS.IMPORT_RECIPE_STEP_3) && (
+        <RecipeImportStepModal
+          stepNumber={3}
+          title="Scroll Down and Select 'Save to Trackabite'"
+          description="Scroll through the share menu and tap the 'Save to Trackabite' shortcut."
+          videoSrc="/videos/import-tutorial/step3-save-to-trackabite.mp4"
+          buttonText="Next"
+          onNext={() => nextStep()}
+          onBack={() => goToStep(STEPS.IMPORT_RECIPE_STEP_2)}
+          onSkip={() => dismissTour()}
+        />
+      )}
+
+      {/* Step 4: View Your Recipe (Tutorial) */}
+      {shouldShowTooltip(STEPS.IMPORT_RECIPE_STEP_4) && (
+        <RecipeImportStepModal
+          stepNumber={4}
+          title="View Your Recipe"
+          description="Wait for our Fridgy to analyze your recipe and view it when it's ready."
+          icon="checkmark"
+          buttonText="Ok, Got It"
+          onNext={() => nextStep()}
+          onBack={() => goToStep(STEPS.IMPORT_RECIPE_STEP_3)}
+          onSkip={() => dismissTour()}
+        />
+      )}
+
+      {/* Step 5: Let's Start Importing (Action!) */}
+      {shouldShowTooltip(STEPS.IMPORT_RECIPE_STEP_5) && (
+        <RecipeImportStepModal
+          stepNumber={5}
+          title={<><div style={{fontSize: '0.9rem', fontWeight: '400', color: '#666', marginBottom: '0.5rem'}}>Perfecto!</div>Now Let's Start Importing Your First Recipe!</>}
+          description=""
+          icon={cookingIcon}
+          buttonText="Open an Instagram Post"
+          onNext={() => {
+            console.log('[HomePage] Opening Instagram and starting detection');
+            window.open('https://www.instagram.com/p/DGioQ5qOWij/', '_blank');
+
+            // Start detection immediately
+            detectRecipeImport({
+              onSuccess: (recipe) => {
+                console.log('[HomePage] Recipe detected!', recipe);
+                setImportedRecipe(recipe);
+                goToStep(STEPS.IMPORT_RECIPE_SUCCESS);
+              },
+              onTimeout: () => {
+                console.log('[HomePage] Detection timed out');
+                alert('We couldn\'t find your imported recipe. Please try again or check your saved recipes.');
+                dismissTour();
+              }
+            });
+          }}
+          onBack={() => goToStep(STEPS.IMPORT_RECIPE_STEP_4)}
+          onSkip={() => dismissTour()}
+        />
+      )}
+
+      {/* Recipe Import Success Modal */}
+      {shouldShowTooltip(STEPS.IMPORT_RECIPE_SUCCESS) && (
+        <RecipeImportSuccessModal
+          recipe={importedRecipe}
+          onViewRecipes={() => {
+            console.log('[HomePage] Viewing recipes');
+            completeTour();
+            navigate('/saved-recipes');
+          }}
+          onContinue={() => {
+            console.log('[HomePage] Continuing tour');
+            completeTour();
           }}
         />
       )}

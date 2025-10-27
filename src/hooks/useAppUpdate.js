@@ -45,6 +45,9 @@ const useAppUpdate = () => {
     const checkForWaitingServiceWorker = () => {
       if (registration.waiting) {
         setUpdateStatus('available');
+        // Auto-apply update immediately
+        console.log('[useAppUpdate] Auto-applying waiting update');
+        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
       }
     };
 
@@ -55,6 +58,9 @@ const useAppUpdate = () => {
         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
           // New service worker installed, update available
           setUpdateStatus('available');
+          // Auto-apply update immediately
+          console.log('[useAppUpdate] Auto-applying new update');
+          newWorker.postMessage({ type: 'SKIP_WAITING' });
         }
       });
     });

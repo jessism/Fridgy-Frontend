@@ -60,16 +60,9 @@ const ProfilePageV2 = () => {
   };
 
   const handleReplayWelcomeTour = () => {
-    // Reset and restart the guided tour
-    console.log('[Profile] Replaying welcome tour');
-    resetTour();
-    localStorage.removeItem('has_imported_recipe');
-
-    // Start tour and navigate after a brief delay
-    setTimeout(() => {
-      startTour();
-      navigate('/home');
-    }, 100);
+    // Navigate to welcome tour page
+    console.log('[Profile] Opening welcome tour page');
+    navigate('/welcome-tour');
   };
 
   const handleAppUpdate = () => {

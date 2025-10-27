@@ -1,0 +1,211 @@
+/* Welcome Tour Page Styles */
+.welcome-tour-page {
+  min-height: 100vh;
+  background: #ffffff;
+  padding-bottom: 100px;
+}
+
+/* Header */
+.welcome-tour-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.welcome-tour-page__back-button {
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.welcome-tour-page__back-button:hover {
+  color: var(--primary-green, #4fcf61);
+}
+
+.welcome-tour-page__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.welcome-tour-page__header-spacer {
+  width: 40px; /* Same width as back button for centering */
+}
+
+/* Description */
+.welcome-tour-page__description {
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+}
+
+.welcome-tour-page__description p {
+  font-size: 0.95rem;
+  color: #666;
+  line-height: 1.5;
+  margin: 0;
+  text-align: center;
+}
+
+/* Tour Steps */
+.welcome-tour-page__steps {
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Step Card */
+.welcome-tour-page__step-card {
+  background: white;
+  border: 2px solid #f0f0f0;
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.welcome-tour-page__step-card:hover {
+  border-color: var(--primary-green, #4fcf61);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.15);
+}
+
+.welcome-tour-page__step-card:active {
+  transform: translateY(0);
+}
+
+/* Featured Card (Complete Full Tour) */
+.welcome-tour-page__step-card--featured {
+  background: linear-gradient(135deg, #4fcf61 0%, #45b854 100%);
+  border-color: transparent;
+  box-shadow: 0 4px 16px rgba(79, 207, 97, 0.25);
+}
+
+.welcome-tour-page__step-card--featured:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(79, 207, 97, 0.35);
+}
+
+.welcome-tour-page__step-card--featured .welcome-tour-page__step-title,
+.welcome-tour-page__step-card--featured .welcome-tour-page__step-description {
+  color: white;
+}
+
+.welcome-tour-page__step-card--featured .welcome-tour-page__step-icon,
+.welcome-tour-page__step-card--featured .welcome-tour-page__step-arrow {
+  color: white;
+}
+
+/* Step Icon */
+.welcome-tour-page__step-icon {
+  width: 48px;
+  height: 48px;
+  background: #f8f8f8;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-green, #4fcf61);
+  flex-shrink: 0;
+}
+
+.welcome-tour-page__step-icon--featured {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* Step Content */
+.welcome-tour-page__step-content {
+  flex: 1;
+}
+
+.welcome-tour-page__step-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 0.25rem 0;
+}
+
+.welcome-tour-page__step-description {
+  font-size: 0.875rem;
+  color: #666;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Step Arrow */
+.welcome-tour-page__step-arrow {
+  color: #ccc;
+  flex-shrink: 0;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.welcome-tour-page__step-card:hover .welcome-tour-page__step-arrow {
+  color: var(--primary-green, #4fcf61);
+  transform: translateX(3px);
+}
+
+.welcome-tour-page__step-card--featured .welcome-tour-page__step-arrow {
+  color: white;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .welcome-tour-page {
+    padding-bottom: 80px;
+  }
+
+  .welcome-tour-page__header {
+    padding: 1rem 1rem 0.75rem 1rem;
+  }
+
+  .welcome-tour-page__title {
+    font-size: 1.125rem;
+  }
+
+  .welcome-tour-page__description {
+    padding: 1rem 1rem 0.75rem 1rem;
+  }
+
+  .welcome-tour-page__description p {
+    font-size: 0.875rem;
+  }
+
+  .welcome-tour-page__steps {
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+  }
+
+  .welcome-tour-page__step-card {
+    padding: 1rem;
+    gap: 0.875rem;
+  }
+
+  .welcome-tour-page__step-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .welcome-tour-page__step-title {
+    font-size: 0.95rem;
+  }
+
+  .welcome-tour-page__step-description {
+    font-size: 0.8rem;
+  }
+}
