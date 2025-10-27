@@ -48,6 +48,19 @@ const InventoryPage = ({ defaultTab }) => {
   const [showShoppingListModal, setShowShoppingListModal] = useState(false);
   const [selectedItemForList, setSelectedItemForList] = useState(null);
 
+  // Auto-advance from VIEWING_INVENTORY to PUSH_NOTIFICATION_PROMPT after 2 seconds
+  useEffect(() => {
+    if (shouldShowTooltip(STEPS.VIEWING_INVENTORY)) {
+      console.log('[Inventory] VIEWING_INVENTORY - setting 2s timer for push notification prompt');
+      const timer = setTimeout(() => {
+        console.log('[Inventory] 2s elapsed - showing push notification prompt');
+        nextStep(); // Advances to PUSH_NOTIFICATION_PROMPT
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [shouldShowTooltip, STEPS.VIEWING_INVENTORY, nextStep]);
+
   // Handle tab switching based on props and URL changes
   useEffect(() => {
     // Handle direct navigation or prop changes
@@ -1742,23 +1755,33 @@ const InventoryPage = ({ defaultTab }) => {
         <CelebrationModal
           message="You've added your first item. Great job!"
           onContinue={() => {
-            console.log('[Inventory] Part 1 complete - advancing to PUSH_NOTIFICATION_PROMPT with delay');
-            // Add 1.5 second delay before showing notification prompt
-            setTimeout(() => {
-              nextStep(); // Advances to PUSH_NOTIFICATION_PROMPT
-            }, 1500);
+            console.log('[Inventory] Part 1 complete - closing modal and advancing to VIEWING_INVENTORY');
+            nextStep(); // Advances to VIEWING_INVENTORY (modal closes immediately)
           }}
           continueLabel="Continue"
         />
       )}
 
-      {/* Push Notification Prompt Modal */}
+      {/* Push Notification Prompt Modal - Shows after 4 second delay */}
       {shouldShowTooltip(STEPS.PUSH_NOTIFICATION_PROMPT) && (
         <PushNotificationPromptModal
           onContinue={(enabled) => {
             console.log('[Inventory] Push notification prompt completed, enabled:', enabled);
-            nextStep(); // Advances to RECIPE_INTRO
+            nextStep(); // Advances to SHORTCUT_INTRO
           }}
+        />
+      )}
+
+      {/* Shortcut Introduction Modal - Uses same design as standalone shortcut installation */}
+      {shouldShowTooltip(STEPS.SHORTCUT_INTRO) && (
+        <IntroductionModal
+          title="Let's install your shortcut"
+          message="We'll help you set up a quick way to import recipes from Instagram."
+          onContinue={() => {
+            console.log('[Inventory] Shortcut intro - advancing to INSTALL_SHORTCUT');
+            nextStep(); // Advances to INSTALL_SHORTCUT
+          }}
+          continueLabel="Continue"
         />
       )}
 

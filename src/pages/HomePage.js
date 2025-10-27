@@ -5,6 +5,7 @@ import MobileBottomNav from '../components/MobileBottomNav';
 import { useAuth } from '../features/auth/context/AuthContext';
 import { useGuidedTourContext } from '../contexts/GuidedTourContext';
 import WelcomePrompt from '../components/guided-tour/WelcomePrompt';
+import IntroductionModal from '../components/guided-tour/IntroductionModal';
 import ShortcutInstallModal from '../components/guided-tour/ShortcutInstallModal';
 import ShortcutConfirmationModal from '../components/guided-tour/ShortcutConfirmationModal';
 import ShortcutSuccessBridgeModal from '../components/guided-tour/ShortcutSuccessBridgeModal';
@@ -927,12 +928,38 @@ const HomePage = () => {
         <WelcomePrompt
           onStart={() => {
             console.log('[HomePage] User clicked Start Tour');
-            nextStep(); // Move to ADD_GROCERIES step
+            nextStep(); // Move to GROCERIES_INTRO step
           }}
           onSkip={() => {
             console.log('[HomePage] User clicked Skip Tour');
             dismissTour(); // Dismiss the tour completely
           }}
+        />
+      )}
+
+      {/* Groceries Introduction Modal - "Let's start by logging your first item" */}
+      {shouldShowTooltip(STEPS.GROCERIES_INTRO) && (
+        <IntroductionModal
+          title="Let's start by logging your first item"
+          message="We'll guide you through adding items to your fridge inventory using the camera."
+          onContinue={() => {
+            console.log('[HomePage] Groceries intro - advancing to ADD_GROCERIES');
+            nextStep(); // Advances to ADD_GROCERIES
+          }}
+          continueLabel="Continue"
+        />
+      )}
+
+      {/* Shortcut Introduction Modal - "Let's install your shortcut" */}
+      {shouldShowTooltip(STEPS.SHORTCUT_INTRO) && (
+        <IntroductionModal
+          title="Let's install your shortcut"
+          message="We'll help you set up a quick way to import recipes from Instagram."
+          onContinue={() => {
+            console.log('[HomePage] Shortcut intro - advancing to INSTALL_SHORTCUT');
+            nextStep(); // Advances to INSTALL_SHORTCUT
+          }}
+          continueLabel="Continue"
         />
       )}
 

@@ -9,12 +9,15 @@ const STORAGE_KEY = 'trackabite_guided_tour';
 const STEPS = {
   NOT_STARTED: 'not_started',
   WELCOME_SCREEN: 'welcome_screen',         // Step 0: Welcome prompt
+  GROCERIES_INTRO: 'groceries_intro',       // "Let's start by logging your first item"
   ADD_GROCERIES: 'add_groceries',           // Step 1: Tooltip on navbar "+"
   ADD_ITEMS_MENU: 'add_items_menu',         // Step 2: Tooltip on "Add items" in menu
   ITEMS_ADDED: 'items_added',               // After items scanned
   GO_TO_MEALS: 'go_to_meals',               // Celebration: Items added successfully
+  VIEWING_INVENTORY: 'viewing_inventory',   // Waiting period to view inventory
   PUSH_NOTIFICATION_PROMPT: 'push_notification_prompt', // Push notification setup
-  INSTALL_SHORTCUT: 'install_shortcut',     // Part 2: iOS shortcut installation
+  SHORTCUT_INTRO: 'shortcut_intro',         // "Let's install your shortcut" intro
+  INSTALL_SHORTCUT: 'install_shortcut',     // Part 2: iOS shortcut installation (Copy Magic Key)
   RECIPE_INTRO: 'recipe_intro',             // Part 2: Intro to recipe import (after shortcut)
   SHORTCUT_CONFIRMATION: 'shortcut_confirmation',   // "Have you installed your shortcut?"
   SHORTCUT_SUCCESS_BRIDGE: 'shortcut_success_bridge', // "Awesome! Now let's import..."

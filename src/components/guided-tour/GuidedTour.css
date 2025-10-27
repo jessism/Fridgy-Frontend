@@ -468,6 +468,14 @@
   margin: 0 0 1rem 0;
 }
 
+.guided-tour__intro-message {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #666;
+  margin: 0 0 2rem 0;
+  line-height: 1.6;
+}
+
 /* Shortcut Install Modal Styles */
 .guided-tour__shortcut-card {
   background: white;
@@ -1589,5 +1597,9 @@
 
   .guided-tour__notification-icon {
     margin: 0 auto 1rem;
+  }
+
+  .guided-tour__intro-message {
+    font-size: 0.95rem;
   }
 }

@@ -23,7 +23,7 @@ const IntroductionModal = ({ title, message, onContinue, continueLabel = 'Contin
         )}
 
         {/* Message */}
-        <p className="guided-tour__celebration-message">{message}</p>
+        <p className="guided-tour__intro-message">{message}</p>
 
         {/* Continue Button */}
         <button

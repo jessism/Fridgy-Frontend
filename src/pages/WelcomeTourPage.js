@@ -28,7 +28,7 @@ const WelcomeTourPage = () => {
     resetTour();
 
     setTimeout(() => {
-      goToStep(STEPS.ADD_GROCERIES);
+      goToStep(STEPS.GROCERIES_INTRO);
       navigate('/home');
     }, 100);
   };
@@ -38,7 +38,7 @@ const WelcomeTourPage = () => {
     resetTour();
 
     setTimeout(() => {
-      goToStep(STEPS.INSTALL_SHORTCUT);
+      goToStep(STEPS.SHORTCUT_INTRO);
       navigate('/home');
     }, 100);
   };
