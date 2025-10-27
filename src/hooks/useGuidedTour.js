@@ -13,8 +13,9 @@ const STEPS = {
   ADD_ITEMS_MENU: 'add_items_menu',         // Step 2: Tooltip on "Add items" in menu
   ITEMS_ADDED: 'items_added',               // After items scanned
   GO_TO_MEALS: 'go_to_meals',               // Celebration: Items added successfully
-  RECIPE_INTRO: 'recipe_intro',             // Part 2: Intro to recipe import
+  PUSH_NOTIFICATION_PROMPT: 'push_notification_prompt', // Push notification setup
   INSTALL_SHORTCUT: 'install_shortcut',     // Part 2: iOS shortcut installation
+  RECIPE_INTRO: 'recipe_intro',             // Part 2: Intro to recipe import (after shortcut)
   SHORTCUT_CONFIRMATION: 'shortcut_confirmation',   // "Have you installed your shortcut?"
   SHORTCUT_SUCCESS_BRIDGE: 'shortcut_success_bridge', // "Awesome! Now let's import..."
   IMPORT_RECIPE_INTRO: 'import_recipe_intro',       // "Let's import your first recipe"

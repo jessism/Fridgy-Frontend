@@ -76,6 +76,8 @@ const HomePage = () => {
     hasNotifications: false,
     hasShortcut: false
   });
+  const [shortcutInstallTimer, setShortcutInstallTimer] = useState(null);
+  const [userClickedInstall, setUserClickedInstall] = useState(false);
 
   // Color palette - Option 2 (Medium Green)
   const colors = {
@@ -83,6 +85,16 @@ const HomePage = () => {
     primaryLight: 'rgba(129, 224, 83, 0.3)',
     primaryDark: '#6bc93f',
   };
+
+  // Clean up shortcut install timer on unmount or when tour step changes
+  useEffect(() => {
+    return () => {
+      if (shortcutInstallTimer) {
+        console.log('[HomePage] Cleaning up shortcut install timer');
+        clearTimeout(shortcutInstallTimer);
+      }
+    };
+  }, [shortcutInstallTimer]);
 
   // Debug: Log checkoutSecret changes
   useEffect(() => {
@@ -928,12 +940,50 @@ const HomePage = () => {
       {shouldShowTooltip(STEPS.INSTALL_SHORTCUT) && isIOS() && (
         <ShortcutInstallModal
           onInstall={() => {
-            console.log('[HomePage] User clicked Install Shortcut, waiting 20 seconds...');
-            nextStep(); // Advances to SHORTCUT_CONFIRMATION after 20s delay
+            console.log('[HomePage] User clicked Install Shortcut, starting 10-second timer');
+
+            // Mark that user clicked install
+            setUserClickedInstall(true);
+
+            // Clear any existing timer
+            if (shortcutInstallTimer) {
+              clearTimeout(shortcutInstallTimer);
+            }
+
+            // Start 10-second timer
+            const timer = setTimeout(() => {
+              // Only show confirmation if user still intended to install
+              if (userClickedInstall) {
+                console.log('[HomePage] Timer fired, showing confirmation');
+                nextStep(); // Show SHORTCUT_CONFIRMATION
+              } else {
+                console.log('[HomePage] Timer fired but user cancelled intent, not showing confirmation');
+              }
+            }, 10000);
+
+            setShortcutInstallTimer(timer);
           }}
           onSkip={() => {
             console.log('[HomePage] User skipped shortcut installation');
+
+            // Clear timer and intent flag
+            if (shortcutInstallTimer) {
+              clearTimeout(shortcutInstallTimer);
+              setShortcutInstallTimer(null);
+            }
+            setUserClickedInstall(false);
+
             nextStep(); // Skip to next step
+          }}
+          onCancelTimer={() => {
+            console.log('[HomePage] Cancelling install timer - user clicked skip');
+
+            // Clear timer and intent flag
+            if (shortcutInstallTimer) {
+              clearTimeout(shortcutInstallTimer);
+              setShortcutInstallTimer(null);
+            }
+            setUserClickedInstall(false);
           }}
         />
       )}

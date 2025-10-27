@@ -11,6 +11,7 @@ import { useGuidedTourContext } from '../contexts/GuidedTourContext';
 import CelebrationModal from '../components/guided-tour/CelebrationModal';
 import IntroductionModal from '../components/guided-tour/IntroductionModal';
 import ShortcutInstallModal from '../components/guided-tour/ShortcutInstallModal';
+import PushNotificationPromptModal from '../components/guided-tour/PushNotificationPromptModal';
 import { isIOS } from '../utils/welcomeFlowHelpers';
 import '../components/guided-tour/GuidedTour.css';
 import { getItemIconIcons8, getExpiryStatus, formatQuantity } from '../assets/inventory_emojis/iconHelpers.js';
@@ -1741,10 +1742,23 @@ const InventoryPage = ({ defaultTab }) => {
         <CelebrationModal
           message="You've added your first item. Great job!"
           onContinue={() => {
-            console.log('[Inventory] Part 1 complete - advancing to RECIPE_INTRO');
-            nextStep(); // Advances to RECIPE_INTRO
+            console.log('[Inventory] Part 1 complete - advancing to PUSH_NOTIFICATION_PROMPT with delay');
+            // Add 1.5 second delay before showing notification prompt
+            setTimeout(() => {
+              nextStep(); // Advances to PUSH_NOTIFICATION_PROMPT
+            }, 1500);
           }}
           continueLabel="Continue"
+        />
+      )}
+
+      {/* Push Notification Prompt Modal */}
+      {shouldShowTooltip(STEPS.PUSH_NOTIFICATION_PROMPT) && (
+        <PushNotificationPromptModal
+          onContinue={(enabled) => {
+            console.log('[Inventory] Push notification prompt completed, enabled:', enabled);
+            nextStep(); // Advances to RECIPE_INTRO
+          }}
         />
       )}
 

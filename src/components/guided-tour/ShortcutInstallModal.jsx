@@ -6,14 +6,13 @@ import './GuidedTour.css';
  * ShortcutInstallModal - Swipeable carousel guiding iOS users through shortcut installation
  * Features: swipe gestures, button navigation, step-by-step instructions with images
  */
-const ShortcutInstallModal = ({ onInstall, onSkip }) => {
+const ShortcutInstallModal = ({ onInstall, onSkip, onCancelTimer }) => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tokenCopied, setTokenCopied] = useState(false);
   const [currentModal, setCurrentModal] = useState(1); // 1 = token, 2 = instructions, 'skip-confirm' = skip warning, 'skip-final' = skip final message
   const [returnModal, setReturnModal] = useState(1); // Store which modal to return to if user clicks "No, Let's Do This"
   const [showCopyWarning, setShowCopyWarning] = useState(false);
-  const [installTimerRef, setInstallTimerRef] = useState(null);
 
   const SHORTCUT_URL = process.env.REACT_APP_ICLOUD_SHORTCUT_URL || 'https://www.icloud.com/shortcuts/PLACEHOLDER';
 
@@ -78,11 +77,9 @@ const ShortcutInstallModal = ({ onInstall, onSkip }) => {
   };
 
   const handleSkipClick = () => {
-    // Cancel install timer if user starts skip flow
-    if (installTimerRef) {
-      clearTimeout(installTimerRef);
-      setInstallTimerRef(null);
-      console.log('[ShortcutInstall] Timer cancelled - user clicked skip');
+    // Notify parent to cancel timer
+    if (onCancelTimer) {
+      onCancelTimer();
     }
 
     // Store current modal to return to if user changes mind
@@ -101,10 +98,9 @@ const ShortcutInstallModal = ({ onInstall, onSkip }) => {
   };
 
   const handleSkipFinal = () => {
-    // Cancel install timer if user skips
-    if (installTimerRef) {
-      clearTimeout(installTimerRef);
-      setInstallTimerRef(null);
+    // Notify parent to cancel timer
+    if (onCancelTimer) {
+      onCancelTimer();
     }
     // Actually skip the tour
     onSkip();
@@ -119,23 +115,9 @@ const ShortcutInstallModal = ({ onInstall, onSkip }) => {
     // Open iCloud shortcut URL
     window.location.href = SHORTCUT_URL;
 
-    // Wait 10 seconds before showing confirmation modal
-    const timer = setTimeout(() => {
-      onInstall(); // This advances to SHORTCUT_CONFIRMATION step
-    }, 10000);
-
-    // Store timer reference so we can cancel if user skips
-    setInstallTimerRef(timer);
+    // Notify parent that install was clicked (parent will manage timer)
+    onInstall();
   };
-
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (installTimerRef) {
-        clearTimeout(installTimerRef);
-      }
-    };
-  }, [installTimerRef]);
 
   return ReactDOM.createPortal(
     <div className="guided-tour__celebration-overlay">
