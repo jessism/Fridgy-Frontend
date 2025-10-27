@@ -8,11 +8,13 @@ import WelcomePrompt from '../components/guided-tour/WelcomePrompt';
 import ShortcutInstallModal from '../components/guided-tour/ShortcutInstallModal';
 import ShortcutConfirmationModal from '../components/guided-tour/ShortcutConfirmationModal';
 import ShortcutSuccessBridgeModal from '../components/guided-tour/ShortcutSuccessBridgeModal';
+import PreFlightCheckModal from '../components/guided-tour/PreFlightCheckModal';
 import RecipeImportIntroModal from '../components/guided-tour/RecipeImportIntroModal';
 import RecipeImportStepModal from '../components/guided-tour/RecipeImportStepModal';
 import RecipeImportSuccessModal from '../components/guided-tour/RecipeImportSuccessModal';
 import { isIOS } from '../utils/welcomeFlowHelpers';
 import { detectRecipeImport } from '../utils/recipeImportDetection';
+import { checkRecipeImportPrerequisites, requestNotificationPermission } from '../utils/shortcutDetection';
 import useInventory from '../hooks/useInventory';
 import IOSInstallPrompt from '../components/IOSInstallPrompt';
 import { usePWADetection } from '../hooks/usePWADetection';
@@ -34,6 +36,7 @@ import fatsIcon from '../assets/images/food-groups/foodgroup_fats.png';
 import beveragesIcon from '../assets/images/food-groups/foodgroup_beverages.png';
 import { ReactComponent as RecipesIcon } from '../assets/icons/quickaccess/recipes.svg';
 import importRecipeStep1Image from '../assets/product mockup/Import Recipes/Import_recipe_open_instagram.jpeg';
+import importRecipeStep4Image from '../assets/product mockup/Import Recipes/Import_recipe_allow_api.png';
 import cookingIcon from '../assets/icons/Cooking.png';
 import './HomePage.css';
 
@@ -69,6 +72,10 @@ const HomePage = () => {
   const [upgradeModal, setUpgradeModal] = useState({ isOpen: false });
   const [recipeImportStep, setRecipeImportStep] = useState(1);
   const [importedRecipe, setImportedRecipe] = useState(null);
+  const [preFlightStatus, setPreFlightStatus] = useState({
+    hasNotifications: false,
+    hasShortcut: false
+  });
 
   // Color palette - Option 2 (Medium Green)
   const colors = {
@@ -962,12 +969,47 @@ const HomePage = () => {
       {/* Recipe Import Intro Modal */}
       {shouldShowTooltip(STEPS.IMPORT_RECIPE_INTRO) && (
         <RecipeImportIntroModal
-          onShowMeHow={() => {
-            console.log('[HomePage] User clicked Let\'s Go');
-            nextStep(); // Move to IMPORT_RECIPE_STEP_1
+          onShowMeHow={async () => {
+            console.log('[HomePage] Checking prerequisites...');
+
+            // Check prerequisites
+            const prerequisites = await checkRecipeImportPrerequisites();
+            setPreFlightStatus({
+              hasNotifications: prerequisites.hasNotifications,
+              hasShortcut: prerequisites.hasShortcut
+            });
+
+            nextStep(); // Move to IMPORT_RECIPE_PREFLIGHT
           }}
           onSkip={() => {
             console.log('[HomePage] User skipped recipe import');
+            dismissTour();
+          }}
+        />
+      )}
+
+      {/* Pre-Flight Check Modal */}
+      {shouldShowTooltip(STEPS.IMPORT_RECIPE_PREFLIGHT) && (
+        <PreFlightCheckModal
+          hasNotifications={preFlightStatus.hasNotifications}
+          hasShortcut={preFlightStatus.hasShortcut}
+          onContinue={() => {
+            console.log('[HomePage] Continuing to recipe import steps');
+            nextStep(); // Move to IMPORT_RECIPE_STEP_1
+          }}
+          onEnableNotifications={async () => {
+            console.log('[HomePage] Requesting notification permission');
+            const permission = await requestNotificationPermission();
+            if (permission === 'granted') {
+              setPreFlightStatus(prev => ({ ...prev, hasNotifications: true }));
+            }
+          }}
+          onInstallShortcut={() => {
+            console.log('[HomePage] Redirecting to shortcut installation');
+            goToStep(STEPS.INSTALL_SHORTCUT);
+          }}
+          onSkip={() => {
+            console.log('[HomePage] User skipped preflight check');
             dismissTour();
           }}
         />
@@ -995,7 +1037,12 @@ const HomePage = () => {
       {shouldShowTooltip(STEPS.IMPORT_RECIPE_STEP_2) && (
         <RecipeImportStepModal
           stepNumber={2}
-          title="Tap the Share Icon"
+          title={
+            <>
+              Tap <span style={{color: 'var(--primary-green, #4fcf61)'}}>Share</span> Icon and Click{' '}
+              <span style={{color: 'var(--primary-green, #4fcf61)'}}>Share to</span>
+            </>
+          }
           description="Find the paper airplane icon at the bottom of the Instagram post and tap it."
           videoSrc="/videos/import-tutorial/step2-tap-share.mp4"
           buttonText="Next"
@@ -1009,7 +1056,12 @@ const HomePage = () => {
       {shouldShowTooltip(STEPS.IMPORT_RECIPE_STEP_3) && (
         <RecipeImportStepModal
           stepNumber={3}
-          title="Scroll Down and Select 'Save to Trackabite'"
+          title={
+            <>
+              Scroll Down and Select{' '}
+              <span style={{color: 'var(--primary-green, #4fcf61)'}}>Save to Trackabite</span>
+            </>
+          }
           description="Scroll through the share menu and tap the 'Save to Trackabite' shortcut."
           videoSrc="/videos/import-tutorial/step3-save-to-trackabite.mp4"
           buttonText="Next"
@@ -1019,24 +1071,43 @@ const HomePage = () => {
         />
       )}
 
-      {/* Step 4: View Your Recipe (Tutorial) */}
+      {/* Step 4: Allow Instagram to Send Items (NEW) */}
       {shouldShowTooltip(STEPS.IMPORT_RECIPE_STEP_4) && (
         <RecipeImportStepModal
           stepNumber={4}
-          title="View Your Recipe"
-          description="Wait for our Fridgy to analyze your recipe and view it when it's ready."
-          icon="checkmark"
-          buttonText="Ok, Got It"
+          title={
+            <>
+              <span style={{color: 'var(--primary-green, #4fcf61)'}}>Always Allow</span>
+              {' '}Instagram to Send Items to Trackabite
+            </>
+          }
+          description="Tap 'Always Allow' to allow Instagram to send items to Trackabite."
+          icon={{ type: 'img', src: importRecipeStep4Image }}
+          buttonText="Next"
           onNext={() => nextStep()}
           onBack={() => goToStep(STEPS.IMPORT_RECIPE_STEP_3)}
           onSkip={() => dismissTour()}
         />
       )}
 
-      {/* Step 5: Let's Start Importing (Action!) */}
+      {/* Step 5: View Your Recipe (Tutorial) */}
       {shouldShowTooltip(STEPS.IMPORT_RECIPE_STEP_5) && (
         <RecipeImportStepModal
           stepNumber={5}
+          title="View Your Recipe"
+          description="Wait for our Fridgy to analyze your recipe and view it when it's ready."
+          icon="checkmark"
+          buttonText="Ok, Got It"
+          onNext={() => nextStep()}
+          onBack={() => goToStep(STEPS.IMPORT_RECIPE_STEP_4)}
+          onSkip={() => dismissTour()}
+        />
+      )}
+
+      {/* Step 6: Let's Start Importing (Action!) */}
+      {shouldShowTooltip(STEPS.IMPORT_RECIPE_STEP_6) && (
+        <RecipeImportStepModal
+          stepNumber={6}
           title={<><div style={{fontSize: '0.9rem', fontWeight: '400', color: '#666', marginBottom: '0.5rem'}}>Perfecto!</div>Now Let's Start Importing Your First Recipe!</>}
           description=""
           icon={cookingIcon}
@@ -1059,7 +1130,7 @@ const HomePage = () => {
               }
             });
           }}
-          onBack={() => goToStep(STEPS.IMPORT_RECIPE_STEP_4)}
+          onBack={() => goToStep(STEPS.IMPORT_RECIPE_STEP_5)}
           onSkip={() => dismissTour()}
         />
       )}

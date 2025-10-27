@@ -18,11 +18,13 @@ const STEPS = {
   SHORTCUT_CONFIRMATION: 'shortcut_confirmation',   // "Have you installed your shortcut?"
   SHORTCUT_SUCCESS_BRIDGE: 'shortcut_success_bridge', // "Awesome! Now let's import..."
   IMPORT_RECIPE_INTRO: 'import_recipe_intro',       // "Let's import your first recipe"
+  IMPORT_RECIPE_PREFLIGHT: 'import_recipe_preflight', // Check notifications + shortcut
   IMPORT_RECIPE_STEP_1: 'import_recipe_step_1',     // Step 1: Open Instagram post
   IMPORT_RECIPE_STEP_2: 'import_recipe_step_2',     // Step 2: Tap share icon
-  IMPORT_RECIPE_STEP_3: 'import_recipe_step_3',     // Step 3: Scroll down
-  IMPORT_RECIPE_STEP_4: 'import_recipe_step_4',     // Step 4: Select "Save to Trackabite"
-  IMPORT_RECIPE_STEP_5: 'import_recipe_step_5',     // Step 5: Check import
+  IMPORT_RECIPE_STEP_3: 'import_recipe_step_3',     // Step 3: Scroll down and select
+  IMPORT_RECIPE_STEP_4: 'import_recipe_step_4',     // Step 4: Allow Instagram to send items
+  IMPORT_RECIPE_STEP_5: 'import_recipe_step_5',     // Step 5: View your recipe
+  IMPORT_RECIPE_STEP_6: 'import_recipe_step_6',     // Step 6: Start importing (action)
   IMPORT_RECIPE_SUCCESS: 'import_recipe_success',   // Success modal
   IMPORT_RECIPE: 'import_recipe',           // Legacy: Tooltip on Import button
   PASTE_URL: 'paste_url',                   // Step 5: Tooltip on URL input

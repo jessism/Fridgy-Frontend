@@ -712,6 +712,74 @@
   object-fit: contain;
 }
 
+.recipe-import-step__full-image {
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto 0.25rem auto;
+  text-align: center;
+  line-height: 0;
+}
+
+.recipe-import-step__full-image img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+/* Pre-Flight Check Styles */
+.preflight-check__items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.preflight-check__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.preflight-check__item--ready {
+  background: rgba(79, 207, 97, 0.1);
+  border: 1px solid rgba(79, 207, 97, 0.3);
+  color: #333;
+}
+
+.preflight-check__item--missing {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  color: #333;
+}
+
+.preflight-check__status {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.preflight-check__status--ready {
+  background: var(--primary-green, #4fcf61);
+  color: white;
+}
+
+.preflight-check__status--missing {
+  background: #ffc107;
+  color: white;
+}
+
 /* iPhone Frame for Screenshots */
 .recipe-import-step__phone-frame {
   position: relative;

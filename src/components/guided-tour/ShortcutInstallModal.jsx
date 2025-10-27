@@ -112,10 +112,10 @@ const ShortcutInstallModal = ({ onInstall, onSkip }) => {
     // Open iCloud shortcut URL
     window.location.href = SHORTCUT_URL;
 
-    // Wait 30 seconds before showing confirmation modal
+    // Wait 10 seconds before showing confirmation modal
     const timer = setTimeout(() => {
       onInstall(); // This advances to SHORTCUT_CONFIRMATION step
-    }, 30000);
+    }, 10000);
 
     // Store timer reference so we can cancel if user skips
     setInstallTimerRef(timer);

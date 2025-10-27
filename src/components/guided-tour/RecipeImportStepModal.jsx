@@ -65,6 +65,11 @@ const RecipeImportStepModal = ({
               <path d="M8 12l3 3 5-6" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
+        ) : typeof icon === 'object' && icon.type === 'img' ? (
+          /* Full-width Image (no frame) */
+          <div className="recipe-import-step__full-image">
+            <img src={icon.src} alt={title} />
+          </div>
         ) : typeof icon === 'string' && icon.startsWith('/') ? (
           /* Image Icon (like cooking icon) */
           <div className="recipe-import-step__image-icon">
@@ -78,13 +83,13 @@ const RecipeImportStepModal = ({
         ) : null}
 
         {/* Title */}
-        <h2 className="guided-tour__shortcut-simple-title" style={{ marginBottom: '0.5rem', marginTop: '0.5rem' }}>
+        <h2 className="guided-tour__shortcut-simple-title" style={{ marginBottom: '0.25rem', marginTop: '0.25rem' }}>
           {title}
         </h2>
 
         {/* Description */}
         {description && (
-          <p className="guided-tour__shortcut-simple-description">
+          <p className="guided-tour__shortcut-simple-description" style={{ marginBottom: '1rem' }}>
             {description}
           </p>
         )}
