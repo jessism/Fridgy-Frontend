@@ -111,13 +111,17 @@ export const CATEGORY_ICONS = {
   'Nuts': '🥜',
   'Crackers': '🍘',
   
-  // Condiments & Spices
+  // Seasonings (includes herbs, spices, and condiments)
+  'Seasonings': '🧂',
+  'Seasoning': '🧂',
+  'Herbs': '🌿',
+  'Herb': '🌿',
+  'Spices': '🧂',
+  'Spice': '🧂',
   'Condiments': '🧂',
   'Condiment': '🧂',
   'Salt': '🧂',
   'Pepper': '🧂',
-  'Spices': '🧂',
-  'Spice': '🧂',
   'Sauce': '🥫',
   'Ketchup': '🍅',
   'Mustard': '🟡',

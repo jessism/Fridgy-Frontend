@@ -119,13 +119,17 @@ export const CATEGORY_ICONS_SVG = {
   'Nuts': Package,
   'Crackers': Package,
   
-  // Condiments & Spices
+  // Seasonings (includes herbs, spices, and condiments)
+  'Seasonings': Leaf,
+  'Seasoning': Leaf,
+  'Herbs': Leaf,
+  'Herb': Leaf,
+  'Spices': Package,
+  'Spice': Package,
   'Condiments': Package,
   'Condiment': Package,
   'Salt': Package,
   'Pepper': Package,
-  'Spices': Package,
-  'Spice': Package,
   'Sauce': Package,
   'Ketchup': Package,
   'Mustard': Package,

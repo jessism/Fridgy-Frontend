@@ -35,6 +35,7 @@ import fruitsIcon from '../assets/images/food-groups/foodgroup_fruits.png';
 import grainsIcon from '../assets/images/food-groups/foodgroup_carb.png';
 import fatsIcon from '../assets/images/food-groups/foodgroup_fats.png';
 import beveragesIcon from '../assets/images/food-groups/foodgroup_beverages.png';
+import herbsIcon from '../assets/images/food-groups/foodgroup_herbs.png';
 import { ReactComponent as RecipesIcon } from '../assets/icons/quickaccess/recipes.svg';
 import importRecipeStep1Image from '../assets/product mockup/Import Recipes/Import_recipe_open_instagram.jpeg';
 import importRecipeStep4Image from '../assets/product mockup/Import Recipes/Import_recipe_allow_api.png';
@@ -54,7 +55,7 @@ const HomePage = () => {
   const { user } = useAuth();
   const { items, loading: inventoryLoading } = useInventory();
   const navigate = useNavigate();
-  const { isPremium, startCheckout, checkoutSecret, closeCheckout, pollForUpgrade, refresh } = useSubscription();
+  const { isPremium, startCheckout, checkoutSecret, closeCheckout, refresh } = useSubscription();
   const { shouldShowTooltip, nextStep, dismissTour, completeTour, goToStep, STEPS } = useGuidedTourContext();
 
   // PWA Detection for first-time notification prompt
@@ -164,7 +165,8 @@ const HomePage = () => {
       'Fruits': 0,
       'Grains': 0,
       'Fats and Oils': 0,
-      'Beverages': 0
+      'Beverages': 0,
+      'Seasonings': 0
     };
 
     items.forEach(item => {
@@ -326,6 +328,14 @@ const HomePage = () => {
                 <img src={beveragesIcon} alt="Beverages" className="food-group-icon" />
               </div>
               <h3>Beverages</h3>
+            </div>
+
+            <div className="category-card" onClick={() => navigateToCategory('Seasonings')}>
+              <div className="category-count">{categoryCounts['Seasonings']}</div>
+              <div className="category-image">
+                <img src={herbsIcon} alt="Seasonings" className="food-group-icon" />
+              </div>
+              <h3>Seasonings</h3>
             </div>
           </div>
          </div>
@@ -915,13 +925,11 @@ const HomePage = () => {
         startCheckout={startCheckout}
       />
 
-      {/* Embedded Checkout Modal */}
+      {/* Checkout Modal with Payment Element */}
       {checkoutSecret && (
         <CheckoutModal
-          clientSecret={checkoutSecret}
           onClose={closeCheckout}
           onSuccess={refresh}
-          pollForUpgrade={pollForUpgrade}
         />
       )}
 

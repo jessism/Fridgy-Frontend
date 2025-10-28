@@ -89,6 +89,10 @@
   background: #ffe8cc !important; /* Light orange for beverages */
 }
 
+.ingredient-image--mint-bg {
+  background: #e0f2f1 !important; /* Light mint for herbs and seasonings */
+}
+
 .ingredient-image--pink-bg {
   background: #fce4ec !important; /* Light pink for others */
 }
@@ -160,6 +164,10 @@
 
   .ingredient-image--orange-bg {
     background: #ffe8cc !important;
+  }
+
+  .ingredient-image--mint-bg {
+    background: #e0f2f1 !important;
   }
 
   .ingredient-image--pink-bg {

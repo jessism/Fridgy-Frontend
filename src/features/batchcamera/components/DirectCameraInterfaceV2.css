@@ -484,17 +484,23 @@
   background: rgba(248, 249, 250, 0.5);
 }
 
-/* Left: Icon */
+/* Left: Icon - Match InventoryPage styling with circular image */
 .camera-v2__card-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 2px solid #e9ecef;
+}
+
+/* Circular ingredient image styling */
+.camera-v2__card-image {
+  width: 64px !important;
+  height: 64px !important;
+  border-radius: 50%;
+  overflow: hidden;
+  object-fit: cover;
 }
 
 /* Middle: Content */
@@ -580,11 +586,19 @@
 }
 
 .camera-v2__card-date-input {
-  padding: 0.25rem 0.5rem;
-  border: 1px solid #e9ecef;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  color: var(--primary-green, #4fcf61); /* Changed to green */
+  padding: 0.4rem 0.75rem;
+  border: 1.5px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #333;
+  background: #f8f9fa;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.camera-v2__card-date-input:hover {
+  border-color: #d1d5db;
+  background: #fff;
 }
 
 .camera-v2__card-remove-btn {
@@ -613,8 +627,9 @@
 .camera-v2__card-category-select:focus,
 .camera-v2__card-date-input:focus {
   outline: none;
-  border-color: var(--primary-green, #81e053);
-  box-shadow: 0 0 0 2px rgba(129, 224, 83, 0.1);
+  border-color: #4fcf61;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(79, 207, 97, 0.1);
 }
 
 /* Save Actions */

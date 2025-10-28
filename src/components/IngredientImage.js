@@ -32,6 +32,8 @@ const IngredientImage = ({
       return 'ingredient-image--yellow-bg';
     } else if (cat.includes('grain') || cat.includes('bread') || cat.includes('pasta')) {
       return 'ingredient-image--tan-bg';
+    } else if (cat.includes('seasoning') || cat.includes('herb') || cat.includes('spice') || cat.includes('condiment') || cat.includes('sauce')) {
+      return 'ingredient-image--mint-bg';
     } else {
       return 'ingredient-image--pink-bg';
     }

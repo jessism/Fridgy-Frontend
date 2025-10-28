@@ -6,6 +6,7 @@ import GuidedTooltip from '../../../components/guided-tour/GuidedTooltip';
 import '../../../components/guided-tour/GuidedTour.css';
 import SuccessModal from '../../../components/modals/SuccessModal';
 import { getItemIconIcons8, formatQuantity } from '../../../assets/inventory_emojis/iconHelpers.js';
+import IngredientImage from '../../../components/IngredientImage';
 import { safeJSONStringify } from '../../../utils/jsonSanitizer';
 import FridgyLogo from '../../../assets/images/Logo.png';
 import './DirectCameraInterfaceV2.css';
@@ -28,6 +29,7 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
       'Grains': { bg: '#fff7e6', text: '#8b6332' },
       'Fats and oils': { bg: '#fffde7', text: '#827717' },
       'Beverages': { bg: '#ffe8cc', text: '#cc6600' },
+      'Seasonings': { bg: '#e0f2f1', text: '#2e7d6e' },
       'Other': { bg: '#f5f5f5', text: '#666666' }
     };
     return categoryColors[category] || categoryColors['Other'];
@@ -411,15 +413,22 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
           {/* Modern Card Interface */}
           <div className="camera-v2__results-cards">
             {editableResults.map((item, index) => {
-              const itemIcon = getItemIconIcons8(item.category, item.name, { size: 28 });
               const formattedQuantity = formatQuantity(item.quantity);
               const categoryColor = getCategoryColor(item.category);
 
               return (
                 <div key={index} className="camera-v2__inventory-card">
-                  {/* Left: Emoji icon with category background */}
-                  <div className="camera-v2__card-icon" style={{ backgroundColor: categoryColor.bg }}>
-                    {itemIcon}
+                  {/* Left: Ingredient image with category background */}
+                  <div className="camera-v2__card-icon">
+                    <IngredientImage
+                      item={{
+                        itemName: item.name,
+                        category: item.category
+                      }}
+                      size={64}
+                      className="camera-v2__card-image"
+                      fallbackToIcon={true}
+                    />
                   </div>
                   
                   {/* Middle: Content */}
@@ -468,6 +477,7 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
                           <option value="Grains">Grains</option>
                           <option value="Beverages">Beverages</option>
                           <option value="Fats and oils">Fats and oils</option>
+                          <option value="Seasonings">Seasonings</option>
                           <option value="Other">Other</option>
                         </select>
                       </div>

@@ -21,7 +21,7 @@ import './MealPlansPage.css';
 const MealPlansPage = ({ defaultTab }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isPremium, startCheckout, loading: subscriptionLoading, checkoutSecret, closeCheckout, pollForUpgrade, refresh } = useSubscription();
+  const { isPremium, startCheckout, loading: subscriptionLoading, checkoutSecret, closeCheckout, refresh } = useSubscription();
   const { shouldShowTooltip, completeStep, STEPS } = useGuidedTourContext();
   const {
     suggestions,
@@ -1261,13 +1261,11 @@ const MealPlansPage = ({ defaultTab }) => {
         onClose={() => setShowRecipeCreationModal(false)}
       />
 
-      {/* Embedded Checkout Modal */}
+      {/* Checkout Modal with Payment Element */}
       {checkoutSecret && (
         <CheckoutModal
-          clientSecret={checkoutSecret}
           onClose={closeCheckout}
           onSuccess={refresh}
-          pollForUpgrade={pollForUpgrade}
         />
       )}
 

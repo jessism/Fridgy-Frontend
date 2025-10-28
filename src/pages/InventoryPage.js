@@ -231,8 +231,8 @@ const InventoryPage = ({ defaultTab }) => {
       'Grains': { bg: '#fff7e6', text: '#8b6332' },          // Light tan
       'Fats and oils': { bg: '#fffde7', text: '#827717' },   // Light yellow
       'Beverages': { bg: '#ffe8cc', text: '#cc6600' },       // Light orange
+      'Seasonings': { bg: '#e0f2f1', text: '#2e7d6e' },      // Light mint
       'Snacks': { bg: '#fffcf0', text: '#8b7d4a' },          // Very soft yellow
-      'Condiments': { bg: '#fff0f2', text: '#8b4a56' },      // Very soft coral
       'Pantry': { bg: '#f7f0ff', text: '#6b4a8b' },          // Very soft lavender
       'Frozen': { bg: '#f0faff', text: '#4a7a8b' },          // Very soft cyan
       'Other': { bg: '#f5f5f5', text: '#666666' },           // Very soft gray

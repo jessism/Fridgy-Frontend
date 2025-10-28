@@ -18,7 +18,6 @@ const SubscriptionPage = () => {
     startCheckout,
     checkoutSecret,
     closeCheckout,
-    pollForUpgrade,
     refresh,
   } = useSubscription();
 
@@ -488,13 +487,11 @@ const SubscriptionPage = () => {
         </div>
       </div>
 
-      {/* Embedded Checkout Modal */}
+      {/* Checkout Modal with Payment Element */}
       {checkoutSecret && (
         <CheckoutModal
-          clientSecret={checkoutSecret}
           onClose={closeCheckout}
           onSuccess={refresh}
-          pollForUpgrade={pollForUpgrade}
         />
       )}
     </div>
