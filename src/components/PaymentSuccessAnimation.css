@@ -1,0 +1,233 @@
+/* PaymentSuccessAnimation.css */
+
+.payment-success {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.payment-success.enter {
+  opacity: 0;
+}
+
+.payment-success.show {
+  opacity: 1;
+}
+
+.payment-success.closing {
+  opacity: 0;
+}
+
+.payment-success__content {
+  text-align: center;
+  padding: 2rem;
+  max-width: 400px;
+  width: 100%;
+}
+
+/* SPINNER (Processing state) */
+.payment-success__spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4fcf61;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* CHECKMARK (Success state) */
+.payment-success__checkmark {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+}
+
+.payment-success__checkmark svg {
+  width: 100%;
+  height: 100%;
+}
+
+.payment-success__checkmark-circle {
+  stroke: #4fcf61;
+  stroke-width: 2;
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: stroke-circle 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.payment-success__checkmark-check {
+  stroke: #4fcf61;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: stroke-check 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+}
+
+@keyframes stroke-circle {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes stroke-check {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ERROR ICON */
+.payment-success__error-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+}
+
+.payment-success__error-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* PENDING ICON */
+.payment-success__pending-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+}
+
+.payment-success__pending-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* TYPOGRAPHY */
+.payment-success h2 {
+  color: #333;
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.payment-success p {
+  color: #666;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.payment-success__features {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+  text-align: left;
+}
+
+.payment-success__features li {
+  color: #4fcf61;
+  font-weight: 500;
+  padding: 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+.payment-success__note {
+  font-size: 0.85rem;
+  color: #999;
+  margin-top: 1.5rem;
+}
+
+.payment-success__error-text {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+.payment-success__pending-text {
+  color: #f39c12;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+  line-height: 1.5;
+}
+
+/* BUTTONS */
+.payment-success__button {
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: all 0.2s ease;
+}
+
+.payment-success__button--error {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.payment-success__button--error:hover {
+  background-color: #c0392b;
+}
+
+.payment-success__button--pending {
+  background-color: #4fcf61;
+  color: white;
+}
+
+.payment-success__button--pending:hover {
+  background-color: #3db84e;
+}
+
+/* FADE IN ANIMATION */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.payment-success__content {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* MOBILE RESPONSIVENESS */
+@media (max-width: 768px) {
+  .payment-success__content {
+    padding: 1.5rem;
+  }
+
+  .payment-success h2 {
+    font-size: 1.5rem;
+  }
+
+  .payment-success__checkmark,
+  .payment-success__error-icon,
+  .payment-success__pending-icon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .payment-success__features li {
+    font-size: 0.9rem;
+    padding: 0.4rem 0;
+  }
+}

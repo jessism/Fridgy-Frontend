@@ -105,6 +105,74 @@ export function useSubscription() {
   }, [fetchSubscriptionStatus]);
 
   /**
+   * Poll subscription status until webhook processes payment
+   * Returns detailed status for better UX
+   * @param {number} maxAttempts - Maximum polling attempts (default 15)
+   * @param {number} intervalMs - Polling interval in ms (default 2000)
+   * @returns {Promise<Object>} - { upgraded: boolean, failed: boolean, pending: boolean }
+   */
+  const pollForUpgrade = useCallback(async (maxAttempts = 15, intervalMs = 2000) => {
+    console.log('[useSubscription] 🔄 Starting upgrade polling...');
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      console.log(`[useSubscription] 📡 Poll attempt ${attempt}/${maxAttempts}`);
+
+      try {
+        // Fetch latest subscription status
+        const token = localStorage.getItem('fridgy_token');
+
+        if (!token) {
+          console.error('[useSubscription] ❌ No auth token during polling');
+          return { upgraded: false, failed: true, pending: false };
+        }
+
+        const response = await fetch(`${API_BASE_URL}/subscriptions/status`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch subscription status');
+        }
+
+        const data = await response.json();
+
+        // Update local state with fresh data
+        setSubscription(data.subscription);
+        setUsage(data.usage);
+
+        // Cache the fresh data
+        localStorage.setItem('fridgy_subscription_cache', JSON.stringify(data.subscription));
+        localStorage.setItem('fridgy_usage_cache', JSON.stringify(data.usage));
+
+        // Check if user is now premium (webhook processed successfully)
+        const isPremiumNow = data.subscription?.tier === 'premium' || data.subscription?.tier === 'grandfathered';
+
+        if (isPremiumNow) {
+          console.log('[useSubscription] ✅ Premium upgrade detected!');
+          return { upgraded: true, failed: false, pending: false };
+        }
+
+        // Wait before next poll (unless it's the last attempt)
+        if (attempt < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, intervalMs));
+        }
+      } catch (error) {
+        console.error(`[useSubscription] ⚠️ Poll attempt ${attempt} failed:`, error);
+        // Continue polling even on error (network might recover)
+        if (attempt < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, intervalMs));
+        }
+      }
+    }
+
+    // Polling timed out - webhook may still be processing
+    console.log('[useSubscription] ⏰ Polling timeout - webhook delayed but may still process');
+    return { upgraded: false, failed: false, pending: true };
+  }, []);
+
+  /**
    * Check if user is premium (includes grandfathered users)
    */
   const isPremium = useCallback(() => {
@@ -356,6 +424,7 @@ export function useSubscription() {
     reactivateSubscription,
     validatePromoCode,
     refresh: fetchSubscriptionStatus,
+    pollForUpgrade, // NEW: Poll for webhook confirmation
 
     // Embedded checkout state
     checkoutSecret,

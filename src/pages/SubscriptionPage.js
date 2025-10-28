@@ -18,6 +18,8 @@ const SubscriptionPage = () => {
     startCheckout,
     checkoutSecret,
     closeCheckout,
+    pollForUpgrade,
+    refresh,
   } = useSubscription();
 
   const [promoCode, setPromoCode] = useState('');
@@ -491,6 +493,8 @@ const SubscriptionPage = () => {
         <CheckoutModal
           clientSecret={checkoutSecret}
           onClose={closeCheckout}
+          onSuccess={refresh}
+          pollForUpgrade={pollForUpgrade}
         />
       )}
     </div>

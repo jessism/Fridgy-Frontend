@@ -16,6 +16,10 @@ function SubscriptionSuccessPage() {
   const [isInPWA, setIsInPWA] = useState(false);
   const [countdown, setCountdown] = useState(3);
 
+  // Check if this is a fallback redirect (shouldn't happen in normal flow)
+  const isFallback = searchParams.get('fallback') === 'true';
+  const sessionId = searchParams.get('session_id');
+
   useEffect(() => {
     // Detect if we're in PWA or Safari
     const checkPWAMode = () => {
@@ -55,8 +59,6 @@ function SubscriptionSuccessPage() {
     }
   }, [navigate, isAuthenticated, user]);
 
-  const sessionId = searchParams.get('session_id');
-
   // Get app URL from env or use current origin
   const appURL = process.env.REACT_APP_PWA_URL || window.location.origin;
 
@@ -65,6 +67,15 @@ function SubscriptionSuccessPage() {
     return (
       <div className="subscription-success">
         <div className="subscription-success__container">
+          {/* Fallback notice - shouldn't happen in normal flow */}
+          {isFallback && (
+            <div className="subscription-success__fallback-notice">
+              <p>⚠️ You've reached this page unexpectedly.</p>
+              <p>This is a fallback route that should only activate if the in-app checkout flow fails.</p>
+              <p>Your payment was successful - please return to the app to continue.</p>
+            </div>
+          )}
+
           <div className="subscription-success__icon">🎉</div>
 
           <h1 className="subscription-success__title">

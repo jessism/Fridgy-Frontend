@@ -21,7 +21,7 @@ import './MealPlansPage.css';
 const MealPlansPage = ({ defaultTab }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isPremium, startCheckout, loading: subscriptionLoading, checkoutSecret, closeCheckout } = useSubscription();
+  const { isPremium, startCheckout, loading: subscriptionLoading, checkoutSecret, closeCheckout, pollForUpgrade, refresh } = useSubscription();
   const { shouldShowTooltip, completeStep, STEPS } = useGuidedTourContext();
   const {
     suggestions,
@@ -1266,6 +1266,8 @@ const MealPlansPage = ({ defaultTab }) => {
         <CheckoutModal
           clientSecret={checkoutSecret}
           onClose={closeCheckout}
+          onSuccess={refresh}
+          pollForUpgrade={pollForUpgrade}
         />
       )}
 

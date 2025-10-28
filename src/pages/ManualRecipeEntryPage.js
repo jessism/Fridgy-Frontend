@@ -8,7 +8,7 @@ import { CheckoutModal } from '../components/modals/CheckoutModal';
 const ManualRecipeEntryPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { canAccess, startCheckout, checkoutSecret, closeCheckout } = useSubscription();
+  const { canAccess, startCheckout, checkoutSecret, closeCheckout, pollForUpgrade, refresh } = useSubscription();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentSection, setCurrentSection] = useState(1);
@@ -937,6 +937,8 @@ const ManualRecipeEntryPage = () => {
         <CheckoutModal
           clientSecret={checkoutSecret}
           onClose={closeCheckout}
+          onSuccess={refresh}
+          pollForUpgrade={pollForUpgrade}
         />
       )}
     </div>

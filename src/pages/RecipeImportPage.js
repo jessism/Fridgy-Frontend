@@ -13,7 +13,7 @@ import '../components/guided-tour/GuidedTour.css'; // Import guided tour styles
 const RecipeImportPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { canAccess, startCheckout, checkoutSecret, closeCheckout } = useSubscription();
+  const { canAccess, startCheckout, checkoutSecret, closeCheckout, pollForUpgrade, refresh } = useSubscription();
   const { shouldShowTooltip, completeStep, goToStep, isActive, STEPS } = useGuidedTourContext();
 
   // Check if coming from push notification
@@ -952,6 +952,8 @@ const RecipeImportPage = () => {
         <CheckoutModal
           clientSecret={checkoutSecret}
           onClose={closeCheckout}
+          onSuccess={refresh}
+          pollForUpgrade={pollForUpgrade}
         />
       )}
 

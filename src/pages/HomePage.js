@@ -54,7 +54,7 @@ const HomePage = () => {
   const { user } = useAuth();
   const { items, loading: inventoryLoading } = useInventory();
   const navigate = useNavigate();
-  const { isPremium, startCheckout, checkoutSecret, closeCheckout } = useSubscription();
+  const { isPremium, startCheckout, checkoutSecret, closeCheckout, pollForUpgrade, refresh } = useSubscription();
   const { shouldShowTooltip, nextStep, dismissTour, completeTour, goToStep, STEPS } = useGuidedTourContext();
 
   // PWA Detection for first-time notification prompt
@@ -920,6 +920,8 @@ const HomePage = () => {
         <CheckoutModal
           clientSecret={checkoutSecret}
           onClose={closeCheckout}
+          onSuccess={refresh}
+          pollForUpgrade={pollForUpgrade}
         />
       )}
 

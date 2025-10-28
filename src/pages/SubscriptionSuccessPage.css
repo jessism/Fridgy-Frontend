@@ -9,6 +9,27 @@
   padding: 20px;
 }
 
+/* Fallback notice styling */
+.subscription-success__fallback-notice {
+  background-color: #fff3cd;
+  border: 2px solid #f39c12;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  color: #856404;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.subscription-success__fallback-notice p {
+  margin: 0.5rem 0;
+}
+
+.subscription-success__fallback-notice p:first-child {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
 .subscription-success__container {
   background: white;
   border-radius: 24px;
