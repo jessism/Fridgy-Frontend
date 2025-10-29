@@ -485,7 +485,7 @@
   font-size: 1.125rem;
   color: var(--header-color);
   margin-bottom: 1rem;
-  font-weight: 500;
+  font-weight: 550;
 }
 
 .section-subtitle {
@@ -951,7 +951,7 @@
   font-family: var(--header-font);
   font-size: 1.125rem;
   color: var(--header-color);
-  font-weight: 500;
+  font-weight: 550;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1094,7 +1094,7 @@
   font-family: var(--header-font);
   font-size: 1.125rem;
   color: var(--header-color);
-  font-weight: 500;
+  font-weight: 550;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1451,7 +1451,7 @@
   font-family: var(--header-font);
   font-size: 1.125rem;
   color: var(--header-color);
-  font-weight: 500;
+  font-weight: 550;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1845,7 +1845,7 @@
   font-family: var(--header-font);
   font-size: 1.125rem;
   color: var(--header-color);
-  font-weight: 500;
+  font-weight: 550;
   margin: 0;
 }
 
@@ -2898,7 +2898,7 @@ h2.section-title::after {
 .section-title {
   font-family: var(--header-font);
   font-size: 1.125rem;
-  font-weight: 500;
+  font-weight: 550;
   color: var(--header-color);
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;

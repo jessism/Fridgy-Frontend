@@ -19,7 +19,7 @@ const debounce = (func, wait) => {
 const AIRecipeQuestionnaire = ({ onSubmit, onBackToMeals, loading = false }) => {
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 7; // Reduced from 8 after removing cuisine preference
+  const totalSteps = 8; // Added ingredient usage preference question
 
   const [formData, setFormData] = useState({
     meal_type: '',
@@ -28,6 +28,7 @@ const AIRecipeQuestionnaire = ({ onSubmit, onBackToMeals, loading = false }) => 
     vibe: '',
     cuisine_preference: '',
     dietary_considerations: [],
+    ingredient_usage_preference: 'use_most', // Default to flexible mode
     additional_notes: ''
   });
 
@@ -158,6 +159,15 @@ const AIRecipeQuestionnaire = ({ onSubmit, onBackToMeals, loading = false }) => 
         { value: 'kid_friendly', label: 'Kid Friendly' },
         { value: 'one_pot', label: 'One Pot' },
         { value: 'meal_prep', label: 'Meal Prep' }
+      ]
+    },
+    ingredient_usage_preference: {
+      title: "How should we use your Trackabite inventory?",
+      required: true,
+      options: [
+        { value: 'only_inventory', label: 'Use ONLY ingredients I have logged' },
+        { value: 'use_most', label: 'Use most of my logged ingredients' },
+        { value: 'fully_flexible', label: 'Suggest any ingredients' }
       ]
     }
   };
@@ -496,6 +506,24 @@ const AIRecipeQuestionnaire = ({ onSubmit, onBackToMeals, loading = false }) => 
         );
 
       case 7:
+        // How should we use your Trackabite inventory?
+        return (
+          <div className="questionnaire-step">
+            {renderQuestion('ingredient_usage_preference', questions.ingredient_usage_preference)}
+            <div className="questionnaire-actions">
+              <button
+                className="btn-continue"
+                onClick={goToNext}
+                disabled={!formData.ingredient_usage_preference}
+                type="button"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        );
+
+      case 8:
         // Tell Trackabite anything else
         return (
           <div className="questionnaire-step questionnaire-step--final">
