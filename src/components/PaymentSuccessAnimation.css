@@ -50,46 +50,20 @@
   100% { transform: rotate(360deg); }
 }
 
-/* CHECKMARK (Success state) */
-.payment-success__checkmark {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 1.5rem;
+/* CONFETTI (Success state) */
+.payment-success__confetti {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.payment-success__checkmark svg {
+.payment-success__confetti img {
   width: 100%;
   height: 100%;
-}
-
-.payment-success__checkmark-circle {
-  stroke: #4fcf61;
-  stroke-width: 2;
-  stroke-dasharray: 166;
-  stroke-dashoffset: 166;
-  animation: stroke-circle 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
-}
-
-.payment-success__checkmark-check {
-  stroke: #4fcf61;
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 48;
-  stroke-dashoffset: 48;
-  animation: stroke-check 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
-}
-
-@keyframes stroke-circle {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes stroke-check {
-  to {
-    stroke-dashoffset: 0;
-  }
+  object-fit: contain;
 }
 
 /* ERROR ICON */
@@ -116,16 +90,31 @@
   height: 100%;
 }
 
-/* TYPOGRAPHY */
-.payment-success h2 {
-  color: #333;
-  font-size: 1.75rem;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
+/* HEADLINE */
+.payment-success__headline {
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
 
+.payment-success__welcome {
+  color: #222222;
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+  letter-spacing: 0.3px;
+}
+
+.payment-success__brand {
+  color: #222222;
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* TYPOGRAPHY */
 .payment-success p {
-  color: #666;
+  color: #222222;
   margin-bottom: 1rem;
   font-size: 1rem;
 }
@@ -133,21 +122,44 @@
 .payment-success__features {
   list-style: none;
   padding: 0;
-  margin: 1.5rem 0;
+  margin: 1rem 0;
   text-align: left;
 }
 
 .payment-success__features li {
-  color: #4fcf61;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #222222;
   font-weight: 500;
-  padding: 0.5rem 0;
+  padding: 0.3rem 0;
   font-size: 0.95rem;
 }
 
+.payment-success__features li .feature-check {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.payment-success__features li span {
+  color: #222222;
+}
+
 .payment-success__note {
-  font-size: 0.85rem;
-  color: #999;
-  margin-top: 1.5rem;
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 1rem;
+  line-height: 1.5;
+}
+
+.payment-success__trial-description {
+  font-size: 0.65rem;
+  color: #666;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+  line-height: 1.6;
+  text-align: center;
 }
 
 .payment-success__error-text {
@@ -165,14 +177,35 @@
 
 /* BUTTONS */
 .payment-success__button {
-  padding: 0.75rem 2rem;
+  padding: 1rem 2.25rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 16px;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  margin-top: 1rem;
-  transition: all 0.2s ease;
+  margin-top: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  max-width: 340px;
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.25);
+}
+
+.payment-success__button--success {
+  background: linear-gradient(135deg, #4fcf61 0%, #3db84e 100%);
+  color: white;
+  font-size: 1.05rem;
+  letter-spacing: 0.5px;
+}
+
+.payment-success__button--success:hover {
+  background: linear-gradient(135deg, #45b854 0%, #38a647 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(79, 207, 97, 0.4);
+}
+
+.payment-success__button--success:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3);
 }
 
 .payment-success__button--error {
@@ -215,11 +248,19 @@
     padding: 1.5rem;
   }
 
-  .payment-success h2 {
-    font-size: 1.5rem;
+  .payment-success__confetti {
+    width: 100px;
+    height: 100px;
   }
 
-  .payment-success__checkmark,
+  .payment-success__brand {
+    font-size: 2rem;
+  }
+
+  .payment-success__welcome {
+    font-size: 1.75rem;
+  }
+
   .payment-success__error-icon,
   .payment-success__pending-icon {
     width: 64px;
@@ -228,6 +269,20 @@
 
   .payment-success__features li {
     font-size: 0.9rem;
-    padding: 0.4rem 0;
+    padding: 0.25rem 0;
+  }
+
+  .payment-success__features li .feature-check {
+    width: 16px;
+    height: 16px;
+  }
+
+  .payment-success__trial-description {
+    font-size: 0.65rem;
+  }
+
+  .payment-success__button {
+    font-size: 0.95rem;
+    padding: 0.875rem 1.5rem;
   }
 }

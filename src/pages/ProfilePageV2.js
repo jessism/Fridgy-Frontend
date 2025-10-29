@@ -106,7 +106,7 @@ const ProfilePageV2 = () => {
             {user?.email || 'user@example.com'}
           </p>
           <div className={`profile-v2__plan-badge ${isPremium ? 'profile-v2__plan-badge--premium' : 'profile-v2__plan-badge--free'}`}>
-            {isPremium ? 'Premium' : 'Free Plan'}
+            {isPremium ? 'Trackabite Pro' : 'Free Plan'}
           </div>
         </div>
       </div>

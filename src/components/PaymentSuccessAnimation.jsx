@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import confettiIcon from '../assets/icons/Confetti.png';
 import './PaymentSuccessAnimation.css';
 
 /**
@@ -13,21 +14,11 @@ export const PaymentSuccessAnimation = ({ status, onComplete }) => {
   const [animationStage, setAnimationStage] = useState('enter');
 
   useEffect(() => {
-    // Animation stages: enter -> show -> closing
+    // Animation stages: enter -> show
     const timer1 = setTimeout(() => setAnimationStage('show'), 300);
 
-    // If showing success, auto-close after 2.5 seconds
-    if (status === 'success') {
-      const timer2 = setTimeout(() => {
-        setAnimationStage('closing');
-        setTimeout(() => onComplete && onComplete(), 300);
-      }, 2500);
-
-      return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
-      };
-    }
+    // Don't auto-close on success - user clicks button manually
+    // Only auto-close for processing state (if needed)
 
     return () => clearTimeout(timer1);
   }, [status, onComplete]);
@@ -48,23 +39,56 @@ export const PaymentSuccessAnimation = ({ status, onComplete }) => {
         {/* SUCCESS STATE */}
         {status === 'success' && (
           <>
-            <div className="payment-success__checkmark">
-              <svg viewBox="0 0 52 52">
-                <circle className="payment-success__checkmark-circle" cx="26" cy="26" r="25" fill="none" />
-                <path className="payment-success__checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
-              </svg>
+            <div className="payment-success__confetti">
+              <img src={confettiIcon} alt="Success" />
             </div>
-            <h2>Premium Activated!</h2>
-            <p>Welcome to Trackabite Premium</p>
+
+            <div className="payment-success__headline">
+              <p className="payment-success__welcome">Welcome to</p>
+              <h1 className="payment-success__brand">Trackabite Pro</h1>
+            </div>
+
             <ul className="payment-success__features">
-              <li>✓ Unlimited inventory items</li>
-              <li>✓ Unlimited recipes</li>
-              <li>✓ AI recipe generation</li>
-              <li>✓ Advanced analytics</li>
+              <li>
+                <svg className="feature-check" viewBox="0 0 20 20" fill="none">
+                  <circle cx="10" cy="10" r="10" fill="#4fcf61"/>
+                  <path d="M6 10L8.5 12.5L14 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>Unlimited inventory tracking</span>
+              </li>
+              <li>
+                <svg className="feature-check" viewBox="0 0 20 20" fill="none">
+                  <circle cx="10" cy="10" r="10" fill="#4fcf61"/>
+                  <path d="M6 10L8.5 12.5L14 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>Unlimited recipe imports & uploads</span>
+              </li>
+              <li>
+                <svg className="feature-check" viewBox="0 0 20 20" fill="none">
+                  <circle cx="10" cy="10" r="10" fill="#4fcf61"/>
+                  <path d="M6 10L8.5 12.5L14 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>AI-powered recipe recommendations</span>
+              </li>
+              <li>
+                <svg className="feature-check" viewBox="0 0 20 20" fill="none">
+                  <circle cx="10" cy="10" r="10" fill="#4fcf61"/>
+                  <path d="M6 10L8.5 12.5L14 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>Advanced analytics & insights</span>
+              </li>
             </ul>
-            <p className="payment-success__note">
-              7-day free trial • $4.99/month after
+
+            <p className="payment-success__trial-description">
+              Your FREE week has started. You won't be charged until {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}.
             </p>
+
+            <button
+              className="payment-success__button payment-success__button--success"
+              onClick={onComplete}
+            >
+              Enjoy Trackabite Pro
+            </button>
           </>
         )}
 
@@ -100,10 +124,10 @@ export const PaymentSuccessAnimation = ({ status, onComplete }) => {
                 <text x="26" y="32" fontSize="24" textAnchor="middle" fill="#f39c12">i</text>
               </svg>
             </div>
-            <h2>Taking Longer Than Usual</h2>
-            <p>Your payment was received successfully!</p>
+            <h2>Almost There!</h2>
+            <p>Your payment was processed successfully</p>
             <p className="payment-success__pending-text">
-              Premium features will activate within 5 minutes. You'll receive an email confirmation shortly.
+              Your premium features are activating. This usually takes just a few seconds. If features aren't unlocked within 5 minutes, please refresh the page or contact support.
             </p>
             <button
               className="payment-success__button payment-success__button--pending"

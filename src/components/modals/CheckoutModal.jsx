@@ -110,8 +110,12 @@ const PaymentForm = ({ subscriptionId, requiresSetup, onSuccess, onError, onPend
 
         const result = await confirmRes.json();
 
+        console.log('[PaymentForm] Backend response:', result);
+        console.log('[PaymentForm] result.success:', result.success);
+        console.log('[PaymentForm] result.requiresSupport:', result.requiresSupport);
+
         if (result.success) {
-          console.log('[PaymentForm] ✅ Subscription activated!');
+          console.log('[PaymentForm] ✅ Subscription activated! Calling onSuccess()');
           onSuccess();
         } else if (result.requiresSupport) {
           console.warn('[PaymentForm] ⚠️ Setup succeeded but verification pending');
@@ -249,14 +253,23 @@ export const CheckoutModal = ({ onClose, onSuccess }) => {
   };
 
   const handleSuccessComplete = () => {
-    console.log('[CheckoutModal] Success complete, closing and navigating...');
+    console.log('[CheckoutModal] Success complete, refreshing and reloading...');
 
+    // Refresh subscription data first
     if (onSuccess) {
       onSuccess();
     }
 
+    // Close modal
     onClose();
+
+    // Navigate to home and reload to ensure premium features unlock
     navigate('/home', { replace: true });
+
+    // Force reload after short delay to ensure navigation completes
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
   };
 
   const handleErrorComplete = () => {

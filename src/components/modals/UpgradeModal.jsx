@@ -104,8 +104,8 @@ export function UpgradeModal({ isOpen, onClose, feature, current, limit, startCh
           </ul>
         </div>
 
-        <p className="upgrade-modal__pricing-text">
-          7-day free trial, then $4.99/month
+        <p className="upgrade-modal__pricing-headline">
+          Free for 7 days, then $4.99/month
         </p>
 
         <button
@@ -113,11 +113,15 @@ export function UpgradeModal({ isOpen, onClose, feature, current, limit, startCh
           onClick={handleUpgrade}
           disabled={loading}
         >
-          {loading ? 'Loading...' : 'Start Free Trial'}
+          {loading ? 'Loading...' : 'Start your FREE week'}
         </button>
 
-        <p className="upgrade-modal__disclaimer">
-          Cancel anytime. No commitments.
+        <p className="upgrade-modal__no-payment">
+          <svg className="check-icon" width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="10" fill="#4fcf61"/>
+            <path d="M6 10L8.5 12.5L14 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          No payment due now
         </p>
       </div>
     </div>
