@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import confettiIcon from '../../assets/icons/Confetti.png';
 
 const SuccessModal = ({ 
   isOpen, 
@@ -7,12 +8,12 @@ const SuccessModal = ({
   savedItems = [], 
   itemCount = 0 
 }) => {
-  // Auto-close after 2 seconds
+  // Auto-close after 3 seconds if user doesn't click OK
   useEffect(() => {
     if (isOpen) {
       const timer = setTimeout(() => {
         onClose();
-      }, 2000);
+      }, 3000);
 
       return () => clearTimeout(timer);
     }
@@ -43,18 +44,17 @@ const SuccessModal = ({
         </button>
         
         <div className="success-modal-header">
-          <div className="success-icon">🎉</div>
+          <img src={confettiIcon} alt="Success" className="success-icon-img" />
           <h2>Items Saved Successfully!</h2>
         </div>
         
         <div className="success-modal-content">
           <p className="success-message">
-            Successfully saved <strong>{itemCount}</strong> item{itemCount !== 1 ? 's' : ''} to your inventory!
+            {itemCount} item{itemCount !== 1 ? 's' : ''} saved to your inventory
           </p>
           
           {savedItems.length > 0 && (
             <div className="saved-items-list">
-              <h4>Items saved:</h4>
               <ul>
                 {savedItems.map((item, index) => (
                   <li key={index}>

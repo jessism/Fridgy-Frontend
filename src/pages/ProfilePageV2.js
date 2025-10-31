@@ -50,6 +50,9 @@ const ProfilePageV2 = () => {
     navigate('/subscription');
   };
 
+  const handleSupport = () => {
+    navigate('/support');
+  };
 
   const handleDietaryPreferences = () => {
     navigate('/dietary-preferences');
@@ -207,6 +210,15 @@ const ProfilePageV2 = () => {
           <span className="profile-v2__menu-text">Manage subscription</span>
         </div>
 
+        {/* Support */}
+        <div className="profile-v2__menu-item" onClick={handleSupport}>
+          <div className="profile-v2__menu-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5a9 9 0 0 1 18 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <span className="profile-v2__menu-text">Support</span>
+        </div>
 
         {/* Logout */}
         <div className="profile-v2__menu-item" onClick={handleLogout}>

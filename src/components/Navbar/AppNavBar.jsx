@@ -246,15 +246,14 @@ const AppNavBar = () => {
       </div>
 
       {/* Guided Tour Tooltips */}
-      {shouldShowTooltip(STEPS.ADD_GROCERIES) && (
+      {shouldShowTooltip(STEPS.ADD_GROCERIES) && (location.pathname === '/home' || location.pathname === '/') && (
         <>
           {console.log('[AppNavBar] 🎯 Rendering GuidedTooltip component NOW')}
           <GuidedTooltip
             targetSelector=".add-button, .add-to-fridge-button"
-            message="Start by adding groceries"
+            message="Tap the + button"
             position="top"
-            onAction={handleAddButtonClick}
-            actionLabel="Add groceries"
+            showAction={false}
             highlight={true}
             offset={16}
           />
@@ -264,7 +263,7 @@ const AppNavBar = () => {
       {shouldShowTooltip(STEPS.ADD_ITEMS_MENU) && isAddModalOpen && (
         <GuidedTooltip
           targetSelector=".add-modal-option-grocery"
-          message="Tap here to scan your first items"
+          message='Tap "Add Grocery"'
           position="bottom"
           onAction={handleAddGrocery}
           actionLabel="Scan items"

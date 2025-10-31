@@ -53,6 +53,11 @@ const MealPlansPage = ({ defaultTab }) => {
   const [recentMealsLoading, setRecentMealsLoading] = useState(true);
   const [recentMealsError, setRecentMealsError] = useState(null);
 
+  // Past AI recipes state
+  const [pastAIRecipes, setPastAIRecipes] = useState([]);
+  const [pastAIRecipesLoading, setPastAIRecipesLoading] = useState(true);
+  const [pastAIRecipesError, setPastAIRecipesError] = useState(null);
+
   // Image preloading state for saved recipes
   const [imageStates, setImageStates] = useState({});
   
@@ -254,6 +259,64 @@ const MealPlansPage = ({ defaultTab }) => {
     }
   };
 
+  // Fetch past AI recipe generations
+  const fetchPastAIRecipes = async () => {
+    try {
+      console.log('🤖 [MealPlans] Fetching past AI recipes...');
+      setPastAIRecipesLoading(true);
+      setPastAIRecipesError(null);
+
+      const token = localStorage.getItem('fridgy_token');
+      if (!token) {
+        console.log('🤖 [MealPlans] No token found');
+        setPastAIRecipes([]);
+        setPastAIRecipesLoading(false);
+        return;
+      }
+
+      // Fetch last 2 AI recipe generations
+      const params = new URLSearchParams({ limit: 2 });
+      const response = await fetch(`${API_BASE_URL}/ai-recipes/history?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.log('🤖 [MealPlans] Unauthorized - clearing AI recipes');
+          setPastAIRecipes([]);
+          setPastAIRecipesLoading(false);
+          return;
+        }
+        throw new Error(`Failed to fetch past AI recipes: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('🤖 [MealPlans] Past AI recipes:', data.data?.generations?.length || 0);
+
+      // Debug: Log first generation to see image URLs structure
+      if (data.data?.generations?.length > 0) {
+        console.log('🤖 [MealPlans] First generation sample:', {
+          id: data.data.generations[0].id,
+          recipesCount: data.data.generations[0].recipes?.length,
+          imageUrlsCount: data.data.generations[0].image_urls?.length,
+          imageUrlsType: typeof data.data.generations[0].image_urls,
+          firstImageUrlPreview: data.data.generations[0].image_urls?.[0] ?
+            data.data.generations[0].image_urls[0].substring(0, 100) : 'NULL'
+        });
+      }
+
+      setPastAIRecipes(data.data?.generations || []);
+    } catch (error) {
+      console.error('🤖 [MealPlans] Error fetching past AI recipes:', error);
+      setPastAIRecipesError(error.message);
+      setPastAIRecipes([]);
+    } finally {
+      setPastAIRecipesLoading(false);
+    }
+  };
+
   // Handle tab switching based on props and URL changes
   useEffect(() => {
     if (defaultTab) {
@@ -283,7 +346,12 @@ const MealPlansPage = ({ defaultTab }) => {
 
     // Fetch recent meals
     fetchRecentMeals();
-  }, []); // Empty dependency array - only runs once on component mount
+
+    // Fetch past AI recipes (only if premium)
+    if (isPremium) {
+      fetchPastAIRecipes();
+    }
+  }, [isPremium]); // Re-fetch when premium status changes
 
   // Preload saved recipe images to prevent glitching
   useEffect(() => {
@@ -545,6 +613,52 @@ const MealPlansPage = ({ defaultTab }) => {
     setIsModalOpen(true);
   };
 
+  const handleViewAIRecipeDetails = (recipe, imageUrl) => {
+    // Transform AI recipe to modal format (same as AIRecipePage transformation)
+    const parseIngredientAmount = (amountString) => {
+      if (!amountString) return { amount: 1, unit: 'piece' };
+      const match = String(amountString).match(/^([\d.\/½¼¾]+)\s*(.*)$/);
+      if (!match) return { amount: 1, unit: 'piece' };
+      return {
+        amount: parseFloat(match[1]) || 1,
+        unit: match[2].split(/\s+/)[0] || 'piece'
+      };
+    };
+
+    const transformedRecipe = {
+      id: recipe.id || Math.random().toString(36),
+      title: recipe.title,
+      image: imageUrl,
+      servings: recipe.servings,
+      readyInMinutes: parseInt(recipe.total_time) || null,
+      summary: recipe.description || '',
+      vegetarian: recipe.dietary_info?.vegetarian || false,
+      vegan: recipe.dietary_info?.vegan || false,
+      glutenFree: recipe.dietary_info?.gluten_free || false,
+      dairyFree: recipe.dietary_info?.dairy_free || false,
+      cuisines: recipe.cuisine_type ? [recipe.cuisine_type] : [],
+      extendedIngredients: recipe.ingredients?.map(ing => {
+        const parsed = parseIngredientAmount(ing.amount);
+        return {
+          name: ing.item || ing.name || '',
+          amount: parsed.amount,
+          unit: parsed.unit
+        };
+      }) || [],
+      instructions: Array.isArray(recipe.instructions)
+        ? recipe.instructions.map(step =>
+            typeof step === 'string' ? step.replace(/^Step \d+:\s*/i, '') : step
+          )
+        : (recipe.instructions || []),
+      nutrition: recipe.nutrition || null,
+      difficulty: recipe.difficulty,
+      tips: recipe.tips
+    };
+
+    setSelectedRecipe(transformedRecipe);
+    setIsModalOpen(true);
+  };
+
   // Render saved recipe card
   const renderSavedRecipeCard = (recipe, showDetails = false) => {
     // Helper function to check if URL needs proxying
@@ -634,6 +748,85 @@ const MealPlansPage = ({ defaultTab }) => {
                   <path d="M12 6V12L15 15" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
                 {recipe.readyInMinutes} min
+              </span>
+            )}
+            {recipe.servings && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <rect x="5" y="6" width="14" height="13" rx="2" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M10 12h4" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                {recipe.servings} servings
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Render AI recipe card from past generations
+  const renderAIRecipeCard = (recipe, imageUrl, createdAt, index) => {
+    // Parse total time to minutes
+    const parseTimeToMinutes = (timeString) => {
+      if (!timeString) return null;
+      const match = String(timeString).match(/(\d+)/);
+      return match ? parseInt(match[1]) : null;
+    };
+
+    const totalMinutes = parseTimeToMinutes(recipe.total_time);
+
+    console.log('[MealPlans] Rendering AI recipe card:', {
+      index,
+      title: recipe.title,
+      imageUrl: imageUrl ? `${imageUrl.substring(0, 50)}...` : 'NO IMAGE URL',
+      imageUrlType: typeof imageUrl,
+      imageUrlStartsWith: imageUrl ? imageUrl.substring(0, 20) : 'null'
+    });
+
+    return (
+      <div
+        key={`ai-recipe-${index}`}
+        className="meal-plans-page__saved-recipe-card"
+        onClick={() => handleViewAIRecipeDetails(recipe, imageUrl)}
+      >
+        <div className="meal-plans-page__saved-recipe-image">
+          <img
+            src={imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c'}
+            alt={recipe.title}
+            className="meal-plans-page__recipe-img meal-plans-page__recipe-img--loaded"
+            onLoad={() => {
+              console.log('[MealPlans] AI recipe image loaded successfully:', recipe.title);
+            }}
+            onError={(e) => {
+              console.error('[MealPlans] AI recipe image failed to load:', {
+                title: recipe.title,
+                imageUrl: imageUrl ? imageUrl.substring(0, 100) : 'null'
+              });
+              if (!e.target.dataset.failed) {
+                e.target.dataset.failed = 'true';
+                e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+              }
+            }}
+          />
+          <div className="meal-plans-page__saved-recipe-badge">
+            <span>AI Generated</span>
+          </div>
+        </div>
+        <div className="meal-plans-page__saved-recipe-content">
+          <h3 className="meal-plans-page__saved-recipe-title">{recipe.title}</h3>
+          <p className="meal-plans-page__saved-recipe-author" style={{ color: '#999', fontSize: '0.75rem' }}>
+            {new Date(createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+          </p>
+          <div className="meal-plans-page__saved-recipe-meta">
+            {totalMinutes && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="#666" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M12 6V12L15 15" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                {totalMinutes} min
               </span>
             )}
             {recipe.servings && (
@@ -1049,6 +1242,76 @@ const MealPlansPage = ({ defaultTab }) => {
                   </p>
                 </div>
               )}
+
+              {/* Your Past AI Recipes Section (PREMIUM ONLY) */}
+              {isPremium && pastAIRecipes.length > 0 && (
+                <div className="meal-plans-page__analytics-section" style={{ marginTop: '40px' }}>
+                  <div className="meal-plans-page__analytics-text-section">
+                    <div className="meal-plans-page__section-header-with-action">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+                        <h2 className="meal-plans-page__section-title" style={{ margin: 0 }}>Your past AI recipes</h2>
+                        <button
+                          className="meal-plans-page__view-more-arrow-btn"
+                          onClick={() => navigate('/past-ai-recipes')}
+                          title="View all past AI recipes"
+                          style={{ marginLeft: 'auto' }}
+                        >
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 18l6-6-6-6" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <p className="meal-plans-page__section-subtitle">Browse previously generated recipes</p>
+                  </div>
+
+                  {/* AI Recipe Cards Grid */}
+                  {pastAIRecipesLoading ? (
+                    <div className="meal-plans-page__saved-recipes-loading">
+                      <div className="meal-plans-page__saved-recipes-grid">
+                        <div className="meal-plans-page__saved-recipe-card loading">
+                          <div className="meal-plans-page__saved-recipe-image">
+                            <div className="loading-placeholder" style={{ height: '120px' }}></div>
+                          </div>
+                          <div className="meal-plans-page__saved-recipe-content">
+                            <div className="loading-placeholder" style={{ height: '16px', marginBottom: '8px' }}></div>
+                            <div className="loading-placeholder" style={{ height: '12px' }}></div>
+                          </div>
+                        </div>
+                        <div className="meal-plans-page__saved-recipe-card loading">
+                          <div className="meal-plans-page__saved-recipe-image">
+                            <div className="loading-placeholder" style={{ height: '120px' }}></div>
+                          </div>
+                          <div className="meal-plans-page__saved-recipe-content">
+                            <div className="loading-placeholder" style={{ height: '16px', marginBottom: '8px' }}></div>
+                            <div className="loading-placeholder" style={{ height: '12px' }}></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="meal-plans-page__saved-recipes-grid">
+                      {pastAIRecipes.slice(0, 2).map((generation, genIndex) => {
+                        // Show first recipe from each generation (each generation has 3 recipes)
+                        const recipe = generation.recipes[0];
+                        // Image URLs are stored in the generation object
+                        const imageUrl = generation.image_urls?.[0] || recipe.imageUrl || recipe.image;
+
+                        console.log('[MealPlans] AI Recipe Card:', {
+                          genIndex,
+                          title: recipe.title,
+                          hasImageUrls: !!generation.image_urls,
+                          imageUrlsLength: generation.image_urls?.length,
+                          imageUrl: imageUrl ? (imageUrl.substring(0, 50) + '...') : 'null',
+                          recipeHasImage: !!recipe.image
+                        });
+
+                        return renderAIRecipeCard(recipe, imageUrl, generation.created_at, genIndex);
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
             </>
           )}
 
@@ -1280,6 +1543,22 @@ const MealPlansPage = ({ defaultTab }) => {
             completeStep(STEPS.IMPORT_RECIPE);
           }}
           actionLabel="Import recipe"
+          highlight={true}
+        />
+      )}
+
+      {/* Generate Recipes Tour - Start Button Tooltip */}
+      {shouldShowTooltip(STEPS.GENERATE_RECIPES_START_BUTTON) && isPremium && activeTab === 'meals' && (
+        <GuidedTooltip
+          targetSelector=".meal-plans-page__ai-access"
+          message="Click here to start generating AI-powered recipes tailored to your taste and inventory"
+          position="top"
+          onAction={() => {
+            console.log('[MealPlansPage] User clicked Start personalized recipes tooltip');
+            completeStep(STEPS.GENERATE_RECIPES_START_BUTTON);
+            // User will naturally navigate to /ai-recipes by clicking the button
+          }}
+          actionLabel="Got it"
           highlight={true}
         />
       )}

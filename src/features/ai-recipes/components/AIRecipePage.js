@@ -4,10 +4,14 @@ import { ChevronLeft } from 'lucide-react';
 import { AppNavBar } from '../../../components/Navbar';
 import MobileBottomNav from '../../../components/MobileBottomNav';
 import RecipeDetailModal from '../../../components/modals/RecipeDetailModal';
+import RegenerateOptionsModal from '../../../components/modals/RegenerateOptionsModal';
 import AIRecipeCard from './AIRecipeCard';
 import AIRecipeQuestionnaire from './AIRecipeQuestionnaire';
 import AIRecipeLoadingScreen from './AIRecipeLoadingScreen';
 import useAIRecipes from '../hooks/useAIRecipes';
+import { useGuidedTourContext } from '../../../contexts/GuidedTourContext';
+import GuidedTooltip from '../../../components/guided-tour/GuidedTooltip';
+import IntroductionModal from '../../../components/guided-tour/IntroductionModal';
 import './AIRecipePage.css';
 
 const AIRecipePage = () => {
@@ -20,17 +24,26 @@ const AIRecipePage = () => {
     generationStatus,
     loadRecipes,
     regenerateRecipes,
+    clearRecipes,
     clearError
   } = useAIRecipes();
 
+  const { shouldShowTooltip, nextStep, completeTour, goToStep, dismissTour, STEPS, isIndividualTour } = useGuidedTourContext();
+
   const [showError, setShowError] = useState(false);
   const [showQuestionnaire, setShowQuestionnaire] = useState(true); // Start with questionnaire
-  
+
   // Modal state for recipe details
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
   const [recipeError, setRecipeError] = useState(null);
+
+  // Regenerate options modal state
+  const [showRegenerateModal, setShowRegenerateModal] = useState(false);
+  const [lastQuestionnaireData, setLastQuestionnaireData] = useState(null);
+  const [questionnaireInitialStep, setQuestionnaireInitialStep] = useState(1);
+  const [questionnaireInitialData, setQuestionnaireInitialData] = useState(null);
 
   // Show error state
   useEffect(() => {
@@ -39,11 +52,23 @@ const AIRecipePage = () => {
     }
   }, [error]);
 
+  // Detect when recipes are first generated during the tour
+  useEffect(() => {
+    if (shouldShowTooltip(STEPS.GENERATE_RECIPES_QUESTIONNAIRE) && hasRecipes && !loading) {
+      console.log('[AIRecipePage] Recipes generated during tour - showing success');
+      goToStep(STEPS.GENERATE_RECIPES_SUCCESS);
+    }
+  }, [hasRecipes, loading, shouldShowTooltip, STEPS, goToStep]);
+
   const handleQuestionnaireSubmit = async (questionnaireData) => {
     try {
       clearError();
       setShowError(false);
       setShowQuestionnaire(false); // Hide questionnaire during loading
+
+      // Store the questionnaire data for potential regeneration
+      setLastQuestionnaireData(questionnaireData);
+
       await loadRecipes(false, questionnaireData);
     } catch (err) {
       console.error('Failed to generate recipes:', err);
@@ -55,10 +80,34 @@ const AIRecipePage = () => {
     try {
       clearError();
       setShowError(false);
-      setShowQuestionnaire(true); // Show questionnaire for regeneration too
+      // Show the options modal instead of directly showing questionnaire
+      setShowRegenerateModal(true);
     } catch (err) {
       console.error('Failed to regenerate recipes:', err);
     }
+  };
+
+  const handleStartFromBeginning = () => {
+    setShowRegenerateModal(false);
+    setQuestionnaireInitialStep(1); // Start from step 1
+    setQuestionnaireInitialData(null); // Clear any saved data
+    clearRecipes(); // Clear old recipes before showing questionnaire
+    setShowQuestionnaire(true);
+  };
+
+  const handleKeepPreferences = () => {
+    setShowRegenerateModal(false);
+    if (lastQuestionnaireData) {
+      // Jump to step 8 (final step) with preserved data
+      setQuestionnaireInitialStep(8);
+      setQuestionnaireInitialData(lastQuestionnaireData);
+    }
+    clearRecipes(); // Clear old recipes before showing questionnaire
+    setShowQuestionnaire(true);
+  };
+
+  const handleCloseRegenerateModal = () => {
+    setShowRegenerateModal(false);
   };
 
   const handleDismissError = () => {
@@ -73,18 +122,63 @@ const AIRecipePage = () => {
   // Helper function to parse AI time strings to minutes
   const parseTimeToMinutes = (timeString) => {
     if (!timeString || typeof timeString !== 'string') return null;
-    
+
     // Extract number from strings like "30 minutes", "1 hour", "45 mins", etc.
     const match = timeString.match(/(\d+)\s*(minute|min|hour|hr)/i);
     if (!match) return null;
-    
+
     const value = parseInt(match[1]);
     const unit = match[2].toLowerCase();
-    
+
     if (unit.includes('hour') || unit.includes('hr')) {
       return value * 60; // Convert hours to minutes
     }
     return value; // Already in minutes
+  };
+
+  // Helper function to parse AI ingredient amounts like "1 cup", "2 lbs", etc.
+  const parseIngredientAmount = (amountString) => {
+    if (!amountString) return { amount: 1, unit: 'piece' };
+
+    const str = String(amountString).trim();
+
+    // Try to extract number and unit from strings like "1 cup", "2 tablespoons", "½ tsp"
+    const match = str.match(/^([\d.\/½¼¾⅓⅔⅛⅜⅝⅞]+)\s*(.*)$/);
+
+    if (!match) {
+      // If no number found, return default
+      return { amount: 1, unit: str || 'piece' };
+    }
+
+    let amount = match[1];
+
+    // Handle common fractions
+    if (amount === '½' || amount === '1/2') amount = 0.5;
+    else if (amount === '¼' || amount === '1/4') amount = 0.25;
+    else if (amount === '¾' || amount === '3/4') amount = 0.75;
+    else if (amount === '⅓' || amount === '1/3') amount = 0.33;
+    else if (amount === '⅔' || amount === '2/3') amount = 0.67;
+    else if (amount === '⅛' || amount === '1/8') amount = 0.125;
+    else if (amount.includes('/')) {
+      // Handle fractions like "1/2"
+      const parts = amount.split('/');
+      amount = parseFloat(parts[0]) / parseFloat(parts[1]);
+    } else {
+      amount = parseFloat(amount);
+    }
+
+    // Extract unit (everything after the number)
+    let unit = match[2].trim();
+
+    // If unit contains the ingredient name, extract just the unit part
+    // e.g., "cup chicken" -> "cup"
+    const unitWords = unit.split(/\s+/);
+    unit = unitWords[0] || 'piece';
+
+    return {
+      amount: isNaN(amount) ? 1 : amount,
+      unit: unit || 'piece'
+    };
   };
 
   // Transform AI recipe data to format expected by RecipeDetailModal
@@ -118,29 +212,42 @@ const AIRecipePage = () => {
       extendedIngredients: aiRecipe.ingredients?.map(ingredient => {
         // Handle string ingredients (fallback)
         if (typeof ingredient === 'string') {
+          const parsed = parseIngredientAmount('1');
           return {
             name: ingredient,
-            amount: '',
-            unit: ''
+            amount: parsed.amount,
+            unit: parsed.unit
           };
         }
         // Handle AI recipe format: {item: "name", amount: "1 cup", from_inventory: true}
+        // Parse the combined amount+unit string into separate numeric amount and unit
+        const parsed = parseIngredientAmount(ingredient.amount);
         return {
-          name: ingredient.item || ingredient.name || 'Unknown ingredient', // ✅ Use 'item' field
-          amount: ingredient.amount || '',  // ✅ Already correct
-          unit: '' // ✅ AI doesn't separate unit from amount
+          name: ingredient.item || ingredient.name || 'Unknown ingredient',
+          amount: parsed.amount,  // Numeric value
+          unit: parsed.unit       // String unit
         };
       }) || 
       // Fallback to key_ingredients if ingredients array doesn't exist
-      aiRecipe.key_ingredients?.map(ingredient => ({
-        name: typeof ingredient === 'string' ? ingredient : ingredient.item || 'Unknown ingredient',
-        amount: '',
-        unit: ''
-      })) || [],
+      aiRecipe.key_ingredients?.map(ingredient => {
+        const parsed = parseIngredientAmount('1');
+        return {
+          name: typeof ingredient === 'string' ? ingredient : ingredient.item || 'Unknown ingredient',
+          amount: parsed.amount,
+          unit: parsed.unit
+        };
+      }) || [],
       
-      // Instructions - ensure it's in the right format
-      instructions: aiRecipe.instructions || aiRecipe.steps || 'No instructions available.',
-      
+      // Instructions - ensure it's in the right format and remove duplicate "Step X:" prefixes
+      instructions: Array.isArray(aiRecipe.instructions)
+        ? aiRecipe.instructions.map(step =>
+            typeof step === 'string' ? step.replace(/^Step \d+:\s*/i, '') : step
+          )
+        : (aiRecipe.instructions || aiRecipe.steps || 'No instructions available.'),
+
+      // Nutrition - backend already returns in correct format, just pass through
+      nutrition: aiRecipe.nutrition || null,
+
       // Additional fields that might be present
       difficulty: aiRecipe.difficulty,
       tips: aiRecipe.tips
@@ -242,6 +349,8 @@ const AIRecipePage = () => {
                 onSubmit={handleQuestionnaireSubmit}
                 onBackToMeals={handleBackToMeals}
                 loading={loading}
+                initialStep={questionnaireInitialStep}
+                initialFormData={questionnaireInitialData}
               />
             </div>
           )}
@@ -297,7 +406,7 @@ const AIRecipePage = () => {
       </div>
       
       <MobileBottomNav />
-      
+
       {/* Recipe Detail Modal */}
       <RecipeDetailModal
         isOpen={isModalOpen}
@@ -307,6 +416,51 @@ const AIRecipePage = () => {
         error={recipeError}
         onCookNow={handleActuallyCook}
       />
+
+      {/* Regenerate Options Modal */}
+      <RegenerateOptionsModal
+        isOpen={showRegenerateModal}
+        onClose={handleCloseRegenerateModal}
+        onStartFromBeginning={handleStartFromBeginning}
+        onKeepPreferences={handleKeepPreferences}
+      />
+
+      {/* Guided Tour - Questionnaire Tooltip */}
+      {shouldShowTooltip(STEPS.GENERATE_RECIPES_QUESTIONNAIRE) && showQuestionnaire && questionnaireInitialStep === 1 && (
+        <GuidedTooltip
+          targetSelector=".btn-continue--large"
+          message="Answer a list of questions to personalize your recipes. The AI will use your preferences to create perfect meals for you."
+          position="top"
+          onAction={() => {
+            console.log('[AIRecipePage] User acknowledged questionnaire tooltip');
+            nextStep();
+          }}
+          onDismiss={() => {
+            console.log('[AIRecipePage] User dismissed generate recipes tour');
+            dismissTour();
+          }}
+          actionLabel="Got it"
+        />
+      )}
+
+      {/* Guided Tour - Success Celebration */}
+      {shouldShowTooltip(STEPS.GENERATE_RECIPES_SUCCESS) && hasRecipes && (
+        <IntroductionModal
+          title="Congrats on your first personalized recipes!"
+          message="Your AI-generated recipes are ready! Browse through them and tap any recipe to see the full details, ingredients, and cooking instructions."
+          emoji="🎉"
+          onContinue={() => {
+            console.log('[AIRecipePage] User completed generate recipes tour');
+            // If individual tour, complete it. If full tour, continue to next section.
+            if (isIndividualTour) {
+              completeTour();
+            } else {
+              nextStep(); // Continue to next section of full tour
+            }
+          }}
+          continueLabel={isIndividualTour ? "Start Cooking!" : "Continue Tour"}
+        />
+      )}
     </div>
   );
 };

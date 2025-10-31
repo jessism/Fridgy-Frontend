@@ -16,6 +16,7 @@ const GuidedTooltip = ({
   showAction = true,
   arrow = true,
   highlight = false, // Add subtle highlight to target
+  showOverlay = false, // Add grey overlay behind content
   offset = 12
 }) => {
   const [targetRect, setTargetRect] = useState(null);
@@ -160,11 +161,18 @@ const GuidedTooltip = ({
 
   // Use React Portal to render at document root
   return ReactDOM.createPortal(
-    <div
-      ref={tooltipRef}
-      className={`guided-tooltip guided-tooltip--${position}`}
-      style={finalStyle}
-    >
+    <>
+      {/* Overlay */}
+      {showOverlay && (
+        <div className="guided-tooltip__overlay" />
+      )}
+
+      {/* Tooltip */}
+      <div
+        ref={tooltipRef}
+        className={`guided-tooltip guided-tooltip--${position}`}
+        style={finalStyle}
+      >
       {/* Arrow */}
       {arrow && hasTarget && position !== 'centered-above-modal' && (
         <div className={`guided-tooltip__arrow guided-tooltip__arrow--${position}`} />
@@ -225,7 +233,8 @@ const GuidedTooltip = ({
           ×
         </button>
       )}
-    </div>,
+    </div>
+    </>,
     document.body
   );
 };

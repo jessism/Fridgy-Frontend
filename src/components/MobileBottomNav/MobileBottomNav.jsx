@@ -168,15 +168,14 @@ const MobileBottomNav = () => {
       </nav>
 
       {/* Guided Tour Tooltips for Mobile */}
-      {shouldShowTooltip(STEPS.ADD_GROCERIES) && (
+      {shouldShowTooltip(STEPS.ADD_GROCERIES) && (location.pathname === '/home' || location.pathname === '/') && (
         <>
           {console.log('[MobileBottomNav] 🎯 Rendering tooltip for ADD_GROCERIES')}
           <GuidedTooltip
             targetSelector=".mobile-bottom-nav .add-button"
-            message="Start by adding groceries"
+            message="Tap the + button"
             position="top"
-            onAction={handlePlusButtonClick}
-            actionLabel="Add groceries"
+            showAction={false}
             highlight={true}
             offset={20}
           />
@@ -186,7 +185,7 @@ const MobileBottomNav = () => {
       {shouldShowTooltip(STEPS.ADD_ITEMS_MENU) && isModalOpen && (
         <GuidedTooltip
           targetSelector=".modal-option-grocery"
-          message='Tap "Add Grocery" to add your recent purchases to your fridge.'
+          message='Tap "Add Grocery"'
           position="centered-above-modal"
           showAction={false}
           onDismiss={null}

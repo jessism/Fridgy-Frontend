@@ -9,50 +9,31 @@ const GuidedTourContext = createContext(null);
 export const GuidedTourProvider = ({ children }) => {
   const guidedTour = useGuidedTour();
 
-  // Check if this is first launch and start tour
+  // Check if this is first-time user and start tour
   useEffect(() => {
-    const checkFirstLaunch = async () => {
-      const hasToken = !!localStorage.getItem('fridgy_token');
+    const checkFirstTimeUser = () => {
+      const hasSeenApp = localStorage.getItem('trackabite_has_seen_app');
       const tourData = localStorage.getItem('trackabite_guided_tour');
 
-      // Don't start if tour is already completed or in progress
-      if (!hasToken || tourData) {
-        console.log('[GuidedTour] Tour already exists or no token, skipping auto-start');
+      // If already seen app OR tour exists, don't start
+      if (hasSeenApp || tourData) {
+        console.log('[GuidedTour] Not first-time user, skipping auto-start');
         return;
       }
 
-      // Check if user has any imported recipes in the database
-      try {
-        const token = localStorage.getItem('fridgy_token');
-        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-        const response = await fetch(`${apiUrl}/saved-recipes?filter=imported&limit=1`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+      // This is the VERY FIRST TIME user has opened the app after signup
+      console.log('[GuidedTour] First-time user detected, starting welcome tour');
 
-        if (response.ok) {
-          const data = await response.json();
-          const hasRecipes = data.recipes && data.recipes.length > 0;
+      // Mark that user has now seen the app
+      localStorage.setItem('trackabite_has_seen_app', 'true');
 
-          if (hasRecipes) {
-            console.log('[GuidedTour] User already has recipes, NOT starting tour');
-            localStorage.setItem('has_imported_recipe', 'true');
-            return;
-          }
-        }
-      } catch (error) {
-        console.error('[GuidedTour] Error checking recipes:', error);
-        // If error checking recipes, don't auto-start tour
-        return;
-      }
-
-      // Start tour only if user is authenticated and has NO recipes
-      console.log('[GuidedTour] First-time user detected (no recipes), starting tour');
+      // Start tour with welcome screen
       setTimeout(() => {
-        guidedTour.startTour();
-      }, 2000); // Wait 2 seconds after app loads
+        guidedTour.startTour(); // Starts at WELCOME_SCREEN
+      }, 2000);
     };
 
-    checkFirstLaunch();
+    checkFirstTimeUser();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run on mount
 

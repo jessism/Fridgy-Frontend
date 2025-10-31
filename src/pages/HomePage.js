@@ -6,6 +6,8 @@ import { useAuth } from '../features/auth/context/AuthContext';
 import { useGuidedTourContext } from '../contexts/GuidedTourContext';
 import WelcomePrompt from '../components/guided-tour/WelcomePrompt';
 import IntroductionModal from '../components/guided-tour/IntroductionModal';
+import GenerateRecipesIntroModal from '../components/guided-tour/GenerateRecipesIntroModal';
+import GuidedTooltip from '../components/guided-tour/GuidedTooltip';
 import ShortcutInstallModal from '../components/guided-tour/ShortcutInstallModal';
 import ShortcutConfirmationModal from '../components/guided-tour/ShortcutConfirmationModal';
 import ShortcutSuccessBridgeModal from '../components/guided-tour/ShortcutSuccessBridgeModal';
@@ -962,6 +964,38 @@ const HomePage = () => {
           }}
           continueLabel="Continue"
           skipLabel="Skip logging first item"
+        />
+      )}
+
+      {/* Generate Recipes Introduction Modal */}
+      {shouldShowTooltip(STEPS.GENERATE_RECIPES_INTRO) && (
+        <GenerateRecipesIntroModal
+          onContinue={() => {
+            console.log('[HomePage] Generate recipes intro - advancing to NAV_TO_MEALS');
+            nextStep(); // Advances to GENERATE_RECIPES_NAV_TO_MEALS
+          }}
+          onSkip={() => {
+            console.log('[HomePage] User skipped generate recipes tour');
+            dismissTour();
+          }}
+        />
+      )}
+
+      {/* Generate Recipes - Tooltip to Navigate to Meals */}
+      {shouldShowTooltip(STEPS.GENERATE_RECIPES_NAV_TO_MEALS) && (
+        <GuidedTooltip
+          targetSelector=".mobile-bottom-nav__nav-tab[href='/meal-plans'], .app-navbar__nav-link[href='/meal-plans']"
+          message="Start by heading to Meals page"
+          position="top"
+          onAction={() => {
+            console.log('[HomePage] User acknowledged meals nav tooltip');
+            nextStep(); // Advances to GENERATE_RECIPES_START_BUTTON (will show on MealPlansPage)
+          }}
+          onDismiss={() => {
+            console.log('[HomePage] User dismissed generate recipes tour');
+            dismissTour();
+          }}
+          actionLabel="Got it"
         />
       )}
 

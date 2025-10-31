@@ -15,6 +15,11 @@ const STEPS = {
   ITEMS_ADDED: 'items_added',               // After items scanned
   GO_TO_MEALS: 'go_to_meals',               // Celebration: Items added successfully
   VIEWING_INVENTORY: 'viewing_inventory',   // Waiting period to view inventory
+  GENERATE_RECIPES_INTRO: 'generate_recipes_intro',           // "Let's generate personalized recipes" intro
+  GENERATE_RECIPES_NAV_TO_MEALS: 'generate_recipes_nav_to_meals', // Tooltip: Navigate to Meals page
+  GENERATE_RECIPES_START_BUTTON: 'generate_recipes_start_button',  // Tooltip: Click "Start personalized recipes"
+  GENERATE_RECIPES_QUESTIONNAIRE: 'generate_recipes_questionnaire', // Tooltip: Answer questions
+  GENERATE_RECIPES_SUCCESS: 'generate_recipes_success',       // Success: Recipes generated!
   PUSH_NOTIFICATION_PROMPT: 'push_notification_prompt', // Push notification setup
   SHORTCUT_INTRO: 'shortcut_intro',         // "Let's install your shortcut" intro
   INSTALL_SHORTCUT: 'install_shortcut',     // Part 2: iOS shortcut installation (Copy Magic Key)
@@ -39,6 +44,8 @@ const STEPS = {
 const useGuidedTour = () => {
   const [currentStep, setCurrentStep] = useState(STEPS.NOT_STARTED);
   const [isActive, setIsActive] = useState(false);
+  const [tourSource, setTourSource] = useState('full'); // 'individual' or 'full'
+  const [demoInventoryItems, setDemoInventoryItems] = useState([]); // Virtual inventory for tour
 
   // Load saved progress on mount
   useEffect(() => {
@@ -55,6 +62,8 @@ const useGuidedTour = () => {
           console.log('[useGuidedTour] Restoring tour:', data.currentStep, 'isActive:', data.isActive);
           setCurrentStep(data.currentStep || STEPS.NOT_STARTED);
           setIsActive(data.isActive !== false);
+          setTourSource(data.tourSource || 'full');
+          setDemoInventoryItems(data.demoInventoryItems || []);
         }
       } else {
         console.log('[useGuidedTour] No saved state found');
@@ -71,13 +80,15 @@ const useGuidedTour = () => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
           currentStep,
           isActive,
+          tourSource,
+          demoInventoryItems,
           lastUpdated: new Date().toISOString()
         }));
       } catch (error) {
         console.error('[GuidedTour] Error saving state:', error);
       }
     }
-  }, [currentStep, isActive]);
+  }, [currentStep, isActive, tourSource, demoInventoryItems]);
 
   /**
    * Start the guided tour
@@ -124,23 +135,28 @@ const useGuidedTour = () => {
   /**
    * Go to specific step
    */
-  const goToStep = useCallback((step) => {
-    console.log('[GuidedTour] Jumping to step:', step);
+  const goToStep = useCallback((step, source = null) => {
+    console.log('[GuidedTour] Jumping to step:', step, 'source:', source);
     setCurrentStep(step);
     setIsActive(true);
+    if (source) {
+      setTourSource(source);
+    }
   }, []);
 
   /**
    * Complete the tour
    */
   const completeTour = useCallback(() => {
-    console.log('[GuidedTour] Tour completed!');
+    console.log('[GuidedTour] Tour completed - clearing demo inventory');
     setCurrentStep(STEPS.COMPLETED);
     setIsActive(false);
+    setDemoInventoryItems([]); // Clear demo items
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       currentStep: STEPS.COMPLETED,
       isActive: false,
+      demoInventoryItems: [], // Clear in storage
       completedAt: new Date().toISOString()
     }));
   }, []);
@@ -149,13 +165,15 @@ const useGuidedTour = () => {
    * Dismiss/skip the tour
    */
   const dismissTour = useCallback(() => {
-    console.log('[GuidedTour] Tour dismissed');
+    console.log('[GuidedTour] Tour dismissed - clearing demo inventory');
     setCurrentStep(STEPS.COMPLETED);
     setIsActive(false);
+    setDemoInventoryItems([]); // Clear demo items
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       currentStep: STEPS.COMPLETED,
       isActive: false,
+      demoInventoryItems: [], // Clear in storage
       dismissed: true,
       dismissedAt: new Date().toISOString()
     }));
@@ -165,10 +183,11 @@ const useGuidedTour = () => {
    * Reset the tour (for replay)
    */
   const resetTour = useCallback(() => {
-    console.log('[GuidedTour] Tour reset');
+    console.log('[GuidedTour] Tour reset - clearing demo inventory');
     localStorage.removeItem(STORAGE_KEY);
     setCurrentStep(STEPS.NOT_STARTED);
     setIsActive(false);
+    setDemoInventoryItems([]); // Clear demo items
   }, []);
 
   /**
@@ -191,11 +210,30 @@ const useGuidedTour = () => {
     }
   }, [currentStep, nextStep]);
 
+  /**
+   * Add demo inventory items (for virtual tour inventory)
+   */
+  const addDemoInventoryItems = useCallback((items) => {
+    console.log('[GuidedTour] 🎯 Adding', items.length, 'demo inventory items:', items);
+    setDemoInventoryItems(items);
+    console.log('[GuidedTour] ✅ Demo inventory state updated');
+  }, []);
+
+  /**
+   * Clear demo inventory items
+   */
+  const clearDemoInventoryItems = useCallback(() => {
+    console.log('[GuidedTour] Clearing demo inventory items');
+    setDemoInventoryItems([]);
+  }, []);
+
   return {
     // State
     currentStep,
     isActive,
     STEPS,
+    tourSource,
+    demoInventoryItems,
 
     // Actions
     startTour,
@@ -204,14 +242,21 @@ const useGuidedTour = () => {
     completeTour,
     dismissTour,
     resetTour,
+    setTourSource,
 
     // Helpers
     shouldShowTooltip,
     completeStep,
 
+    // Demo Inventory Management
+    addDemoInventoryItems,
+    clearDemoInventoryItems,
+
     // Status checks
     isCompleted: currentStep === STEPS.COMPLETED,
-    isFirstStep: currentStep === STEPS.ADD_GROCERIES
+    isFirstStep: currentStep === STEPS.ADD_GROCERIES,
+    isIndividualTour: tourSource === 'individual',
+    isFullTour: tourSource === 'full'
   };
 };
 

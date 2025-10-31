@@ -2264,12 +2264,19 @@ h2.section-title::after {
   margin-bottom: 0.5rem;
 }
 
+.success-icon-img {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 1rem;
+  object-fit: contain;
+}
+
 .success-modal-header h2 {
   margin: 0;
   font-family: var(--header-font);
   color: var(--primary-green);
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .success-modal-content {
@@ -2278,7 +2285,7 @@ h2.section-title::after {
 }
 
 .success-message {
-  font-size: 1.1rem;
+  font-size: 0.75rem;
   color: #333;
   margin-bottom: 1.5rem;
   line-height: 1.5;
@@ -2289,13 +2296,6 @@ h2.section-title::after {
   border-radius: 8px;
   padding: 1rem;
   margin-top: 0.5rem;
-}
-
-.saved-items-list h4 {
-  margin: 0 0 0.75rem 0;
-  font-size: 1rem;
-  color: #666;
-  font-weight: 600;
 }
 
 .saved-items-list ul {
@@ -2318,7 +2318,7 @@ h2.section-title::after {
 
 .item-name {
   font-weight: 500;
-  color: #333;
+  color: #222222;
 }
 
 .item-quantity {

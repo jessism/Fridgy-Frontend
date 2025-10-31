@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
@@ -24,7 +24,7 @@ const InventoryPage = ({ defaultTab }) => {
   const { items: inventoryItems, loading, error, refreshInventory, deleteItem, updateItem } = useInventory();
   const { lists: shoppingLists, addItem: addToShoppingList, createList } = useShoppingLists();
   const { canAccess } = useSubscription();
-  const { shouldShowTooltip, nextStep, dismissTour, STEPS } = useGuidedTourContext();
+  const { shouldShowTooltip, nextStep, dismissTour, completeTour, goToStep, STEPS, isActive, demoInventoryItems, isIndividualTour, isFullTour } = useGuidedTourContext();
   const navigate = useNavigate();
   const location = useLocation();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -48,18 +48,25 @@ const InventoryPage = ({ defaultTab }) => {
   const [showShoppingListModal, setShowShoppingListModal] = useState(false);
   const [selectedItemForList, setSelectedItemForList] = useState(null);
 
-  // Auto-advance from VIEWING_INVENTORY to PUSH_NOTIFICATION_PROMPT after 2 seconds
-  useEffect(() => {
-    if (shouldShowTooltip(STEPS.VIEWING_INVENTORY)) {
-      console.log('[Inventory] VIEWING_INVENTORY - setting 2s timer for push notification prompt');
-      const timer = setTimeout(() => {
-        console.log('[Inventory] 2s elapsed - showing push notification prompt');
-        nextStep(); // Advances to PUSH_NOTIFICATION_PROMPT
-      }, 2000);
-
-      return () => clearTimeout(timer);
+  // Show ONLY demo items during tour, otherwise show real items
+  const items = useMemo(() => {
+    // During grocery tour steps: Show ONLY demo items (hide real inventory)
+    if (isActive &&
+        demoInventoryItems &&
+        demoInventoryItems.length > 0 &&
+        (shouldShowTooltip(STEPS.GO_TO_MEALS) ||
+         shouldShowTooltip(STEPS.VIEWING_INVENTORY) ||
+         shouldShowTooltip(STEPS.PUSH_NOTIFICATION_PROMPT))) {
+      console.log('[Inventory] 🎯 Demo mode active - Showing ONLY', demoInventoryItems.length, 'demo items (hiding real items)');
+      return demoInventoryItems;
     }
-  }, [shouldShowTooltip, STEPS.VIEWING_INVENTORY, nextStep]);
+
+    console.log('[Inventory] Normal mode - Showing', inventoryItems.length, 'real items');
+    return inventoryItems;
+  }, [isActive, demoInventoryItems, inventoryItems, shouldShowTooltip, STEPS]);
+
+  // No more auto-advance - user must explicitly finish/continue tour
+  // (Removed auto-advance to keep demo items visible)
 
   // Handle tab switching based on props and URL changes
   useEffect(() => {
@@ -436,16 +443,16 @@ const InventoryPage = ({ defaultTab }) => {
 
   // Filter items based on active filter and search term
   const getFilteredItems = () => {
-    if (!inventoryItems) return [];
-    
+    if (!items) return [];
+
     // First filter by search term if provided
-    let filtered = inventoryItems;
+    let filtered = items;  // ← Use merged items instead of inventoryItems
     if (searchTerm.trim()) {
-      filtered = inventoryItems.filter(item =>
+      filtered = items.filter(item =>  // ← Use merged items instead of inventoryItems
         item.itemName.toLowerCase().includes(searchTerm.toLowerCase().trim())
       );
     }
-    
+
     // Apply sorting for recently-added filter
     if (activeFilter === 'recently-added') {
       return [...filtered].sort((a, b) => {
@@ -455,7 +462,7 @@ const InventoryPage = ({ defaultTab }) => {
         return dateB - dateA; // Descending order (most recent first)
       });
     }
-    
+
     // No special handling for other filters
     return filtered;
   };
@@ -1760,6 +1767,27 @@ const InventoryPage = ({ defaultTab }) => {
             nextStep(); // Advances to VIEWING_INVENTORY (modal closes immediately)
           }}
           continueLabel="Continue"
+        />
+      )}
+
+      {/* Groceries Tour End Modal - Individual or Full Tour */}
+      {shouldShowTooltip(STEPS.VIEWING_INVENTORY) && demoInventoryItems && demoInventoryItems.length > 0 && (
+        <IntroductionModal
+          title={isIndividualTour ? "You've completed logging groceries!" : "Great! Your items are saved"}
+          message={isIndividualTour
+            ? "Your 4 items are now in your fridge inventory. You can view them anytime and track expiry dates."
+            : "Now let's continue to the next part of the tour and see what else you can do!"}
+          emoji={isIndividualTour ? "🎉" : "✅"}
+          onContinue={() => {
+            if (isIndividualTour) {
+              console.log('[Inventory] User finished groceries tour (individual) - completing tour');
+              completeTour();
+            } else {
+              console.log('[Inventory] User continuing full tour - advancing to next section');
+              goToStep(STEPS.GENERATE_RECIPES_INTRO);
+            }
+          }}
+          continueLabel={isIndividualTour ? "Finish Tour" : "Continue Tour"}
         />
       )}
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../../auth/context/AuthContext';
 import TrackabideLogo from '../../../assets/images/Trackabite-logo.png';
 import './AIRecipeQuestionnaire.css';
@@ -16,12 +16,18 @@ const debounce = (func, wait) => {
   };
 };
 
-const AIRecipeQuestionnaire = ({ onSubmit, onBackToMeals, loading = false }) => {
+const AIRecipeQuestionnaire = ({
+  onSubmit,
+  onBackToMeals,
+  loading = false,
+  initialStep = 1,
+  initialFormData = null
+}) => {
   const { user } = useAuth();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(initialStep);
   const totalSteps = 8; // Added ingredient usage preference question
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(initialFormData || {
     meal_type: '',
     serving_size: 1,
     cooking_time: '',
@@ -33,10 +39,20 @@ const AIRecipeQuestionnaire = ({ onSubmit, onBackToMeals, loading = false }) => 
   });
 
   const [errors, setErrors] = useState({});
-  
+
   // Serving size validation state
   const [servingWarning, setServingWarning] = useState(null);
   const [checkingServings, setCheckingServings] = useState(false);
+
+  // Reset state when initialStep or initialFormData changes
+  useEffect(() => {
+    if (initialStep !== currentStep) {
+      setCurrentStep(initialStep);
+    }
+    if (initialFormData) {
+      setFormData(initialFormData);
+    }
+  }, [initialStep, initialFormData]);
 
   // API base URL
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';

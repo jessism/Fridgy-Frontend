@@ -4,6 +4,18 @@
    ============================================ */
 
 /* Guided Tooltip - Small floating hint */
+/* Overlay for focused tooltips */
+.guided-tooltip__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999; /* Below mobile nav (1000) but above content */
+  pointer-events: none; /* Allow clicks through to highlighted elements */
+}
+
 .guided-tooltip {
   position: fixed;
   background: white;
@@ -35,9 +47,10 @@
 .guided-tooltip__message {
   font-size: 0.9rem;
   color: #333;
-  margin: 0 0 0.75rem 0;
+  margin: 0;
   line-height: 1.5;
   font-weight: 500;
+  text-align: center;
 }
 
 /* Tooltip Actions */
@@ -148,7 +161,7 @@
 /* Highlight effect on target element */
 .guided-tour__highlight {
   position: relative;
-  z-index: 9998 !important;
+  z-index: 1001 !important; /* Above overlay (999) and mobile nav (1000) */
   animation: guided-highlight-pulse 2s ease-in-out infinite;
 }
 

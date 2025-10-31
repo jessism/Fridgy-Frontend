@@ -31,19 +31,18 @@ const AIRecipeLoadingScreen = () => {
   return (
     <div className="ai-recipe-loading-screen">
       <div className="ai-recipe-loading-content">
-        {/* Animated Logo with Spinner */}
+        {/* Animated Logo with Wave Effect */}
         <div className="ai-recipe-loading-logo-container">
-          <div className="ai-recipe-loading-spinner"></div>
-          <img 
-            src={FridgyLogo} 
-            alt="Fridgy" 
+          <img
+            src={FridgyLogo}
+            alt="Fridgy"
             className="ai-recipe-loading-logo"
           />
         </div>
-        
+
         {/* Main Headline */}
         <h2 className="ai-recipe-loading-title">
-          Fridgy is creating your own personalized recipes
+          Creating your personalized recipes
         </h2>
         
         {/* Status Messages */}

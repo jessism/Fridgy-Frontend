@@ -1,0 +1,247 @@
+/* Regenerate Options Modal Styles */
+
+.regenerate-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease-out;
+  padding: 20px;
+}
+
+.regenerate-modal {
+  background: white;
+  border-radius: 24px;
+  padding: 32px;
+  max-width: 480px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  animation: slideUpScale 0.3s ease-out;
+}
+
+/* Close button */
+.regenerate-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #9CA3AF;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.regenerate-modal-close:hover {
+  background: #F3F4F6;
+  color: #4B5563;
+}
+
+/* Icon */
+.regenerate-modal-icon {
+  width: 56px;
+  height: 56px;
+  background: #DCFCE7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  animation: bounceIn 0.5s ease-out 0.2s both;
+}
+
+.regenerate-modal-icon svg {
+  color: #4fcf61;
+}
+
+/* Header */
+.regenerate-modal-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.regenerate-modal-header h2 {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.3px;
+}
+
+.regenerate-modal-subtitle {
+  font-size: 0.9375rem;
+  color: #6B7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Options container */
+.regenerate-modal-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Option buttons */
+.regenerate-option-button {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px;
+  border: 2px solid #E5E7EB;
+  border-radius: 16px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.regenerate-option-button:hover {
+  border-color: #4fcf61;
+  background: #F9FFF9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.15);
+}
+
+.regenerate-option-button:active {
+  transform: translateY(0);
+}
+
+/* Option icon */
+.regenerate-option-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  background: #F3F4F6;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.regenerate-option-button:hover .regenerate-option-icon {
+  background: #4fcf61;
+}
+
+.regenerate-option-icon svg {
+  color: #6B7280;
+  transition: color 0.2s ease;
+}
+
+.regenerate-option-button:hover .regenerate-option-icon svg {
+  color: white;
+}
+
+/* Option text */
+.regenerate-option-text {
+  flex: 1;
+  padding-top: 2px;
+}
+
+.regenerate-option-text h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.2px;
+}
+
+.regenerate-option-text p {
+  font-size: 0.875rem;
+  color: #6B7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpScale {
+  from {
+    transform: translateY(20px) scale(0.97);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 520px) {
+  .regenerate-modal {
+    padding: 24px;
+    margin: 10px;
+  }
+
+  .regenerate-modal-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .regenerate-modal-subtitle {
+    font-size: 0.875rem;
+  }
+
+  .regenerate-option-button {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .regenerate-option-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .regenerate-option-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .regenerate-option-text h3 {
+    font-size: 0.9375rem;
+  }
+
+  .regenerate-option-text p {
+    font-size: 0.8125rem;
+  }
+
+  .regenerate-modal-close {
+    width: 28px;
+    height: 28px;
+    padding: 6px;
+  }
+}

@@ -9,16 +9,19 @@ import SignUpPage from './pages/SignUpPage';
 import SignInPage from './pages/SignInPage';
 import HomePage from './pages/HomePage';
 import InventoryPage from './pages/InventoryPage';
+import DemoInventoryPage from './pages/DemoInventoryPage';
 import MealPlansPage from './pages/MealPlansPage';
 import { AIRecipePage } from './features/ai-recipes';
 import ShoppingListPage from './pages/ShoppingListPage';
 import ProfilePageV2 from './pages/ProfilePageV2';
+import SupportPage from './pages/SupportPage';
 import WelcomeTourPage from './pages/WelcomeTourPage';
 import AboutYouPage from './pages/AboutYouPage';
 import DietaryPreferencesPage from './pages/DietaryPreferencesPage';
 import NotificationSettingsPage from './pages/NotificationSettingsPage';
 import MealHistoryPage from './pages/MealHistoryPage';
 import SavedRecipesPage from './pages/SavedRecipesPage';
+import PastAIRecipesPage from './pages/PastAIRecipesPage';
 import UploadedRecipesPage from './pages/UploadedRecipesPage';
 import RecipeImportPage from './pages/RecipeImportPage';
 import MultiModalImportPage from './pages/MultiModalImportPage';
@@ -91,6 +94,11 @@ function App() {
               <InventoryPage defaultTab="inventory" />
             </AuthGuard>
           } />
+          <Route path="/demo-inventory" element={
+            <AuthGuard>
+              <DemoInventoryPage />
+            </AuthGuard>
+          } />
           <Route path="/inventory/shopping-list" element={
             <AuthGuard>
               <InventoryPage defaultTab="shopping-list" />
@@ -126,6 +134,11 @@ function App() {
               <ProfilePageV2 />
             </AuthGuard>
           } />
+          <Route path="/support" element={
+            <AuthGuard>
+              <SupportPage />
+            </AuthGuard>
+          } />
           <Route path="/welcome-tour" element={
             <AuthGuard>
               <WelcomeTourPage />
@@ -154,6 +167,11 @@ function App() {
           <Route path="/saved-recipes" element={
             <AuthGuard>
               <SavedRecipesPage />
+            </AuthGuard>
+          } />
+          <Route path="/past-ai-recipes" element={
+            <AuthGuard>
+              <PastAIRecipesPage />
             </AuthGuard>
           } />
           <Route path="/uploaded-recipes" element={

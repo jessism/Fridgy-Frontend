@@ -537,3 +537,55 @@
     font-size: 1rem; /* 16px */
   }
 }
+
+/* Past AI Recipes Page Specific Styles */
+.past-ai-recipes__container {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  margin-top: 24px;
+}
+
+.past-ai-recipes__generation {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.past-ai-recipes__generation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.past-ai-recipes__generation-date {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0;
+}
+
+.past-ai-recipes__generation-count {
+  font-size: 0.875rem;
+  color: #718096;
+  background: #f7fafc;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .past-ai-recipes__container {
+    gap: 32px;
+  }
+
+  .past-ai-recipes__generation-date {
+    font-size: 1rem;
+  }
+
+  .past-ai-recipes__generation-count {
+    font-size: 0.8125rem;
+  }
+}
