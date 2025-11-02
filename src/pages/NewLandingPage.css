@@ -35,7 +35,7 @@
 }
 
 .landing-page-v2__container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 40px;
 }
@@ -181,7 +181,9 @@
 /* CTA BUTTON */
 .landing-page-v2__cta-button-container {
   display: flex;
-  justify-content: flex-start;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
   margin-bottom: 40px;
 }
 
@@ -204,6 +206,23 @@
   background: var(--primary-green-dark);
   transform: translateY(-3px);
   box-shadow: 0 8px 30px rgba(129, 224, 83, 0.4);
+}
+
+/* Continue in browser link */
+.landing-page-v2__continue-link {
+  background: transparent;
+  border: none;
+  color: #666;
+  font-size: 0.875rem; /* 14px */
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.landing-page-v2__continue-link:hover {
+  color: #333;
 }
 
 /* HERO PHONE MOCKUPS - NEW ANGLED DESIGN */
@@ -675,6 +694,7 @@
 
   .landing-page-v2__cta-button-container {
     justify-content: center;
+    align-items: center;
   }
 
   .landing-page-v2__hero-phones {
@@ -1062,7 +1082,7 @@
 /* FEATURE 2 SECTION */
 .landing-page-v2__feature-2 {
   padding: 100px 0;
-  background: radial-gradient(40% 40% at 80% 20%, #ecfdf5, transparent 60%), #f8f9fa;
+  background: white;
 }
 
 .landing-page-v2__feature-2-content {
@@ -1148,7 +1168,7 @@
 /* FEATURE 3 SECTION */
 .landing-page-v2__feature-3 {
   padding: 100px 0;
-  background: radial-gradient(55% 55% at 10% 30%, #ecfdf5, transparent 75%), white;
+  background: white;
 }
 
 .landing-page-v2__feature-3-content {

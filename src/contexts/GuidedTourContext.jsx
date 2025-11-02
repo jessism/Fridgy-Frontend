@@ -30,10 +30,10 @@ export const GuidedTourProvider = ({ children }) => {
     if (user.hasSeenWelcomeTour !== true) {
       console.log('[GuidedTour] First-time user detected (backend hasSeenWelcomeTour=false), starting welcome tour');
 
-      // Start tour with welcome screen after short delay
+      // Start tour with welcome screen after 4 second delay
       setTimeout(() => {
         guidedTour.startTour(); // Starts at WELCOME_SCREEN
-      }, 1000);
+      }, 4000);
     } else {
       console.log('[GuidedTour] Backend says tour already completed (hasSeenWelcomeTour=true), skipping');
     }

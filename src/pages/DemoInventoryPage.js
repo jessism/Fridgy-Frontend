@@ -7,15 +7,23 @@ import { EditIcon, DeleteIcon, PlusIcon } from '../components/icons';
 import IngredientImage from '../components/IngredientImage';
 import CelebrationModal from '../components/guided-tour/CelebrationModal';
 import GenerateRecipesIntroModal from '../components/guided-tour/GenerateRecipesIntroModal';
+import PushNotificationPromptModal from '../components/guided-tour/PushNotificationPromptModal';
+import IntroductionModal from '../components/guided-tour/IntroductionModal';
 import { getExpiryStatus, formatQuantity } from '../assets/inventory_emojis/iconHelpers.js';
 import './InventoryPage.css';
 
 const DemoInventoryPage = () => {
   const navigate = useNavigate();
-  const { demoInventoryItems, shouldShowTooltip, nextStep, dismissTour, completeTour, isIndividualTour, STEPS } = useGuidedTourContext();
+  const { demoInventoryItems, shouldShowTooltip, nextStep, dismissTour, completeTour, isIndividualTour, isFullTour, STEPS } = useGuidedTourContext();
   const [activeTab, setActiveTab] = useState('inventory');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
+
+  // State for notification flow (local to this page, not tour steps)
+  const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
+  const [showNotificationSkipMessage, setShowNotificationSkipMessage] = useState(false);
+  const [showNotificationSuccess, setShowNotificationSuccess] = useState(false);
+  const [notificationEnabled, setNotificationEnabled] = useState(false);
 
   // If no demo items, redirect to real inventory
   useEffect(() => {
@@ -312,23 +320,89 @@ const DemoInventoryPage = () => {
       {/* VIEWING_INVENTORY auto-advance (after 3 seconds) */}
       {shouldShowTooltip(STEPS.VIEWING_INVENTORY) && <ViewingInventoryAutoAdvance />}
 
-      {/* SHORTCUT_INTRO - Congratulations Modal (Individual Tour Only) */}
-      {shouldShowTooltip(STEPS.SHORTCUT_INTRO) && isIndividualTour && (
+      {/* SHORTCUT_INTRO - Congratulations Modal (Both Tours) */}
+      {shouldShowTooltip(STEPS.SHORTCUT_INTRO) && !showNotificationPrompt && !showNotificationSuccess && (
         <CelebrationModal
           title="Congratulations! You've finished logging your items"
-          description="Continue learning how to import and save recipes"
           onContinue={() => {
-            console.log('[DemoInventory] User wants to continue to save recipes - navigating to home');
-            navigate('/home'); // Navigate to home while staying at SHORTCUT_INTRO step
-          }}
-          onSkip={() => {
-            console.log('[DemoInventory] User wants to end tour');
-            completeTour();
-            navigate('/home');
+            console.log('[DemoInventory] User clicked Continue - showing notification prompt');
+            setShowNotificationPrompt(true);
           }}
           continueLabel="Continue"
-          skipLabel="End Tour"
         />
+      )}
+
+      {/* Notification Prompt Modal */}
+      {showNotificationPrompt && !showNotificationSkipMessage && !showNotificationSuccess && (
+        <PushNotificationPromptModal
+          onContinue={(enabled) => {
+            console.log('[DemoInventory] Notification prompt completed, enabled:', enabled);
+            setNotificationEnabled(enabled);
+            if (enabled) {
+              // Show success modal (this will hide notification prompt due to condition)
+              setShowNotificationSuccess(true);
+            } else {
+              // User clicked "Maybe Later" - show skip message (this will hide notification prompt due to condition)
+              setShowNotificationSkipMessage(true);
+            }
+          }}
+        />
+      )}
+
+      {/* Notification Skip Message Modal */}
+      {showNotificationSkipMessage && (
+        <IntroductionModal
+          title="No worries!"
+          message="You can turn this on later in Profile > Notifications"
+          onContinue={() => {
+            console.log('[DemoInventory] User acknowledged notification skip message');
+            setShowNotificationSkipMessage(false);
+            setShowNotificationSuccess(true); // Show final completion modal
+          }}
+          continueLabel="Got it"
+          showClose={false}
+        />
+      )}
+
+      {/* Final Modal - Different based on notification status and tour type */}
+      {showNotificationSuccess && (
+        notificationEnabled ? (
+          // Notification was enabled - show success message
+          <CelebrationModal
+            title="You're all set!"
+            description="You'll now receive helpful updates about your inventory"
+            onContinue={() => {
+              console.log('[DemoInventory] Notification success acknowledged');
+              setShowNotificationSuccess(false);
+              if (isIndividualTour) {
+                completeTour();
+                navigate('/home');
+              } else {
+                // Full tour: continue to shortcuts
+                navigate('/home');
+              }
+            }}
+            continueLabel={isIndividualTour ? "Finish" : "Continue to Save Recipes"}
+          />
+        ) : (
+          // Notification was skipped - show completion message
+          <CelebrationModal
+            title={isIndividualTour ? "You finished the tour!" : "Congratulations on finishing grocery logging!"}
+            description={isIndividualTour ? "" : "Ready to continue learning how to save recipes?"}
+            onContinue={() => {
+              console.log('[DemoInventory] Final modal acknowledged');
+              setShowNotificationSuccess(false);
+              if (isIndividualTour) {
+                completeTour();
+                navigate('/home');
+              } else {
+                // Full tour: continue to shortcuts
+                navigate('/home');
+              }
+            }}
+            continueLabel={isIndividualTour ? "Complete Tour" : "Continue"}
+          />
+        )
       )}
 
       {/* GENERATE_RECIPES_INTRO Modal */}
