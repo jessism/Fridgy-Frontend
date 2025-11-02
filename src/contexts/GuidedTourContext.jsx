@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect } from 'react';
 import useGuidedTour from '../hooks/useGuidedTour';
+import { useAuth } from '../features/auth/context/AuthContext';
 
 const GuidedTourContext = createContext(null);
 
@@ -8,34 +9,37 @@ const GuidedTourContext = createContext(null);
  */
 export const GuidedTourProvider = ({ children }) => {
   const guidedTour = useGuidedTour();
+  const { user, loading: authLoading } = useAuth();
 
   // Check if this is first-time user and start tour
   useEffect(() => {
-    const checkFirstTimeUser = () => {
-      const hasSeenApp = localStorage.getItem('trackabite_has_seen_app');
-      const tourData = localStorage.getItem('trackabite_guided_tour');
+    // Wait for auth to finish loading
+    if (authLoading) {
+      console.log('[GuidedTour] Waiting for auth to load...');
+      return;
+    }
 
-      // If already seen app OR tour exists, don't start
-      if (hasSeenApp || tourData) {
-        console.log('[GuidedTour] Not first-time user, skipping auto-start');
-        return;
-      }
+    // No user logged in, skip tour
+    if (!user) {
+      console.log('[GuidedTour] No user logged in, skipping tour');
+      return;
+    }
 
-      // This is the VERY FIRST TIME user has opened the app after signup
-      console.log('[GuidedTour] First-time user detected, starting welcome tour');
+    // Backend is the PRIMARY source of truth
+    // If backend says user hasn't seen tour, show it regardless of localStorage
+    if (user.hasSeenWelcomeTour !== true) {
+      console.log('[GuidedTour] First-time user detected (backend hasSeenWelcomeTour=false), starting welcome tour');
 
-      // Mark that user has now seen the app
-      localStorage.setItem('trackabite_has_seen_app', 'true');
-
-      // Start tour with welcome screen
+      // Start tour with welcome screen after short delay
       setTimeout(() => {
         guidedTour.startTour(); // Starts at WELCOME_SCREEN
-      }, 2000);
-    };
+      }, 1000);
+    } else {
+      console.log('[GuidedTour] Backend says tour already completed (hasSeenWelcomeTour=true), skipping');
+    }
 
-    checkFirstTimeUser();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
+  }, [user, authLoading]); // Re-run when user or auth loading state changes
 
   // NOTE: Removed auto-advance polling - it was advancing too early
   // Now the camera component will advance the step when user clicks "Add Items to Inventory"

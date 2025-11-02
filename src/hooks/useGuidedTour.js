@@ -156,7 +156,7 @@ const useGuidedTour = () => {
   /**
    * Complete the tour
    */
-  const completeTour = useCallback(() => {
+  const completeTour = useCallback(async () => {
     console.log('[GuidedTour] Tour completed - clearing demo inventory');
     setCurrentStep(STEPS.COMPLETED);
     setIsActive(false);
@@ -168,12 +168,30 @@ const useGuidedTour = () => {
       demoInventoryItems: [], // Clear in storage
       completedAt: new Date().toISOString()
     }));
+
+    // Mark welcome tour as completed on backend
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+      await fetch(`${apiUrl}/auth/welcome-tour/complete`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log('[GuidedTour] Backend marked tour as completed');
+    } catch (error) {
+      console.error('[GuidedTour] Failed to mark tour complete on backend:', error);
+      // Continue anyway - localStorage fallback will work
+    }
   }, []);
 
   /**
    * Dismiss/skip the tour
    */
-  const dismissTour = useCallback(() => {
+  const dismissTour = useCallback(async () => {
     console.log('[GuidedTour] Tour dismissed - clearing demo inventory');
     setCurrentStep(STEPS.COMPLETED);
     setIsActive(false);
@@ -186,6 +204,24 @@ const useGuidedTour = () => {
       dismissed: true,
       dismissedAt: new Date().toISOString()
     }));
+
+    // Mark welcome tour as completed on backend (dismissed counts as completed)
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+      await fetch(`${apiUrl}/auth/welcome-tour/complete`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log('[GuidedTour] Backend marked tour as completed (dismissed)');
+    } catch (error) {
+      console.error('[GuidedTour] Failed to mark tour complete on backend:', error);
+      // Continue anyway - localStorage fallback will work
+    }
   }, []);
 
   /**

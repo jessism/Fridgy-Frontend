@@ -334,6 +334,10 @@ export const AuthProvider = ({ children }) => {
     // Always clear all storage and state
     removeTokens();
     setUser(null);
+
+    // Clear tour data to ensure clean state for next user on same device
+    localStorage.removeItem('trackabite_guided_tour');
+    localStorage.removeItem('trackabite_has_seen_app');
   };
 
   // Check if user is authenticated

@@ -12,9 +12,9 @@ import appleLogo from '../assets/icons/Apple_logo_white.svg.png';
 import step1Image from '../assets/product mockup/HomepageS_Step1.jpeg';
 import step2Image from '../assets/product mockup/Homepage_Step2.jpeg';
 import step3Image from '../assets/product mockup/Homepage_Step3.jpeg';
-import FridgeIcon from '../assets/icons/FridgeIcon';
-import ChefIcon from '../assets/icons/ChefIcon';
-import SaveIcon from '../assets/icons/SaveIcon';
+import groceriesIcon from '../assets/icons/groceries.png';
+import chefIcon from '../assets/icons/Smart chef.png';
+import heartCheckIcon from '../assets/icons/Healthy.png';
 import Button from '../components/Button';
 import './NewLandingPage.css';
 
@@ -150,6 +150,57 @@ const NewLandingPage = () => {
         </div>
       </section>
 
+      {/* Solution Section */}
+      <section className="landing-page-v2__solution-section">
+        <div className="landing-page-v2__container">
+          <div className="landing-page-v2__solution-content">
+            
+            {/* Section Headline */}
+            <h2 className="landing-page-v2__solution-headline">
+              Your groceries, organized and ready.
+            </h2>
+
+            {/* Three Highlights */}
+            <div className="landing-page-v2__highlights-grid">
+              
+              {/* Highlight 1 */}
+              <div className="landing-page-v2__highlight-card landing-page-v2__highlight-card--track">
+                <div className="landing-page-v2__highlight-icon">
+                  <img src={groceriesIcon} alt="Groceries" className="landing-page-v2__highlight-icon-img" />
+                </div>
+                <h3 className="landing-page-v2__highlight-title">Know what's in your fridge. Anytime, anywhere.</h3>
+                <p className="landing-page-v2__highlight-description">
+                  See exactly what's in, what's low, and what's expiring.
+                </p>
+              </div>
+
+              {/* Highlight 2 */}
+              <div className="landing-page-v2__highlight-card landing-page-v2__highlight-card--know">
+                <div className="landing-page-v2__highlight-icon">
+                  <img src={chefIcon} alt="Chef" className="landing-page-v2__highlight-icon-img" />
+                </div>
+                <h3 className="landing-page-v2__highlight-title">Brain off. Chef on.</h3>
+                <p className="landing-page-v2__highlight-description">
+                  Get smart recipes based on what's on hand and your preferences.
+                </p>
+              </div>
+
+              {/* Highlight 3 */}
+              <div className="landing-page-v2__highlight-card landing-page-v2__highlight-card--reduce">
+                <div className="landing-page-v2__highlight-icon">
+                  <img src={heartCheckIcon} alt="Save" className="landing-page-v2__highlight-icon-img" />
+                </div>
+                <h3 className="landing-page-v2__highlight-title">Waste less. Save more.</h3>
+                <p className="landing-page-v2__highlight-description">
+                  Keep track of every bite, so nothing gets forgotten.
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works - 3 Steps Section */}
       <section className="landing-page-v2__steps-section">
         <div className="landing-page-v2__container">
@@ -167,7 +218,12 @@ const NewLandingPage = () => {
               {/* Step 1 */}
               <div className="landing-page-v2__step landing-page-v2__step--1">
                 <div className="landing-page-v2__step-image">
-                  <img src={step1Image} alt="Track your inventory" className="landing-page-v2__step-phone" />
+                  <div className="landing-page-v2__step-phone-frame">
+                    <div className="landing-page-v2__step-phone-notch"></div>
+                    <div className="landing-page-v2__step-phone-screen">
+                      <img src={step1Image} alt="Track your inventory" className="landing-page-v2__step-phone" />
+                    </div>
+                  </div>
                 </div>
                 <div className="landing-page-v2__step-content">
                   <span className="landing-page-v2__step-number">Step 1.</span>
@@ -188,14 +244,24 @@ const NewLandingPage = () => {
                   </p>
                 </div>
                 <div className="landing-page-v2__step-image">
-                  <img src={step2Image} alt="Save recipes from anywhere" className="landing-page-v2__step-phone" />
+                  <div className="landing-page-v2__step-phone-frame">
+                    <div className="landing-page-v2__step-phone-notch"></div>
+                    <div className="landing-page-v2__step-phone-screen">
+                      <img src={step2Image} alt="Save recipes from anywhere" className="landing-page-v2__step-phone" />
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Step 3 */}
               <div className="landing-page-v2__step landing-page-v2__step--3">
                 <div className="landing-page-v2__step-image">
-                  <img src={step3Image} alt="Get personalized recipes" className="landing-page-v2__step-phone" />
+                  <div className="landing-page-v2__step-phone-frame">
+                    <div className="landing-page-v2__step-phone-notch"></div>
+                    <div className="landing-page-v2__step-phone-screen">
+                      <img src={step3Image} alt="Get personalized recipes" className="landing-page-v2__step-phone" />
+                    </div>
+                  </div>
                 </div>
                 <div className="landing-page-v2__step-content">
                   <span className="landing-page-v2__step-number">Step 3.</span>
@@ -204,57 +270,6 @@ const NewLandingPage = () => {
                     Generate custom meal ideas based on what's already in your fridge. Cook smarter, waste less.
                   </p>
                 </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Solution Section */}
-      <section className="landing-page-v2__solution-section">
-        <div className="landing-page-v2__container">
-          <div className="landing-page-v2__solution-content">
-            
-            {/* Section Headline */}
-            <h2 className="landing-page-v2__solution-headline">
-              Your groceries, organized and ready.
-            </h2>
-
-            {/* Three Highlights */}
-            <div className="landing-page-v2__highlights-grid">
-              
-              {/* Highlight 1 */}
-              <div className="landing-page-v2__highlight-card landing-page-v2__highlight-card--track">
-                <div className="landing-page-v2__highlight-icon">
-                  <FridgeIcon size={40} color="#81e053" />
-                </div>
-                <h3 className="landing-page-v2__highlight-title">Know what's in your fridge. Anytime, anywhere.</h3>
-                <p className="landing-page-v2__highlight-description">
-                  See exactly what's in, what's low, and what's expiring.
-                </p>
-              </div>
-
-              {/* Highlight 2 */}
-              <div className="landing-page-v2__highlight-card landing-page-v2__highlight-card--know">
-                <div className="landing-page-v2__highlight-icon">
-                  <ChefIcon size={40} color="#81e053" />
-                </div>
-                <h3 className="landing-page-v2__highlight-title">Brain off. Chef on.</h3>
-                <p className="landing-page-v2__highlight-description">
-                  Get smart recipes based on what's on hand and your preferences.
-                </p>
-              </div>
-
-              {/* Highlight 3 */}
-              <div className="landing-page-v2__highlight-card landing-page-v2__highlight-card--reduce">
-                <div className="landing-page-v2__highlight-icon">
-                  <SaveIcon size={40} color="#81e053" />
-                </div>
-                <h3 className="landing-page-v2__highlight-title">Waste less. Save more.</h3>
-                <p className="landing-page-v2__highlight-description">
-                  Keep track of every bite, so nothing gets forgotten.
-                </p>
               </div>
 
             </div>
