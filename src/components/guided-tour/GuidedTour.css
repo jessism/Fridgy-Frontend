@@ -441,6 +441,22 @@
   line-height: 1.5;
 }
 
+.guided-tour__celebration-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 1rem 0;
+  line-height: 1.3;
+}
+
+.guided-tour__celebration-description {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #666;
+  margin: 0 0 2rem 0;
+  line-height: 1.5;
+}
+
 .guided-tour__celebration-button {
   background: var(--primary-green, #4fcf61);
   color: white;
@@ -467,6 +483,26 @@
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+}
+
+/* Skip/End Tour Button */
+.guided-tour__celebration-skip {
+  background: transparent;
+  color: #999;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.guided-tour__celebration-skip:hover {
+  background: #f5f5f5;
+  color: #666;
 }
 
 /* Introduction Modal Styles */
@@ -676,8 +712,8 @@
 
 /* Secondary Button (Go back) */
 .guided-tour__shortcut-secondary-button {
-  background: #f8f8f8;
-  color: #666;
+  background: #e8f8eb;
+  color: #45b854;
   border: none;
   padding: 0.875rem 2rem;
   border-radius: 12px;
@@ -689,8 +725,8 @@
 }
 
 .guided-tour__shortcut-secondary-button:hover {
-  background: #efefef;
-  color: #333;
+  background: #d4f2da;
+  color: #3a9d47;
 }
 
 /* Text Link (Skip for now) */

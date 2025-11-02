@@ -27,6 +27,14 @@
   transform: none !important;
 }
 
+/* BUTTON ICON */
+.button__icon {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 10px;
+  font-size: 1.2em;
+}
+
 /* BUTTON SIZES */
 .button--small {
   padding: 8px 16px;

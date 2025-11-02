@@ -14,7 +14,7 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem 1.5rem;
-  padding-top: 5rem; /* Account for wrapper + container padding */
+  padding-top: 2rem; /* Closer to top */
 }
 
 .support-page__back-button {
@@ -205,7 +205,7 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .support-page__header {
-    padding-top: 2.5rem;
+    padding-top: 1.5rem;
   }
 
   .support-page__title {
@@ -271,7 +271,7 @@
 @media (max-width: 480px) {
   .support-page__header {
     padding: 1rem 0.75rem;
-    padding-top: 2.5rem;
+    padding-top: 1.5rem;
   }
 
   .support-page__title {

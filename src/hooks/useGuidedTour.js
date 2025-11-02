@@ -9,23 +9,23 @@ const STORAGE_KEY = 'trackabite_guided_tour';
 const STEPS = {
   NOT_STARTED: 'not_started',
   WELCOME_SCREEN: 'welcome_screen',         // Step 0: Welcome prompt
+
+  // 1. Log Groceries Flow
   GROCERIES_INTRO: 'groceries_intro',       // "Let's start by logging your first item"
   ADD_GROCERIES: 'add_groceries',           // Step 1: Tooltip on navbar "+"
   ADD_ITEMS_MENU: 'add_items_menu',         // Step 2: Tooltip on "Add items" in menu
   ITEMS_ADDED: 'items_added',               // After items scanned
   GO_TO_MEALS: 'go_to_meals',               // Celebration: Items added successfully
   VIEWING_INVENTORY: 'viewing_inventory',   // Waiting period to view inventory
-  GENERATE_RECIPES_INTRO: 'generate_recipes_intro',           // "Let's generate personalized recipes" intro
-  GENERATE_RECIPES_NAV_TO_MEALS: 'generate_recipes_nav_to_meals', // Tooltip: Navigate to Meals page
-  GENERATE_RECIPES_START_BUTTON: 'generate_recipes_start_button',  // Tooltip: Click "Start personalized recipes"
-  GENERATE_RECIPES_QUESTIONNAIRE: 'generate_recipes_questionnaire', // Tooltip: Answer questions
-  GENERATE_RECIPES_SUCCESS: 'generate_recipes_success',       // Success: Recipes generated!
-  PUSH_NOTIFICATION_PROMPT: 'push_notification_prompt', // Push notification setup
+
+  // 2. Import Shortcut Flow
   SHORTCUT_INTRO: 'shortcut_intro',         // "Let's install your shortcut" intro
-  INSTALL_SHORTCUT: 'install_shortcut',     // Part 2: iOS shortcut installation (Copy Magic Key)
+  INSTALL_SHORTCUT: 'install_shortcut',     // iOS shortcut installation (Copy Magic Key)
   SHORTCUT_CONFIRMATION: 'shortcut_confirmation',   // "Have you installed your shortcut?"
   SHORTCUT_SUCCESS_BRIDGE: 'shortcut_success_bridge', // "Awesome! Now let's import..."
-  RECIPE_INTRO: 'recipe_intro',             // Part 2: Intro to recipe import (after shortcut)
+
+  // 3. Import IG Recipes Flow
+  RECIPE_INTRO: 'recipe_intro',             // Intro to recipe import (after shortcut)
   IMPORT_RECIPE_INTRO: 'import_recipe_intro',       // "Let's import your first recipe"
   IMPORT_RECIPE_PREFLIGHT: 'import_recipe_preflight', // Check notifications + shortcut
   IMPORT_RECIPE_STEP_1: 'import_recipe_step_1',     // Step 1: Open Instagram post
@@ -38,6 +38,15 @@ const STEPS = {
   IMPORT_RECIPE: 'import_recipe',           // Legacy: Tooltip on Import button
   PASTE_URL: 'paste_url',                   // Step 5: Tooltip on URL input
   RECIPE_IMPORTED: 'recipe_imported',       // Step 6: Success toast
+
+  // 4. Personalize Recipe with AI Flow
+  GENERATE_RECIPES_INTRO: 'generate_recipes_intro',           // "Let's generate personalized recipes" intro
+  GENERATE_RECIPES_NAV_TO_MEALS: 'generate_recipes_nav_to_meals', // Tooltip: Navigate to Meals page
+  GENERATE_RECIPES_START_BUTTON: 'generate_recipes_start_button',  // Tooltip: Click "Start personalized recipes"
+  GENERATE_RECIPES_QUESTIONNAIRE: 'generate_recipes_questionnaire', // Tooltip: Answer questions
+  GENERATE_RECIPES_SUCCESS: 'generate_recipes_success',       // Success: Recipes generated!
+  PUSH_NOTIFICATION_PROMPT: 'push_notification_prompt', // Push notification setup
+
   COMPLETED: 'completed'                    // Tour finished
 };
 

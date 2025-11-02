@@ -110,7 +110,7 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
       expiry: '14 days',
       item: 'Eggs',
       category: 'Protein',
-      quantity: 1,
+      quantity: 3,
       total_weight_oz: 12,
       expires: getDateDaysFromNow(14),
       expiryDate: getDateDaysFromNow(14),

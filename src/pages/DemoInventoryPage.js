@@ -12,7 +12,7 @@ import './InventoryPage.css';
 
 const DemoInventoryPage = () => {
   const navigate = useNavigate();
-  const { demoInventoryItems, shouldShowTooltip, nextStep, dismissTour, STEPS } = useGuidedTourContext();
+  const { demoInventoryItems, shouldShowTooltip, nextStep, dismissTour, completeTour, isIndividualTour, STEPS } = useGuidedTourContext();
   const [activeTab, setActiveTab] = useState('inventory');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
@@ -311,6 +311,25 @@ const DemoInventoryPage = () => {
 
       {/* VIEWING_INVENTORY auto-advance (after 3 seconds) */}
       {shouldShowTooltip(STEPS.VIEWING_INVENTORY) && <ViewingInventoryAutoAdvance />}
+
+      {/* SHORTCUT_INTRO - Congratulations Modal (Individual Tour Only) */}
+      {shouldShowTooltip(STEPS.SHORTCUT_INTRO) && isIndividualTour && (
+        <CelebrationModal
+          title="Congratulations! You've finished logging your items"
+          description="Continue learning how to import and save recipes"
+          onContinue={() => {
+            console.log('[DemoInventory] User wants to continue to save recipes - navigating to home');
+            navigate('/home'); // Navigate to home while staying at SHORTCUT_INTRO step
+          }}
+          onSkip={() => {
+            console.log('[DemoInventory] User wants to end tour');
+            completeTour();
+            navigate('/home');
+          }}
+          continueLabel="Continue"
+          skipLabel="End Tour"
+        />
+      )}
 
       {/* GENERATE_RECIPES_INTRO Modal */}
       {shouldShowTooltip(STEPS.GENERATE_RECIPES_INTRO) && (

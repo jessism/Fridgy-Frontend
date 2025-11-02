@@ -9,6 +9,7 @@ import './GuidedTour.css';
 const ShortcutInstallModal = ({ onInstall, onSkip, onCancelTimer }) => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [tokenCopied, setTokenCopied] = useState(false);
   const [currentModal, setCurrentModal] = useState(1); // 1 = token, 2 = instructions, 'skip-confirm' = skip warning, 'skip-final' = skip final message
   const [returnModal, setReturnModal] = useState(1); // Store which modal to return to if user clicks "No, Let's Do This"
@@ -39,9 +40,14 @@ const ShortcutInstallModal = ({ onInstall, onSkip, onCancelTimer }) => {
           } catch (clipError) {
             console.log('[ShortcutInstall] Auto-copy failed, user can copy manually');
           }
+        } else {
+          const errorText = await response.text();
+          console.error('[ShortcutInstall] API error:', response.status, errorText);
+          setError(`Failed to load token: ${response.status}`);
         }
       } catch (error) {
         console.error('[ShortcutInstall] Error fetching token:', error);
+        setError(`Network error: ${error.message}`);
       } finally {
         setLoading(false);
       }
@@ -132,6 +138,21 @@ const ShortcutInstallModal = ({ onInstall, onSkip, onCancelTimer }) => {
             <p className="guided-tour__shortcut-simple-description">
               Quickly import online recipes to your Trackabite account. First, click the clipboard icon to copy your magic key.
             </p>
+
+            {/* Loading State */}
+            {loading && (
+              <div style={{ padding: '1rem', textAlign: 'center' }}>
+                <p>Loading your magic key...</p>
+              </div>
+            )}
+
+            {/* Error State */}
+            {!loading && error && (
+              <div style={{ padding: '1rem', background: '#ffebee', borderRadius: '8px', marginBottom: '1rem' }}>
+                <p style={{ color: '#c62828', margin: 0, fontSize: '0.9rem' }}>{error}</p>
+                <p style={{ color: '#666', margin: '0.5rem 0 0 0', fontSize: '0.85rem' }}>Please check browser console for details</p>
+              </div>
+            )}
 
             {/* Token Display */}
             {!loading && token && (

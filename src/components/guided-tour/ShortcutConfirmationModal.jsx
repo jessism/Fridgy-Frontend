@@ -32,7 +32,7 @@ const ShortcutConfirmationModal = ({ onYes, onNo, onSkip }) => {
             className="guided-tour__shortcut-secondary-button"
             onClick={onNo}
           >
-            Not Yet
+            Not yet. Help me install.
           </button>
         </div>
 

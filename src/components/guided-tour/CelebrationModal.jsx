@@ -6,7 +6,7 @@ import './GuidedTour.css';
  * CelebrationModal - Shows success message in center of screen
  * Used for milestone celebrations in the guided tour
  */
-const CelebrationModal = ({ message, onContinue, continueLabel = 'Continue' }) => {
+const CelebrationModal = ({ message, title, description, onContinue, continueLabel = 'Continue', onSkip, skipLabel = 'End Tour' }) => {
   return ReactDOM.createPortal(
     <div className="guided-tour__celebration-overlay">
       <div className="guided-tour__celebration-card">
@@ -23,8 +23,15 @@ const CelebrationModal = ({ message, onContinue, continueLabel = 'Continue' }) =
           </svg>
         </div>
 
-        {/* Message */}
-        <p className="guided-tour__celebration-message">{message}</p>
+        {/* Title and Description (if provided) or single Message */}
+        {title ? (
+          <>
+            <h2 className="guided-tour__celebration-title">{title}</h2>
+            {description && <p className="guided-tour__celebration-description">{description}</p>}
+          </>
+        ) : (
+          <p className="guided-tour__celebration-message">{message}</p>
+        )}
 
         {/* Continue Button */}
         <button
@@ -33,6 +40,16 @@ const CelebrationModal = ({ message, onContinue, continueLabel = 'Continue' }) =
         >
           {continueLabel}
         </button>
+
+        {/* Skip Button (Optional) */}
+        {onSkip && (
+          <button
+            className="guided-tour__celebration-skip"
+            onClick={onSkip}
+          >
+            {skipLabel}
+          </button>
+        )}
       </div>
     </div>,
     document.body

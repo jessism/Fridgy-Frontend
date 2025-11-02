@@ -6,6 +6,12 @@ import fridgeHeroImage from '../assets/images/fridge.jpg';
 import foodImage1 from '../assets/images/Landingpage_food_1.jpg';
 import foodImage2 from '../assets/images/Landingpage_food_2.jpg';
 import foodImage3 from '../assets/images/Landingpage_food_3.jpg';
+import phoneLeftImage from '../assets/product mockup/HomepageS_Step1.jpeg';
+import phoneRightImage from '../assets/product mockup/Homepage_personalized recipes.jpeg';
+import appleLogo from '../assets/icons/Apple_logo_white.svg.png';
+import step1Image from '../assets/product mockup/HomepageS_Step1.jpeg';
+import step2Image from '../assets/product mockup/Homepage_Step2.jpeg';
+import step3Image from '../assets/product mockup/Homepage_Step3.jpeg';
 import FridgeIcon from '../assets/icons/FridgeIcon';
 import ChefIcon from '../assets/icons/ChefIcon';
 import SaveIcon from '../assets/icons/SaveIcon';
@@ -83,25 +89,123 @@ const NewLandingPage = () => {
 
           <div className="landing-page-v2__container">
             <div className="landing-page-v2__hero-content">
-              {/* Main Content - Centered */}
+              {/* Left Column - Text Content */}
               <div className="landing-page-v2__hero-main">
-                
+
                 <h1 className="landing-page-v2__hero-title">
                   Food tracking that <span className="landing-page-v2__hero-title-gradient">remembers</span> for you.
                 </h1>
-                
+
                 <p className="landing-page-v2__hero-subtitle">
-                  Download Trackabite for effortless food tracking and a<br/>
-                  seamless inventory management experience.
+                  Download Trackabite for effortless food tracking and a seamless inventory management experience.
                 </p>
-                
+
                 <div className="landing-page-v2__cta-button-container">
-                  <Button variant="primary" size="large" href="/onboarding">
+                  <Button
+                    variant="primary"
+                    size="large"
+                    href="/onboarding"
+                    icon={<img src={appleLogo} alt="Apple" style={{ width: '20px', height: '24px' }} />}
+                  >
                     GET STARTED FOR FREE
                   </Button>
                 </div>
 
               </div>
+
+              {/* Right Column - Phone Mockups */}
+              <div className="landing-page-v2__hero-phones">
+                <div className="landing-page-v2__phone-container">
+                  {/* Left Phone with Frame */}
+                  <div className="landing-page-v2__phone-mockup landing-page-v2__phone-mockup--left">
+                    <div className="landing-page-v2__phone-frame">
+                      <div className="landing-page-v2__phone-notch"></div>
+                      <div className="landing-page-v2__phone-screen">
+                        <img
+                          src={phoneLeftImage}
+                          alt="Trackabite - Add to Fridge"
+                          className="landing-page-v2__phone-screenshot"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Phone with Frame */}
+                  <div className="landing-page-v2__phone-mockup landing-page-v2__phone-mockup--right">
+                    <div className="landing-page-v2__phone-frame">
+                      <div className="landing-page-v2__phone-notch"></div>
+                      <div className="landing-page-v2__phone-screen">
+                        <img
+                          src={phoneRightImage}
+                          alt="Trackabite - Personalized Recipes"
+                          className="landing-page-v2__phone-screenshot"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works - 3 Steps Section */}
+      <section className="landing-page-v2__steps-section">
+        <div className="landing-page-v2__container">
+          <div className="landing-page-v2__steps-content">
+
+            {/* Section Title */}
+            <h2 className="landing-page-v2__steps-title">
+              Plan smarter, eat smarter<br />
+              in 3 simple steps
+            </h2>
+
+            {/* Steps Grid */}
+            <div className="landing-page-v2__steps-grid">
+
+              {/* Step 1 */}
+              <div className="landing-page-v2__step landing-page-v2__step--1">
+                <div className="landing-page-v2__step-image">
+                  <img src={step1Image} alt="Track your inventory" className="landing-page-v2__step-phone" />
+                </div>
+                <div className="landing-page-v2__step-content">
+                  <span className="landing-page-v2__step-number">Step 1.</span>
+                  <h3 className="landing-page-v2__step-heading">Track your inventory</h3>
+                  <p className="landing-page-v2__step-description">
+                    Snap a photo of your groceries and let AI do the rest. Know exactly what's in your fridge and when items expire.
+                  </p>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="landing-page-v2__step landing-page-v2__step--2">
+                <div className="landing-page-v2__step-content">
+                  <span className="landing-page-v2__step-number">Step 2.</span>
+                  <h3 className="landing-page-v2__step-heading">Save recipes from anywhere</h3>
+                  <p className="landing-page-v2__step-description">
+                    Import your favorite recipes directly from Instagram and TikTok. Build your personal recipe collection effortlessly.
+                  </p>
+                </div>
+                <div className="landing-page-v2__step-image">
+                  <img src={step2Image} alt="Save recipes from anywhere" className="landing-page-v2__step-phone" />
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="landing-page-v2__step landing-page-v2__step--3">
+                <div className="landing-page-v2__step-image">
+                  <img src={step3Image} alt="Get personalized recipes" className="landing-page-v2__step-phone" />
+                </div>
+                <div className="landing-page-v2__step-content">
+                  <span className="landing-page-v2__step-number">Step 3.</span>
+                  <h3 className="landing-page-v2__step-heading">Get personalized recipes</h3>
+                  <p className="landing-page-v2__step-description">
+                    Generate custom meal ideas based on what's already in your fridge. Cook smarter, waste less.
+                  </p>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>

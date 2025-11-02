@@ -100,7 +100,7 @@
   min-height: 100vh;
   position: relative;
   overflow: hidden;
-  background: radial-gradient(60% 60% at 70% 0%, #ecfdf5, transparent 60%), white;
+  background: white;
 }
 
 .landing-page-v2__hero-background {
@@ -114,9 +114,10 @@
 }
 
 .landing-page-v2__hero-content {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
-  justify-content: space-between;
+  gap: 60px;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
@@ -127,11 +128,12 @@
 
 /* MAIN CONTENT */
 .landing-page-v2__hero-main {
-  flex: 1;
-  text-align: center;
+  text-align: left;
   max-width: 600px;
-  margin: 0 auto;
   background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .landing-page-v2__hero-badge {
@@ -178,7 +180,7 @@
 /* CTA BUTTON */
 .landing-page-v2__cta-button-container {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   margin-bottom: 40px;
 }
 
@@ -203,38 +205,70 @@
   box-shadow: 0 8px 30px rgba(129, 224, 83, 0.4);
 }
 
-/* PHONE MOCKUP */
-.landing-page-v2__hero-phone {
-  display: flex;
-  justify-content: center;
-  margin-top: 40px;
-  z-index: 5;
-}
-
-.landing-page-v2__phone-mockup {
+/* HERO PHONE MOCKUPS - NEW ANGLED DESIGN */
+.landing-page-v2__hero-phones {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 510px;
 }
 
+.landing-page-v2__phone-container {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  height: 510px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Phone Mockup Wrapper */
+.landing-page-v2__phone-mockup {
+  position: absolute;
+  transition: all 0.3s ease;
+}
+
+.landing-page-v2__phone-mockup--left {
+  left: 0;
+  transform: rotate(-15deg) translateX(-20px);
+  z-index: 1;
+}
+
+.landing-page-v2__phone-mockup--right {
+  right: 0;
+  transform: rotate(10deg) translateX(20px);
+  z-index: 2;
+}
+
+.landing-page-v2__phone-mockup:hover {
+  transform: rotate(0deg) translateY(-5px) scale(1.02);
+  z-index: 3;
+}
+
+/* iPhone Frame Styling */
 .landing-page-v2__phone-frame {
-  width: 280px;
-  height: 570px;
+  width: 238px;
+  height: 485px;
   background: #222222;
   border-radius: 35px;
-  padding: 6px;
-  box-shadow: 
+  padding: 8px;
+  box-shadow:
     0 25px 80px rgba(0, 0, 0, 0.4),
     0 10px 30px rgba(0, 0, 0, 0.2);
+  position: relative;
 }
 
 .landing-page-v2__phone-notch {
   position: absolute;
-  top: 6px;
+  top: 8px;
   left: 50%;
   transform: translateX(-50%);
-  width: 120px;
-  height: 25px;
+  width: 102px;
+  height: 24px;
   background: #222222;
-  border-radius: 0 0 15px 15px;
+  border-radius: 0 0 18px 18px;
   z-index: 10;
 }
 
@@ -242,9 +276,108 @@
   width: 100%;
   height: 100%;
   background: white;
-  border-radius: 30px;
+  border-radius: 28px;
   overflow: hidden;
   position: relative;
+}
+
+.landing-page-v2__phone-screenshot {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* HOW IT WORKS - 3 STEPS SECTION */
+.landing-page-v2__steps-section {
+  padding: 80px 0;
+  background: #ffffff;
+}
+
+.landing-page-v2__steps-content {
+  text-align: center;
+}
+
+.landing-page-v2__steps-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #222222;
+  margin: 0 0 4rem 0;
+  line-height: 1.2;
+  text-align: center;
+  font-family: var(--header-font);
+}
+
+.landing-page-v2__steps-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Individual Step */
+.landing-page-v2__step {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+.landing-page-v2__step-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.landing-page-v2__step-phone {
+  width: 255px;
+  height: auto;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.landing-page-v2__step-phone:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+}
+
+.landing-page-v2__step-content {
+  text-align: left;
+  max-width: 450px;
+}
+
+.landing-page-v2__step-number {
+  font-size: 4rem;
+  font-weight: 800;
+  color: #81e053;
+  line-height: 1;
+  display: block;
+  margin-bottom: 1rem;
+  font-family: var(--header-font);
+}
+
+.landing-page-v2__step-heading {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 1rem 0;
+  line-height: 1.3;
+  font-family: var(--header-font);
+}
+
+.landing-page-v2__step-description {
+  font-size: 1.125rem;
+  color: #666666;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* Step 2 has reversed order (content first, then image) */
+.landing-page-v2__step--2 .landing-page-v2__step-content {
+  order: -1;
+  text-align: right;
 }
 
 .landing-page-v2__phone-status-bar {
@@ -493,27 +626,106 @@
   }
   
   .landing-page-v2__hero-content {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     text-align: center;
     gap: 40px;
   }
-  
-  .landing-page-v2__phone-frame {
-    width: 250px;
-    height: 510px;
+
+  .landing-page-v2__hero-main {
+    text-align: center;
+    align-items: center;
+    max-width: 100%;
   }
-  
+
+  .landing-page-v2__cta-button-container {
+    justify-content: center;
+  }
+
+  .landing-page-v2__hero-phones {
+    min-height: 425px;
+  }
+
+  .landing-page-v2__phone-container {
+    max-width: 380px;
+    height: 425px;
+  }
+
+  .landing-page-v2__phone-frame {
+    width: 204px;
+    height: 417px;
+  }
+
+  .landing-page-v2__phone-notch {
+    width: 87px;
+    height: 20px;
+  }
+
+  .landing-page-v2__phone-mockup--left {
+    transform: rotate(-12deg) translateX(-15px);
+  }
+
+  .landing-page-v2__phone-mockup--right {
+    transform: rotate(8deg) translateX(15px);
+  }
+
   .landing-page-v2__floating-avatar {
     display: none;
   }
-  
+
   .landing-page-v2__hero-title {
     font-size: 2.25rem; /* 36px */
   }
-  
+
   .landing-page-v2__cta-button {
     width: 250px;
     text-align: center;
+  }
+
+  /* Steps Section - Mobile */
+  .landing-page-v2__steps-section {
+    padding: 60px 0;
+  }
+
+  .landing-page-v2__steps-title {
+    font-size: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .landing-page-v2__steps-grid {
+    gap: 3rem;
+  }
+
+  .landing-page-v2__step {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 2rem;
+  }
+
+  .landing-page-v2__step-content {
+    text-align: center !important;
+    max-width: 100%;
+  }
+
+  .landing-page-v2__step-phone {
+    width: 213px;
+  }
+
+  .landing-page-v2__step-number {
+    font-size: 3rem;
+  }
+
+  .landing-page-v2__step-heading {
+    font-size: 1.5rem;
+  }
+
+  .landing-page-v2__step-description {
+    font-size: 1rem;
+  }
+
+  /* Step 2 mobile - no special order needed */
+  .landing-page-v2__step--2 .landing-page-v2__step-content {
+    order: 0;
+    text-align: center !important;
   }
 }
 
@@ -523,11 +735,80 @@
     flex-direction: column;
     gap: 6px;
   }
-  
+
   .landing-page-v2__header-actions .button {
     padding: 6px 12px;
     font-size: 0.6875rem; /* 11px */
     min-width: 70px;
+  }
+
+  .landing-page-v2__hero-title {
+    font-size: 1.75rem; /* 28px */
+  }
+
+  .landing-page-v2__hero-subtitle {
+    font-size: 1rem; /* 16px */
+  }
+
+  .landing-page-v2__hero-phones {
+    min-height: 360px;
+  }
+
+  .landing-page-v2__phone-container {
+    max-width: 300px;
+    height: 360px;
+  }
+
+  .landing-page-v2__phone-frame {
+    width: 170px;
+    height: 349px;
+  }
+
+  .landing-page-v2__phone-mockup--left {
+    transform: rotate(-10deg) translateX(-10px);
+  }
+
+  .landing-page-v2__phone-mockup--right {
+    transform: rotate(6deg) translateX(10px);
+  }
+
+  .landing-page-v2__phone-notch {
+    width: 85px;
+    height: 20px;
+  }
+
+  /* Steps Section - Very Small Screens */
+  .landing-page-v2__steps-section {
+    padding: 50px 0;
+  }
+
+  .landing-page-v2__steps-title {
+    font-size: 1.75rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .landing-page-v2__steps-grid {
+    gap: 2.5rem;
+  }
+
+  .landing-page-v2__step {
+    gap: 1.5rem;
+  }
+
+  .landing-page-v2__step-phone {
+    width: 187px;
+  }
+
+  .landing-page-v2__step-number {
+    font-size: 2.5rem;
+  }
+
+  .landing-page-v2__step-heading {
+    font-size: 1.25rem;
+  }
+
+  .landing-page-v2__step-description {
+    font-size: 0.95rem;
   }
 }
 
