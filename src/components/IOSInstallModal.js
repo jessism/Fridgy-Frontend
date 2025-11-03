@@ -1,8 +1,15 @@
 import React from 'react';
 import './IOSInstallModal.css';
 
-const IOSInstallModal = ({ isOpen, onClose }) => {
+const IOSInstallModal = ({ isOpen, onClose, onContinue }) => {
   if (!isOpen) return null;
+
+  const handleContinue = () => {
+    onClose(); // Close the modal
+    if (onContinue) {
+      onContinue(); // Navigate to onboarding
+    }
+  };
 
   return (
     <div className="ios-install-modal__overlay" onClick={onClose}>
@@ -50,7 +57,7 @@ const IOSInstallModal = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        <button className="ios-install-modal__continue" onClick={onClose}>
+        <button className="ios-install-modal__continue" onClick={handleContinue}>
           Got it!
         </button>
       </div>

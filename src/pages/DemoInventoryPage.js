@@ -385,22 +385,29 @@ const DemoInventoryPage = () => {
             continueLabel={isIndividualTour ? "Finish" : "Continue to Save Recipes"}
           />
         ) : (
-          // Notification was skipped - show completion message
+          // Notification was skipped - show completion/transition message
           <CelebrationModal
-            title={isIndividualTour ? "You finished the tour!" : "Congratulations on finishing grocery logging!"}
-            description={isIndividualTour ? "" : "Ready to continue learning how to save recipes?"}
+            title={isIndividualTour ? "You finished the tour!" : "Good job! Now let's learn how to import your recipes"}
+            description=""
             onContinue={() => {
-              console.log('[DemoInventory] Final modal acknowledged');
+              console.log('[DemoInventory] Final modal acknowledged - continuing');
               setShowNotificationSuccess(false);
               if (isIndividualTour) {
                 completeTour();
                 navigate('/home');
               } else {
-                // Full tour: continue to shortcuts
+                // Full tour: continue to shortcuts on HomePage
                 navigate('/home');
               }
             }}
+            onSkip={isFullTour ? () => {
+              console.log('[DemoInventory] Full tour user skipped import recipes');
+              setShowNotificationSuccess(false);
+              completeTour();
+              navigate('/home');
+            } : undefined}
             continueLabel={isIndividualTour ? "Complete Tour" : "Continue"}
+            skipLabel="Skip import recipes"
           />
         )
       )}

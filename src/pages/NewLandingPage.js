@@ -71,10 +71,7 @@ const NewLandingPage = () => {
     if (platform === 'ios') {
       console.log('[PWA] iOS detected, showing install instructions');
       setShowIOSModal(true);
-      // Still navigate to onboarding after showing modal
-      setTimeout(() => {
-        navigate('/onboarding');
-      }, 500);
+      // Modal will handle navigation when user clicks "Got it!"
       return;
     }
 
@@ -568,6 +565,7 @@ const NewLandingPage = () => {
       <IOSInstallModal
         isOpen={showIOSModal}
         onClose={() => setShowIOSModal(false)}
+        onContinue={() => navigate('/onboarding')}
       />
     </div>
   );
