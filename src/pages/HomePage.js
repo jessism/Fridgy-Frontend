@@ -1045,7 +1045,7 @@ const HomePage = () => {
             setShortcutInstallTimer(timer);
           }}
           onSkip={() => {
-            console.log('[HomePage] User skipped shortcut installation');
+            console.log('[HomePage] User skipped shortcut installation - jumping to recipe import');
 
             // Clear timer and intent flag
             if (shortcutInstallTimer) {
@@ -1054,7 +1054,7 @@ const HomePage = () => {
             }
             setUserClickedInstall(false);
 
-            nextStep(); // Skip to next step
+            goToStep(STEPS.RECIPE_INTRO); // Skip entire shortcut flow, go to recipe import
           }}
           onCancelTimer={() => {
             console.log('[HomePage] Cancelling install timer - user clicked skip');
