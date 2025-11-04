@@ -1,17 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { AppNavBar } from '../../../components/Navbar';
 import MobileBottomNav from '../../../components/MobileBottomNav';
 import RecipeDetailModal from '../../../components/modals/RecipeDetailModal';
 import RegenerateOptionsModal from '../../../components/modals/RegenerateOptionsModal';
+import { UpgradeModal } from '../../../components/modals/UpgradeModal';
 import AIRecipeCard from './AIRecipeCard';
 import AIRecipeQuestionnaire from './AIRecipeQuestionnaire';
 import AIRecipeLoadingScreen from './AIRecipeLoadingScreen';
 import useAIRecipes from '../hooks/useAIRecipes';
+import { useSubscription } from '../../../hooks/useSubscription';
 import { useGuidedTourContext } from '../../../contexts/GuidedTourContext';
+import { usePWAInstall } from '../../../hooks/usePWAInstall';
 import GuidedTooltip from '../../../components/guided-tour/GuidedTooltip';
 import IntroductionModal from '../../../components/guided-tour/IntroductionModal';
+import InstallPromptModal from '../../../components/guided-tour/InstallPromptModal';
+import IOSInstallModal from '../../../components/IOSInstallModal';
+import confettiImage from '../../../assets/icons/Confetti.png';
 import './AIRecipePage.css';
 
 const AIRecipePage = () => {
@@ -21,6 +27,7 @@ const AIRecipePage = () => {
     hasRecipes,
     loading,
     error,
+    limitInfo,
     generationStatus,
     loadRecipes,
     regenerateRecipes,
@@ -28,10 +35,16 @@ const AIRecipePage = () => {
     clearError
   } = useAIRecipes();
 
+  const { isFreeTier, getAIRecipeUsage, refresh, startCheckout } = useSubscription();
+  const aiRecipeUsage = useMemo(() => getAIRecipeUsage(), [getAIRecipeUsage]);
+
   const { shouldShowTooltip, nextStep, completeTour, goToStep, dismissTour, STEPS, isIndividualTour } = useGuidedTourContext();
+  const { isInstallable, isInstalled, platform, installApp } = usePWAInstall();
 
   const [showError, setShowError] = useState(false);
   const [showQuestionnaire, setShowQuestionnaire] = useState(true); // Start with questionnaire
+  const [isSubmitting, setIsSubmitting] = useState(false); // Local state for immediate loading UI
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false); // Upgrade modal for limit exceeded
 
   // Modal state for recipe details
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -45,6 +58,14 @@ const AIRecipePage = () => {
   const [questionnaireInitialStep, setQuestionnaireInitialStep] = useState(1);
   const [questionnaireInitialData, setQuestionnaireInitialData] = useState(null);
 
+  // Guided tour - Success celebration delay
+  const [showSuccessCelebration, setShowSuccessCelebration] = useState(false);
+
+  // PWA Install modals
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [showIOSInstallModal, setShowIOSInstallModal] = useState(false);
+  const [showTourCompleteModal, setShowTourCompleteModal] = useState(false);
+
   // Show error state
   useEffect(() => {
     if (error) {
@@ -52,26 +73,73 @@ const AIRecipePage = () => {
     }
   }, [error]);
 
+  // Detect when AI recipe limit is exceeded and show upgrade modal
+  useEffect(() => {
+    if (limitInfo && limitInfo.upgradeRequired) {
+      console.log('[AIRecipePage] AI recipe limit exceeded, showing upgrade modal after delay');
+
+      // Add 2.5 second delay so user sees loading screen longer
+      const timer = setTimeout(() => {
+        setShowUpgradeModal(true);
+      }, 2500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [limitInfo]);
+
+  // Auto-advance tour step when landing on AI recipes page
+  useEffect(() => {
+    if (shouldShowTooltip(STEPS.GENERATE_RECIPES_START_BUTTON)) {
+      console.log('[AIRecipePage] User arrived from Start button, advancing to QUESTIONNAIRE step');
+      nextStep();
+    }
+  }, [shouldShowTooltip, STEPS.GENERATE_RECIPES_START_BUTTON, nextStep]);
+
   // Detect when recipes are first generated during the tour
   useEffect(() => {
     if (shouldShowTooltip(STEPS.GENERATE_RECIPES_QUESTIONNAIRE) && hasRecipes && !loading) {
-      console.log('[AIRecipePage] Recipes generated during tour - showing success');
+      console.log('[AIRecipePage] Recipes generated during tour - advancing to success step');
       goToStep(STEPS.GENERATE_RECIPES_SUCCESS);
     }
   }, [hasRecipes, loading, shouldShowTooltip, STEPS, goToStep]);
+
+  // Show success celebration after 8 second delay
+  useEffect(() => {
+    if (shouldShowTooltip(STEPS.GENERATE_RECIPES_SUCCESS) && hasRecipes) {
+      console.log('[AIRecipePage] On success step - setting 8s timer for celebration');
+      const timer = setTimeout(() => {
+        console.log('[AIRecipePage] 8s elapsed - showing celebration modal');
+        setShowSuccessCelebration(true);
+      }, 8000);
+
+      return () => clearTimeout(timer);
+    } else {
+      setShowSuccessCelebration(false);
+    }
+  }, [shouldShowTooltip, STEPS.GENERATE_RECIPES_SUCCESS, hasRecipes]);
 
   const handleQuestionnaireSubmit = async (questionnaireData) => {
     try {
       clearError();
       setShowError(false);
+
+      // Set submitting state BEFORE hiding questionnaire to prevent flash
+      setIsSubmitting(true);
       setShowQuestionnaire(false); // Hide questionnaire during loading
 
       // Store the questionnaire data for potential regeneration
       setLastQuestionnaireData(questionnaireData);
 
       await loadRecipes(false, questionnaireData);
+
+      // Refresh subscription to get updated usage count
+      await refresh();
+
+      // Reset submitting state after completion
+      setIsSubmitting(false);
     } catch (err) {
       console.error('Failed to generate recipes:', err);
+      setIsSubmitting(false); // Reset submitting state on error
       setShowQuestionnaire(true); // Show questionnaire again on error
     }
   };
@@ -87,15 +155,19 @@ const AIRecipePage = () => {
     }
   };
 
-  const handleStartFromBeginning = () => {
+  const handleStartFromBeginning = async () => {
     setShowRegenerateModal(false);
     setQuestionnaireInitialStep(1); // Start from step 1
     setQuestionnaireInitialData(null); // Clear any saved data
     clearRecipes(); // Clear old recipes before showing questionnaire
+
+    // Refresh subscription to show updated usage count
+    await refresh();
+
     setShowQuestionnaire(true);
   };
 
-  const handleKeepPreferences = () => {
+  const handleKeepPreferences = async () => {
     setShowRegenerateModal(false);
     if (lastQuestionnaireData) {
       // Jump to step 8 (final step) with preserved data
@@ -103,6 +175,10 @@ const AIRecipePage = () => {
       setQuestionnaireInitialData(lastQuestionnaireData);
     }
     clearRecipes(); // Clear old recipes before showing questionnaire
+
+    // Refresh subscription to show updated usage count
+    await refresh();
+
     setShowQuestionnaire(true);
   };
 
@@ -117,6 +193,60 @@ const AIRecipePage = () => {
 
   const handleBackToMeals = () => {
     navigate('/meal-plans');
+  };
+
+  const handleUpgradeModalClose = () => {
+    console.log('[AIRecipePage] User dismissed upgrade modal, navigating back to meals');
+    setShowUpgradeModal(false);
+    navigate('/meal-plans');
+  };
+
+  // Format reset date for display
+  const formatResetDate = (dateString) => {
+    if (!dateString) return 'Unknown';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  const handleInstallApp = async () => {
+    console.log('[AIRecipePage] User wants to install app, platform:', platform);
+
+    // If already installed, just complete tour
+    if (isInstalled) {
+      console.log('[AIRecipePage] App already installed, completing tour');
+      setShowInstallPrompt(false);
+      completeTour();
+      return;
+    }
+
+    // iOS: Show instruction modal
+    if (platform === 'ios') {
+      console.log('[AIRecipePage] iOS detected, showing install instructions');
+      setShowInstallPrompt(false);
+      setShowIOSInstallModal(true);
+      return;
+    }
+
+    // Android/Desktop: Show native install prompt
+    if (isInstallable) {
+      console.log('[AIRecipePage] Showing native install prompt');
+      const result = await installApp();
+
+      if (result.success) {
+        console.log('[AIRecipePage] Install successful, completing tour');
+        setShowInstallPrompt(false);
+        completeTour();
+      } else {
+        console.log('[AIRecipePage] Install cancelled, completing tour anyway');
+        setShowInstallPrompt(false);
+        completeTour();
+      }
+    } else {
+      // No install prompt available, just complete tour
+      console.log('[AIRecipePage] No install prompt available, completing tour');
+      setShowInstallPrompt(false);
+      completeTour();
+    }
   };
 
   // Helper function to parse AI time strings to minutes
@@ -325,7 +455,7 @@ const AIRecipePage = () => {
               <p className="ai-recipe-page__hero-subtitle">Answer a few questions to get recipes tailored to your fridge inventory and taste preferences</p>
             </div>
           )}
-          
+
 
           {/* Error Message */}
           {showError && error && (
@@ -342,7 +472,7 @@ const AIRecipePage = () => {
           )}
 
           {/* Main Content */}
-          {showQuestionnaire && !loading && (
+          {showQuestionnaire && !loading && !isSubmitting && (
             /* Questionnaire Form */
             <div className="ai-recipe-page__content">
               <AIRecipeQuestionnaire
@@ -351,11 +481,17 @@ const AIRecipePage = () => {
                 loading={loading}
                 initialStep={questionnaireInitialStep}
                 initialFormData={questionnaireInitialData}
+                onStepChange={(step) => {
+                  console.log('[AIRecipePage] Questionnaire step changed to:', step);
+                  setQuestionnaireInitialStep(step);
+                }}
+                isFreeTier={isFreeTier}
+                aiRecipeUsage={aiRecipeUsage}
               />
             </div>
           )}
 
-          {loading && statusMessage && (
+          {(isSubmitting || (loading && statusMessage)) && (
             /* Full-screen Loading Overlay */
             <AIRecipeLoadingScreen />
           )}
@@ -427,40 +563,90 @@ const AIRecipePage = () => {
 
       {/* Guided Tour - Questionnaire Tooltip */}
       {shouldShowTooltip(STEPS.GENERATE_RECIPES_QUESTIONNAIRE) && showQuestionnaire && questionnaireInitialStep === 1 && (
-        <GuidedTooltip
-          targetSelector=".btn-continue--large"
-          message="Answer a list of questions to personalize your recipes. The AI will use your preferences to create perfect meals for you."
-          position="top"
-          onAction={() => {
-            console.log('[AIRecipePage] User acknowledged questionnaire tooltip');
-            nextStep();
-          }}
-          onDismiss={() => {
-            console.log('[AIRecipePage] User dismissed generate recipes tour');
-            dismissTour();
-          }}
-          actionLabel="Got it"
-        />
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 999999,
+          background: 'white',
+          border: '3px solid #4fcf61',
+          borderRadius: '16px',
+          padding: '16px 24px',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+          textAlign: 'center',
+          fontSize: '15px',
+          fontWeight: '500',
+          color: '#333',
+          maxWidth: '280px'
+        }}>
+          Answer a few questions to get personalized recipes
+        </div>
       )}
 
       {/* Guided Tour - Success Celebration */}
-      {shouldShowTooltip(STEPS.GENERATE_RECIPES_SUCCESS) && hasRecipes && (
+      {shouldShowTooltip(STEPS.GENERATE_RECIPES_SUCCESS) && hasRecipes && showSuccessCelebration && !showInstallPrompt && (
         <IntroductionModal
           title="Congrats on your first personalized recipes!"
-          message="Your AI-generated recipes are ready! Browse through them and tap any recipe to see the full details, ingredients, and cooking instructions."
-          emoji="🎉"
+          message="Your recipes are ready! Tap any recipe to view full details."
+          emoji={<img src={confettiImage} alt="Celebration" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />}
           onContinue={() => {
-            console.log('[AIRecipePage] User completed generate recipes tour');
-            // If individual tour, complete it. If full tour, continue to next section.
-            if (isIndividualTour) {
-              completeTour();
-            } else {
-              nextStep(); // Continue to next section of full tour
-            }
+            console.log('[AIRecipePage] User clicked Next - showing install prompt');
+            setShowSuccessCelebration(false);
+            setShowInstallPrompt(true);
           }}
-          continueLabel={isIndividualTour ? "Start Cooking!" : "Continue Tour"}
+          continueLabel="Next"
         />
       )}
+
+      {/* Install Prompt Modal */}
+      <InstallPromptModal
+        isOpen={showInstallPrompt}
+        onInstall={handleInstallApp}
+        onClose={() => {
+          setShowInstallPrompt(false);
+          setShowTourCompleteModal(true);
+        }}
+      />
+
+      {/* Tour Complete Congratulations Modal */}
+      {showTourCompleteModal && (
+        <IntroductionModal
+          title="Congratulations!"
+          message="You now can add more items and create personalized recipes"
+          emoji={<img src={confettiImage} alt="Celebration" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />}
+          onContinue={() => {
+            setShowTourCompleteModal(false);
+            completeTour();
+          }}
+          continueLabel="Get Started"
+        />
+      )}
+
+      {/* iOS Install Modal */}
+      <IOSInstallModal
+        isOpen={showIOSInstallModal}
+        onClose={() => {
+          setShowIOSInstallModal(false);
+          completeTour();
+          navigate('/home');
+        }}
+        onContinue={() => {
+          setShowIOSInstallModal(false);
+          completeTour();
+          navigate('/home');
+        }}
+      />
+
+      {/* Upgrade Modal for AI Recipe Limit */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={handleUpgradeModalClose}
+        feature="ai recipes"
+        current={limitInfo?.current}
+        limit={limitInfo?.limit}
+        startCheckout={startCheckout}
+      />
     </div>
   );
 };

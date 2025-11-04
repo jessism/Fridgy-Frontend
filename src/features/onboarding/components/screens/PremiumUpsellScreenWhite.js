@@ -4,11 +4,10 @@ import Logo from '../../../../assets/images/Logo.png';
 
 const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep, updateData }) => {
   const premiumFeatures = [
-    'AI-powered food recognition from photos',
-    'Smart expiration date tracking',
-    'Personalized recipe recommendations',
     'Inventory management & notifications',
+    'Personalized recipe recommendations',
     'Meal planning based on your fridge',
+    'Smart expiration date tracking',
     'Reduce food waste & save money'
   ];
 
@@ -47,7 +46,9 @@ const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep, up
       zIndex: 999,
       display: 'flex',
       flexDirection: 'column',
-      padding: '40px 20px'
+      padding: '20px 15px',
+      overflowY: 'auto',
+      WebkitOverflowScrolling: 'touch'
     }}>
       
       <button
@@ -76,14 +77,14 @@ const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep, up
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: '20px',
-        paddingTop: '60px'
+        paddingTop: '20px'
       }}>
-        <img 
-          src={Logo} 
-          alt="Fridgy Logo" 
+        <img
+          src={Logo}
+          alt="Fridgy Logo"
           style={{
-            width: '140px',
-            height: '140px',
+            width: '100px',
+            height: '100px',
             objectFit: 'contain'
           }}
         />
@@ -126,7 +127,7 @@ const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep, up
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
-              marginBottom: '16px'
+              marginBottom: '10px'
             }}>
               <div style={{
                 width: '28px',

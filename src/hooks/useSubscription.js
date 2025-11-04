@@ -137,7 +137,7 @@ export function useSubscription() {
       meal_logs: Infinity, // Unlimited - historical tracking
       owned_shopping_lists: 5,
       joined_shopping_lists: 1,
-      ai_recipes: 0, // Not allowed
+      ai_recipes: 3, // 3 generations per month (9 recipes total)
       analytics: 0, // Not allowed
     };
 
@@ -306,6 +306,23 @@ export function useSubscription() {
     }
   }, []);
 
+  /**
+   * Get AI recipe usage stats
+   * @returns {Object} { current, limit, remaining, nextResetDate }
+   */
+  const getAIRecipeUsage = useCallback(() => {
+    const current = usage?.ai_recipe_generations_count || 0;
+    const limit = isPremium() ? Infinity : 3;
+    const remaining = isPremium() ? Infinity : Math.max(0, limit - current);
+
+    return {
+      current,
+      limit,
+      remaining,
+      nextResetDate: usage?.next_reset_date || null,
+    };
+  }, [usage, isPremium]);
+
   return {
     // State
     subscription,
@@ -325,6 +342,7 @@ export function useSubscription() {
     reactivateSubscription,
     validatePromoCode,
     refresh: fetchSubscriptionStatus,
+    getAIRecipeUsage,
 
     // Embedded checkout state
     checkoutSecret,

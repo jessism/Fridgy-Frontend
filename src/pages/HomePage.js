@@ -939,8 +939,8 @@ const HomePage = () => {
       {shouldShowTooltip(STEPS.WELCOME_SCREEN) && (
         <WelcomePrompt
           onStart={() => {
-            console.log('[HomePage] User clicked Start Tour - skipping groceries intro');
-            goToStep(STEPS.ADD_GROCERIES); // Skip groceries intro, go straight to ADD_GROCERIES
+            console.log('[HomePage] User clicked Start Tour - advancing to groceries intro');
+            nextStep(); // Advances to GROCERIES_INTRO
           }}
           onSkip={() => {
             console.log('[HomePage] User clicked Skip Tour');
@@ -984,18 +984,12 @@ const HomePage = () => {
       {/* Generate Recipes - Tooltip to Navigate to Meals */}
       {shouldShowTooltip(STEPS.GENERATE_RECIPES_NAV_TO_MEALS) && (
         <GuidedTooltip
-          targetSelector=".mobile-bottom-nav__nav-tab[href='/meal-plans'], .app-navbar__nav-link[href='/meal-plans']"
+          targetSelector=".mobile-bottom-nav .nav-tab:nth-child(4)"
           message="Start by heading to Meals page"
           position="top"
-          onAction={() => {
-            console.log('[HomePage] User acknowledged meals nav tooltip');
-            nextStep(); // Advances to GENERATE_RECIPES_START_BUTTON (will show on MealPlansPage)
-          }}
-          onDismiss={() => {
-            console.log('[HomePage] User dismissed generate recipes tour');
-            dismissTour();
-          }}
-          actionLabel="Got it"
+          showAction={false}
+          highlight={true}
+          offset={20}
         />
       )}
 

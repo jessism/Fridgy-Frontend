@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/context/AuthContext';
-import { usePWAInstall } from '../hooks/usePWAInstall';
 import appLogo from '../assets/images/Logo.png';
 import fridgeHeroImage from '../assets/images/fridge.jpg';
 import foodImage1 from '../assets/images/Landingpage_food_1.jpg';
@@ -17,17 +16,14 @@ import groceriesIcon from '../assets/icons/groceries.png';
 import chefIcon from '../assets/icons/Smart chef.png';
 import heartCheckIcon from '../assets/icons/Healthy.png';
 import Button from '../components/Button';
-import IOSInstallModal from '../components/IOSInstallModal';
 import './NewLandingPage.css';
 
 const NewLandingPage = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
-  const [showIOSModal, setShowIOSModal] = useState(false);
   const totalTestimonials = 4;
   const navigate = useNavigate();
   const { isAuthenticated, loading } = useAuth();
-  const { isInstallable, isInstalled, platform, installApp } = usePWAInstall();
 
   // Check authentication and redirect if logged in
   useEffect(() => {
@@ -59,43 +55,9 @@ const NewLandingPage = () => {
     setCurrentTestimonial(index);
   };
 
-  const handleGetStarted = async () => {
-    // If already installed, go directly to onboarding
-    if (isInstalled) {
-      console.log('[PWA] App already installed, navigating to onboarding');
-      navigate('/onboarding');
-      return;
-    }
-
-    // iOS: Show instruction modal
-    if (platform === 'ios') {
-      console.log('[PWA] iOS detected, showing install instructions');
-      setShowIOSModal(true);
-      // Modal will handle navigation when user clicks "Got it!"
-      return;
-    }
-
-    // Android/Desktop: Try to show install prompt
-    if (isInstallable) {
-      console.log('[PWA] Showing install prompt');
-      const result = await installApp();
-
-      if (result.success) {
-        console.log('[PWA] Install successful, navigating to onboarding');
-        // Wait a moment for install to complete, then navigate
-        setTimeout(() => {
-          navigate('/onboarding');
-        }, 1000);
-      } else {
-        console.log('[PWA] Install cancelled or failed, navigating to onboarding anyway');
-        // User cancelled or error occurred, still allow them to continue
-        navigate('/onboarding');
-      }
-    } else {
-      // No install prompt available, just navigate
-      console.log('[PWA] No install prompt available, navigating to onboarding');
-      navigate('/onboarding');
-    }
+  const handleGetStarted = () => {
+    console.log('[Landing] Navigating to onboarding');
+    navigate('/onboarding');
   };
 
   // Show loading state while checking authentication
@@ -151,12 +113,6 @@ const NewLandingPage = () => {
                   >
                     GET STARTED FOR FREE
                   </Button>
-                  <button
-                    className="landing-page-v2__continue-link"
-                    onClick={() => navigate('/onboarding')}
-                  >
-                    Continue in browser
-                  </button>
                 </div>
 
               </div>
@@ -561,12 +517,6 @@ const NewLandingPage = () => {
         </div>
       </section>
 
-      {/* iOS Install Modal */}
-      <IOSInstallModal
-        isOpen={showIOSModal}
-        onClose={() => setShowIOSModal(false)}
-        onContinue={() => navigate('/onboarding')}
-      />
     </div>
   );
 };

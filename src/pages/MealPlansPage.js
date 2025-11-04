@@ -22,7 +22,7 @@ const MealPlansPage = ({ defaultTab }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isPremium, startCheckout, loading: subscriptionLoading, checkoutSecret, closeCheckout, refresh } = useSubscription();
-  const { shouldShowTooltip, completeStep, STEPS } = useGuidedTourContext();
+  const { shouldShowTooltip, completeStep, nextStep, STEPS } = useGuidedTourContext();
   const {
     suggestions,
     loading,
@@ -60,7 +60,10 @@ const MealPlansPage = ({ defaultTab }) => {
 
   // Image preloading state for saved recipes
   const [imageStates, setImageStates] = useState({});
-  
+
+  // Guided tour - Start button visibility detection
+  const [isStartButtonVisible, setIsStartButtonVisible] = useState(false);
+
   // Edamam test hook - COMMENTED OUT
   // const {
   //   suggestions: edamamSuggestions,
@@ -347,11 +350,41 @@ const MealPlansPage = ({ defaultTab }) => {
     // Fetch recent meals
     fetchRecentMeals();
 
-    // Fetch past AI recipes (only if premium)
-    if (isPremium) {
-      fetchPastAIRecipes();
+    // Fetch past AI recipes (available for all users now!)
+    fetchPastAIRecipes();
+  }, []); // Only fetch once on mount
+
+  // Auto-advance tour step when landing on Meals page
+  useEffect(() => {
+    if (shouldShowTooltip(STEPS.GENERATE_RECIPES_NAV_TO_MEALS)) {
+      console.log('[MealPlansPage] User arrived from nav tooltip, advancing to START_BUTTON step');
+      nextStep();
     }
-  }, [isPremium]); // Re-fetch when premium status changes
+  }, [shouldShowTooltip, STEPS.GENERATE_RECIPES_NAV_TO_MEALS, nextStep]);
+
+  // Scroll detection - hide tooltip when Start button is visible
+  useEffect(() => {
+    if (!shouldShowTooltip(STEPS.GENERATE_RECIPES_START_BUTTON)) return;
+
+    const targetElement = document.querySelector('.meal-plans-page__ai-access');
+    if (!targetElement) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsStartButtonVisible(entry.isIntersecting);
+          if (entry.isIntersecting) {
+            console.log('[MealPlansPage] Start button is visible, hiding tooltip');
+          }
+        });
+      },
+      { threshold: 0.5 } // Button is 50% visible
+    );
+
+    observer.observe(targetElement);
+
+    return () => observer.disconnect();
+  }, [shouldShowTooltip, STEPS.GENERATE_RECIPES_START_BUTTON]);
 
   // Preload saved recipe images to prevent glitching
   useEffect(() => {
@@ -1192,59 +1225,11 @@ const MealPlansPage = ({ defaultTab }) => {
                 )}
               </div>
 
-              {/* AI Recipe Section - Get perfect match with AI (PREMIUM ONLY) */}
-              {isPremium ? (
-                <AIRecipeSection />
-              ) : (
-                <div style={{
-                  background: 'linear-gradient(135deg, rgba(79, 207, 97, 0.1), rgba(69, 184, 84, 0.05))',
-                  borderRadius: '16px',
-                  padding: '40px 30px',
-                  textAlign: 'center',
-                  margin: '20px 0',
-                  border: '2px dashed rgba(79, 207, 97, 0.3)'
-                }}>
-                  <div style={{ marginBottom: '16px' }}>
-                    <PremiumBadge size="large" text="Pro" />
-                  </div>
-                  <h3 style={{ fontSize: '24px', fontWeight: '600', color: '#333', marginBottom: '12px' }}>
-                    AI Recipe Recommendations
-                  </h3>
-                  <p style={{ fontSize: '16px', color: '#666', marginBottom: '24px', lineHeight: '1.6' }}>
-                    AI creates personalized recipes using what's actually in your fridge right now.
-                  </p>
-                  <button
-                    onClick={startCheckout}
-                    style={{
-                      padding: '14px 32px',
-                      background: '#4fcf61',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '12px',
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseOver={(e) => {
-                      e.target.style.background = '#45b854';
-                      e.target.style.transform = 'translateY(-2px)';
-                    }}
-                    onMouseOut={(e) => {
-                      e.target.style.background = '#4fcf61';
-                      e.target.style.transform = 'translateY(0)';
-                    }}
-                  >
-                    Upgrade to Premium
-                  </button>
-                  <p style={{ fontSize: '13px', color: '#999', marginTop: '12px' }}>
-                    7-day free trial, then $4.99/month
-                  </p>
-                </div>
-              )}
+              {/* AI Recipe Section - Get perfect match with AI (Now available for ALL users!) */}
+              <AIRecipeSection />
 
-              {/* Your Past AI Recipes Section (PREMIUM ONLY) */}
-              {isPremium && pastAIRecipes.length > 0 && (
+              {/* Your Past AI Recipes Section (Available for ALL users!) */}
+              {pastAIRecipes.length > 0 && (
                 <div className="meal-plans-page__analytics-section" style={{ marginTop: '40px' }}>
                   <div className="meal-plans-page__analytics-text-section">
                     <div className="meal-plans-page__section-header-with-action">
@@ -1548,18 +1533,11 @@ const MealPlansPage = ({ defaultTab }) => {
       )}
 
       {/* Generate Recipes Tour - Start Button Tooltip */}
-      {shouldShowTooltip(STEPS.GENERATE_RECIPES_START_BUTTON) && isPremium && activeTab === 'meals' && (
+      {shouldShowTooltip(STEPS.GENERATE_RECIPES_START_BUTTON) && !isStartButtonVisible && (
         <GuidedTooltip
-          targetSelector=".meal-plans-page__ai-access"
-          message="Click here to start generating AI-powered recipes tailored to your taste and inventory"
+          message="Scroll down and tap 'Start personalized recipes' ↓"
           position="top"
-          onAction={() => {
-            console.log('[MealPlansPage] User clicked Start personalized recipes tooltip');
-            completeStep(STEPS.GENERATE_RECIPES_START_BUTTON);
-            // User will naturally navigate to /ai-recipes by clicking the button
-          }}
-          actionLabel="Got it"
-          highlight={true}
+          showAction={false}
         />
       )}
     </div>

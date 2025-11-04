@@ -96,8 +96,21 @@ const IOSInstallModal = ({ isOpen, onClose, onContinue }) => {
                 Trackabite will appear on your home screen
               </p>
             </div>
-            <button className="ios-install-modal__continue" onClick={handleContinue}>
-              Got it!
+            <button className="ios-install-modal__continue" onClick={handleNext}>
+              Next
+            </button>
+          </>
+        );
+
+      case 4:
+        // Screen 5: Final confirmation
+        return (
+          <>
+            <div className="ios-install-modal__header">
+              <h2 className="ios-install-modal__title">Perfect! Now add Trackabite to your screen to start tracking and creating your recipes</h2>
+            </div>
+            <button className="ios-install-modal__continue" onClick={onClose}>
+              Done
             </button>
           </>
         );
@@ -118,7 +131,7 @@ const IOSInstallModal = ({ isOpen, onClose, onContinue }) => {
 
         {/* Step indicator dots */}
         <div className="ios-install-modal__step-indicator">
-          {[0, 1, 2, 3].map((step) => (
+          {[0, 1, 2, 3, 4].map((step) => (
             <span
               key={step}
               className={`ios-install-modal__step-dot ${

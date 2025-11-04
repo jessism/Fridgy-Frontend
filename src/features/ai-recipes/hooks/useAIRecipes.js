@@ -1,15 +1,18 @@
 import { useState, useCallback } from 'react';
 import { useAuth } from '../../auth/context/AuthContext';
 import { safeJSONStringify } from '../../../utils/jsonSanitizer';
+import { useGuidedTourContext } from '../../../contexts/GuidedTourContext';
 
 // API base URL - adjust for your backend
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const useAIRecipes = () => {
   const { user } = useAuth();
+  const { isActive: isTourActive, demoInventoryItems } = useGuidedTourContext();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [limitInfo, setLimitInfo] = useState(null); // Stores limit exceeded details
   const [generationStatus, setGenerationStatus] = useState('idle'); // idle, generating, completed, failed
 
   // Get token from localStorage
@@ -21,7 +24,7 @@ const useAIRecipes = () => {
   const apiRequest = async (endpoint, options = {}) => {
     const url = `${API_BASE_URL}${endpoint}`;
     const token = getToken();
-    
+
     const config = {
       headers: {
         'Content-Type': 'application/json',
@@ -35,6 +38,19 @@ const useAIRecipes = () => {
     const data = await response.json();
 
     if (!response.ok) {
+      // For limit exceeded errors, preserve the full error data
+      if (response.status === 402 && data.error === 'LIMIT_EXCEEDED') {
+        const error = new Error(data.message || 'Usage limit exceeded');
+        error.limitInfo = {
+          current: data.current,
+          limit: data.limit,
+          tier: data.tier,
+          feature: data.feature,
+          upgradeRequired: data.upgradeRequired
+        };
+        throw error;
+      }
+
       throw new Error(data.error || `HTTP error! status: ${response.status}`);
     }
 
@@ -74,13 +90,39 @@ const useAIRecipes = () => {
       setLoading(true);
       setError(null);
       setGenerationStatus('generating');
-      
+
       console.log('🤖 Starting AI recipe generation...');
       console.log('📋 Questionnaire data:', questionnaireData);
-      
+
+      // Check if we should use demo inventory (tour mode)
+      const shouldUseDemoInventory = isTourActive && demoInventoryItems && demoInventoryItems.length > 0;
+
+      // Prepare request body
+      let requestBody = { ...questionnaireData };
+
+      if (shouldUseDemoInventory) {
+        console.log('🎯 Tour mode detected - using demo inventory items:', demoInventoryItems.length);
+
+        // Transform demo inventory to backend format (camelCase → snake_case)
+        const transformedDemoInventory = demoInventoryItems.map(item => ({
+          item_name: item.itemName,
+          quantity: item.quantity,
+          category: item.category,
+          expiration_date: item.expirationDate,
+          uploaded_at: item.uploadedAt,
+          created_at: item.createdAt,
+          updated_at: item.updatedAt,
+          total_weight_oz: item.total_weight_oz,
+          isDemo: true
+        }));
+
+        requestBody.demoInventory = transformedDemoInventory;
+        console.log('📦 Demo inventory transformed and added to request');
+      }
+
       const response = await apiRequest('/ai-recipes/generate', {
         method: 'POST',
-        body: safeJSONStringify(questionnaireData)
+        body: safeJSONStringify(requestBody)
       });
 
       if (response.success && response.data) {
@@ -96,11 +138,17 @@ const useAIRecipes = () => {
       console.error('❌ Error generating recipes:', err);
       setError(err.message);
       setGenerationStatus('failed');
+
+      // Store limit info if this is a limit exceeded error
+      if (err.limitInfo) {
+        setLimitInfo(err.limitInfo);
+      }
+
       throw err;
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, isTourActive, demoInventoryItems]);
 
   // Load recipes (cached first, then generate if needed)
   const loadRecipes = useCallback(async (forceRegenerate = false, questionnaireData = {}) => {
@@ -185,6 +233,7 @@ const useAIRecipes = () => {
   // Clear error state
   const clearError = useCallback(() => {
     setError(null);
+    setLimitInfo(null);
   }, []);
 
 
@@ -211,12 +260,13 @@ const useAIRecipes = () => {
     // Data
     recipes,
     hasRecipes,
-    
+
     // State
     loading,
     error,
+    limitInfo, // Limit exceeded details (current, limit, tier, etc.)
     generationStatus, // idle, generating, completed, failed
-    
+
     // Actions
     loadRecipes,
     generateRecipes,
@@ -224,7 +274,7 @@ const useAIRecipes = () => {
     checkCachedRecipes,
     clearRecipes,
     clearError,
-    
+
     // Utilities
     areRecipesFresh,
     getAnalytics

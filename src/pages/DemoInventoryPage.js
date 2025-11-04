@@ -25,6 +25,9 @@ const DemoInventoryPage = () => {
   const [showNotificationSuccess, setShowNotificationSuccess] = useState(false);
   const [notificationEnabled, setNotificationEnabled] = useState(false);
 
+  // State for VIEWING_INVENTORY celebration
+  const [showViewingInventoryCelebration, setShowViewingInventoryCelebration] = useState(false);
+
   // If no demo items, redirect to real inventory
   useEffect(() => {
     if (!demoInventoryItems || demoInventoryItems.length === 0) {
@@ -32,6 +35,19 @@ const DemoInventoryPage = () => {
       navigate('/inventory');
     }
   }, [demoInventoryItems, navigate]);
+
+  // VIEWING_INVENTORY - Show celebration modal after 4 seconds
+  useEffect(() => {
+    if (shouldShowTooltip(STEPS.VIEWING_INVENTORY)) {
+      console.log('[DemoInventory] VIEWING_INVENTORY - setting 4s timer for celebration modal');
+      const timer = setTimeout(() => {
+        console.log('[DemoInventory] 4s elapsed - showing celebration modal');
+        setShowViewingInventoryCelebration(true);
+      }, 4000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [shouldShowTooltip, STEPS.VIEWING_INVENTORY]);
 
   // Helper function to calculate days until expiry
   const getDaysUntilExpiry = (expirationDate) => {
@@ -317,8 +333,19 @@ const DemoInventoryPage = () => {
         />
       )}
 
-      {/* VIEWING_INVENTORY auto-advance (after 3 seconds) */}
-      {shouldShowTooltip(STEPS.VIEWING_INVENTORY) && <ViewingInventoryAutoAdvance />}
+      {/* VIEWING_INVENTORY celebration modal (after 4 seconds) */}
+      {shouldShowTooltip(STEPS.VIEWING_INVENTORY) && showViewingInventoryCelebration && (
+        <CelebrationModal
+          title="Good job! You've logged your first items."
+          description="Now let's create your first personalized recipes"
+          onContinue={() => {
+            console.log('[DemoInventory] User clicked Continue - advancing to Generate Recipes');
+            setShowViewingInventoryCelebration(false);
+            nextStep(); // Advances to GENERATE_RECIPES_INTRO
+          }}
+          continueLabel="Continue"
+        />
+      )}
 
       {/* SHORTCUT_INTRO - Congratulations Modal (Both Tours) */}
       {shouldShowTooltip(STEPS.SHORTCUT_INTRO) && !showNotificationPrompt && !showNotificationSuccess && (
@@ -387,7 +414,7 @@ const DemoInventoryPage = () => {
         ) : (
           // Notification was skipped - show completion/transition message
           <CelebrationModal
-            title={isIndividualTour ? "You finished the tour!" : "Good job! Now let's learn how to import your recipes"}
+            title={isIndividualTour ? "You finished the tour!" : "Good job! Now let's create your first personalized recipes"}
             description=""
             onContinue={() => {
               console.log('[DemoInventory] Final modal acknowledged - continuing');
@@ -416,8 +443,9 @@ const DemoInventoryPage = () => {
       {shouldShowTooltip(STEPS.GENERATE_RECIPES_INTRO) && (
         <GenerateRecipesIntroModal
           onContinue={() => {
-            console.log('[DemoInventory] User wants to learn recipe generation - advancing tour');
+            console.log('[DemoInventory] User wants to learn recipe generation - advancing tour and navigating to home');
             nextStep();
+            navigate('/home');
           }}
           onSkip={() => {
             console.log('[DemoInventory] User skipped recipe generation - dismissing tour');
@@ -427,23 +455,6 @@ const DemoInventoryPage = () => {
       )}
     </div>
   );
-};
-
-// Helper component for auto-advancing after viewing inventory
-const ViewingInventoryAutoAdvance = () => {
-  const { nextStep } = useGuidedTourContext();
-
-  useEffect(() => {
-    console.log('[DemoInventory] VIEWING_INVENTORY - setting 4s timer');
-    const timer = setTimeout(() => {
-      console.log('[DemoInventory] 4s elapsed - advancing tour');
-      nextStep();
-    }, 4000);
-
-    return () => clearTimeout(timer);
-  }, [nextStep]);
-
-  return null;
 };
 
 export default DemoInventoryPage;

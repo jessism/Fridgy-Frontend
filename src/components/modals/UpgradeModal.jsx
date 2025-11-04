@@ -51,10 +51,11 @@ export function UpgradeModal({ isOpen, onClose, feature, current, limit, startCh
         ]
       },
       'ai recipes': {
-        subtitle: 'Upgrade to Pro Plan to unlock AI recipe generation',
+        title: 'Unlock Unlimited AI Recipe Generation',
+        subtitle: `You've reached your free limit. Upgrade to Pro Plan to enjoy unlimited recipe generations`,
         benefits: [
-          'Generate custom recipes from your inventory',
-          'Get AI-powered recipe suggestions',
+          'Unlimited AI-generated recipes',
+          'Personalized to your fridge inventory',
           'Adapt recipes to your preferences',
           'Create meal plans automatically',
           'Never run out of cooking ideas'
@@ -84,7 +85,9 @@ export function UpgradeModal({ isOpen, onClose, feature, current, limit, startCh
           ×
         </button>
 
-        <h2 className="upgrade-modal__title">Try Trackabite Pro</h2>
+        <h2 className="upgrade-modal__title">
+          {featureContent.title || 'Try Trackabite Pro'}
+        </h2>
 
         <p className="upgrade-modal__message">
           {featureContent.subtitle}

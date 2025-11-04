@@ -18,13 +18,20 @@ const STEPS = {
   GO_TO_MEALS: 'go_to_meals',               // Celebration: Items added successfully
   VIEWING_INVENTORY: 'viewing_inventory',   // Waiting period to view inventory
 
-  // 2. Import Shortcut Flow
+  // 2. Personalize Recipe with AI Flow (moved up from #4)
+  GENERATE_RECIPES_INTRO: 'generate_recipes_intro',           // "Let's generate personalized recipes" intro
+  GENERATE_RECIPES_NAV_TO_MEALS: 'generate_recipes_nav_to_meals', // Tooltip: Navigate to Meals page
+  GENERATE_RECIPES_START_BUTTON: 'generate_recipes_start_button',  // Tooltip: Click "Start personalized recipes"
+  GENERATE_RECIPES_QUESTIONNAIRE: 'generate_recipes_questionnaire', // Tooltip: Answer questions
+  GENERATE_RECIPES_SUCCESS: 'generate_recipes_success',       // Success: Recipes generated!
+
+  // 3. Import Shortcut Flow (moved down from #2)
   SHORTCUT_INTRO: 'shortcut_intro',         // "Let's install your shortcut" intro
   INSTALL_SHORTCUT: 'install_shortcut',     // iOS shortcut installation (Copy Magic Key)
   SHORTCUT_CONFIRMATION: 'shortcut_confirmation',   // "Have you installed your shortcut?"
   SHORTCUT_SUCCESS_BRIDGE: 'shortcut_success_bridge', // "Awesome! Now let's import..."
 
-  // 3. Import IG Recipes Flow
+  // 4. Import IG Recipes Flow (moved down from #3)
   RECIPE_INTRO: 'recipe_intro',             // Intro to recipe import (after shortcut)
   IMPORT_RECIPE_INTRO: 'import_recipe_intro',       // "Let's import your first recipe"
   IMPORT_RECIPE_PREFLIGHT: 'import_recipe_preflight', // Check notifications + shortcut
@@ -39,12 +46,6 @@ const STEPS = {
   PASTE_URL: 'paste_url',                   // Step 5: Tooltip on URL input
   RECIPE_IMPORTED: 'recipe_imported',       // Step 6: Success toast
 
-  // 4. Personalize Recipe with AI Flow
-  GENERATE_RECIPES_INTRO: 'generate_recipes_intro',           // "Let's generate personalized recipes" intro
-  GENERATE_RECIPES_NAV_TO_MEALS: 'generate_recipes_nav_to_meals', // Tooltip: Navigate to Meals page
-  GENERATE_RECIPES_START_BUTTON: 'generate_recipes_start_button',  // Tooltip: Click "Start personalized recipes"
-  GENERATE_RECIPES_QUESTIONNAIRE: 'generate_recipes_questionnaire', // Tooltip: Answer questions
-  GENERATE_RECIPES_SUCCESS: 'generate_recipes_success',       // Success: Recipes generated!
   PUSH_NOTIFICATION_PROMPT: 'push_notification_prompt', // Push notification setup
 
   COMPLETED: 'completed'                    // Tour finished
@@ -102,16 +103,18 @@ const useGuidedTour = () => {
   /**
    * Start the guided tour
    */
-  const startTour = useCallback(() => {
-    console.log('[GuidedTour] Starting tour with welcome screen');
+  const startTour = useCallback((source = 'full') => {
+    console.log(`[GuidedTour] Starting tour with welcome screen (source: ${source})`);
     setCurrentStep(STEPS.WELCOME_SCREEN);
     setIsActive(true);
+    setTourSource(source);
 
     // Immediately save to localStorage
     try {
       localStorage.setItem('trackabite_guided_tour', JSON.stringify({
         currentStep: STEPS.WELCOME_SCREEN,
         isActive: true,
+        tourSource: source,
         lastUpdated: new Date().toISOString()
       }));
     } catch (error) {

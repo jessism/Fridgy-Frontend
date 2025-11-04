@@ -21,7 +21,10 @@ const AIRecipeQuestionnaire = ({
   onBackToMeals,
   loading = false,
   initialStep = 1,
-  initialFormData = null
+  initialFormData = null,
+  onStepChange,
+  isFreeTier = false,
+  aiRecipeUsage = null
 }) => {
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(initialStep);
@@ -253,7 +256,11 @@ const AIRecipeQuestionnaire = ({
 
   const goToNext = () => {
     if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+      if (onStepChange) {
+        onStepChange(nextStep);
+      }
     }
   };
 
@@ -420,7 +427,7 @@ const AIRecipeQuestionnaire = ({
               <p className="questionnaire-subtitle">
                 Answer a few questions to get recipes tailored to your fridge inventory and taste preferences
               </p>
-              <div className="questionnaire-actions">
+              <div className="questionnaire-actions" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <button
                   className="btn-continue btn-continue--large"
                   onClick={goToNext}
@@ -428,6 +435,27 @@ const AIRecipeQuestionnaire = ({
                 >
                   Get Started
                 </button>
+                {isFreeTier && aiRecipeUsage && (
+                  <div style={{
+                    marginTop: '16px',
+                    fontSize: '14px',
+                    color: '#6c757d',
+                    textAlign: 'center',
+                    width: '100%'
+                  }}>
+                    {aiRecipeUsage.remaining > 0 ? (
+                      <>
+                        <span style={{ fontWeight: '600', color: '#4fcf61' }}>
+                          {aiRecipeUsage.remaining} of {aiRecipeUsage.limit}
+                        </span> remaining this month
+                      </>
+                    ) : (
+                      <span style={{ fontWeight: '600', color: '#dc3545' }}>
+                        Limit reached ({aiRecipeUsage.current}/{aiRecipeUsage.limit})
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -1,0 +1,152 @@
+/* Install Prompt Modal Overlay */
+.install-prompt-modal__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  padding: 20px;
+  animation: install-prompt-fade-in 0.3s ease;
+}
+
+@keyframes install-prompt-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal Content */
+.install-prompt-modal__content {
+  background: white;
+  border-radius: 20px;
+  max-width: 400px;
+  width: 100%;
+  padding: 40px 30px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: install-prompt-slide-up 0.3s ease;
+}
+
+@keyframes install-prompt-slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Close Button */
+.install-prompt-modal__close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.install-prompt-modal__close:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+/* Header */
+.install-prompt-modal__header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.install-prompt-modal__icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.install-prompt-modal__title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 12px 0;
+  line-height: 1.3;
+}
+
+.install-prompt-modal__subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Install Button */
+.install-prompt-modal__install-button {
+  width: 100%;
+  background: var(--primary-green, #4fcf61);
+  color: white;
+  border: none;
+  padding: 16px 20px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 12px;
+}
+
+.install-prompt-modal__install-button:hover {
+  background: var(--primary-green-dark, #3fb54d);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3);
+}
+
+/* Skip Button */
+.install-prompt-modal__skip {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #999;
+  font-size: 13px;
+  font-weight: 400;
+  padding: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.install-prompt-modal__skip:hover {
+  color: #333;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+  .install-prompt-modal__content {
+    padding: 30px 20px;
+  }
+
+  .install-prompt-modal__title {
+    font-size: 20px;
+  }
+
+  .install-prompt-modal__subtitle {
+    font-size: 13px;
+  }
+}
