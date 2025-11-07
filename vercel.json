@@ -5,20 +5,20 @@
   "framework": "create-react-app",
   "redirects": [
     {
-      "source": "/:path*",
+      "source": "/(.*)",
       "has": [
         {
           "type": "host",
           "value": "www.trackabite.app"
         }
       ],
-      "destination": "https://trackabite.app/:path*",
+      "destination": "https://trackabite.app/:splat",
       "permanent": true
     }
   ],
   "headers": [
     {
-      "source": "/:path*",
+      "source": "/(.*)",
       "headers": [
         {
           "key": "X-Content-Type-Options",
@@ -41,7 +41,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!static|favicon.ico|logo|manifest.json|robots.txt|service-worker.js).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
