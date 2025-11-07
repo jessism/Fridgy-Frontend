@@ -369,7 +369,10 @@
   font-family: var(--header-font);
   font-size: 2rem;
   font-weight: 700;
-  color: var(--primary-green);
+  background: linear-gradient(135deg, #4fcf61 0%, #81e053 50%, #6bc93f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0 0 0.25rem 0;
   text-align: left;
   line-height: 1.1;
