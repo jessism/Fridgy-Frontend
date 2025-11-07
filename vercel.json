@@ -41,7 +41,7 @@
   ],
   "rewrites": [
     {
-      "source": "/:path*",
+      "source": "/((?!static|favicon.ico|logo|manifest.json|robots.txt|service-worker.js).*)",
       "destination": "/index.html"
     }
   ]
