@@ -39,7 +39,7 @@ const useOnboarding = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const totalSteps = 12;
+  const totalSteps = 13;
 
   useEffect(() => {
     // Always start fresh - clear any existing onboarding data

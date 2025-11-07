@@ -17,7 +17,7 @@ const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep, up
       updateData({ wantsTrial: true });
     }
     localStorage.setItem('fridgy_wants_trial', 'true');
-    jumpToStep(12); // Go to account creation
+    jumpToStep(13); // Go to account creation
   };
 
   const handleContinueFree = () => {
@@ -26,7 +26,7 @@ const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep, up
       updateData({ wantsTrial: false });
     }
     localStorage.setItem('fridgy_wants_trial', 'false');
-    jumpToStep(12); // Go to account creation
+    jumpToStep(13); // Go to account creation
   };
 
   return (
@@ -148,26 +148,31 @@ const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep, up
             </div>
           ))}
         </div>
-        
-        <div style={{
-          textAlign: 'center',
-          marginBottom: '20px'
-        }}>
-          <div style={{
-            fontSize: '14px',
-            color: '#666',
-            marginBottom: '4px'
-          }}>
-            Try 7 days free, then $4.99/month
-          </div>
-        </div>
 
         <div style={{
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
-          alignItems: 'center'
+          alignItems: 'center',
+          marginTop: '32px'
         }}>
+          {/* No Payment Due Now with checkmark */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            marginBottom: '4px',
+            color: '#333',
+            fontSize: '15px'
+          }}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M6 10L9 13L14 7" stroke="#4fcf61" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span>No Payment Due Now</span>
+          </div>
+
+          {/* Start Trial Button */}
           <button
             onClick={handleStartTrial}
             style={{
@@ -194,41 +199,30 @@ const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep, up
             Start 7-Day Free Trial
           </button>
 
-          <button
-            onClick={handleContinueFree}
-            style={{
-              width: '100%',
-              padding: '14px 32px',
-              fontSize: '16px',
-              fontWeight: '500',
-              background: 'transparent',
+          {/* Text container for both lines */}
+          <div style={{
+            marginTop: '8px',
+            lineHeight: '1.2'
+          }}>
+            <div style={{
+              fontSize: '13px',
               color: '#666',
-              border: '2px solid #e0e0e0',
-              borderRadius: '25px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseOver={(e) => {
-              e.target.style.background = '#f5f5f5';
-              e.target.style.borderColor = '#ccc';
-            }}
-            onMouseOut={(e) => {
-              e.target.style.background = 'transparent';
-              e.target.style.borderColor = '#e0e0e0';
-            }}
-          >
-            Continue with Free Plan
-          </button>
+              textAlign: 'center'
+            }}>
+              7 days free, then $4.99/month
+            </div>
+            <div style={{
+              fontSize: '13px',
+              color: '#666',
+              textAlign: 'center',
+              marginTop: '0px'
+            }}>
+              Cancel anytime. No commitments.
+            </div>
+          </div>
         </div>
 
-        <p style={{
-          fontSize: '13px',
-          color: '#999',
-          marginTop: '12px',
-          textAlign: 'center'
-        }}>
-          Cancel anytime. No commitments.
-        </p>
+        <div style={{ marginBottom: '20px' }}></div>
       </div>
     </div>
   );

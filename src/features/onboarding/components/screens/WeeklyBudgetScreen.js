@@ -1,19 +1,7 @@
 import React from 'react';
 import './ScreenStyles.css';
 
-const HouseholdBudgetScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
-  const handleHouseholdIncrease = () => {
-    if (data.householdSize < 10) {
-      updateData({ householdSize: data.householdSize + 1 });
-    }
-  };
-
-  const handleHouseholdDecrease = () => {
-    if (data.householdSize > 1) {
-      updateData({ householdSize: data.householdSize - 1 });
-    }
-  };
-
+const WeeklyBudgetScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
   const handleBudgetChange = (e) => {
     const value = parseInt(e.target.value, 10);
     updateData({ weeklyBudget: value });
@@ -27,38 +15,13 @@ const HouseholdBudgetScreen = ({ data, updateData, onNext, onBack, onSkip }) => 
     <div className="onboarding-screen">
       <div className="onboarding-screen__content">
         <h1 className="onboarding-screen__title">
-          Tell us about your household
+          What's your average weekly spend?
         </h1>
-        
+
         <p className="onboarding-screen__subtitle">
-          This helps us suggest the right portions and budget
+          We'll help you stay within budget with smart suggestions
         </p>
-        
-        <div className="input-group">
-          <label className="input-group__label">
-            How many people are in your household?
-          </label>
-          <div className="number-selector">
-            <button
-              type="button"
-              className="number-selector__btn"
-              onClick={handleHouseholdDecrease}
-              disabled={data.householdSize <= 1}
-            >
-              -
-            </button>
-            <span className="number-selector__value">{data.householdSize}</span>
-            <button
-              type="button"
-              className="number-selector__btn"
-              onClick={handleHouseholdIncrease}
-              disabled={data.householdSize >= 10}
-            >
-              +
-            </button>
-          </div>
-        </div>
-        
+
         <div className="input-group">
           <div className="budget-slider">
             <div className="budget-slider__header">
@@ -86,13 +49,10 @@ const HouseholdBudgetScreen = ({ data, updateData, onNext, onBack, onSkip }) => 
               <span>$500+</span>
             </div>
           </div>
-          <p className="input-group__helper">
-            We'll help you stay within budget with smart suggestions
-          </p>
         </div>
-        
+
         <div className="onboarding-screen__actions">
-          <button 
+          <button
             className="onboarding-btn onboarding-btn--primary onboarding-btn--large"
             onClick={onNext}
           >
@@ -104,4 +64,4 @@ const HouseholdBudgetScreen = ({ data, updateData, onNext, onBack, onSkip }) => 
   );
 };
 
-export default HouseholdBudgetScreen;
+export default WeeklyBudgetScreen;
