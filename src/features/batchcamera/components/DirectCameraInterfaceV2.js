@@ -74,7 +74,7 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
     return date.toISOString().split('T')[0];
   };
 
-  // Demo items configuration - 4 unique items, 4 photos
+  // Demo items configuration - 5 unique items, 5 photos
   const demoItems = [
     {
       emoji: '🍗',
@@ -131,6 +131,20 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
       uniqueItemId: 'item-4',
       showExpiry: true,
       imageUrl: require('../../../assets/images/mock-inventories/Asparagus.png')
+    },
+    {
+      emoji: '🍝',
+      name: 'Spaghetti',
+      expiry: '365 days',
+      item: 'Spaghetti',
+      category: 'Grains',
+      quantity: 1,
+      total_weight_oz: 16,
+      expires: getDateDaysFromNow(365),
+      expiryDate: getDateDaysFromNow(365),
+      uniqueItemId: 'item-5',
+      showExpiry: true,
+      imageUrl: 'https://aimvjpndmipmtavpmjnn.supabase.co/storage/v1/object/public/ingredient-images/Spaghetti.png'
     }
   ];
 
@@ -975,7 +989,7 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
                   {console.log('[Camera] 🎯 Demo tooltip: Snap next item')}
                   <GuidedTooltip
                     targetSelector=".camera-v2__capture-button"
-                    message="Snap to add your next item (1/4)"
+                    message="Snap to add your next item (1/5)"
                     position="top"
                     showAction={false}
                     onDismiss={null}
@@ -991,7 +1005,7 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
                   {console.log('[Camera] 🎯 Demo tooltip: Snap next item (2)')}
                   <GuidedTooltip
                     targetSelector=".camera-v2__capture-button"
-                    message="Snap to add your next item (2/4)"
+                    message="Snap to add your next item (2/5)"
                     position="top"
                     showAction={false}
                     onDismiss={null}
@@ -1007,7 +1021,7 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
                   {console.log('[Camera] 🎯 Demo tooltip: Snap next item (3)')}
                   <GuidedTooltip
                     targetSelector=".camera-v2__capture-button"
-                    message="Snap to add your next item (3/4)"
+                    message="Snap to add your next item (3/5)"
                     position="top"
                     showAction={false}
                     onDismiss={null}
@@ -1017,8 +1031,24 @@ const DirectCameraInterfaceV2 = ({ onComplete }) => {
                 </>
               )}
 
-              {/* After 4th photo: "Tap Done" */}
+              {/* After 4th photo: "Snap to add your next item" */}
               {capturedPhotos.length === 4 && (
+                <>
+                  {console.log('[Camera] 🎯 Demo tooltip: Snap next item (4)')}
+                  <GuidedTooltip
+                    targetSelector=".camera-v2__capture-button"
+                    message="Snap to add your next item (4/5)"
+                    position="top"
+                    showAction={false}
+                    onDismiss={null}
+                    highlight={true}
+                    offset={30}
+                  />
+                </>
+              )}
+
+              {/* After 5th photo: "Tap Done" */}
+              {capturedPhotos.length === 5 && (
                 <>
                   {console.log('[Camera] 🎯 Demo tooltip: Tap Done')}
                   <GuidedTooltip

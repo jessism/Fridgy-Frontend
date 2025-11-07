@@ -64,6 +64,11 @@ const WelcomeTourPage = () => {
     }, 100);
   };
 
+  const handleInstallOnPhone = () => {
+    console.log('[WelcomeTour] Navigating to Install on Phone page');
+    navigate('/install-trackabite');
+  };
+
   const tourSteps = [
     {
       id: 'log-groceries',
@@ -89,6 +94,20 @@ const WelcomeTourPage = () => {
         </svg>
       ),
       onClick: handleGenerateRecipes,
+      show: true
+    },
+    {
+      id: 'install-on-phone',
+      title: 'Install Trackabite on Your Phone',
+      description: 'Add Trackabite to your home screen for quick access and an app-like experience',
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="7" y="2" width="10" height="20" rx="2" ry="2" stroke="currentColor" strokeWidth="2" fill="none"/>
+          <line x1="12" y1="18" x2="12" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          <path d="M12 6v4m0 0l-2-2m2 2l2-2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      ),
+      onClick: handleInstallOnPhone,
       show: true
     },
     {

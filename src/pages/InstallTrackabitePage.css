@@ -1,0 +1,541 @@
+/* Install Trackabite Page - BEM scoped styles */
+
+.install-trackabite-page {
+  min-height: 100vh;
+  background-color: #f9fafb;
+  padding-bottom: 80px; /* Space for mobile nav */
+}
+
+/* Header */
+.install-trackabite-page__header {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.install-trackabite-page__back-button {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #374151;
+  transition: color 0.2s ease;
+}
+
+.install-trackabite-page__back-button:hover {
+  color: #4fcf61;
+}
+
+.install-trackabite-page__back-button:active {
+  transform: scale(0.95);
+}
+
+.install-trackabite-page__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  margin-left: 12px;
+}
+
+/* Main Content */
+.install-trackabite-page__content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+/* Intro Section */
+.install-trackabite-page__intro {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.install-trackabite-page__intro-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.install-trackabite-page__intro-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 12px 0;
+}
+
+.install-trackabite-page__intro-description {
+  font-size: 1rem;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Platform Card */
+.install-trackabite-page__platform-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  border: 2px solid #e5e7eb;
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.install-trackabite-page__platform-card--highlighted {
+  border-color: #4fcf61;
+  box-shadow: 0 0 0 3px rgba(79, 207, 97, 0.1);
+}
+
+.install-trackabite-page__platform-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s ease;
+}
+
+.install-trackabite-page__platform-header:hover {
+  background-color: #f9fafb;
+}
+
+.install-trackabite-page__platform-header:active {
+  background-color: #f3f4f6;
+}
+
+.install-trackabite-page__platform-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.install-trackabite-page__platform-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.install-trackabite-page__platform-icon img {
+  display: block;
+  object-fit: contain;
+}
+
+.install-trackabite-page__platform-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.install-trackabite-page__badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #4fcf61;
+  background-color: #ecfdf5;
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.install-trackabite-page__chevron {
+  flex-shrink: 0;
+  color: #9ca3af;
+  transition: transform 0.3s ease;
+}
+
+.install-trackabite-page__chevron--expanded {
+  transform: rotate(180deg);
+}
+
+/* Steps */
+.install-trackabite-page__steps {
+  padding: 0 24px 24px 24px;
+  animation: slideDown 0.3s ease-out;
+}
+
+/* Auto-install Section */
+.install-trackabite-page__auto-install {
+  margin-bottom: 32px;
+  padding-bottom: 32px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.install-trackabite-page__install-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 18px 24px;
+  background-color: #4fcf61;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(79, 207, 97, 0.2);
+}
+
+.install-trackabite-page__install-button:hover:not(:disabled) {
+  background-color: #3db84f;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(79, 207, 97, 0.3);
+}
+
+.install-trackabite-page__install-button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(79, 207, 97, 0.2);
+}
+
+.install-trackabite-page__install-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.install-trackabite-page__install-button svg {
+  flex-shrink: 0;
+}
+
+.install-trackabite-page__install-hint {
+  margin-top: 12px;
+  font-size: 0.875rem;
+  color: #6b7280;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* Loading Spinner */
+.install-trackabite-page__spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Install Success Message */
+.install-trackabite-page__install-success {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px;
+  background-color: #f0fdf4;
+  border: 2px solid #4fcf61;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.install-trackabite-page__install-success svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.install-trackabite-page__install-success h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #166534;
+  margin: 0 0 6px 0;
+}
+
+.install-trackabite-page__install-success p {
+  font-size: 0.9375rem;
+  color: #166534;
+  line-height: 1.5;
+  margin: 0;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.install-trackabite-page__step {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 28px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.install-trackabite-page__step:last-of-type {
+  margin-bottom: 20px;
+  border-bottom: none;
+}
+
+.install-trackabite-page__step-number {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background-color: #4fcf61;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.install-trackabite-page__step-content {
+  flex: 1;
+}
+
+.install-trackabite-page__step-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 8px 0;
+}
+
+.install-trackabite-page__step-description {
+  font-size: 0.9375rem;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.install-trackabite-page__visual-hint {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 12px;
+  background-color: #f0fdf4;
+  border-radius: 8px;
+  border: 1px solid #d1fae5;
+}
+
+.install-trackabite-page__visual-hint span {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4fcf61;
+}
+
+/* Success Message */
+.install-trackabite-page__success-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background-color: #f0fdf4;
+  border-radius: 12px;
+  border: 2px solid #4fcf61;
+  margin-top: 20px;
+}
+
+.install-trackabite-page__success-message span {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #166534;
+  line-height: 1.5;
+}
+
+/* Desktop Message */
+.install-trackabite-page__desktop-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px;
+  background-color: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  margin-top: 24px;
+}
+
+.install-trackabite-page__desktop-message svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.install-trackabite-page__desktop-message p {
+  font-size: 0.9375rem;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .install-trackabite-page {
+    padding-bottom: 100px; /* More space for mobile bottom nav */
+  }
+
+  .install-trackabite-page__header {
+    padding: 16px;
+  }
+
+  .install-trackabite-page__title {
+    font-size: 1.125rem;
+  }
+
+  .install-trackabite-page__content {
+    padding: 24px 16px;
+  }
+
+  .install-trackabite-page__intro-title {
+    font-size: 1.5rem;
+  }
+
+  .install-trackabite-page__intro-description {
+    font-size: 0.9375rem;
+  }
+
+  .install-trackabite-page__platform-header {
+    padding: 20px 16px;
+  }
+
+  .install-trackabite-page__platform-header-left {
+    gap: 12px;
+  }
+
+  .install-trackabite-page__platform-title {
+    font-size: 1.125rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .install-trackabite-page__steps {
+    padding: 0 16px 20px 16px;
+  }
+
+  .install-trackabite-page__step {
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+  }
+
+  .install-trackabite-page__step-number {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .install-trackabite-page__step-title {
+    font-size: 1rem;
+  }
+
+  .install-trackabite-page__step-description {
+    font-size: 0.875rem;
+  }
+
+  .install-trackabite-page__visual-hint {
+    padding: 10px;
+  }
+
+  .install-trackabite-page__visual-hint span {
+    font-size: 0.8125rem;
+  }
+
+  .install-trackabite-page__success-message {
+    padding: 14px;
+  }
+
+  .install-trackabite-page__success-message span {
+    font-size: 0.875rem;
+  }
+
+  .install-trackabite-page__desktop-message {
+    padding: 16px;
+  }
+
+  .install-trackabite-page__desktop-message p {
+    font-size: 0.875rem;
+  }
+
+  .install-trackabite-page__install-button {
+    font-size: 1rem;
+    padding: 16px 20px;
+  }
+
+  .install-trackabite-page__install-hint {
+    font-size: 0.8125rem;
+  }
+
+  .install-trackabite-page__install-success {
+    padding: 16px;
+  }
+
+  .install-trackabite-page__install-success h4 {
+    font-size: 1rem;
+  }
+
+  .install-trackabite-page__install-success p {
+    font-size: 0.875rem;
+  }
+}
+
+/* Desktop Layout - Side by side on larger screens */
+@media (min-width: 900px) {
+  .install-trackabite-page__content {
+    padding: 40px 32px;
+  }
+
+  .install-trackabite-page__intro {
+    margin-bottom: 48px;
+  }
+
+  .install-trackabite-page__intro-title {
+    font-size: 2rem;
+  }
+
+  /* Could add side-by-side layout here if desired */
+}
+
+/* Print Styles */
+@media print {
+  .install-trackabite-page__header {
+    position: static;
+    box-shadow: none;
+  }
+
+  .install-trackabite-page__back-button {
+    display: none;
+  }
+
+  .install-trackabite-page__platform-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .install-trackabite-page__steps {
+    display: block !important;
+  }
+}

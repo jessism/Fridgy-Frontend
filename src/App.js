@@ -16,6 +16,7 @@ import ShoppingListPage from './pages/ShoppingListPage';
 import ProfilePageV2 from './pages/ProfilePageV2';
 import SupportPage from './pages/SupportPage';
 import WelcomeTourPage from './pages/WelcomeTourPage';
+import InstallTrackabitePage from './pages/InstallTrackabitePage';
 import AboutYouPage from './pages/AboutYouPage';
 import DietaryPreferencesPage from './pages/DietaryPreferencesPage';
 import NotificationSettingsPage from './pages/NotificationSettingsPage';
@@ -142,6 +143,11 @@ function App() {
           <Route path="/welcome-tour" element={
             <AuthGuard>
               <WelcomeTourPage />
+            </AuthGuard>
+          } />
+          <Route path="/install-trackabite" element={
+            <AuthGuard>
+              <InstallTrackabitePage />
             </AuthGuard>
           } />
           <Route path="/about-you" element={

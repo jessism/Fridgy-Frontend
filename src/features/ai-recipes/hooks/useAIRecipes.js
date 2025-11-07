@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useAuth } from '../../auth/context/AuthContext';
 import { safeJSONStringify } from '../../../utils/jsonSanitizer';
 import { useGuidedTourContext } from '../../../contexts/GuidedTourContext';
+import demoRecipesData from '../../../data/demoRecipes.json';
 
 // API base URL - adjust for your backend
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -94,14 +95,41 @@ const useAIRecipes = () => {
       console.log('🤖 Starting AI recipe generation...');
       console.log('📋 Questionnaire data:', questionnaireData);
 
-      // Check if we should use demo inventory (tour mode)
-      const shouldUseDemoInventory = isTourActive && demoInventoryItems && demoInventoryItems.length > 0;
+      // Check if we should use demo mode (tour active, regardless of demo inventory items)
+      const isDemoMode = isTourActive;
+
+      if (isDemoMode) {
+        console.log('🎯 DEMO MODE: Using pre-generated static recipes for welcome tour');
+
+        // Simulate AI generation with fake loading delay (4.5 seconds to show all 3 loading steps)
+        // Step 1: 500ms, Step 2: 2000ms, Step 3: 3500ms, Complete: 4500ms
+        await new Promise(resolve => setTimeout(resolve, 4500));
+
+        // Return static demo recipes
+        const demoData = {
+          success: true,
+          data: {
+            recipes: demoRecipesData.recipes,
+            generatedAt: new Date().toISOString(),
+            isDemo: true
+          }
+        };
+
+        console.log('✅ Demo recipes loaded successfully:', demoData.data.recipes.length);
+        setRecipes(demoData.data.recipes);
+        setGenerationStatus('completed');
+        return demoData.data;
+      }
+
+      // REAL MODE: Make actual API call
+      // Check if we should use demo inventory (for real API but with demo data)
+      const shouldUseDemoInventory = demoInventoryItems && demoInventoryItems.length > 0;
 
       // Prepare request body
       let requestBody = { ...questionnaireData };
 
       if (shouldUseDemoInventory) {
-        console.log('🎯 Tour mode detected - using demo inventory items:', demoInventoryItems.length);
+        console.log('🎯 Using demo inventory items for API call:', demoInventoryItems.length);
 
         // Transform demo inventory to backend format (camelCase → snake_case)
         const transformedDemoInventory = demoInventoryItems.map(item => ({

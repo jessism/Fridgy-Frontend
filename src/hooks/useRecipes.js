@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../features/auth/context/AuthContext';
+import { useGuidedTourContext } from '../contexts/GuidedTourContext';
 import recipeCache from '../services/RecipeCache';
 import { generateInventoryFingerprint, generateCacheKey, hasInventoryChanged } from '../utils/inventoryFingerprint';
 import { safeJSONStringify } from '../utils/jsonSanitizer';
@@ -11,6 +12,7 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api
 const useRecipes = () => {
   const { user } = useAuth();
   const { items: inventoryItems } = useInventory();
+  const { isActive: isTourActive, demoInventoryItems } = useGuidedTourContext();
   const [suggestions, setSuggestions] = useState([]);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -107,14 +109,45 @@ const useRecipes = () => {
         minMatch = 0 // Minimum match percentage filter
       } = options;
 
+      // Check if we should use demo inventory (tour mode)
+      const shouldUseDemoInventory = isTourActive && demoInventoryItems && demoInventoryItems.length > 0;
+
       const queryParams = new URLSearchParams({
         limit: limit.toString(),
         ranking: ranking.toString(),
         minMatch: minMatch.toString()
       });
-      
+
+      // Prepare request options
+      let requestOptions = {};
+
+      if (shouldUseDemoInventory) {
+        console.log('🎯 Tour mode detected - using demo inventory items:', demoInventoryItems.length);
+
+        // Transform demo inventory to backend format (camelCase → snake_case)
+        const transformedDemoInventory = demoInventoryItems.map(item => ({
+          item_name: item.itemName,
+          quantity: item.quantity,
+          category: item.category,
+          expiration_date: item.expirationDate,
+          uploaded_at: item.uploadedAt,
+          created_at: item.createdAt,
+          updated_at: item.updatedAt,
+          total_weight_oz: item.total_weight_oz,
+          isDemo: true
+        }));
+
+        // Send demo inventory in request body
+        requestOptions = {
+          method: 'POST',
+          body: safeJSONStringify({ demoInventory: transformedDemoInventory })
+        };
+
+        console.log('📦 Demo inventory transformed and added to request');
+      }
+
       console.log('📡 DEBUG: Making API request to:', `${API_BASE_URL}/recipes/suggestions?${queryParams}`);
-      const response = await apiRequest(`/recipes/suggestions?${queryParams}`);
+      const response = await apiRequest(`/recipes/suggestions?${queryParams}`, requestOptions);
       console.log('📡 DEBUG: API response received:', { success: response.success, suggestions: response.suggestions?.length });
       
       if (response.success) {
