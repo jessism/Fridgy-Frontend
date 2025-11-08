@@ -38,11 +38,12 @@ const ShoppingListSelectionModal = ({
   };
 
   // Set default name when form opens
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   React.useEffect(() => {
     if (showCreateForm && recipeTitle && !newListName) {
       setNewListName(getDefaultListName());
     }
-  }, [showCreateForm, recipeTitle]);
+  }, [showCreateForm, recipeTitle]); // newListName intentionally omitted to prevent infinite loop
 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {

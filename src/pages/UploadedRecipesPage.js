@@ -17,9 +17,10 @@ const UploadedRecipesPage = () => {
   const [showCreationModal, setShowCreationModal] = useState(false);
   const [deletingRecipeId, setDeletingRecipeId] = useState(null);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchRecipes();
-  }, []);
+  }, []); // Intentionally fetch only on mount
 
   const fetchRecipes = async () => {
     try {

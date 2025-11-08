@@ -44,7 +44,7 @@ const IngredientImage = ({
 
   useEffect(() => {
     loadImage();
-  }, [item?.itemName, item?.imageUrl]);
+  }, [item?.itemName, item?.imageUrl, preferThumbnail]);
 
   const loadImage = async () => {
     if (!item) {
