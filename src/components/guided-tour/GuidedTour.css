@@ -545,6 +545,77 @@
   text-decoration: underline;
 }
 
+/* Sparkle animations for chef hat icon */
+@keyframes sparkle-twinkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes sparkle-pulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes sparkle-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Apply animations to sparkle elements */
+.sparkle-1 {
+  animation: sparkle-twinkle 2s ease-in-out infinite;
+}
+
+.sparkle-2 {
+  animation: sparkle-twinkle 2.5s ease-in-out infinite 0.3s;
+}
+
+.sparkle-3 {
+  animation: sparkle-pulse 1.8s ease-in-out infinite 0.5s;
+}
+
+.sparkle-4 {
+  animation: sparkle-rotate 4s linear infinite;
+}
+
+.sparkle-5 {
+  animation: sparkle-twinkle 3s ease-in-out infinite 0.7s;
+}
+
+.sparkle-6 {
+  animation: sparkle-pulse 2.2s ease-in-out infinite 0.2s;
+}
+
+.sparkle-7 {
+  animation: sparkle-twinkle 2.8s ease-in-out infinite 1s;
+}
+
+.sparkle-8 {
+  animation: sparkle-pulse 1.5s ease-in-out infinite 0.8s;
+}
+
+.sparkle-9 {
+  animation: sparkle-twinkle 2.3s ease-in-out infinite 0.4s;
+}
+
+.sparkle-10 {
+  animation: sparkle-pulse 2s ease-in-out infinite 0.6s;
+}
+
 /* Shortcut Install Modal Styles */
 .guided-tour__shortcut-card {
   background: white;

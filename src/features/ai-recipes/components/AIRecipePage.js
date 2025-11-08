@@ -35,6 +35,10 @@ const AIRecipePage = () => {
     clearError
   } = useAIRecipes();
 
+  // Add state to track image preloading
+  const [imagesPreloaded, setImagesPreloaded] = useState(false);
+  const [isPreloadingImages, setIsPreloadingImages] = useState(false);
+
   const { isFreeTier, getAIRecipeUsage, refresh, startCheckout } = useSubscription();
   const aiRecipeUsage = useMemo(() => getAIRecipeUsage(), [getAIRecipeUsage]);
 
@@ -103,9 +107,63 @@ const AIRecipePage = () => {
     }
   }, [hasRecipes, loading, shouldShowTooltip, STEPS, goToStep]);
 
+  // Preload images when recipes are loaded
+  useEffect(() => {
+    const preloadRecipeImages = async () => {
+      if (recipes && recipes.length > 0 && !imagesPreloaded && !isPreloadingImages) {
+        console.log('[AIRecipePage] Starting to preload', recipes.length, 'recipe images');
+        setIsPreloadingImages(true);
+
+        // Create array of image preload promises
+        const imagePromises = recipes.map((recipe) => {
+          return new Promise((resolve) => {
+            if (!recipe.imageUrl) {
+              // No image to load, resolve immediately
+              resolve();
+              return;
+            }
+
+            const img = new Image();
+            img.onload = () => {
+              console.log('[AIRecipePage] Image loaded:', recipe.title);
+              resolve();
+            };
+            img.onerror = () => {
+              console.warn('[AIRecipePage] Failed to load image for:', recipe.title);
+              // Don't fail the whole preload if one image fails
+              resolve();
+            };
+            img.src = recipe.imageUrl;
+          });
+        });
+
+        // Wait for all images to load or fail
+        try {
+          await Promise.all(imagePromises);
+          console.log('[AIRecipePage] All images preloaded successfully');
+          setImagesPreloaded(true);
+        } catch (error) {
+          console.error('[AIRecipePage] Error preloading images:', error);
+          // Still mark as preloaded to show recipes even if some images failed
+          setImagesPreloaded(true);
+        } finally {
+          setIsPreloadingImages(false);
+        }
+      }
+    };
+
+    preloadRecipeImages();
+  }, [recipes, imagesPreloaded, isPreloadingImages]);
+
+  // Reset preload state when recipes change
+  useEffect(() => {
+    setImagesPreloaded(false);
+    setIsPreloadingImages(false);
+  }, [recipes]);
+
   // Show success celebration after 8 second delay
   useEffect(() => {
-    if (shouldShowTooltip(STEPS.GENERATE_RECIPES_SUCCESS) && hasRecipes) {
+    if (shouldShowTooltip(STEPS.GENERATE_RECIPES_SUCCESS) && hasRecipes && imagesPreloaded) {
       console.log('[AIRecipePage] On success step - setting 8s timer for celebration');
       const timer = setTimeout(() => {
         console.log('[AIRecipePage] 8s elapsed - showing celebration modal');
@@ -116,7 +174,7 @@ const AIRecipePage = () => {
     } else {
       setShowSuccessCelebration(false);
     }
-  }, [shouldShowTooltip, STEPS.GENERATE_RECIPES_SUCCESS, hasRecipes]);
+  }, [shouldShowTooltip, STEPS.GENERATE_RECIPES_SUCCESS, hasRecipes, imagesPreloaded]);
 
   const handleQuestionnaireSubmit = async (questionnaireData) => {
     try {
@@ -444,7 +502,7 @@ const AIRecipePage = () => {
       <div className="ai-recipe-page__main">
         <div className="ai-recipe-page__container">
           {/* Hero Section - Only show when not displaying recipes and not in questionnaire */}
-          {!hasRecipes && !showQuestionnaire && (
+          {!hasRecipes && !showQuestionnaire && !isSubmitting && (
             <div className="ai-recipe-page__hero">
               <div className="ai-recipe-page__hero-header">
                 <button className="ai-recipe-page__back-btn" onClick={handleBackToMeals}>
@@ -491,13 +549,13 @@ const AIRecipePage = () => {
             </div>
           )}
 
-          {(isSubmitting || (loading && statusMessage)) && (
-            /* Full-screen Loading Overlay */
+          {(isSubmitting || (loading && statusMessage) || (hasRecipes && !imagesPreloaded)) && (
+            /* Full-screen Loading Overlay - Keep visible until images are preloaded */
             <AIRecipeLoadingScreen />
           )}
 
-          {hasRecipes && !loading && (
-            /* Recipe Cards */
+          {hasRecipes && !loading && imagesPreloaded && (
+            /* Recipe Cards - Only show when images are ready */
             <div className="recipes-container-no-border">
               <div className="recipes-header">
                 <button className="ai-recipe-page__back-btn" onClick={handleBackToMeals}>

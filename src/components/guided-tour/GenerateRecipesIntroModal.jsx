@@ -10,13 +10,62 @@ const GenerateRecipesIntroModal = ({ onContinue, onSkip }) => {
   return ReactDOM.createPortal(
     <div className="guided-tour__celebration-overlay">
       <div className="guided-tour__celebration-card">
-        {/* Icon */}
+        {/* Icon - Chef Hat with Star Dust */}
         <div className="guided-tour__intro-emoji">
-          <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="32" cy="32" r="30" fill="#4fcf61" opacity="0.1"/>
-            <path d="M32 12C20.9543 12 12 20.9543 12 32C12 43.0457 20.9543 52 32 52C43.0457 52 52 43.0457 52 32C52 20.9543 43.0457 12 32 12Z" stroke="#4fcf61" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M32 20V32L38 38" stroke="#4fcf61" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M22 26L26 30L34 22" stroke="#4fcf61" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Background circle */}
+            <circle cx="40" cy="40" r="38" fill="#4fcf61" opacity="0.08"/>
+
+            {/* Chef Hat */}
+            <g transform="translate(40, 38)">
+              {/* Hat band */}
+              <rect x="-14" y="8" width="28" height="6" fill="#4fcf61" rx="1"/>
+
+              {/* Hat puff */}
+              <path d="M-12 8 Q-12 -8 0 -8 Q12 -8 12 8 Z" fill="#4fcf61" opacity="0.9"/>
+              <path d="M-12 8 Q-12 -8 0 -8 Q12 -8 12 8" stroke="#4fcf61" strokeWidth="2" fill="none"/>
+
+              {/* Hat pleat lines */}
+              <line x1="-6" y1="-6" x2="-6" y2="6" stroke="#81e053" strokeWidth="1" opacity="0.6"/>
+              <line x1="0" y1="-7" x2="0" y2="6" stroke="#81e053" strokeWidth="1" opacity="0.6"/>
+              <line x1="6" y1="-6" x2="6" y2="6" stroke="#81e053" strokeWidth="1" opacity="0.6"/>
+            </g>
+
+            {/* Sparkles and star dust */}
+            {/* Large sparkle top left */}
+            <g transform="translate(20, 20)" className="sparkle-1">
+              <path d="M0 -4 L1 0 L0 4 L-1 0 Z M-4 0 L0 -1 L4 0 L0 1 Z" fill="#ffd700" opacity="0.8"/>
+            </g>
+
+            {/* Medium sparkle top right */}
+            <g transform="translate(60, 22)" className="sparkle-2">
+              <path d="M0 -3 L0.7 0 L0 3 L-0.7 0 Z M-3 0 L0 -0.7 L3 0 L0 0.7 Z" fill="#ffeb3b" opacity="0.7"/>
+            </g>
+
+            {/* Small sparkle bottom left */}
+            <g transform="translate(18, 55)" className="sparkle-3">
+              <circle cx="0" cy="0" r="2" fill="#fff59d" opacity="0.8"/>
+            </g>
+
+            {/* Star top */}
+            <g transform="translate(40, 15)" className="sparkle-4">
+              <path d="M0,-3 L0.9,-0.9 L3,0 L0.9,0.9 L0,3 L-0.9,0.9 L-3,0 L-0.9,-0.9 Z" fill="#ffd700" opacity="0.6"/>
+            </g>
+
+            {/* Small dots for dust effect */}
+            <circle cx="25" cy="35" r="1.5" fill="#ffeb3b" opacity="0.5" className="sparkle-5"/>
+            <circle cx="55" cy="38" r="1" fill="#ffd700" opacity="0.6" className="sparkle-6"/>
+            <circle cx="62" cy="50" r="1.5" fill="#fff59d" opacity="0.5" className="sparkle-7"/>
+            <circle cx="22" cy="48" r="1" fill="#ffeb3b" opacity="0.6" className="sparkle-8"/>
+
+            {/* Tiny accent stars */}
+            <g transform="translate(52, 30)" className="sparkle-9">
+              <path d="M0 -2 L0.5 0 L0 2 L-0.5 0 Z M-2 0 L0 -0.5 L2 0 L0 0.5 Z" fill="#fff" opacity="0.7"/>
+            </g>
+
+            <g transform="translate(28, 28)" className="sparkle-10">
+              <path d="M0 -1.5 L0.4 0 L0 1.5 L-0.4 0 Z M-1.5 0 L0 -0.4 L1.5 0 L0 0.4 Z" fill="#fff" opacity="0.6"/>
+            </g>
           </svg>
         </div>
 
