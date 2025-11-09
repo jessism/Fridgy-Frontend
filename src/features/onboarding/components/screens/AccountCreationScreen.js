@@ -5,6 +5,9 @@ const AccountCreationScreen = ({ data, updateData, onComplete, onBack, loading, 
   const [showPassword, setShowPassword] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
 
+  // Check if payment was completed
+  const paymentCompleted = localStorage.getItem('fridgy_payment_completed') === 'true' || data?.paymentCompleted === true;
+
   const handleInputChange = (field, value) => {
     updateData({
       accountData: {
@@ -53,11 +56,13 @@ const AccountCreationScreen = ({ data, updateData, onComplete, onBack, loading, 
     <div className="onboarding-screen onboarding-screen--account">
       <div className="onboarding-screen__content">
         <h1 className="onboarding-screen__title">
-          Create your account
+          {paymentCompleted ? 'Complete your account' : 'Create your account'}
         </h1>
-        
+
         <p className="onboarding-screen__subtitle">
-          You're one step away from your personalized experience!
+          {paymentCompleted
+            ? "Your trial is active! Just create your account to start using Fridgy."
+            : "You're one step away from your personalized experience!"}
         </p>
         
         <form onSubmit={handleSubmit} className="account-form">

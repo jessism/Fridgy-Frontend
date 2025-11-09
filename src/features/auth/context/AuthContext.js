@@ -230,7 +230,7 @@ export const AuthProvider = ({ children }) => {
 
   // Sign up function
   const signUp = async (userData) => {
-    const { firstName, email, password } = userData;
+    const { firstName, email, password, onboardingSessionId } = userData;
 
     // Client-side validation
     if (!validateName(firstName)) {
@@ -252,7 +252,8 @@ export const AuthProvider = ({ children }) => {
         body: safeJSONStringify({
           firstName: firstName.trim(),
           email: email.toLowerCase(),
-          password
+          password,
+          onboardingSessionId // Pass session ID to link payment
         }),
       }, false);
 

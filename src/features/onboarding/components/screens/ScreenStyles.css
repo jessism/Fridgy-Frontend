@@ -22,6 +22,13 @@
   min-height: 100vh;
 }
 
+.onboarding-screen--payment {
+  justify-content: flex-start;
+  padding-top: 100px;
+  min-height: 100vh;
+  margin-top: -100px;
+}
+
 .account-form {
   margin-top: 20px;
   width: 100%;

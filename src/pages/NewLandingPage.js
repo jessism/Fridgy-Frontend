@@ -98,11 +98,12 @@ const NewLandingPage = () => {
               <div className="landing-page-v2__hero-main">
 
                 <h1 className="landing-page-v2__hero-title">
-                  Food tracking that <span className="landing-page-v2__hero-title-gradient">remembers</span> for you.
+                  No more wonder<br /> <span className="landing-page-v2__hero-title-gradient">"What's for dinner"</span>
                 </h1>
 
                 <p className="landing-page-v2__hero-subtitle">
-                  Download Trackabite for effortless food tracking and a seamless inventory management experience.
+                  Track what you've got and<br />
+                  let AI do the thinking.
                 </p>
 
                 <div className="landing-page-v2__cta-button-container">

@@ -521,13 +521,205 @@
   .hero-title {
     font-size: 1.75rem; /* 28px */
   }
-  
+
   .hero-subtitle {
     font-size: 1rem; /* 16px */
   }
-  
+
   .phone-frame {
     width: 220px;
     height: 450px;
+  }
+}
+
+/* ========================================= */
+/* DESIGN VARIANT STYLES */
+/* ========================================= */
+
+/* Smooth transitions between variants */
+.landing-page {
+  transition: background 0.5s ease;
+}
+
+.hero,
+.hero-background {
+  transition: background 0.5s ease, backdrop-filter 0.5s ease;
+}
+
+/* ========================================= */
+/* VARIANT A: CLASSIC (WHITE BACKGROUND) */
+/* ========================================= */
+.landing-page--classic {
+  background: white;
+}
+
+.landing-page--classic .hero {
+  background: white;
+}
+
+.landing-page--classic .hero-background {
+  background: white;
+}
+
+/* ========================================= */
+/* VARIANT B: MODERN (GLASSMORPHISM) */
+/* ========================================= */
+.landing-page--modern {
+  background:
+    linear-gradient(135deg,
+      rgba(129, 224, 83, 0.08) 0%,
+      rgba(79, 207, 97, 0.15) 25%,
+      rgba(107, 201, 63, 0.12) 50%,
+      rgba(129, 224, 83, 0.1) 75%,
+      rgba(79, 207, 97, 0.08) 100%),
+    linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(240, 255, 240, 0.9) 100%);
+  position: relative;
+}
+
+/* Add gradient mesh background effect */
+.landing-page--modern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(129, 224, 83, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 80% 60%, rgba(79, 207, 97, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, rgba(107, 201, 63, 0.18) 0%, transparent 50%),
+    radial-gradient(circle at 70% 20%, rgba(129, 224, 83, 0.12) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.landing-page--modern .hero {
+  background: transparent;
+  position: relative;
+}
+
+.landing-page--modern .hero-background {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 30px;
+  margin: 20px;
+  box-shadow:
+    0 20px 40px rgba(79, 207, 97, 0.1),
+    0 10px 20px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: visible;
+}
+
+/* Enhanced header in modern mode */
+.landing-page--modern .landing-header {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(79, 207, 97, 0.2);
+  box-shadow: 0 2px 20px rgba(79, 207, 97, 0.1);
+}
+
+/* Hero content glass effect */
+.landing-page--modern .hero-center {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow:
+    0 10px 30px rgba(79, 207, 97, 0.08),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Badge enhancement in modern mode */
+.landing-page--modern .hero-badge {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(79, 207, 97, 0.3);
+  box-shadow:
+    0 4px 15px rgba(79, 207, 97, 0.15),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+}
+
+/* App store buttons in modern mode */
+.landing-page--modern .app-store-btn {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.landing-page--modern .app-store-btn:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 12px 25px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Phone mockup enhancement */
+.landing-page--modern .phone-mockup {
+  filter: drop-shadow(0 25px 50px rgba(79, 207, 97, 0.2));
+}
+
+.landing-page--modern .phone-frame {
+  background: linear-gradient(135deg, #222222 0%, #333333 100%);
+}
+
+/* Floating elements enhancement */
+.landing-page--modern .floating-element {
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.landing-page--modern .avatar-circle {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+    0 8px 20px rgba(79, 207, 97, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+/* Auth links in modern mode */
+.landing-page--modern .auth-link {
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.landing-page--modern .auth-link:hover {
+  text-shadow: 0 2px 8px rgba(79, 207, 97, 0.3);
+}
+
+/* Responsive adjustments for modern variant */
+@media (max-width: 768px) {
+  .landing-page--modern .hero-background {
+    margin: 10px;
+    border-radius: 20px;
+  }
+
+  .landing-page--modern .hero-center {
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .landing-page--modern .hero-background {
+    margin: 5px;
+    border-radius: 15px;
+  }
+
+  .landing-page--modern .hero-center {
+    padding: 20px 15px;
+    background: rgba(255, 255, 255, 0.5);
   }
 }

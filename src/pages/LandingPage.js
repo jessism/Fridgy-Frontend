@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import trackaBiteLogo from '../assets/images/Trackabite-logo.png';
-import './LandingPage-Option3.css';
+import DesignVariantToggle from '../components/DesignVariantToggle';
+import './LandingPage.css';
 
 const LandingPage = () => {
+  const [variant, setVariant] = useState('classic');
+
   return (
-    <div className="landing-page">
+    <div className={`landing-page landing-page--${variant}`}>
       {/* Custom Header */}
       <header className="landing-header">
         <div className="container">
@@ -19,6 +22,7 @@ const LandingPage = () => {
               <span className="auth-divider">|</span>
               <Link to="/signup" className="auth-link signup-link">Sign Up</Link>
             </div>
+            <DesignVariantToggle variant={variant} onVariantChange={setVariant} />
           </div>
         </div>
       </header>

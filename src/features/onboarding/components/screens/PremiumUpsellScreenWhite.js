@@ -17,7 +17,7 @@ const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep, up
       updateData({ wantsTrial: true });
     }
     localStorage.setItem('fridgy_wants_trial', 'true');
-    jumpToStep(13); // Go to account creation
+    jumpToStep(10); // Go to payment screen
   };
 
   const handleContinueFree = () => {
@@ -26,7 +26,7 @@ const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep, up
       updateData({ wantsTrial: false });
     }
     localStorage.setItem('fridgy_wants_trial', 'false');
-    jumpToStep(13); // Go to account creation
+    jumpToStep(13); // Go to account creation (skip payment)
   };
 
   return (

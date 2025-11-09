@@ -21,7 +21,6 @@ const useOnboarding = () => {
     dietaryRestrictions: [],
     allergies: [],
     customAllergies: '',
-    preferredCuisines: [],
     cookingTimePreference: '',
     notificationPreferences: {
       mealReminders: false,
@@ -56,7 +55,6 @@ const useOnboarding = () => {
       dietaryRestrictions: [],
       allergies: [],
       customAllergies: '',
-      preferredCuisines: [],
       cookingTimePreference: '',
       notificationPreferences: {
         mealReminders: false,
@@ -142,8 +140,17 @@ const useOnboarding = () => {
 
     try {
       const { accountData, ...preferences } = onboardingData;
-      
-      const user = await signUp(accountData);
+
+      // Get the onboarding session ID if it exists (from payment flow)
+      const onboardingSessionId = localStorage.getItem('fridgy_onboarding_session_id');
+
+      // Pass session ID to signup to link payment
+      const signUpData = {
+        ...accountData,
+        onboardingSessionId
+      };
+
+      const user = await signUp(signUpData);
       
       if (user) {
         const token = localStorage.getItem('fridgy_token');
@@ -152,10 +159,8 @@ const useOnboarding = () => {
           dietary_restrictions: preferences.dietaryRestrictions,
           allergies: preferences.allergies,
           custom_allergies: preferences.customAllergies,
-          preferred_cuisines: preferences.preferredCuisines,
           cooking_time_preference: preferences.cookingTimePreference,
           cuisine_cooking_time: {
-            cuisines: preferences.preferredCuisines,
             cookingTime: preferences.cookingTimePreference
           },
           onboarding_source: 'onboarding_flow'
@@ -194,42 +199,50 @@ const useOnboarding = () => {
         localStorage.removeItem(ONBOARDING_STORAGE_KEY);
         localStorage.removeItem(ONBOARDING_STEP_KEY);
 
-        // Check if user wants to start trial
-        const wantsTrial = localStorage.getItem('fridgy_wants_trial') === 'true' ||
-                           onboardingData.wantsTrial === true;
+        // Check if payment was already completed during onboarding
+        const paymentCompleted = localStorage.getItem('fridgy_payment_completed') === 'true' ||
+                                  onboardingData.paymentCompleted === true;
 
-        if (wantsTrial) {
-          // User chose to start trial - redirect to Stripe Checkout
-          console.log('[Onboarding] User wants trial, redirecting to checkout...');
-          try {
-            const checkoutResponse = await fetch(`${API_BASE_URL}/subscriptions/create-checkout`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-              },
-            });
+        if (paymentCompleted) {
+          // Payment already done - subscription is already active
+          console.log('[Onboarding] Trial payment already completed, navigating to home...');
 
-            const checkoutData = await checkoutResponse.json();
-
-            if (checkoutData.url) {
-              // Clear trial preference
-              localStorage.removeItem('fridgy_wants_trial');
-              // Redirect to Stripe Checkout
-              window.location.href = checkoutData.url;
-              return; // Don't navigate to /home
-            } else {
-              console.error('[Onboarding] No checkout URL received');
-              // Fallback to home if checkout fails
-              navigate('/home');
+          // Link the subscription to the newly created account
+          const subscriptionId = localStorage.getItem('fridgy_subscription_id');
+          if (subscriptionId) {
+            try {
+              // Update subscription with user ID
+              await fetch(`${API_BASE_URL}/subscriptions/link-to-account`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+                },
+                body: safeJSONStringify({
+                  subscriptionId: subscriptionId
+                })
+              });
+            } catch (linkError) {
+              console.error('[Onboarding] Error linking subscription:', linkError);
             }
-          } catch (checkoutError) {
-            console.error('[Onboarding] Checkout error:', checkoutError);
-            // Fallback to home if checkout fails
-            navigate('/home');
           }
+
+          // Clean up payment flags
+          localStorage.removeItem('fridgy_payment_completed');
+          localStorage.removeItem('fridgy_subscription_id');
+          localStorage.removeItem('fridgy_wants_trial');
+
+          // Navigate to success or home
+          navigate('/home?welcome=trial');
         } else {
           // User chose free tier - go to home
+          const wantsTrial = localStorage.getItem('fridgy_wants_trial') === 'true';
+
+          if (wantsTrial) {
+            // This shouldn't happen - if they wanted trial, payment should have been completed
+            console.warn('[Onboarding] User wanted trial but payment not completed');
+          }
+
           localStorage.removeItem('fridgy_wants_trial');
           navigate('/home');
         }
@@ -264,7 +277,6 @@ const useOnboarding = () => {
       dietaryRestrictions: [],
       allergies: [],
       customAllergies: '',
-      preferredCuisines: [],
       cookingTimePreference: '',
       notificationPreferences: {
         mealReminders: false,

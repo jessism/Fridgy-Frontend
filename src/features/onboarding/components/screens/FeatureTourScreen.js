@@ -159,7 +159,9 @@ const FeatureTourScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
                     onError={(e) => {
                       // If video fails to load, show placeholder
                       e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
+                      if (e.target.nextSibling) {
+                        e.target.nextSibling.style.display = 'flex';
+                      }
                     }}
                   >
                     <source
@@ -254,7 +256,9 @@ const FeatureTourScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
                   onError={(e) => {
                     // Fallback to emoji if image doesn't load
                     e.target.style.display = 'none';
-                    e.target.parentElement.nextSibling.style.display = 'block';
+                    if (e.target.parentElement?.nextSibling) {
+                      e.target.parentElement.nextSibling.style.display = 'block';
+                    }
                   }}
                 />
               </div>
@@ -310,7 +314,9 @@ const FeatureTourScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
                   onError={(e) => {
                     // Fallback to emoji if video doesn't load
                     e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'block';
+                    if (e.target.nextSibling) {
+                      e.target.nextSibling.style.display = 'block';
+                    }
                   }}
                 >
                   <source src="/videos/Trackabite - Shared list.mp4" type="video/mp4" />
