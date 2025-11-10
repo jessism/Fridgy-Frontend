@@ -8,6 +8,10 @@ import { ChevronLeft } from 'lucide-react';
 import { useSubscription } from '../hooks/useSubscription';
 import { UpgradeModal } from '../components/modals/UpgradeModal';
 import './MealHistoryPage.css';
+import BreakfastIcon from '../assets/icons/Breakfast.png';
+import LunchIcon from '../assets/icons/Lunch.png';
+import DinnerIcon from '../assets/icons/Dinner.png';
+import SnackIcon from '../assets/icons/Snack.png';
 
 const MealHistoryPage = () => {
   const navigate = useNavigate();
@@ -22,6 +26,7 @@ const MealHistoryPage = () => {
     dinner: [],
     snack: []
   });
+  const [weekMealCounts, setWeekMealCounts] = useState({}); // Track meal counts for each date in the week
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showMonthCalendar, setShowMonthCalendar] = useState(false); // Month calendar modal state
@@ -36,7 +41,13 @@ const MealHistoryPage = () => {
   // Load today's meals on initial mount
   useEffect(() => {
     fetchMealsForDate(selectedDate);
+    fetchWeekMealCounts();
   }, []);
+
+  // Fetch week meal counts when week changes
+  useEffect(() => {
+    fetchWeekMealCounts();
+  }, [currentWeekOffset]);
 
   // Check if returning from meal scanner and refresh meals
   useEffect(() => {
@@ -46,6 +57,7 @@ const MealHistoryPage = () => {
       // Add small delay to ensure meal is saved in database
       setTimeout(() => {
         fetchMealsForDate(returnDate);
+        fetchWeekMealCounts(); // Refresh week counts
       }, 500);
       // Clear the state to prevent re-triggering
       navigate(location.pathname, { replace: true });
@@ -86,6 +98,53 @@ const MealHistoryPage = () => {
 
   const handleBackClick = () => {
     navigate('/meal-plans');
+  };
+
+  // Fetch meal counts for all dates in the current week
+  const fetchWeekMealCounts = async () => {
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      if (!token) return;
+
+      const weekDates = getCurrentWeekDates();
+      const counts = {};
+
+      // Fetch meal counts for each date in parallel
+      await Promise.all(
+        weekDates.map(async ({ fullDate }) => {
+          const formattedDate = `${fullDate.getFullYear()}-${String(fullDate.getMonth() + 1).padStart(2, '0')}-${String(fullDate.getDate()).padStart(2, '0')}`;
+          const dateKey = formattedDate;
+
+          try {
+            const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/meals/history?date=${formattedDate}`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              // Count unique meal types (breakfast, lunch, dinner, snack)
+              const mealTypes = new Set();
+              if (data.meals && Array.isArray(data.meals)) {
+                data.meals.forEach(meal => {
+                  if (meal.meal_type) {
+                    mealTypes.add(meal.meal_type);
+                  }
+                });
+              }
+              counts[dateKey] = mealTypes.size;
+            } else {
+              counts[dateKey] = 0;
+            }
+          } catch (err) {
+            counts[dateKey] = 0;
+          }
+        })
+      );
+
+      setWeekMealCounts(counts);
+    } catch (error) {
+      console.error('Failed to fetch week meal counts:', error);
+    }
   };
 
   // Week navigation functions
@@ -683,79 +742,121 @@ const MealHistoryPage = () => {
     );
   };
 
+  // Get meal icon and calorie range based on type
+  const getMealConfig = (mealType) => {
+    const configs = {
+      breakfast: {
+        image: BreakfastIcon,
+        calorieRange: 'Recommended 530-1170Cal'
+      },
+      lunch: {
+        image: LunchIcon,
+        calorieRange: 'Recommended 255-370Cal'
+      },
+      dinner: {
+        image: DinnerIcon,
+        calorieRange: 'Recommended 255-370Cal'
+      },
+      snack: {
+        image: SnackIcon,
+        calorieRange: 'Recommended 830-1170Cal'
+      }
+    };
+    return configs[mealType] || configs.snack;
+  };
+
   // Meal Category Section Component
   const MealCategorySection = ({ title, meals, mealType }) => {
+    const hasMeals = meals && meals.length > 0;
+    const config = getMealConfig(mealType);
+
     return (
       <div className="meal-history-page__meal-section">
-        <h3 className="meal-history-page__meal-title">{title}</h3>
-        
-        {meals && meals.length > 0 && (
-          <div className="meal-history-page__meal-list">
-            {meals.map((meal) => (
-              <div key={meal.id} className="meal-history-page__meal-item">
-                <div className="meal-history-page__meal-content" onClick={() => handleMealNameClick(meal)}>
-                  <div className="meal-history-page__meal-info">
-                    <div className="meal-history-page__meal-header">
-                      <h4 className="meal-history-page__meal-name">
-                        {getMealName(meal)}
-                      </h4>
-                    </div>
-                    {getTotalCalories(meal) && (
-                      <span className="meal-history-page__meal-calories">{getTotalCalories(meal)}</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="meal-history-page__meal-right">
-                  <span className={`meal-history-page__meal-type-pill ${meal.is_dine_out ? 'meal-history-page__meal-type-pill--dine-out' : 'meal-history-page__meal-type-pill--eat-in'}`}>
-                    {meal.is_dine_out ? 'Dine Out' : 'Eat In'}
-                  </span>
-
-                  {/* 3-dot menu */}
-                  <div className="meal-history-page__meal-menu">
-                    <button
-                      className="meal-history-page__meal-menu-btn"
-                      onClick={() => handleDropdownToggle(meal.id)}
-                      aria-label="Meal options"
-                    >
-                      ⋮
-                    </button>
-                  
-                    {/* Dropdown menu */}
-                    {openDropdownId === meal.id && (
-                      <>
-                        <div className="meal-history-page__dropdown-overlay" onClick={handleDropdownClose}></div>
-                        <div className="meal-history-page__dropdown-menu">
-                          <button
-                            className="meal-history-page__dropdown-option"
-                            onClick={() => handleEditMealFromDropdown(meal)}
-                          >
-                            <EditIcon />
-                            <span>Edit</span>
-                          </button>
-                          <button
-                            className="meal-history-page__dropdown-option"
-                            onClick={() => handleDeleteMealFromDropdown(meal)}
-                          >
-                            <DeleteIcon />
-                            <span>Delete</span>
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
+        {/* Unified Card - contains header + logged items */}
+        <div className="meal-history-page__meal-card">
+          {/* Header - always visible */}
+          <div className={`meal-history-page__meal-card-header ${hasMeals ? 'meal-history-page__meal-card-header--has-meals' : ''}`}>
+            {!hasMeals && (
+              <div className="meal-history-page__meal-card-icon">
+                <img src={config.image} alt={title} />
               </div>
-            ))}
+            )}
+            <div className="meal-history-page__meal-card-info">
+              <h3 className="meal-history-page__meal-card-title">{title}</h3>
+            </div>
+            <button
+              className="meal-history-page__meal-card-add-btn"
+              onClick={() => handleAddFood(mealType)}
+            >
+              + Add
+            </button>
           </div>
-        )}
-        
-        <button 
-          className="meal-history-page__add-food-btn"
-          onClick={() => handleAddFood(mealType)}
-        >
-          ADD FOOD
-        </button>
+
+          {/* Logged Items - only show if meals exist */}
+          {hasMeals && (
+            <div className="meal-history-page__meal-card-items">
+              {meals.map((meal) => (
+                <div key={meal.id} className="meal-history-page__meal-card-item">
+                  {/* Photo or fallback icon */}
+                  <div className="meal-history-page__meal-card-item-photo">
+                    {meal.meal_photo_url ? (
+                      <img
+                        src={meal.meal_photo_url}
+                        alt={getMealName(meal)}
+                        onError={(e) => {
+                          // Fallback to meal type icon if photo fails to load
+                          e.target.style.display = 'none';
+                          e.target.nextSibling?.setAttribute('style', 'display: block');
+                        }}
+                      />
+                    ) : (
+                      <img
+                        src={config.image}
+                        alt={title}
+                      />
+                    )}
+                  </div>
+
+                  {/* Meal info */}
+                  <div className="meal-history-page__meal-card-item-info">
+                    <h4 className="meal-history-page__meal-card-item-name" onClick={() => handleMealNameClick(meal)}>
+                      {getMealName(meal)}
+                    </h4>
+                    {getTotalCalories(meal) && (
+                      <p className="meal-history-page__meal-card-item-calories">
+                        {getTotalCalories(meal)}
+                      </p>
+                    )}
+                    {/* Edit and Delete icons below calories */}
+                    <div className="meal-history-page__meal-card-item-actions">
+                      <button
+                        className="meal-history-page__meal-action-btn"
+                        onClick={() => handleEditMeal(meal)}
+                        aria-label="Edit meal"
+                      >
+                        <EditIcon />
+                      </button>
+                      <button
+                        className="meal-history-page__meal-action-btn"
+                        onClick={() => handleDeleteMeal(meal)}
+                        aria-label="Delete meal"
+                      >
+                        <DeleteIcon />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Right side - pill only */}
+                  <div className="meal-history-page__meal-card-item-right">
+                    <span className={`meal-history-page__meal-type-pill ${meal.is_dine_out ? 'meal-history-page__meal-type-pill--dine-out' : 'meal-history-page__meal-type-pill--eat-in'}`}>
+                      {meal.is_dine_out ? 'Dine Out' : 'Eat In'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     );
   };
@@ -858,6 +959,11 @@ const MealHistoryPage = () => {
                   const daysDiff = Math.floor((today - dateDay) / (1000 * 60 * 60 * 24));
                   const isLocked = !isPremium && daysDiff > 7;
 
+                  // Get meal count for this date
+                  const formattedDate = `${dateInfo.fullDate.getFullYear()}-${String(dateInfo.fullDate.getMonth() + 1).padStart(2, '0')}-${String(dateInfo.fullDate.getDate()).padStart(2, '0')}`;
+                  const mealCount = weekMealCounts[formattedDate] || 0;
+                  const progressClass = mealCount > 0 ? `meal-progress-${mealCount}` : '';
+
                   return (
                     <div
                       key={index}
@@ -878,7 +984,7 @@ const MealHistoryPage = () => {
                         position: 'relative'
                       }}
                     >
-                      <span className="meal-history-page__date-number">
+                      <span className={`meal-history-page__date-number ${progressClass}`}>
                         {dateInfo.date}
                       </span>
                       {isLocked && (

@@ -178,8 +178,8 @@
 }
 
 .meal-history-page__date-cell--today .meal-history-page__date-number {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 3rem;
+  height: 3rem;
   background-color: #e6e6e6;
   border-radius: 50%;
   display: flex;
@@ -192,8 +192,8 @@
 }
 
 .meal-history-page__date-cell--selected .meal-history-page__date-number {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 3rem;
+  height: 3rem;
   border-radius: 50%;
   background: linear-gradient(135deg, #81e053 0%, #4fcf61 100%);
   display: flex;
@@ -211,11 +211,71 @@
   font-size: 1.125rem;
   font-weight: 400;
   color: #333;
-  min-width: 2rem;
-  min-height: 2rem;
+  width: 3rem;
+  height: 3rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* Meal progress ring wrapper */
+.meal-history-page__date-number::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #4fcf61 0deg,
+    #4fcf61 0deg,
+    transparent 0deg,
+    transparent 360deg
+  );
+  z-index: -1;
+}
+
+/* Progress ring states - 1 meal (25% = 90deg) */
+.meal-history-page__date-number.meal-progress-1::before {
+  background: conic-gradient(
+    #4fcf61 0deg,
+    #4fcf61 90deg,
+    transparent 90deg,
+    transparent 360deg
+  );
+}
+
+/* Progress ring states - 2 meals (50% = 180deg) */
+.meal-history-page__date-number.meal-progress-2::before {
+  background: conic-gradient(
+    #4fcf61 0deg,
+    #4fcf61 180deg,
+    transparent 180deg,
+    transparent 360deg
+  );
+}
+
+/* Progress ring states - 3 meals (75% = 270deg) */
+.meal-history-page__date-number.meal-progress-3::before {
+  background: conic-gradient(
+    #4fcf61 0deg,
+    #4fcf61 270deg,
+    transparent 270deg,
+    transparent 360deg
+  );
+}
+
+/* Progress ring states - 4 meals (100% = 360deg) */
+.meal-history-page__date-number.meal-progress-4::before {
+  background: conic-gradient(
+    #4fcf61 0deg,
+    #4fcf61 360deg
+  );
 }
 
 /* Modal Styles */
@@ -323,13 +383,13 @@
   }
 
   .meal-history-page__date-cell--selected .meal-history-page__date-number {
-    width: 2rem;
-    height: 2rem;
+    width: 3rem;
+    height: 3rem;
   }
 
   .meal-history-page__date-cell--today .meal-history-page__date-number {
-    width: 2rem;
-    height: 2rem;
+    width: 3rem;
+    height: 3rem;
   }
 
   .meal-history-page__header {
@@ -383,13 +443,13 @@
   }
 
   .meal-history-page__date-cell--selected .meal-history-page__date-number {
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 3rem;
+    height: 3rem;
   }
 
   .meal-history-page__date-cell--today .meal-history-page__date-number {
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 3rem;
+    height: 3rem;
   }
 }
 
@@ -420,12 +480,12 @@
 }
 
 .meal-history-page__meal-section {
-  background: white;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  padding: 1rem;
+  background: transparent;
+  border-radius: 0;
+  margin-bottom: 0;
+  padding: 0;
   border: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: none;
 }
 
 .meal-history-page__meal-title {
@@ -437,7 +497,7 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
-/* Meal List Layout (replacing grid) */
+/* Meal List Layout - card-based */
 .meal-history-page__meal-list {
   display: flex;
   flex-direction: column;
@@ -445,69 +505,107 @@
   margin-bottom: 0.5rem;
 }
 
-/* Individual meal item (line-based) */
-.meal-history-page__meal-item {
+/* Individual Logged Meal Item - row within card */
+.meal-history-page__meal-card-item {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 0.875rem 0;
-  border-bottom: 1px solid #f0f0f0;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
   position: relative;
+  border-bottom: 1px solid #f5f5f5;
 }
 
-.meal-history-page__meal-item:last-child {
+.meal-history-page__meal-card-item:last-child {
   border-bottom: none;
+  padding-bottom: 0;
 }
 
-/* Meal content (clickable area) */
-.meal-history-page__meal-content {
-  flex: 1;
-  cursor: pointer;
-  padding-right: 1rem;
-  transition: opacity 0.2s ease;
+.meal-history-page__meal-card-item:first-child {
+  padding-top: 0;
 }
 
-.meal-history-page__meal-content:hover {
-  opacity: 0.7;
+/* Item photo container */
+.meal-history-page__meal-card-item-photo {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  background-color: #f5f5f5;
 }
 
-.meal-history-page__meal-content:active {
-  opacity: 0.5;
+.meal-history-page__meal-card-item-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-/* Meal info container */
-.meal-history-page__meal-info {
+/* Item info container */
+.meal-history-page__meal-card-item-info {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 2px;
 }
 
-/* Meal header row - contains name and pill */
-.meal-history-page__meal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-/* Meal name styling */
-.meal-history-page__meal-name {
-  font-size: 0.95rem;
+/* Item name */
+.meal-history-page__meal-card-item-name {
+  font-size: 15px;
   font-weight: 500;
-  color: #333;
+  color: #1a1a1a;
   margin: 0;
   line-height: 1.3;
-  flex: 1;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
 }
 
-/* Meal calories styling - now underneath the name */
-.meal-history-page__meal-calories {
-  font-size: 0.8rem;
+.meal-history-page__meal-card-item-name:hover {
+  opacity: 0.7;
+}
+
+/* Item calories */
+.meal-history-page__meal-card-item-calories {
+  font-size: 12px;
   color: #666;
   font-weight: 400;
-  display: block;
-  margin-top: 0.125rem;
+  margin: 0;
+}
+
+/* Action buttons container (edit/delete icons) */
+.meal-history-page__meal-card-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.meal-history-page__meal-action-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: #666;
+}
+
+.meal-history-page__meal-action-btn:hover {
+  color: #333;
+  transform: scale(1.1);
+}
+
+.meal-history-page__meal-action-btn:active {
+  transform: scale(0.95);
+}
+
+.meal-history-page__meal-action-btn svg {
+  width: 16px;
+  height: 16px;
 }
 
 /* Meal type pills */
@@ -532,12 +630,12 @@
   color: #4CAF50;
 }
 
-/* Right side container for pill and menu */
-.meal-history-page__meal-right {
+/* Right side container for pill and menu - for items */
+.meal-history-page__meal-card-item-right {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.5rem;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
   flex-shrink: 0;
 }
 
@@ -640,7 +738,96 @@
   font-weight: 500;
 }
 
-/* Empty State - Removed completely for cleaner design */
+/* Unified Meal Card - contains header + logged items */
+.meal-history-page__meal-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin: 0 16px 8px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Card Header - always visible (icon + title + add button) */
+.meal-history-page__meal-card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 60px;
+  position: relative;
+}
+
+/* Header when meals are logged - no icon, text on left */
+.meal-history-page__meal-card-header--has-meals {
+  min-height: 40px;
+  padding: 0;
+}
+
+.meal-history-page__meal-card-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.meal-history-page__meal-card-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.meal-history-page__meal-card-info {
+  flex: 1;
+}
+
+.meal-history-page__meal-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+}
+
+.meal-history-page__meal-card-calories {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+}
+
+.meal-history-page__meal-card-add-btn {
+  background: #4fcf61;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.meal-history-page__meal-card-add-btn:hover {
+  background: #3ab54a;
+  transform: translateY(-50%) translateY(-1px);
+}
+
+.meal-history-page__meal-card-add-btn:active {
+  transform: translateY(-50%) translateY(0);
+}
+
+/* Logged Items Section - appears below header */
+.meal-history-page__meal-card-items {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
 
 .meal-history-page__add-food-btn {
   width: 100%;
@@ -705,8 +892,8 @@
   }
 
   .meal-history-page__meal-section {
-    margin-bottom: 0.75rem;
-    padding: 0.875rem;
+    margin-bottom: 0;
+    padding: 0;
   }
 
   .meal-history-page__meal-title {
@@ -758,7 +945,7 @@
   }
 
   .meal-history-page__meal-section {
-    padding: 0.75rem;
+    padding: 0;
   }
 }
 

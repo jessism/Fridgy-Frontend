@@ -36,6 +36,7 @@ const InventoryPage = ({ defaultTab }) => {
   const [activeTab, setActiveTab] = useState(defaultTab || 'inventory'); // New state for tab navigation
   const [upgradeModal, setUpgradeModal] = useState({ isOpen: false, feature: '', current: 0, limit: 0 });
   const [clickedIcon, setClickedIcon] = useState(null); // Track which icon was clicked
+  const [selectedCategory, setSelectedCategory] = useState(null); // Track selected category from URL
 
   // Touch/swipe state for mobile navigation
   const [touchStartX, setTouchStartX] = useState(null);
@@ -88,6 +89,7 @@ const InventoryPage = ({ defaultTab }) => {
     if (categoryParam) {
       // Set filter to by-category and ensure we're on inventory tab
       setActiveFilter('by-category');
+      setSelectedCategory(categoryParam); // Store the selected category
       setActiveTab('inventory');
 
       // Scroll to category after a short delay to ensure DOM is updated
@@ -470,7 +472,7 @@ const InventoryPage = ({ defaultTab }) => {
   // Group items by category or expiration status
   const getGroupedItems = () => {
     const filtered = getFilteredItems();
-    
+
     if (activeFilter === 'by-category') {
       const grouped = {};
       filtered.forEach(item => {
@@ -480,13 +482,18 @@ const InventoryPage = ({ defaultTab }) => {
         }
         grouped[category].push(item);
       });
-      
+
+      // If a specific category is selected (from URL), show only that category
+      if (selectedCategory) {
+        return grouped[selectedCategory] ? { [selectedCategory]: grouped[selectedCategory] } : {};
+      }
+
       // Sort categories alphabetically
       const sortedGrouped = {};
       Object.keys(grouped).sort().forEach(category => {
         sortedGrouped[category] = grouped[category];
       });
-      
+
       return sortedGrouped;
     }
     
@@ -641,7 +648,13 @@ const InventoryPage = ({ defaultTab }) => {
               ].map((filter) => (
                 <button
                   key={filter.key}
-                  onClick={() => setActiveFilter(filter.key)}
+                  onClick={() => {
+                    setActiveFilter(filter.key);
+                    // Reset selected category when switching away from by-category filter
+                    if (filter.key !== 'by-category') {
+                      setSelectedCategory(null);
+                    }
+                  }}
                   style={{
                     padding: '8px 14px',
                     borderRadius: '25px',
@@ -793,7 +806,10 @@ const InventoryPage = ({ defaultTab }) => {
                     fontSize: '0.9rem',
                     cursor: 'pointer'
                   }}
-                  onClick={() => setActiveFilter('all')}
+                  onClick={() => {
+                    setActiveFilter('all');
+                    setSelectedCategory(null);
+                  }}
                 >
                   Show All Items
                 </button>

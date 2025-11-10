@@ -1,6 +1,7 @@
 /* Inventory Usage Page - Light Theme */
 .inventory-usage-page {
   min-height: 100vh;
+  width: 100%;
   background-color: #f5f5f5; /* Light grey background */
   padding-bottom: 80px; /* Space for mobile bottom nav */
 }
@@ -45,28 +46,58 @@
   max-width: 1200px;
   margin: 0 auto 1.5rem;
   padding: 0 1.5rem;
-  text-align: right;
+  display: flex;
+  justify-content: flex-end;
 }
 
-.inventory-usage-page .date-range-dropdown {
-  padding: 0.75rem 1rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 1rem;
-  background: white;
-  transition: all 0.2s ease;
-  min-width: 150px;
+/* Segmented Control Container */
+.inventory-usage-page__segmented-control {
+  display: inline-flex;
+  background: #f0f0f0;
+  border-radius: 12px;
+  padding: 4px;
+  gap: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.inventory-usage-page .date-range-dropdown:hover {
-  border-color: #81e053;
+/* Segment Button Base Styles */
+.inventory-usage-page__segment-button {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  border-radius: 8px;
+  font-family: inherit;
 }
 
-.inventory-usage-page .date-range-dropdown:focus {
-  outline: none;
-  border-color: #81e053;
-  box-shadow: 0 0 0 3px rgba(129, 224, 83, 0.1);
+/* Active State */
+.inventory-usage-page__segment-button--active {
+  background: #2c3e50;
+  color: white;
+  font-weight: 600;
+}
+
+/* Hover State (only for inactive buttons) */
+.inventory-usage-page__segment-button:not(.inventory-usage-page__segment-button--active):hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
+/* Disabled State */
+.inventory-usage-page__segment-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Focus State for accessibility */
+.inventory-usage-page__segment-button:focus-visible {
+  outline: 2px solid #4fcf61;
+  outline-offset: 2px;
 }
 
 /* Usage Analytics Container */
@@ -201,25 +232,36 @@
   max-width: 1200px;
   margin: 1.5rem auto 0;
   padding: 0 1.5rem;
+  display: block;
+  width: 100%;
 }
 
 .inventory-usage-page .category-card {
   background: white;
   border-radius: 20px;
-  padding: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .inventory-usage-page .category-title {
   font-size: 1.25rem;
   font-weight: 600;
   color: #222;
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 2rem 0;
+  text-align: left;
 }
 
 .inventory-usage-page .category-content {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 2rem;
+  width: 100%;
+  max-width: 100%;
 }
 
 .inventory-usage-page .category-chart-wrapper {
@@ -231,27 +273,33 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .inventory-usage-page .legend-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  white-space: nowrap;
+  padding: 0.5rem 0;
 }
 
 .inventory-usage-page .legend-color {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
   flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .inventory-usage-page .legend-text {
-  font-size: 0.9rem;
-  color: #666;
+  font-size: 1rem;
+  color: #333;
   font-weight: 500;
-  text-align: left;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Most Used Items */
@@ -477,6 +525,24 @@
 
   .inventory-usage-page .page-subtitle {
     font-size: 0.95rem;
+  }
+
+  /* Mobile segmented control adjustments */
+  .inventory-usage-page .date-filter-section {
+    justify-content: center;
+    padding: 0 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .inventory-usage-page__segmented-control {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .inventory-usage-page__segment-button {
+    flex: 1;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.85rem;
   }
 
   .inventory-usage-page .date-range-select {

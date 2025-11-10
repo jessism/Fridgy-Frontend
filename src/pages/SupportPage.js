@@ -25,8 +25,7 @@ const SupportPage = () => {
 
   const handleEmailSupport = () => {
     // Opens email client with pre-filled support email
-    // Replace with your actual support email
-    window.location.href = 'mailto:support@trackabite.com?subject=Support Request';
+    window.location.href = 'mailto:hello@trackabite.app?subject=Support Request';
   };
 
   const handleInAppFeedback = () => {
@@ -163,7 +162,7 @@ const SupportPage = () => {
             </div>
             <div className="support-page__card-content">
               <h2 className="support-page__card-title">Email Support</h2>
-              <p className="support-page__card-email">support@trackabite.com</p>
+              <p className="support-page__card-email">hello@trackabite.app</p>
               <p className="support-page__card-description">Reach out anytime</p>
             </div>
           </div>

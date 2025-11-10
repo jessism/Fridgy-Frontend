@@ -82,14 +82,14 @@ const InventoryUsagePage = () => {
     );
   };
 
-  // Category color mapping
+  // Category color mapping - Vibrant, highly visible colors
   const categoryColors = {
-    'Vegetables': '#4fcf61',
-    'Dairy': '#4A90E2',
-    'Protein': '#50C878',
-    'Grains': '#FF9F43',
-    'Fruits': '#FF6B6B',
-    'Other': '#9B59B6'
+    'Vegetables': '#34D399',  // Vibrant emerald green
+    'Dairy': '#60A5FA',       // Bold blue
+    'Protein': '#F472B6',     // Hot pink/magenta (reddish tone)
+    'Grains': '#FB923C',      // Vivid orange
+    'Fruits': '#A78BFA',      // Rich purple
+    'Other': '#94A3B8'        // Slate gray
   };
 
   // Convert category breakdown to chart data
@@ -274,18 +274,40 @@ const InventoryUsagePage = () => {
         </div>
       </div>
 
-      {/* Date Range Dropdown */}
+      {/* Date Range Segmented Control */}
       <div className="date-filter-section">
-        <select 
-          className="date-range-dropdown"
-          value={dateRange}
-          onChange={handleDateRangeChange}
-          disabled={isLoading}
-        >
-          <option value="7">Last 7 days</option>
-          <option value="30">Last 30 days</option>
-          <option value="90">Last 90 days</option>
-        </select>
+        <div className="inventory-usage-page__segmented-control">
+          <button
+            className={`inventory-usage-page__segment-button ${dateRange === '7' ? 'inventory-usage-page__segment-button--active' : ''}`}
+            onClick={() => {
+              setDateRange('7');
+              changeDateRange(7);
+            }}
+            disabled={isLoading}
+          >
+            Last 7 days
+          </button>
+          <button
+            className={`inventory-usage-page__segment-button ${dateRange === '30' ? 'inventory-usage-page__segment-button--active' : ''}`}
+            onClick={() => {
+              setDateRange('30');
+              changeDateRange(30);
+            }}
+            disabled={isLoading}
+          >
+            30 days
+          </button>
+          <button
+            className={`inventory-usage-page__segment-button ${dateRange === '90' ? 'inventory-usage-page__segment-button--active' : ''}`}
+            onClick={() => {
+              setDateRange('90');
+              changeDateRange(90);
+            }}
+            disabled={isLoading}
+          >
+            90 days
+          </button>
+        </div>
       </div>
 
       {/* Usage Analytics Container */}
@@ -402,7 +424,7 @@ const InventoryUsagePage = () => {
           <div className="category-content">
             <div className="category-chart-wrapper">
               {!isLoading && getCategoryChartData().length > 0 ? (
-                <svg width="160" height="160" viewBox="0 0 160 160" className="category-donut">
+                <svg width="200" height="200" viewBox="0 0 160 160" className="category-donut">
                   {getDonutSegments().map((segment, index) => (
                     <path
                       key={segment.category}
@@ -414,14 +436,16 @@ const InventoryUsagePage = () => {
                   ))}
                 </svg>
               ) : (
-                <div style={{ 
-                  width: '160px', 
-                  height: '160px', 
-                  display: 'flex', 
-                  alignItems: 'center', 
+                <div style={{
+                  width: '200px',
+                  height: '200px',
+                  display: 'flex',
+                  alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#666',
-                  fontSize: '0.9rem'
+                  color: '#999',
+                  fontSize: '0.95rem',
+                  background: '#f9f9f9',
+                  borderRadius: '50%'
                 }}>
                   {isLoading ? 'Loading...' : 'No data'}
                 </div>

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { safeJSONStringify } from '../../../utils/jsonSanitizer';
+import { usePostHog } from '@posthog/react';
 
 // Create the authentication context
 const AuthContext = createContext();
@@ -118,6 +119,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const refreshTimeoutRef = useRef(null);
+  const posthog = usePostHog();
 
   // Schedule token refresh before expiry (refresh 5 minutes before expiry)
   const scheduleTokenRefresh = useCallback(() => {
@@ -142,6 +144,13 @@ export const AuthProvider = ({ children }) => {
             setTokens(data.token, data.refreshToken);
             setUserData(data.user);
             setUser({ ...data.user, token: data.token });
+
+            // Identify user in PostHog (in case properties changed)
+            posthog?.identify(data.user.id, {
+              email: data.user.email,
+              firstName: data.user.firstName,
+            });
+
             scheduleTokenRefresh(); // Schedule next refresh
           }
         } catch (error) {
@@ -168,6 +177,12 @@ export const AuthProvider = ({ children }) => {
               setUserData(response.user);
               setUser({ ...response.user, token });
 
+              // Identify user in PostHog
+              posthog?.identify(response.user.id, {
+                email: response.user.email,
+                firstName: response.user.firstName,
+              });
+
               // If backend sent new tokens, update them
               if (response.token) {
                 setTokens(response.token, response.refreshToken);
@@ -193,6 +208,13 @@ export const AuthProvider = ({ children }) => {
                   setTokens(data.token, data.refreshToken);
                   setUserData(data.user);
                   setUser({ ...data.user, token: data.token });
+
+                  // Identify user in PostHog
+                  posthog?.identify(data.user.id, {
+                    email: data.user.email,
+                    firstName: data.user.firstName,
+                  });
+
                   scheduleTokenRefresh();
                 } else {
                   // Refresh failed, clear auth
@@ -263,6 +285,13 @@ export const AuthProvider = ({ children }) => {
         setUserData(response.user);
         const userWithToken = { ...response.user, token: response.token };
         setUser(userWithToken);
+
+        // Identify user in PostHog
+        posthog?.identify(response.user.id, {
+          email: response.user.email,
+          firstName: response.user.firstName,
+        });
+
         scheduleTokenRefresh();
         return userWithToken;
       } else {
@@ -301,6 +330,13 @@ export const AuthProvider = ({ children }) => {
         setUserData(response.user);
         const userWithToken = { ...response.user, token: response.token };
         setUser(userWithToken);
+
+        // Identify user in PostHog
+        posthog?.identify(response.user.id, {
+          email: response.user.email,
+          firstName: response.user.firstName,
+        });
+
         scheduleTokenRefresh();
         return userWithToken;
       } else {
@@ -331,6 +367,9 @@ export const AuthProvider = ({ children }) => {
     if (refreshTimeoutRef.current) {
       clearTimeout(refreshTimeoutRef.current);
     }
+
+    // Reset PostHog user identity
+    posthog?.reset();
 
     // Always clear all storage and state
     removeTokens();
