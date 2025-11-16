@@ -203,7 +203,7 @@ const PastAIRecipesPage = () => {
                             }}
                           />
                           <div className="saved-recipes-page__source-badge">
-                            AI Generated
+                            {generation.tour_mode ? 'DEMO' : 'AI Generated'}
                           </div>
                         </div>
                         <div className="saved-recipes-page__recipe-content">

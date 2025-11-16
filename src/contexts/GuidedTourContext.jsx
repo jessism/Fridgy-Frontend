@@ -26,16 +26,18 @@ export const GuidedTourProvider = ({ children }) => {
     }
 
     // Backend is the PRIMARY source of truth
-    // If backend says user hasn't seen tour, show it regardless of localStorage
-    if (user.hasSeenWelcomeTour !== true) {
-      console.log('[GuidedTour] First-time user detected (backend hasSeenWelcomeTour=false), starting welcome tour');
+    // Check new tour_status field - only show if not completed or skipped
+    const tourStatus = user.tourStatus || 'not_started';
+
+    if (tourStatus !== 'completed' && tourStatus !== 'skipped') {
+      console.log(`[GuidedTour] User has not completed/skipped tour (tour_status=${tourStatus}), starting welcome tour`);
 
       // Start tour with welcome screen after 4 second delay
       setTimeout(() => {
         guidedTour.startTour(); // Starts at WELCOME_SCREEN
       }, 4000);
     } else {
-      console.log('[GuidedTour] Backend says tour already completed (hasSeenWelcomeTour=true), skipping');
+      console.log(`[GuidedTour] Tour already ${tourStatus}, not showing again`);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

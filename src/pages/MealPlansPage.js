@@ -844,7 +844,7 @@ const MealPlansPage = ({ defaultTab }) => {
             }}
           />
           <div className="meal-plans-page__saved-recipe-badge">
-            <span>AI Generated</span>
+            <span>{recipe.tour_mode ? 'DEMO' : 'AI Generated'}</span>
           </div>
         </div>
         <div className="meal-plans-page__saved-recipe-content">

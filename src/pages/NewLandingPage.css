@@ -153,22 +153,25 @@
 }
 
 .landing-page-v2__hero-title {
-  font-size: clamp(32px, 5vw, 52px);
+  font-size: clamp(36px, 5.5vw, 58px);
   font-weight: 800;
   color: #222222;
   margin: 0 0 24px 0;
-  line-height: 1.3;
-  letter-spacing: -1px;
+  line-height: 1.25;
+  letter-spacing: -1.5px;
   text-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
-  max-width: 500px;
+  max-width: 620px;
 }
 
 .landing-page-v2__hero-title-gradient {
-  background: linear-gradient(to right, var(--primary-green), var(--primary-green-dark));
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   color: transparent;
+  font-weight: 900;
+  position: relative;
+  display: inline-block;
 }
 
 .landing-page-v2__hero-subtitle {

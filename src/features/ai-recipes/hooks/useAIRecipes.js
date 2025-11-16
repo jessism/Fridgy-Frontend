@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react';
 import { useAuth } from '../../auth/context/AuthContext';
 import { safeJSONStringify } from '../../../utils/jsonSanitizer';
 import { useGuidedTourContext } from '../../../contexts/GuidedTourContext';
-import demoRecipesData from '../../../data/demoRecipes.json';
 
 // API base URL - adjust for your backend
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -95,41 +94,14 @@ const useAIRecipes = () => {
       console.log('🤖 Starting AI recipe generation...');
       console.log('📋 Questionnaire data:', questionnaireData);
 
-      // Check if we should use demo mode (tour active, regardless of demo inventory items)
-      const isDemoMode = isTourActive;
-
-      if (isDemoMode) {
-        console.log('🎯 DEMO MODE: Using pre-generated static recipes for welcome tour');
-
-        // Simulate AI generation with fake loading delay (4.5 seconds to show all 3 loading steps)
-        // Step 1: 500ms, Step 2: 2000ms, Step 3: 3500ms, Complete: 4500ms
-        await new Promise(resolve => setTimeout(resolve, 4500));
-
-        // Return static demo recipes
-        const demoData = {
-          success: true,
-          data: {
-            recipes: demoRecipesData.recipes,
-            generatedAt: new Date().toISOString(),
-            isDemo: true
-          }
-        };
-
-        console.log('✅ Demo recipes loaded successfully:', demoData.data.recipes.length);
-        setRecipes(demoData.data.recipes);
-        setGenerationStatus('completed');
-        return demoData.data;
-      }
-
-      // REAL MODE: Make actual API call
-      // Check if we should use demo inventory (for real API but with demo data)
-      const shouldUseDemoInventory = demoInventoryItems && demoInventoryItems.length > 0;
-
       // Prepare request body
       let requestBody = { ...questionnaireData };
 
+      // Check if we should use demo inventory (during welcome tour)
+      const shouldUseDemoInventory = demoInventoryItems && demoInventoryItems.length > 0;
+
       if (shouldUseDemoInventory) {
-        console.log('🎯 Using demo inventory items for API call:', demoInventoryItems.length);
+        console.log('🎯 Using demo inventory items from tour context:', demoInventoryItems.length);
 
         // Transform demo inventory to backend format (camelCase → snake_case)
         const transformedDemoInventory = demoInventoryItems.map(item => ({
@@ -145,7 +117,58 @@ const useAIRecipes = () => {
         }));
 
         requestBody.demoInventory = transformedDemoInventory;
+        requestBody.tourMode = true;
         console.log('📦 Demo inventory transformed and added to request');
+      } else if (isTourActive) {
+        // Tour is active but no demo inventory scanned - use fallback demo items
+        console.log('🎯 Tour active but no demo inventory - using fallback demo items');
+
+        const fallbackDemoInventory = [
+          {
+            item_name: 'Chicken Breast',
+            quantity: 2,
+            category: 'Protein',
+            expiration_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 5 days from now
+            total_weight_oz: 16,
+            isDemo: true
+          },
+          {
+            item_name: 'Broccoli',
+            quantity: 1,
+            category: 'Vegetables',
+            expiration_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now
+            total_weight_oz: 8,
+            isDemo: true
+          },
+          {
+            item_name: 'Eggs',
+            quantity: 6,
+            category: 'Protein',
+            expiration_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 14 days from now
+            total_weight_oz: 12,
+            isDemo: true
+          },
+          {
+            item_name: 'Asparagus',
+            quantity: 1,
+            category: 'Vegetables',
+            expiration_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 5 days from now
+            total_weight_oz: 6,
+            isDemo: true
+          },
+          {
+            item_name: 'Spaghetti',
+            quantity: 1,
+            category: 'Grains',
+            expiration_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 year from now
+            total_weight_oz: 16,
+            isDemo: true
+          }
+        ];
+
+        requestBody.demoInventory = fallbackDemoInventory;
+        requestBody.tourMode = true;
+        console.log('📦 Fallback demo inventory added to request:', fallbackDemoInventory.length, 'items');
       }
 
       const response = await apiRequest('/ai-recipes/generate', {

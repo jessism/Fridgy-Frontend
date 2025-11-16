@@ -98,7 +98,10 @@ const NewLandingPage = () => {
               <div className="landing-page-v2__hero-main">
 
                 <h1 className="landing-page-v2__hero-title">
-                  No more wonder<br /> <span className="landing-page-v2__hero-title-gradient">"What's for dinner"</span>
+                  Know<br />
+                  what's fresh,<br />
+                  what's not, and<br />
+                  <span className="landing-page-v2__hero-title-gradient">what's for dinner</span>
                 </h1>
 
                 <p className="landing-page-v2__hero-subtitle">

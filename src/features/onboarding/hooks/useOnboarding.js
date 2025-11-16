@@ -44,6 +44,7 @@ const useOnboarding = () => {
     // Always start fresh - clear any existing onboarding data
     localStorage.removeItem(ONBOARDING_STORAGE_KEY);
     localStorage.removeItem(ONBOARDING_STEP_KEY);
+    localStorage.removeItem('fridgy_onboarding_session_id');
     
     // Ensure we start from step 1 with fresh data
     setCurrentStep(1);
@@ -269,6 +270,7 @@ const useOnboarding = () => {
   const clearOnboardingData = () => {
     localStorage.removeItem(ONBOARDING_STORAGE_KEY);
     localStorage.removeItem(ONBOARDING_STEP_KEY);
+    localStorage.removeItem('fridgy_onboarding_session_id');
     setOnboardingData({
       primaryGoal: '',
       householdSize: 1,

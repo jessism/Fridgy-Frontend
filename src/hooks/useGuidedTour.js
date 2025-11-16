@@ -115,10 +115,31 @@ const useGuidedTour = () => {
         currentStep: STEPS.WELCOME_SCREEN,
         isActive: true,
         tourSource: source,
+        startedAt: new Date().toISOString(),
         lastUpdated: new Date().toISOString()
       }));
     } catch (error) {
       console.error('[GuidedTour] Error saving on start:', error);
+    }
+
+    // Mark tour as started on backend
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+      fetch(`${apiUrl}/auth/tour/start`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }).then(() => {
+        console.log('[GuidedTour] Backend marked tour as started');
+      }).catch(err => {
+        console.error('[GuidedTour] Failed to mark tour start:', err);
+      });
+    } catch (error) {
+      console.error('[GuidedTour] Error marking tour start:', error);
     }
   }, []);
 
@@ -172,30 +193,35 @@ const useGuidedTour = () => {
       completedAt: new Date().toISOString()
     }));
 
-    // Mark welcome tour as completed on backend
+    // Mark tour as completed on backend with final step
     try {
       const token = localStorage.getItem('fridgy_token');
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-      await fetch(`${apiUrl}/auth/welcome-tour/complete`, {
+      const response = await fetch(`${apiUrl}/auth/tour/complete`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({
+          final_step: currentStep || STEPS.COMPLETED
+        })
       });
-      console.log('[GuidedTour] Backend marked tour as completed');
+
+      const data = await response.json();
+      console.log('[GuidedTour] Tour completion response:', data);
     } catch (error) {
       console.error('[GuidedTour] Failed to mark tour complete on backend:', error);
       // Continue anyway - localStorage fallback will work
     }
-  }, []);
+  }, [currentStep]);
 
   /**
    * Dismiss/skip the tour
    */
   const dismissTour = useCallback(async () => {
-    console.log('[GuidedTour] Tour dismissed - clearing demo inventory');
+    console.log('[GuidedTour] Tour dismissed/skipped at step:', currentStep);
     setCurrentStep(STEPS.COMPLETED);
     setIsActive(false);
     setDemoInventoryItems([]); // Clear demo items
@@ -204,28 +230,35 @@ const useGuidedTour = () => {
       currentStep: STEPS.COMPLETED,
       isActive: false,
       demoInventoryItems: [], // Clear in storage
-      dismissed: true,
-      dismissedAt: new Date().toISOString()
+      skipped: true,
+      skippedAt: new Date().toISOString(),
+      skippedAtStep: currentStep
     }));
 
-    // Mark welcome tour as completed on backend (dismissed counts as completed)
+    // Mark tour as skipped on backend
     try {
       const token = localStorage.getItem('fridgy_token');
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-      await fetch(`${apiUrl}/auth/welcome-tour/complete`, {
+      const response = await fetch(`${apiUrl}/auth/tour/skip`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({
+          current_step: currentStep || 'unknown',
+          reason: 'user_action'
+        })
       });
-      console.log('[GuidedTour] Backend marked tour as completed (dismissed)');
+
+      const data = await response.json();
+      console.log('[GuidedTour] Tour skip response:', data);
     } catch (error) {
-      console.error('[GuidedTour] Failed to mark tour complete on backend:', error);
+      console.error('[GuidedTour] Failed to mark tour skipped on backend:', error);
       // Continue anyway - localStorage fallback will work
     }
-  }, []);
+  }, [currentStep]);
 
   /**
    * Reset the tour (for replay)

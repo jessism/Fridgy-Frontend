@@ -101,11 +101,11 @@ const AIRecipePage = () => {
 
   // Detect when recipes are first generated during the tour
   useEffect(() => {
-    if (shouldShowTooltip(STEPS.GENERATE_RECIPES_QUESTIONNAIRE) && hasRecipes && !loading) {
+    if (shouldShowTooltip(STEPS.GENERATE_RECIPES_QUESTIONNAIRE) && hasRecipes && !loading && imagesPreloaded) {
       console.log('[AIRecipePage] Recipes generated during tour - advancing to success step');
       goToStep(STEPS.GENERATE_RECIPES_SUCCESS);
     }
-  }, [hasRecipes, loading, shouldShowTooltip, STEPS, goToStep]);
+  }, [hasRecipes, loading, imagesPreloaded, shouldShowTooltip, STEPS, goToStep]);
 
   // Preload images when recipes are loaded
   useEffect(() => {
@@ -676,8 +676,9 @@ const AIRecipePage = () => {
           onContinue={() => {
             setShowTourCompleteModal(false);
             completeTour();
+            navigate('/home');
           }}
-          continueLabel="Get Started"
+          continueLabel="End Tour"
         />
       )}
 

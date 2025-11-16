@@ -42,6 +42,7 @@ import { ReactComponent as RecipesIcon } from '../assets/icons/quickaccess/recip
 import importRecipeStep1Image from '../assets/product mockup/Import Recipes/Import_recipe_open_instagram.jpeg';
 import importRecipeStep4Image from '../assets/product mockup/Import Recipes/Import_recipe_allow_api.png';
 import cookingIcon from '../assets/icons/Cooking.png';
+import FridgyLogo from '../assets/images/Logo.png';
 import './HomePage.css';
 
 // Helper function to calculate days until expiry (reused from InventoryPage)
@@ -415,14 +416,7 @@ const HomePage = () => {
                 // Show empty state for brand new users (priority 3)
                 <div className="empty-fridge-state">
                   <div className="empty-state-icon">
-                    <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="10" y="15" width="25" height="30" rx="2" stroke="#4fcf61" strokeWidth="2.5" fill="none"/>
-                      <line x1="10" y1="27" x2="35" y2="27" stroke="#4fcf61" strokeWidth="2.5"/>
-                      <rect x="32" y="20" width="2" height="3" rx="1" fill="#4fcf61"/>
-                      <rect x="32" y="32" width="2" height="4" rx="1" fill="#4fcf61"/>
-                      <circle cx="45" cy="25" r="12" fill="#4fcf61"/>
-                      <path d="M45 20v10M40 25h10" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-                    </svg>
+                    <img src={FridgyLogo} alt="Fridgy" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
                   </div>
                   <h4 className="empty-state-title">Let's get your fridge started!</h4>
                   <p className="empty-state-subtitle">Add your groceries to begin tracking freshness and reducing waste</p>
