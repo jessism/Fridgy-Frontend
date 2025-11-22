@@ -11,7 +11,14 @@ import { PostHogProvider } from '@posthog/react';
 if (process.env.NODE_ENV === 'production') {
   posthog.init(process.env.REACT_APP_PUBLIC_POSTHOG_KEY, {
     api_host: process.env.REACT_APP_PUBLIC_POSTHOG_HOST,
-    defaults: '2025-05-24',
+    autocapture: true, // Enable automatic event tracking
+    capture_pageview: true, // Track page views
+    capture_pageleave: true, // Track when users leave pages
+    person_profiles: 'identified_only', // Only create profiles for identified users
+    session_recording: {
+      maskAllInputs: true, // Privacy: mask all input fields
+      maskTextSelector: '*' // Privacy: mask all text content
+    }
   });
 }
 
