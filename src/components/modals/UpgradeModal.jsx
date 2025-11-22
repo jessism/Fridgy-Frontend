@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import './UpgradeModal.css';
 
-export function UpgradeModal({ isOpen, onClose, feature, current, limit, startCheckout }) {
+export function UpgradeModal({ isOpen, onClose, feature, current, limit, startCheckout, previewContent }) {
   const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
@@ -79,8 +79,17 @@ export function UpgradeModal({ isOpen, onClose, feature, current, limit, startCh
   const featureContent = getFeatureBenefits(feature);
 
   return (
-    <div className="upgrade-modal__overlay">
-      <div className="upgrade-modal__content">
+    <div className="upgrade-modal">
+      {/* Background Preview Layer - shows blurred premium feature */}
+      {previewContent && (
+        <div className="upgrade-modal__preview-background">
+          {previewContent}
+        </div>
+      )}
+
+      {/* Frosted Glass Overlay + Modal Content */}
+      <div className="upgrade-modal__overlay">
+        <div className="upgrade-modal__content">
         <button className="upgrade-modal__close" onClick={onClose} aria-label="Close">
           ×
         </button>
@@ -127,6 +136,7 @@ export function UpgradeModal({ isOpen, onClose, feature, current, limit, startCh
           No payment due now
         </p>
       </div>
+    </div>
     </div>
   );
 }

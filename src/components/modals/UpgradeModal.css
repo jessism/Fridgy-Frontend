@@ -1,12 +1,39 @@
 /* UpgradeModal Styles */
 
+/* Main container - holds both preview background and overlay */
+.upgrade-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+}
+
+/* Background Preview Layer - shows blurred premium feature */
+.upgrade-modal__preview-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  filter: blur(6px);
+  opacity: 0.5;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Frosted Glass Overlay */
 .upgrade-modal__overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: white;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   z-index: 10000;
   animation: fadeIn 0.3s ease-out;
 }

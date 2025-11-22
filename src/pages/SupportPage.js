@@ -19,8 +19,7 @@ const SupportPage = () => {
 
   const handleTextSupport = () => {
     // Opens SMS app with pre-filled phone number
-    // Replace with your actual support phone number
-    window.location.href = 'sms:+15551234567';
+    window.location.href = 'sms:+17789002577';
   };
 
   const handleEmailSupport = () => {
@@ -142,12 +141,12 @@ const SupportPage = () => {
             </div>
             <div className="support-page__card-content">
               <h2 className="support-page__card-title">Text Support</h2>
-              <p className="support-page__card-phone">(555) 123-4567</p>
+              <p className="support-page__card-phone">+1 778-900-2577</p>
               <p className="support-page__card-description">Send us a text message</p>
             </div>
           </div>
           <button className="support-page__card-button support-page__card-button--secondary">
-            Open Messages
+            Text Support
           </button>
         </div>
 

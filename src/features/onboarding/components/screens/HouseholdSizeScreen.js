@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { trackOnboardingStepViewed } from '../../../../utils/onboardingTracking';
 import './ScreenStyles.css';
 
 const HouseholdSizeScreen = ({ data, updateData, onNext, onBack }) => {
+  useEffect(() => {
+    trackOnboardingStepViewed(3);
+  }, []);
   const handleHouseholdIncrease = () => {
     if (data.householdSize < 10) {
       updateData({ householdSize: data.householdSize + 1 });

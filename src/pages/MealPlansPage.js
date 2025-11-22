@@ -993,17 +993,14 @@ const MealPlansPage = ({ defaultTab }) => {
 
   // Render empty state for recent meals
   const renderRecentMealsEmptyState = () => (
-    <div
-      className="meal-plans-page__saved-recipes-empty"
-      onClick={() => navigate('/mealscanner')}
-    >
-      <div className="meal-plans-page__saved-recipes-empty-container">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <circle cx="16" cy="16" r="14" fill="none" stroke="var(--primary-green)" strokeWidth="2"/>
-          <path d="M16 10V22M10 16H22" stroke="var(--primary-green)" strokeWidth="2" strokeLinecap="round"/>
-        </svg>
-      </div>
-      <p className="meal-plans-page__saved-recipes-empty-text">Start logging your meals</p>
+    <div className="meal-plans-page__saved-recipes-empty">
+      <p className="meal-plans-page__saved-recipes-empty-text">No meals logged yet</p>
+      <button
+        className="meal-plans-page__saved-recipes-empty-button"
+        onClick={() => navigate('/mealscanner')}
+      >
+        Start Logging Meals
+      </button>
     </div>
   );
 
@@ -1535,6 +1532,7 @@ const MealPlansPage = ({ defaultTab }) => {
       {/* Generate Recipes Tour - Start Button Tooltip */}
       {shouldShowTooltip(STEPS.GENERATE_RECIPES_START_BUTTON) && !isStartButtonVisible && (
         <GuidedTooltip
+          targetSelector=".meal-plans-page__ai-access"
           message="Scroll down and tap 'Start personalized recipes' ↓"
           position="top"
           showAction={false}

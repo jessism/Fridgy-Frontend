@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { trackOnboardingStepViewed } from '../../../../utils/onboardingTracking';
 import './ScreenStyles.css';
 
 const DietaryRestrictionsScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
+  useEffect(() => {
+    trackOnboardingStepViewed(5);
+  }, []);
   const dietaryOptions = [
     { id: 'none', label: 'None' },
     { id: 'vegetarian', label: 'Vegetarian' },

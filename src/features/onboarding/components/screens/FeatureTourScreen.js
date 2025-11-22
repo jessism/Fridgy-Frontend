@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { trackOnboardingStepViewed } from '../../../../utils/onboardingTracking';
 import './ScreenStyles.css';
 
 // Video setup:
@@ -9,6 +10,10 @@ import './ScreenStyles.css';
 
 const FeatureTourScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
   const [currentFeature, setCurrentFeature] = useState(0);
+
+  useEffect(() => {
+    trackOnboardingStepViewed(8);
+  }, []);
 
   const features = [
     {

@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { trackOnboardingStepViewed } from '../../../../utils/onboardingTracking';
 import './ScreenStyles.css';
 
 const GoalSelectionScreen = ({ data, updateData, onNext, onBack }) => {
+  useEffect(() => {
+    trackOnboardingStepViewed(2);
+  }, []);
   const goals = [
     {
       id: 'save_money',

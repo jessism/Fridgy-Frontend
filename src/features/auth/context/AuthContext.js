@@ -149,6 +149,8 @@ export const AuthProvider = ({ children }) => {
             posthog?.identify(data.user.id, {
               email: data.user.email,
               firstName: data.user.firstName,
+              subscription_tier: data.user.tier,
+              is_grandfathered: data.user.isGrandfathered
             });
 
             scheduleTokenRefresh(); // Schedule next refresh
@@ -181,6 +183,8 @@ export const AuthProvider = ({ children }) => {
               posthog?.identify(response.user.id, {
                 email: response.user.email,
                 firstName: response.user.firstName,
+                subscription_tier: response.user.tier,
+                is_grandfathered: response.user.isGrandfathered
               });
 
               // If backend sent new tokens, update them
@@ -213,6 +217,8 @@ export const AuthProvider = ({ children }) => {
                   posthog?.identify(data.user.id, {
                     email: data.user.email,
                     firstName: data.user.firstName,
+                    subscription_tier: data.user.tier,
+                    is_grandfathered: data.user.isGrandfathered
                   });
 
                   scheduleTokenRefresh();
@@ -290,6 +296,8 @@ export const AuthProvider = ({ children }) => {
         posthog?.identify(response.user.id, {
           email: response.user.email,
           firstName: response.user.firstName,
+          subscription_tier: response.user.tier,
+          is_grandfathered: response.user.isGrandfathered
         });
 
         scheduleTokenRefresh();
@@ -335,6 +343,8 @@ export const AuthProvider = ({ children }) => {
         posthog?.identify(response.user.id, {
           email: response.user.email,
           firstName: response.user.firstName,
+          subscription_tier: response.user.tier,
+          is_grandfathered: response.user.isGrandfathered
         });
 
         scheduleTokenRefresh();

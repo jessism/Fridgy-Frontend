@@ -17,11 +17,6 @@ const SavedRecipesPage = () => {
   const [showDetail, setShowDetail] = useState(false);
   const [showCreationModal, setShowCreationModal] = useState(false);
   const [deletingRecipeId, setDeletingRecipeId] = useState(null);
-  const [shortcutConfig, setShortcutConfig] = useState(null);
-  const [installingShortcut, setInstallingShortcut] = useState(false);
-
-  // Detect iOS device
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   
   useEffect(() => {
     fetchRecipes();
@@ -241,144 +236,32 @@ const SavedRecipesPage = () => {
     }
   };
 
-  // Quick install shortcut function
-  const handleQuickShortcutInstall = async () => {
-    if (!isIOS) {
-      alert('This feature is for iOS devices. You can still import recipes by copying the URL and pasting it in the import page!');
-      return;
-    }
-
-    setInstallingShortcut(true);
-
-    try {
-      const token = localStorage.getItem('fridgy_token');
-      if (!token) {
-        alert('Please sign in to set up shortcuts');
-        navigate('/signin');
-        return;
-      }
-
-      // Fetch user's shortcut token
-      const response = await fetch(`${API_BASE_URL}/shortcuts/setup`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch shortcut configuration');
-      }
-
-      const config = await response.json();
-
-      // Copy token to clipboard
-      try {
-        await navigator.clipboard.writeText(config.token);
-        console.log('Token copied to clipboard');
-      } catch (clipboardError) {
-        console.warn('Could not copy to clipboard:', clipboardError);
-      }
-
-      // iCloud shortcut link
-      const iCloudShortcutURL = process.env.REACT_APP_ICLOUD_SHORTCUT_URL || 'https://www.icloud.com/shortcuts/PLACEHOLDER';
-
-      // Show instructions with token
-      const userConfirmed = window.confirm(
-        '📱 Install Instagram Recipe Saver\n\n' +
-        '✅ Token copied to clipboard!\n\n' +
-        `Your token: ${config.token}\n\n` +
-        '1. Tap OK to open the shortcut\n' +
-        '2. Tap "Add Shortcut"\n' +
-        '3. Paste token when asked (one time only!)\n\n' +
-        'After setup, share Instagram recipes for full details!'
-      );
-
-      if (userConfirmed) {
-        window.location.href = iCloudShortcutURL;
-
-        setTimeout(() => {
-          const installed = window.confirm('Did you successfully add the shortcut?');
-          if (installed) {
-            localStorage.setItem('shortcut_installed', 'true');
-            alert('🎉 Perfect! Share Instagram recipes now - they\'ll import with full details!');
-          }
-        }, 3000);
-      }
-    } catch (error) {
-      console.error('Error installing shortcut:', error);
-      alert('Failed to set up shortcut. Please try again.');
-    } finally {
-      setInstallingShortcut(false);
-    }
-  };
-
   return (
     <div className="saved-recipes-page">
       <div className="saved-recipes-page__main">
         <div className="saved-recipes-page__container">
           {/* Header */}
-          <div className="saved-recipes-page__header" style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '0.5rem 0 1rem 0', marginTop: '-1rem', marginLeft: '-0.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginBottom: '1rem' }}>
-              <button
-                className="saved-recipes-page__back-button"
-                onClick={() => navigate('/meal-plans/recipes')}
-                style={{ marginRight: '0.5rem', marginLeft: '-0.5rem' }}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-              <h1 className="saved-recipes-page__title" style={{ margin: 0, textAlign: 'left' }}>
-                All imported recipes
-              </h1>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%', justifyContent: 'flex-end' }}>
-              {isIOS && !localStorage.getItem('shortcut_installed') && (
-                <button
-                  className="saved-recipes-page__setup-button"
-                  onClick={handleQuickShortcutInstall}
-                  disabled={installingShortcut}
-                  style={{
-                    position: 'relative',
-                    backgroundColor: installingShortcut ? '#ccc' : undefined
-                  }}
-                >
-                  {installingShortcut ? (
-                    <>Installing...</>
-                  ) : (
-                    <>
-                      📱 Quick Save
-                      <span style={{
-                        position: 'absolute',
-                        top: '-8px',
-                        right: '-8px',
-                        background: '#ff4444',
-                        color: 'white',
-                        borderRadius: '50%',
-                        width: '16px',
-                        height: '16px',
-                        fontSize: '10px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 'bold'
-                      }}>
-                        !
-                      </span>
-                    </>
-                  )}
-                </button>
-              )}
-              <button
-                className="saved-recipes-page__add-button-header"
-                onClick={() => navigate('/import')}
-              >
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                  <circle cx="16" cy="16" r="14" fill="var(--primary-green)"/>
-                  <path d="M16 10V22M10 16H22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </button>
-            </div>
+          <div className="saved-recipes-page__header">
+            <button
+              className="saved-recipes-page__back-button"
+              onClick={() => navigate('/meal-plans/recipes')}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            <h1 className="saved-recipes-page__title">
+              All imported recipes
+            </h1>
+            <button
+              className="saved-recipes-page__add-button-header"
+              onClick={() => navigate('/import')}
+            >
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="14" fill="var(--primary-green)"/>
+                <path d="M16 10V22M10 16H22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
           </div>
 
 

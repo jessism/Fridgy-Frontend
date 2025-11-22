@@ -40,6 +40,7 @@ import PWATestPage from './pages/PWATestPage';
 import ScrollToTop from './components/ScrollToTop';
 import BillingPage from './pages/BillingPage';
 import SubscriptionPage from './pages/SubscriptionPage';
+import CancelSubscriptionPage from './pages/CancelSubscriptionPage';
 import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
@@ -255,6 +256,11 @@ function App() {
           <Route path="/subscription" element={
             <AuthGuard>
               <SubscriptionPage />
+            </AuthGuard>
+          } />
+          <Route path="/subscription/cancel" element={
+            <AuthGuard>
+              <CancelSubscriptionPage />
             </AuthGuard>
           } />
           {/* Public success page - handles both PWA and Safari contexts */}

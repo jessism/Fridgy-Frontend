@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { trackOnboardingStepViewed } from '../../../../utils/onboardingTracking';
 import './ScreenStyles.css';
 
 const WeeklyBudgetScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
+  useEffect(() => {
+    trackOnboardingStepViewed(4);
+  }, []);
   const handleBudgetChange = (e) => {
     const value = parseInt(e.target.value, 10);
     updateData({ weeklyBudget: value });

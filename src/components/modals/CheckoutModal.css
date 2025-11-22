@@ -122,6 +122,12 @@
   margin-bottom: 1.5rem;
 }
 
+/* Promo Code Section */
+.checkout-modal__promo-section {
+  margin-top: 16px;
+  margin-bottom: 20px;
+}
+
 /* Error Message */
 .checkout-modal__error {
   background-color: #fee;

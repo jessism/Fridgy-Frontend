@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { trackOnboardingStepViewed } from '../../../../utils/onboardingTracking';
 import './ScreenStyles.css';
 
 const CookingTimePreferenceScreen = ({ data, updateData, onNext, onBack }) => {
+  useEffect(() => {
+    trackOnboardingStepViewed(7);
+  }, []);
   const cookingTimeOptions = [
     { id: 'under_15', label: 'Under 15 min', description: 'Quick & easy meals' },
     { id: '15_30', label: '15-30 min', description: 'Balanced cooking time' },

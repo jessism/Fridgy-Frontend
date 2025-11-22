@@ -687,13 +687,11 @@ const AIRecipePage = () => {
         isOpen={showIOSInstallModal}
         onClose={() => {
           setShowIOSInstallModal(false);
-          completeTour();
-          navigate('/home');
+          setShowTourCompleteModal(true);
         }}
         onContinue={() => {
           setShowIOSInstallModal(false);
-          completeTour();
-          navigate('/home');
+          setShowTourCompleteModal(true);
         }}
       />
 

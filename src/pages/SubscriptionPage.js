@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../features/auth/context/AuthContext';
 import { useSubscription } from '../hooks/useSubscription';
 import { CheckoutModal } from '../components/modals/CheckoutModal';
@@ -7,7 +7,21 @@ import './SubscriptionPage.css';
 
 const SubscriptionPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
+  const [successMessage, setSuccessMessage] = useState(location.state?.message || null);
+
+  // Clear success message after 5 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage(null);
+        // Clear location state
+        navigate(location.pathname, { replace: true, state: {} });
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage, navigate, location.pathname]);
   const {
     subscription,
     usage,
@@ -15,6 +29,8 @@ const SubscriptionPage = () => {
     isPremium,
     isFreeTier,
     openBillingPortal,
+    cancelSubscription,
+    reactivateSubscription,
     startCheckout,
     checkoutSecret,
     closeCheckout,
@@ -23,9 +39,9 @@ const SubscriptionPage = () => {
 
   const [promoCode, setPromoCode] = useState('');
   const [portalLoading, setPortalLoading] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
-  const [showUsage, setShowUsage] = useState(false);
 
   if (loading) {
     return (
@@ -46,6 +62,24 @@ const SubscriptionPage = () => {
       alert('Failed to open billing portal. Please try again.');
     } finally {
       setPortalLoading(false);
+    }
+  };
+
+  const handleCancelSubscription = () => {
+    // Navigate to dedicated cancellation page
+    navigate('/subscription/cancel');
+  };
+
+  const handleReactivateSubscription = async () => {
+    try {
+      setCancelLoading(true);
+      await reactivateSubscription();
+      await refresh(); // Refresh to show updated state
+      alert('Subscription reactivated successfully!');
+    } catch (error) {
+      alert('Failed to reactivate subscription. Please try again.');
+    } finally {
+      setCancelLoading(false);
     }
   };
 
@@ -79,6 +113,21 @@ const SubscriptionPage = () => {
 
   return (
     <div className="subscription-page">
+      {/* Success Message Banner */}
+      {successMessage && (
+        <div style={{
+          background: '#10B981',
+          color: 'white',
+          padding: '16px 20px',
+          textAlign: 'center',
+          fontSize: '14px',
+          fontWeight: '500',
+          lineHeight: '1.5'
+        }}>
+          ✓ {successMessage}
+        </div>
+      )}
+
       {/* Header */}
       <div className="subscription-page__header">
         <button className="subscription-page__back-btn" onClick={() => navigate('/profile')}>
@@ -125,13 +174,20 @@ const SubscriptionPage = () => {
             }}>
               <div style={{ textAlign: 'left' }}>
                 <div style={{ fontSize: '14px', opacity: 0.85, marginBottom: '6px', fontWeight: '500' }}>Details:</div>
-                <div style={{ fontSize: '14px', fontWeight: '700', whiteSpace: 'nowrap' }}>$4.99/month</div>
+                <div style={{ fontSize: '14px', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                  {subscription?.billing?.baseAmountFormatted || '$4.99'}/month
+                  {subscription?.billing?.discount && (
+                    <span style={{ fontSize: '11px', marginLeft: '6px', color: '#2ecc71' }}>
+                      ({subscription.billing.discount.percentOff}% off first month)
+                    </span>
+                  )}
+                </div>
               </div>
-              {subscription?.status === 'trialing' && subscription.trial_end && (
+              {subscription?.status === 'trialing' && (
                 <div style={{ textAlign: 'left' }}>
                   <div style={{ fontSize: '14px', opacity: 0.85, marginBottom: '6px', fontWeight: '500' }}>Trial ends:</div>
                   <div style={{ fontSize: '14px', fontWeight: '700', whiteSpace: 'nowrap' }}>
-                    {new Date(subscription.trial_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {new Date(subscription?.billing?.date || subscription.trial_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </div>
                 </div>
               )}
@@ -146,45 +202,88 @@ const SubscriptionPage = () => {
             </div>
 
             <div style={{ fontSize: '12px', opacity: 0.85, marginBottom: '10px', lineHeight: '1.4' }}>
-              {subscription?.status === 'trialing'
-                ? `You're on a 7-day free trial. Your card will be charged $4.99 on ${new Date(subscription.trial_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}.`
-                : subscription?.tier === 'grandfathered'
-                  ? 'You have lifetime premium access as an early supporter. Thank you!'
-                  : `Subscribed through Trackabite. Your next charge will be $4.99 on ${new Date(subscription.current_period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}.`}
+              {subscription?.tier === 'grandfathered'
+                ? 'You have lifetime premium access as an early supporter. Thank you!'
+                : subscription?.cancel_at_period_end
+                  ? (subscription?.status === 'trialing'
+                    ? `Trial canceled. You can still use Trackabite Pro until ${new Date(subscription?.billing?.date || subscription.trial_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}. You won't be charged.`
+                    : `Subscription canceled. Access until ${new Date(subscription?.billing?.date || subscription.current_period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}. Your card won't be charged again.`)
+                  : (subscription?.status === 'trialing'
+                    ? `You're on a 7-day free trial. Your card will be charged ${subscription?.billing?.amountFormatted || '$4.99'} on ${new Date(subscription?.billing?.date || subscription.trial_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}.${subscription?.billing?.discount ? ` (${subscription.billing.discount.percentOff}% discount applied)` : ''}`
+                    : `Subscribed through Trackabite. Your next charge will be ${subscription?.billing?.amountFormatted || '$4.99'} on ${new Date(subscription?.billing?.date || subscription.current_period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}.${subscription?.billing?.discount ? ` (${subscription.billing.discount.percentOff}% discount applied)` : ''}`)}
             </div>
 
             {subscription?.tier !== 'grandfathered' && (
-              <button
-                onClick={handleManageBilling}
-                disabled={portalLoading}
-                style={{
-                  width: '100%',
-                  padding: '14px',
-                  background: 'rgba(255, 255, 255, 0.18)',
-                  backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(255, 255, 255, 0.25)',
-                  borderRadius: '12px',
-                  color: '#222222',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.03)',
-                  opacity: 0.8
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.background = 'rgba(255, 255, 255, 0.28)';
-                  e.target.style.transform = 'translateY(-1px)';
-                  e.target.style.opacity = '1';
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.background = 'rgba(255, 255, 255, 0.18)';
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.opacity = '0.8';
-                }}
-              >
-                {portalLoading ? 'Opening...' : 'Cancel Subscription'}
-              </button>
+              <>
+                <button
+                  onClick={subscription?.cancel_at_period_end ? handleReactivateSubscription : handleCancelSubscription}
+                  disabled={cancelLoading}
+                  style={{
+                    width: '100%',
+                    padding: '14px',
+                    background: 'rgba(255, 255, 255, 0.18)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(255, 255, 255, 0.25)',
+                    borderRadius: '12px',
+                    color: '#222222',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    cursor: cancelLoading ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.03)',
+                    opacity: cancelLoading ? 0.5 : 0.8,
+                    marginBottom: '10px'
+                  }}
+                  onMouseOver={(e) => {
+                    if (!cancelLoading) {
+                      e.target.style.background = 'rgba(255, 255, 255, 0.28)';
+                      e.target.style.transform = 'translateY(-1px)';
+                      e.target.style.opacity = '1';
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (!cancelLoading) {
+                      e.target.style.background = 'rgba(255, 255, 255, 0.18)';
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.opacity = '0.8';
+                    }
+                  }}
+                >
+                  {cancelLoading
+                    ? 'Processing...'
+                    : (subscription?.cancel_at_period_end ? 'Reactivate Subscription' : 'Cancel Subscription')
+                  }
+                </button>
+                <button
+                  onClick={handleManageBilling}
+                  disabled={portalLoading}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    background: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    borderRadius: '12px',
+                    color: '#222222',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    cursor: portalLoading ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s',
+                    opacity: 0.7
+                  }}
+                  onMouseOver={(e) => {
+                    if (!portalLoading) {
+                      e.target.style.opacity = '1';
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (!portalLoading) {
+                      e.target.style.opacity = '0.7';
+                    }
+                  }}
+                >
+                  {portalLoading ? 'Opening...' : 'Update Payment Method'}
+                </button>
+              </>
             )}
           </div>
         ) : (
@@ -298,60 +397,6 @@ const SubscriptionPage = () => {
             </div>
           </div>
         )}
-
-        {/* Usage Statistics Section */}
-        <div className="subscription-page__usage">
-          <button
-            className="subscription-page__comparison-header"
-            onClick={() => setShowUsage(!showUsage)}
-          >
-            <h2 className="subscription-page__section-title">Your Usage</h2>
-            <svg
-              className={`comparison-arrow ${showUsage ? 'comparison-arrow--expanded' : ''}`}
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-
-          {showUsage && (
-            <div style={{
-              background: 'white',
-              borderRadius: '12px',
-              padding: '20px',
-              marginTop: '16px'
-            }}>
-              {/* Compact Usage List */}
-              {[
-                { name: 'Inventory Items', count: usage?.grocery_items_count || 0, limit: 20 },
-                { name: 'Recipe Imports', count: usage?.imported_recipes_count || 0, limit: 10 },
-                { name: 'Shopping Lists', count: usage?.owned_shopping_lists_count || 0, limit: 5 },
-                { name: 'Meal Logs', count: usage?.meal_logs_count || 0, limit: null }
-              ].map((item, index) => (
-                <div key={item.name} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '12px 0',
-                  borderBottom: index < 3 ? '1px solid #f0f0f0' : 'none'
-                }}>
-                  <span style={{ fontSize: '14px', color: '#666', fontWeight: '500' }}>
-                    {item.name}
-                  </span>
-                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#222' }}>
-                    {!item.limit || isPremium
-                      ? item.count
-                      : `${item.count} / ${item.limit}`}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
 
         {/* Plan Comparison Section */}
         <div className="subscription-page__comparison">

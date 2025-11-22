@@ -846,7 +846,7 @@ const NotificationSettings = () => {
             className="notification-settings__button primary"
           >
             {isLoading ? 'Connecting...' :
-             permissionStatus === 'granted' ? '🔗 Connect to Server' : 'Enable Notifications'}
+             permissionStatus === 'granted' ? 'Connect to Server' : 'Enable Notifications'}
           </button>
         ) : (
           <div className="notification-settings__button-group">

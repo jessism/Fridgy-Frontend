@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { trackOnboardingStepViewed } from '../../../../utils/onboardingTracking';
 import './ScreenStyles.css';
 
 const AllergiesScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
+  useEffect(() => {
+    trackOnboardingStepViewed(6);
+  }, []);
   const allergyOptions = [
     { id: 'peanuts', label: 'Peanuts' },
     { id: 'tree-nuts', label: 'Tree Nuts' },

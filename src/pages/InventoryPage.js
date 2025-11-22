@@ -6,6 +6,8 @@ import { EditIcon, DeleteIcon, PlusIcon } from '../components/icons';
 import useInventory from '../hooks/useInventory';
 import useShoppingLists from '../hooks/useShoppingLists';
 import { useSubscription } from '../hooks/useSubscription';
+import useFirstBatchCompletion from '../hooks/useFirstBatchCompletion';
+import IOSInstallPrompt from '../components/IOSInstallPrompt';
 import { UpgradeModal } from '../components/modals/UpgradeModal';
 import { useGuidedTourContext } from '../contexts/GuidedTourContext';
 import CelebrationModal from '../components/guided-tour/CelebrationModal';
@@ -25,6 +27,9 @@ const InventoryPage = ({ defaultTab }) => {
   const { lists: shoppingLists, addItem: addToShoppingList, createList } = useShoppingLists();
   const { canAccess } = useSubscription();
   const { shouldShowTooltip, nextStep, dismissTour, completeTour, goToStep, STEPS, isActive, demoInventoryItems, isIndividualTour, isFullTour } = useGuidedTourContext();
+
+  // Track first batch completion for PWA install prompt
+  const { shouldShowInstallPrompt, dismissPrompt } = useFirstBatchCompletion(inventoryItems);
   const navigate = useNavigate();
   const location = useLocation();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -1864,6 +1869,12 @@ const InventoryPage = ({ defaultTab }) => {
           }}
         />
       )}
+
+      {/* iOS Install Prompt - Shows after first batch of items added */}
+      <IOSInstallPrompt
+        isVisible={shouldShowInstallPrompt}
+        onDismiss={dismissPrompt}
+      />
 
       <MobileBottomNav />
     </div>

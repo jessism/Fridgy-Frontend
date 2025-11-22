@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { trackOnboardingStepViewed } from '../../../../utils/onboardingTracking';
 import './ScreenStyles.css';
 
 const AccountCreationScreen = ({ data, updateData, onComplete, onBack, loading, error, setError }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
+
+  useEffect(() => {
+    trackOnboardingStepViewed(11);
+  }, []);
 
   // Check if payment was completed
   const paymentCompleted = localStorage.getItem('fridgy_payment_completed') === 'true' || data?.paymentCompleted === true;

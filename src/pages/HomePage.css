@@ -93,6 +93,7 @@
   color: var(--primary-green);
   margin: 0;
   font-size: 1.8rem;
+  font-weight: 700;
   cursor: pointer;
   transition: color 0.3s ease;
 }
@@ -456,6 +457,13 @@
   position: relative;
   z-index: 1;
   margin-bottom: 16px;
+}
+
+/* Desktop only - add top spacing to avoid touching navbar */
+@media (min-width: 769px) {
+  .featured-categories {
+    padding-top: 120px;
+  }
 }
 
 .featured-categories .container {

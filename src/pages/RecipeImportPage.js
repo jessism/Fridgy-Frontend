@@ -8,6 +8,8 @@ import { CheckoutModal } from '../components/modals/CheckoutModal';
 import { useGuidedTourContext } from '../contexts/GuidedTourContext';
 import GuidedTooltip from '../components/guided-tour/GuidedTooltip';
 import RecipeImportSuccessModal from '../components/guided-tour/RecipeImportSuccessModal';
+import ShortcutInstallModal from '../components/guided-tour/ShortcutInstallModal';
+import ShortcutConfirmationModal from '../components/guided-tour/ShortcutConfirmationModal';
 import '../components/guided-tour/GuidedTour.css'; // Import guided tour styles
 
 const RecipeImportPage = () => {
@@ -36,9 +38,33 @@ const RecipeImportPage = () => {
   const [isTimeoutError, setIsTimeoutError] = useState(false);
   const [showIOSPrompt, setShowIOSPrompt] = useState(false);
   const [tourSuccessRecipe, setTourSuccessRecipe] = useState(null); // Store recipe for tour success modal
+  const [showShortcutInstallModal, setShowShortcutInstallModal] = useState(false);
+  const [showShortcutConfirmation, setShowShortcutConfirmation] = useState(false);
+  const [shortcutInstallTimer, setShortcutInstallTimer] = useState(null);
 
   // Detect iOS device
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+  // API base URL
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+  // Quick install shortcut function
+  const handleQuickShortcutInstall = () => {
+    if (!isIOS) {
+      alert('This feature is for iOS devices. You can still import recipes by copying the URL and pasting it in the import page!');
+      return;
+    }
+
+    const token = localStorage.getItem('fridgy_token');
+    if (!token) {
+      alert('Please sign in to set up shortcuts');
+      navigate('/signin');
+      return;
+    }
+
+    // Show the professional shortcut install modal
+    setShowShortcutInstallModal(true);
+  };
 
   // Pre-fill URL if coming from guided tour
   useEffect(() => {
@@ -671,54 +697,26 @@ const RecipeImportPage = () => {
           <h1>Import Recipe from Instagram</h1>
         </div>
 
-        {/* iOS Shortcut Prompt */}
-        {showIOSPrompt && isIOS && (
-          <div className="recipe-import-page__ios-prompt" style={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white',
-            padding: '16px',
-            borderRadius: '12px',
-            marginBottom: '20px',
-            position: 'relative'
-          }}>
-            <button
-              onClick={() => {
-                setShowIOSPrompt(false);
-                localStorage.setItem('last_ios_prompt', Date.now().toString());
-              }}
-              style={{
-                position: 'absolute',
-                top: '8px',
-                right: '8px',
-                background: 'none',
-                border: 'none',
-                color: 'white',
-                fontSize: '20px',
-                cursor: 'pointer'
-              }}
-            >
-              ×
-            </button>
-            <h3 style={{ marginTop: '0', marginBottom: '12px' }}>📱 Save recipes with 2 taps!</h3>
-            <p style={{ marginBottom: '12px' }}>Install our iOS Shortcut to save Instagram recipes directly from the share menu.</p>
-            <button
-              onClick={() => {
-                localStorage.setItem('last_ios_prompt', Date.now().toString());
-                navigate('/shortcut-setup');
-              }}
-              style={{
-                background: 'white',
-                color: '#667eea',
-                padding: '10px 20px',
-                borderRadius: '8px',
-                border: 'none',
-                fontWeight: 'bold',
-                cursor: 'pointer'
-              }}
-            >
-              Setup Quick Share →
-            </button>
-          </div>
+        {/* Quick Save Section - for iOS users */}
+        {isIOS && !localStorage.getItem('shortcut_installed') && (
+          <>
+            <div className="recipe-import-page__quick-save-section">
+              <h2 className="recipe-import-page__section-title">Set up Quick Save</h2>
+              <p className="recipe-import-page__section-description">
+                Save Instagram recipes directly from the share menu with one tap.
+              </p>
+              <button
+                className="recipe-import-page__button recipe-import-page__button--dark"
+                onClick={handleQuickShortcutInstall}
+              >
+                Set up Shortcut
+              </button>
+            </div>
+
+            <div className="recipe-import-page__divider">
+              <span>Or paste manually</span>
+            </div>
+          </>
         )}
 
         {/* Status Messages */}
@@ -735,18 +733,6 @@ const RecipeImportPage = () => {
               <button
                 className="recipe-import-page__retry-button"
                 onClick={handleMultiModalImport}
-                style={{
-                  display: 'block',
-                  marginTop: '10px',
-                  padding: '8px 16px',
-                  backgroundColor: '#4fcf61',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
               >
                 Try Again
               </button>
@@ -757,8 +743,11 @@ const RecipeImportPage = () => {
         {/* Import Form */}
         {!showManualForm && (
           <div className="recipe-import-page__form">
+            <h2 className="recipe-import-page__section-title">Paste URL</h2>
+            <p className="recipe-import-page__section-description">
+              Copy a recipe link from Instagram and paste it below.
+            </p>
             <div className="recipe-import-page__input-group">
-              <label htmlFor="url" style={{ textAlign: 'center', display: 'block' }}>Instagram URL</label>
               <input
                 id="url"
                 type="url"
@@ -768,9 +757,6 @@ const RecipeImportPage = () => {
                 disabled={loading}
                 className="recipe-import-page__input"
               />
-              <small className="recipe-import-page__help" style={{ textAlign: 'center', display: 'block' }}>
-                Paste an Instagram post or reel URL containing a recipe
-              </small>
             </div>
 
             {/* Manual Caption Input (shows when auto-fetch fails) */}
@@ -1009,6 +995,48 @@ const RecipeImportPage = () => {
           onViewRecipes={() => {
             console.log('[RecipeImport] Tour complete - viewing recipes');
             navigate('/saved-recipes');
+          }}
+        />
+      )}
+
+      {/* Shortcut Install Modal */}
+      {showShortcutInstallModal && (
+        <ShortcutInstallModal
+          onInstall={() => {
+            // Start timer, then show confirmation after 10 seconds
+            const timer = setTimeout(() => {
+              setShowShortcutInstallModal(false);
+              setShowShortcutConfirmation(true);
+            }, 10000);
+            setShortcutInstallTimer(timer);
+          }}
+          onSkip={() => {
+            if (shortcutInstallTimer) {
+              clearTimeout(shortcutInstallTimer);
+            }
+            setShowShortcutInstallModal(false);
+          }}
+          onCancelTimer={() => {
+            if (shortcutInstallTimer) {
+              clearTimeout(shortcutInstallTimer);
+            }
+          }}
+        />
+      )}
+
+      {/* Shortcut Confirmation Modal */}
+      {showShortcutConfirmation && (
+        <ShortcutConfirmationModal
+          onYes={() => {
+            localStorage.setItem('shortcut_installed', 'true');
+            setShowShortcutConfirmation(false);
+          }}
+          onNo={() => {
+            setShowShortcutConfirmation(false);
+            setShowShortcutInstallModal(true);
+          }}
+          onSkip={() => {
+            setShowShortcutConfirmation(false);
           }}
         />
       )}

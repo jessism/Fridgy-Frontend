@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import fridgyLogo from '../../../../assets/images/Logo.png';
+import { trackOnboardingStepViewed } from '../../../../utils/onboardingTracking';
 import './ScreenStyles.css';
 
 const WelcomeScreen = ({ onNext, onExit }) => {
+  useEffect(() => {
+    trackOnboardingStepViewed(1);
+  }, []);
   return (
     <div className="onboarding-screen onboarding-screen--welcome">
       <div className="onboarding-screen__content">

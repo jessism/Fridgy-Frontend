@@ -9,7 +9,24 @@ const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY ||
 /**
  * Inner Payment Form Component for Onboarding
  */
-const PaymentForm = ({ subscriptionId, requiresSetup, onSuccess, onError, onPending, onBack }) => {
+const PaymentForm = ({
+  subscriptionId,
+  requiresSetup,
+  promoCode,
+  promoDiscount,
+  promoCodeInput,
+  promoError,
+  promoValidating,
+  showPromoInput,
+  setPromoCode,
+  setShowPromoInput,
+  validatePromoCode,
+  onRemovePromo,
+  onSuccess,
+  onError,
+  onPending,
+  onBack
+}) => {
   const stripe = useStripe();
   const elements = useElements();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -179,6 +196,140 @@ const PaymentForm = ({ subscriptionId, requiresSetup, onSuccess, onError, onPend
               layout: 'tabs'
             }}
           />
+
+          {/* Promo Code Field - Collapsible */}
+          <div style={{ marginTop: '16px' }}>
+            {!showPromoInput && !promoCode ? (
+              <button
+                type="button"
+                onClick={() => setShowPromoInput(true)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#4fcf61',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  padding: 0,
+                  textDecoration: 'none'
+                }}
+              >
+                Have a promo code?
+              </button>
+            ) : (
+              <>
+                <label style={{
+                  display: 'block',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  marginBottom: '8px',
+                  color: '#374151'
+                }}>
+                  Promo code (optional)
+                </label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input
+                    type="text"
+                    value={promoCodeInput}
+                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                    placeholder="Enter promo code"
+                    disabled={!!promoCode || promoValidating}
+                    style={{
+                      flex: 1,
+                      padding: '11px 12px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      background: promoCode ? '#f9fafb' : 'white',
+                      cursor: promoCode ? 'not-allowed' : 'text',
+                      color: '#1a1a1a'
+                    }}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (!promoCode && promoCodeInput) {
+                          validatePromoCode(promoCodeInput);
+                        }
+                      }
+                    }}
+                  />
+                  {!promoCode && (
+                    <button
+                      type="button"
+                      onClick={() => validatePromoCode(promoCodeInput)}
+                      disabled={promoValidating || !promoCodeInput}
+                      style={{
+                        padding: '10px 16px',
+                        background: '#4fcf61',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        cursor: promoValidating || !promoCodeInput ? 'not-allowed' : 'pointer',
+                        opacity: promoValidating || !promoCodeInput ? 0.5 : 1,
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {promoValidating ? 'Checking...' : 'Apply'}
+                    </button>
+                  )}
+                </div>
+
+                {/* Success Message */}
+                {promoCode && (
+                  <div style={{
+                    background: '#ECFDF5',
+                    border: '1px solid #10B981',
+                    borderRadius: '6px',
+                    padding: '10px 12px',
+                    marginTop: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '8px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                        <circle cx="10" cy="10" r="10" fill="#10B981"/>
+                        <path d="M6 10L8.5 12.5L14 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      <span style={{ color: '#047857', fontSize: '13px', fontWeight: '500' }}>
+                        Promo code "{promoCode}" applied!
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={onRemovePromo}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#6B7280',
+                        fontSize: '18px',
+                        cursor: 'pointer',
+                        padding: '0 4px',
+                        lineHeight: 1
+                      }}
+                      title="Remove promo code"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
+
+                {/* Error Message */}
+                {promoError && !promoCode && (
+                  <div style={{
+                    color: '#DC2626',
+                    fontSize: '13px',
+                    marginTop: '8px'
+                  }}>
+                    {promoError}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
 
         {errorMessage && (
@@ -219,7 +370,7 @@ const PaymentForm = ({ subscriptionId, requiresSetup, onSuccess, onError, onPend
           <button
             onClick={handleSubmit}
             className="onboarding-btn onboarding-btn--primary onboarding-btn--large"
-            disabled={isSubmitting || !stripe || !elements}
+            disabled={isSubmitting || !stripe || !elements || promoError}
           >
             {isSubmitting ? 'Processing...' : 'Start Free Trial'}
           </button>
@@ -233,7 +384,10 @@ const PaymentForm = ({ subscriptionId, requiresSetup, onSuccess, onError, onPend
           margin: '8px auto 0',
           lineHeight: '1.5'
         }}>
-          $4.99/month after trial ends. Your trial starts immediately and you can cancel anytime during the 7-day trial period.
+          {promoDiscount
+            ? promoDiscount
+            : '$4.99/month after trial ends. Your trial starts immediately and you can cancel anytime during the 7-day trial period.'
+          }
         </p>
       </div>
     </div>
@@ -250,6 +404,14 @@ const PaymentScreen = ({ data, updateData, jumpToStep, onBack }) => {
   const [paymentStatus, setPaymentStatus] = useState('loading');
   const [errorMessage, setErrorMessage] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+
+  // Promo code state
+  const [showPromoInput, setShowPromoInput] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+  const [appliedPromoCode, setAppliedPromoCode] = useState(null);
+  const [promoDiscount, setPromoDiscount] = useState(null);
+  const [promoError, setPromoError] = useState('');
+  const [promoValidating, setPromoValidating] = useState(false);
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -287,7 +449,123 @@ const PaymentScreen = ({ data, updateData, jumpToStep, onBack }) => {
     return sessionId;
   };
 
-  const createSubscriptionIntent = async () => {
+  const validatePromoCode = async (code) => {
+    if (!code || code.trim() === '') {
+      setPromoError('Please enter a promo code');
+      return;
+    }
+
+    setPromoValidating(true);
+    setPromoError('');
+
+    try {
+      // STEP 1: Validate promo code against database first
+      console.log('[PaymentScreen] Validating promo code against database:', code.toUpperCase());
+      const validateRes = await fetch(`${API_BASE_URL}/onboarding/validate-promo`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ code: code.toUpperCase() })
+      });
+
+      const validateData = await validateRes.json();
+
+      // If code is invalid, show error and stop
+      if (!validateRes.ok || !validateData.valid) {
+        console.error('[PaymentScreen] Promo code validation failed:', validateData.message);
+        setPromoError(validateData.message || 'Invalid or expired promo code');
+        setAppliedPromoCode(null);
+        setPromoDiscount(null);
+        setPromoValidating(false);
+        return;
+      }
+
+      console.log('[PaymentScreen] Promo code is valid:', validateData.promo);
+
+      // STEP 2: Apply promo to existing subscription (NO clientSecret update to preserve form)
+      const sessionId = localStorage.getItem('fridgy_onboarding_session_id');
+
+      if (!sessionId || !subscriptionId) {
+        console.error('[PaymentScreen] Missing session or subscription ID for promo application');
+        setPromoError('Please wait for payment form to load before applying promo code');
+        setPromoValidating(false);
+        return;
+      }
+
+      const applyRes = await fetch(`${API_BASE_URL}/onboarding/apply-promo`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          sessionId: sessionId,
+          subscriptionId: subscriptionId,
+          promoCode: code.toUpperCase()
+        })
+      });
+
+      const applyData = await applyRes.json();
+
+      if (!applyRes.ok || !applyData.success) {
+        console.error('[PaymentScreen] Failed to apply promo:', applyData.message || applyData.error);
+        setPromoError(applyData.error || 'Failed to apply promo code. Please try again.');
+        setAppliedPromoCode(null);
+        setPromoDiscount(null);
+        setPromoValidating(false);
+        return;
+      }
+
+      // Set applied code (WITHOUT updating clientSecret - form stays intact)
+      setAppliedPromoCode(code.toUpperCase());
+
+      // Build discount text from validated promo details
+      const promo = validateData.promo;
+      const discount = promo.discountType === 'percent'
+        ? `${promo.discountValue}% off`
+        : `$${promo.discountValue} off`;
+
+      const duration = promo.duration === 'forever'
+        ? 'forever'
+        : promo.duration === 'repeating'
+          ? `for ${promo.durationInMonths} month${promo.durationInMonths > 1 ? 's' : ''}`
+          : 'first payment';
+
+      setPromoDiscount(`${discount} ${duration}`);
+      setPromoError('');
+      console.log('[PaymentScreen] Promo code applied successfully');
+
+    } catch (error) {
+      console.error('[PaymentScreen] Promo code error:', error);
+      setPromoError('Failed to validate promo code. Please try again.');
+      setAppliedPromoCode(null);
+      setPromoDiscount(null);
+    } finally {
+      setPromoValidating(false);
+    }
+  };
+
+  const handleRemovePromo = async () => {
+    setAppliedPromoCode(null);
+    setPromoDiscount(null);
+    setPromoCode('');
+    setShowPromoInput(false);
+    setPromoError('');
+
+    // Remove discount from subscription without clearing form
+    try {
+      const sessionId = localStorage.getItem('fridgy_onboarding_session_id');
+      if (sessionId && subscriptionId) {
+        // Call apply-promo with empty code to clear discount
+        // For now, just clear the UI state - the subscription will be updated when form is submitted
+        console.log('[PaymentScreen] Promo code removed from UI');
+      }
+    } catch (error) {
+      console.error('[PaymentScreen] Error removing promo:', error);
+    }
+  };
+
+  const createSubscriptionIntent = async (promoCodeToUse = null) => {
     try {
       // Get or create session ID
       const sessionId = await getOrCreateSessionId();
@@ -302,7 +580,8 @@ const PaymentScreen = ({ data, updateData, jumpToStep, onBack }) => {
         },
         body: JSON.stringify({
           sessionId: sessionId,
-          isOnboarding: true // Flag to indicate this is from onboarding
+          isOnboarding: true, // Flag to indicate this is from onboarding
+          promoCode: promoCodeToUse || appliedPromoCode
           // priceId will default to backend's STRIPE_PRICE_ID from .env
         })
       });
@@ -523,28 +802,43 @@ const PaymentScreen = ({ data, updateData, jumpToStep, onBack }) => {
   // Render payment form when ready
   if (clientSecret) {
     return (
-      <Elements
-        stripe={stripePromise}
-        options={{
-          clientSecret: clientSecret,
-          appearance: {
-            theme: 'stripe',
-            variables: {
-              colorPrimary: '#4fcf61',
-              borderRadius: '8px'
-            }
-          }
-        }}
-      >
-        <PaymentForm
-          subscriptionId={subscriptionId}
-          requiresSetup={requiresSetup}
-          onSuccess={handleSuccess}
-          onError={handleError}
-          onPending={handlePending}
-          onBack={handleBack}
-        />
-      </Elements>
+      <div className="onboarding-screen">
+        <div className="onboarding-screen__content">
+          <Elements
+            key={clientSecret}
+            stripe={stripePromise}
+            options={{
+              clientSecret: clientSecret,
+              appearance: {
+                theme: 'stripe',
+                variables: {
+                  colorPrimary: '#4fcf61',
+                  borderRadius: '8px'
+                }
+              }
+            }}
+          >
+            <PaymentForm
+              subscriptionId={subscriptionId}
+              requiresSetup={requiresSetup}
+              promoCode={appliedPromoCode}
+              promoDiscount={promoDiscount}
+              promoCodeInput={promoCode}
+              promoError={promoError}
+              promoValidating={promoValidating}
+              showPromoInput={showPromoInput}
+              setPromoCode={setPromoCode}
+              setShowPromoInput={setShowPromoInput}
+              validatePromoCode={validatePromoCode}
+              onRemovePromo={handleRemovePromo}
+              onSuccess={handleSuccess}
+              onError={handleError}
+              onPending={handlePending}
+              onBack={handleBack}
+            />
+          </Elements>
+        </div>
+      </div>
     );
   }
 

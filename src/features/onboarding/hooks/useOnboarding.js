@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/context/AuthContext';
 import { safeJSONStringify } from '../../../utils/jsonSanitizer';
+import { trackOnboardingStepCompleted, trackOnboardingCompleted } from '../../../utils/onboardingTracking';
 
 const ONBOARDING_STORAGE_KEY = 'fridgy_onboarding_data';
 const ONBOARDING_STEP_KEY = 'fridgy_onboarding_step';
@@ -90,6 +91,54 @@ const useOnboarding = () => {
 
   const goToNextStep = useCallback(() => {
     if (currentStep < totalSteps) {
+      // Track step completion with relevant data based on current step
+      const stepData = {};
+
+      switch (currentStep) {
+        case 1: // Welcome screen
+          // No data to collect
+          break;
+        case 2: // Goal selection
+          stepData.primary_goal = onboardingData.primaryGoal;
+          break;
+        case 3: // Household size
+          stepData.household_size = onboardingData.householdSize;
+          break;
+        case 4: // Weekly budget
+          stepData.weekly_budget = onboardingData.weeklyBudget;
+          stepData.budget_currency = onboardingData.budgetCurrency;
+          break;
+        case 5: // Dietary restrictions
+          stepData.dietary_restrictions = onboardingData.dietaryRestrictions;
+          stepData.has_dietary_restrictions = onboardingData.dietaryRestrictions?.length > 0;
+          break;
+        case 6: // Allergies
+          stepData.allergies = onboardingData.allergies;
+          stepData.custom_allergies = onboardingData.customAllergies;
+          stepData.has_allergies = onboardingData.allergies?.length > 0 || Boolean(onboardingData.customAllergies);
+          break;
+        case 7: // Cooking time preference
+          stepData.cooking_time_preference = onboardingData.cookingTimePreference;
+          break;
+        case 8: // Feature tour
+          stepData.watched_feature_tour = true;
+          break;
+        case 9: // Premium upsell
+          // Payment choice tracked separately in PremiumUpsellScreenWhite
+          break;
+        case 10: // Payment screen
+          // Payment completion tracked separately in PaymentScreen
+          break;
+        case 11: // Account creation
+          stepData.email = onboardingData.accountData?.email;
+          stepData.first_name = onboardingData.accountData?.firstName;
+          break;
+        default:
+          break;
+      }
+
+      trackOnboardingStepCompleted(currentStep, stepData);
+
       const nextStep = currentStep + 1;
       setCurrentStep(nextStep);
       saveToLocalStorage(onboardingData, nextStep);
@@ -141,6 +190,9 @@ const useOnboarding = () => {
 
     try {
       const { accountData, ...preferences } = onboardingData;
+
+      // Track onboarding completion before final signup
+      trackOnboardingCompleted(onboardingData);
 
       // Get the onboarding session ID if it exists (from payment flow)
       const onboardingSessionId = localStorage.getItem('fridgy_onboarding_session_id');

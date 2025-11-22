@@ -157,11 +157,6 @@ const SignInPage = () => {
                 {isLoading ? 'Signing in...' : 'Sign in'}
               </button>
             </form>
-
-            <div className="terms-text">
-              Forgot your password?{' '}
-              <Link to="/forgot-password" className="terms-link">Reset it here</Link>
-            </div>
           </div>
         </div>
       </div>

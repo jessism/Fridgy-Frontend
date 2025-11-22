@@ -5,10 +5,13 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { safeJSONStringify } from '../utils/jsonSanitizer';
+import { useAuth } from '../features/auth/context/AuthContext';
+import posthog from 'posthog-js';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 export function useSubscription() {
+  const { user } = useAuth();
   const [subscription, setSubscription] = useState(null);
   const [usage, setUsage] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -77,6 +80,17 @@ export function useSubscription() {
       setSubscription(data.subscription);
       setUsage(data.usage);
       setError(null);
+
+      // Update PostHog with detailed subscription properties
+      if (user?.id && data.subscription) {
+        posthog?.identify(user.id, {
+          subscription_status: data.subscription.status,
+          is_on_trial: data.subscription.status === 'trialing',
+          trial_end_date: data.subscription.trial_end,
+          cancel_at_period_end: data.subscription.cancel_at_period_end,
+          current_period_end: data.subscription.current_period_end
+        });
+      }
 
       // Cache the fresh data
       localStorage.setItem('fridgy_subscription_cache', JSON.stringify(data.subscription));

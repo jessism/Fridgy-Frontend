@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { trackOnboardingStepViewed, trackPaymentChoice } from '../../../../utils/onboardingTracking';
 import './ScreenStyles.css';
 import Logo from '../../../../assets/images/Logo.png';
 
 const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep, updateData }) => {
+  useEffect(() => {
+    trackOnboardingStepViewed(9);
+  }, []);
   const premiumFeatures = [
     'Inventory management & notifications',
     'Personalized recipe recommendations',
@@ -12,6 +16,9 @@ const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep, up
   ];
 
   const handleStartTrial = () => {
+    // Track payment choice
+    trackPaymentChoice('trial');
+
     // Save user's choice to start trial
     if (updateData) {
       updateData({ wantsTrial: true });
@@ -21,6 +28,9 @@ const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep, up
   };
 
   const handleContinueFree = () => {
+    // Track payment choice
+    trackPaymentChoice('free');
+
     // Save user's choice for free tier
     if (updateData) {
       updateData({ wantsTrial: false });

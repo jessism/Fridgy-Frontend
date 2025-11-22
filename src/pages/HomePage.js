@@ -19,7 +19,6 @@ import { isIOS } from '../utils/welcomeFlowHelpers';
 import { detectRecipeImport } from '../utils/recipeImportDetection';
 import { checkNotificationPermission, requestNotificationPermission } from '../utils/shortcutDetection';
 import useInventory from '../hooks/useInventory';
-import IOSInstallPrompt from '../components/IOSInstallPrompt';
 import { usePWADetection } from '../hooks/usePWADetection';
 import PWANotificationPrompt from '../components/PWANotificationPrompt';
 import { useSubscription } from '../hooks/useSubscription';
@@ -245,18 +244,6 @@ const HomePage = () => {
         </div>
       </section>
       */}
-
-      {/* Page Greeting - Desktop only without logo */}
-      <section className="page-greeting desktop-only">
-        <div className="container">
-          <div className="greeting-content desktop-greeting left-aligned">
-            <div className="greeting-text">
-              <h1 className="greeting-hello">Hello {user?.firstName || 'User'},</h1>
-              <p className="greeting-subtitle">What are you cooking today?</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Mobile Page Greeting - Without logo */}
       <section className="page-greeting mobile-only">
@@ -900,7 +887,6 @@ const HomePage = () => {
       </section>
       
       <MobileBottomNav />
-      <IOSInstallPrompt />
 
       {/* PWA First Launch Notification Prompt */}
       {showPWAPrompt && (
@@ -919,6 +905,13 @@ const HomePage = () => {
         current={upgradeModal.current}
         limit={upgradeModal.limit}
         startCheckout={startCheckout}
+        previewContent={upgradeModal.feature === 'inventory analytics' ? (
+          <img
+            src="/images/inventory-analytics-preview.png"
+            alt="Analytics Dashboard Preview"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        ) : null}
       />
 
       {/* Checkout Modal with Payment Element */}

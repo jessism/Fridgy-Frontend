@@ -1324,7 +1324,8 @@
 /* Testimonial Carousel */
 .landing-page-v2__testimonial-carousel {
   position: relative;
-  overflow: hidden;
+  overflow: clip;
+  padding: 0 60px;
 }
 
 .landing-page-v2__testimonial-track {
@@ -1334,57 +1335,53 @@
 }
 
 .landing-page-v2__testimonial-card {
-  min-width: calc(33.333% - 20px);
+  min-width: calc((100% - 60px) / 3);
+  flex: 0 0 calc((100% - 60px) / 3);
   background: white;
-  border-radius: 20px;
-  padding: 40px 30px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 32px 24px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
+  transition: all 0.3s ease;
 }
 
-.landing-page-v2__testimonial-stars {
-  font-size: 1.25rem; /* 20px */
-  line-height: 1;
+.landing-page-v2__testimonial-card:hover {
+  border-color: var(--primary-green);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(79, 207, 97, 0.12);
 }
 
 .landing-page-v2__testimonial-text {
-  font-size: 1rem; /* 16px */
-  line-height: 1.6;
+  font-size: 1.125rem;
+  line-height: 1.7;
   color: #2c2c2c;
   margin: 0;
   flex-grow: 1;
+  font-weight: 400;
 }
 
-.landing-page-v2__testimonial-author {
+.landing-page-v2__testimonial-footer {
   display: flex;
   align-items: center;
-  gap: 16px;
-}
-
-.landing-page-v2__testimonial-avatar {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.landing-page-v2__testimonial-info {
-  flex-grow: 1;
+  gap: 8px;
+  font-size: 0.875rem;
 }
 
 .landing-page-v2__testimonial-name {
-  font-size: 1.125rem; /* 18px */
   font-weight: 600;
   color: #2c2c2c;
-  margin: 0 0 4px 0;
+}
+
+.landing-page-v2__testimonial-separator {
+  color: #ccc;
+  font-weight: 400;
 }
 
 .landing-page-v2__testimonial-role {
-  font-size: 0.875rem; /* 14px */
   color: #666;
-  margin: 0;
+  font-weight: 400;
 }
 
 /* Navigation Arrows */
@@ -1413,11 +1410,11 @@
 }
 
 .landing-page-v2__testimonial-nav--prev {
-  left: -25px;
+  left: 0;
 }
 
 .landing-page-v2__testimonial-nav--next {
-  right: -25px;
+  right: 0;
 }
 
 /* Dots Indicator */

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/context/AuthContext';
 import appLogo from '../assets/images/Logo.png';
-import fridgeHeroImage from '../assets/images/fridge.jpg';
+import fridgeHeroImage from '../assets/product mockup/Share_List_People.png';
 import foodImage1 from '../assets/images/Landingpage_food_1.jpg';
 import foodImage2 from '../assets/images/Landingpage_food_2.jpg';
 import foodImage3 from '../assets/images/Landingpage_food_3.jpg';
@@ -21,7 +21,7 @@ import './NewLandingPage.css';
 const NewLandingPage = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
-  const totalTestimonials = 4;
+  const totalTestimonials = 10;
   const navigate = useNavigate();
   const { isAuthenticated, loading } = useAuth();
 
@@ -43,16 +43,19 @@ const NewLandingPage = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const cardsVisible = 3;
+  const maxPosition = totalTestimonials - cardsVisible;
+
   const nextTestimonial = () => {
-    setCurrentTestimonial((prev) => (prev + 1) % totalTestimonials);
+    setCurrentTestimonial((prev) => Math.min(prev + 1, maxPosition));
   };
 
   const prevTestimonial = () => {
-    setCurrentTestimonial((prev) => (prev - 1 + totalTestimonials) % totalTestimonials);
+    setCurrentTestimonial((prev) => Math.max(prev - 1, 0));
   };
 
   const goToTestimonial = (index) => {
-    setCurrentTestimonial(index);
+    setCurrentTestimonial(Math.min(index, maxPosition));
   };
 
   const handleGetStarted = () => {
@@ -412,78 +415,110 @@ const NewLandingPage = () => {
 
             {/* Testimonial Carousel */}
             <div className="landing-page-v2__testimonial-carousel">
-              <div 
+              <div
                 className="landing-page-v2__testimonial-track"
                 style={{
-                  transform: `translateX(-${currentTestimonial * (100 / 3)}%)`
+                  transform: `translateX(calc(-${currentTestimonial} * ((100% + 30px) / 3)))`
                 }}
               >
                 
                 {/* Testimonial 1 */}
                 <div className="landing-page-v2__testimonial-card">
-                  <div className="landing-page-v2__testimonial-stars">
-                    ⭐⭐⭐⭐⭐
-                  </div>
                   <p className="landing-page-v2__testimonial-text">
-                    "Trackabite has completely changed how we manage our kitchen. No more forgotten leftovers or expired food. We've saved so much money and reduced waste significantly!"
+                    "Didn't think I'd ever get this excited about my fridge, but here we are. Trackabite actually helps me remember what's in there before it goes bad. Love the little reminders - feels like having a smart fridge without the price tag."
                   </p>
-                  <div className="landing-page-v2__testimonial-author">
-                    <img src="https://i.pravatar.cc/60?img=1" alt="Sarah Chen" className="landing-page-v2__testimonial-avatar" />
-                    <div className="landing-page-v2__testimonial-info">
-                      <h4 className="landing-page-v2__testimonial-name">Sarah Chen</h4>
-                      <p className="landing-page-v2__testimonial-role">Busy Mom of 3</p>
-                    </div>
+                  <div className="landing-page-v2__testimonial-footer">
+                    <span className="landing-page-v2__testimonial-name">Sarah L.</span>
                   </div>
                 </div>
 
                 {/* Testimonial 2 */}
                 <div className="landing-page-v2__testimonial-card">
-                  <div className="landing-page-v2__testimonial-stars">
-                    ⭐⭐⭐⭐⭐
-                  </div>
                   <p className="landing-page-v2__testimonial-text">
-                    "The smart notifications are incredible! I actually used up all my vegetables before they went bad for the first time ever. My grocery bill has dropped 30%."
+                    "This app is such a life-saver. My wife and I always buy double of everything - now we just share the grocery list in Trackabite. No more five cartons of milk. Seriously, thank you."
                   </p>
-                  <div className="landing-page-v2__testimonial-author">
-                    <img src="https://i.pravatar.cc/60?img=2" alt="Mike Rodriguez" className="landing-page-v2__testimonial-avatar" />
-                    <div className="landing-page-v2__testimonial-info">
-                      <h4 className="landing-page-v2__testimonial-name">Mike Rodriguez</h4>
-                      <p className="landing-page-v2__testimonial-role">College Student</p>
-                    </div>
+                  <div className="landing-page-v2__testimonial-footer">
+                    <span className="landing-page-v2__testimonial-name">Marcus W.</span>
                   </div>
                 </div>
 
                 {/* Testimonial 3 */}
                 <div className="landing-page-v2__testimonial-card">
-                  <div className="landing-page-v2__testimonial-stars">
-                    ⭐⭐⭐⭐⭐
-                  </div>
                   <p className="landing-page-v2__testimonial-text">
-                    "As someone who meal preps religiously, this app is a game-changer. I can track everything I've prepared and never worry about food safety again."
+                    "Really like how clean and easy the interface is. I started tracking leftovers and it's been surprisingly satisfying. Would love if it connected to grocery stores next - that'd be wild."
                   </p>
-                  <div className="landing-page-v2__testimonial-author">
-                    <img src="https://i.pravatar.cc/60?img=3" alt="Emily Watson" className="landing-page-v2__testimonial-avatar" />
-                    <div className="landing-page-v2__testimonial-info">
-                      <h4 className="landing-page-v2__testimonial-name">Emily Watson</h4>
-                      <p className="landing-page-v2__testimonial-role">Fitness Enthusiast</p>
-                    </div>
+                  <div className="landing-page-v2__testimonial-footer">
+                    <span className="landing-page-v2__testimonial-name">Chloe D.</span>
                   </div>
                 </div>
 
                 {/* Testimonial 4 */}
                 <div className="landing-page-v2__testimonial-card">
-                  <div className="landing-page-v2__testimonial-stars">
-                    ⭐⭐⭐⭐⭐
-                  </div>
                   <p className="landing-page-v2__testimonial-text">
-                    "My husband and I were constantly arguing about what food we had. Now we both can check the app and meal planning is so much easier!"
+                    "I'm not exactly a 'food waste warrior,' but this app is turning me into one. It actually feels good to finish stuff before it expires. Plus, the AI recipe ideas are way better than I expected."
                   </p>
-                  <div className="landing-page-v2__testimonial-author">
-                    <img src="https://i.pravatar.cc/60?img=4" alt="Jennifer Kim" className="landing-page-v2__testimonial-avatar" />
-                    <div className="landing-page-v2__testimonial-info">
-                      <h4 className="landing-page-v2__testimonial-name">Jennifer Kim</h4>
-                      <p className="landing-page-v2__testimonial-role">Working Professional</p>
-                    </div>
+                  <div className="landing-page-v2__testimonial-footer">
+                    <span className="landing-page-v2__testimonial-name">Tom R.</span>
+                  </div>
+                </div>
+
+                {/* Testimonial 5 */}
+                <div className="landing-page-v2__testimonial-card">
+                  <p className="landing-page-v2__testimonial-text">
+                    "My roommates and I use this every week. It's become our little 'fridge scoreboard.' We compete to see who wastes less food. The shared grocery list feature? 10/10."
+                  </p>
+                  <div className="landing-page-v2__testimonial-footer">
+                    <span className="landing-page-v2__testimonial-name">Priya K.</span>
+                  </div>
+                </div>
+
+                {/* Testimonial 6 */}
+                <div className="landing-page-v2__testimonial-card">
+                  <p className="landing-page-v2__testimonial-text">
+                    "Been using Trackabite for a month. I like how it shows what's expiring soon and gives meal ideas using those ingredients. Feels like my fridge got smarter overnight."
+                  </p>
+                  <div className="landing-page-v2__testimonial-footer">
+                    <span className="landing-page-v2__testimonial-name">Daniel S.</span>
+                  </div>
+                </div>
+
+                {/* Testimonial 7 */}
+                <div className="landing-page-v2__testimonial-card">
+                  <p className="landing-page-v2__testimonial-text">
+                    "This app is GENIUS. I used to throw away so much spinach it was embarrassing. Now I actually use what I buy. The design is cute too - feels friendly, not like a boring spreadsheet."
+                  </p>
+                  <div className="landing-page-v2__testimonial-footer">
+                    <span className="landing-page-v2__testimonial-name">Jenna M.</span>
+                  </div>
+                </div>
+
+                {/* Testimonial 8 */}
+                <div className="landing-page-v2__testimonial-card">
+                  <p className="landing-page-v2__testimonial-text">
+                    "Great app overall. The AI suggestions are spot on - made a random 'leftover rice stir-fry' last night that turned out amazing. Would be cool if there were seasonal recipe ideas too."
+                  </p>
+                  <div className="landing-page-v2__testimonial-footer">
+                    <span className="landing-page-v2__testimonial-name">Alex C.</span>
+                  </div>
+                </div>
+
+                {/* Testimonial 9 */}
+                <div className="landing-page-v2__testimonial-card">
+                  <p className="landing-page-v2__testimonial-text">
+                    "Honestly, Trackabite is my new favorite adulting tool. Keeps my fridge organized, helps me plan meals, and even saves me money. Never thought an app could make me feel proud of my groceries."
+                  </p>
+                  <div className="landing-page-v2__testimonial-footer">
+                    <span className="landing-page-v2__testimonial-name">Emily T.</span>
+                  </div>
+                </div>
+
+                {/* Testimonial 10 */}
+                <div className="landing-page-v2__testimonial-card">
+                  <p className="landing-page-v2__testimonial-text">
+                    "Been using it for a few weeks and it's already part of my routine. I just snap a pic of stuff when I unload groceries. Simple, fast, and super helpful. Totally recommend."
+                  </p>
+                  <div className="landing-page-v2__testimonial-footer">
+                    <span className="landing-page-v2__testimonial-name">Kevin L.</span>
                   </div>
                 </div>
 
@@ -505,8 +540,8 @@ const NewLandingPage = () => {
 
               {/* Dots Indicator */}
               <div className="landing-page-v2__testimonial-dots">
-                {[...Array(totalTestimonials)].map((_, index) => (
-                  <span 
+                {[...Array(maxPosition + 1)].map((_, index) => (
+                  <span
                     key={index}
                     className={`landing-page-v2__testimonial-dot ${
                       index === currentTestimonial ? 'landing-page-v2__testimonial-dot--active' : ''

@@ -293,7 +293,10 @@ const ShoppingListDetailPage = () => {
       // Navigate back to shopping list overview after deletion
       navigate('/inventory/shopping-list');
     } catch (err) {
-      alert('Failed to delete list. Only owners can delete lists.');
+      console.error('Error deleting list:', err);
+      // Show actual error message from backend if available
+      const errorMessage = err.message || 'Failed to delete list. Please try again.';
+      alert(errorMessage);
     }
   };
 
@@ -887,6 +890,7 @@ const ShoppingListDetailPage = () => {
             <button
               className="shopping-list-section__bottom-sheet-option"
               onClick={() => {
+                setShowBottomSheet(false);
                 handleDeleteList(selectedList.id);
               }}
             >
