@@ -413,10 +413,16 @@ const PaymentScreen = ({ data, updateData, jumpToStep, onBack }) => {
   const [promoError, setPromoError] = useState('');
   const [promoValidating, setPromoValidating] = useState(false);
 
+  // Duplicate prevention guard (prevents React Strict Mode from creating multiple subscriptions)
+  const hasInitialized = useRef(false);
+
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
   // Create subscription intent on mount
   useEffect(() => {
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+
     createSubscriptionIntent();
   }, []);
 
