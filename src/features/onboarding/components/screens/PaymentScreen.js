@@ -4,7 +4,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import './ScreenStyles.css';
 
 // Initialize Stripe outside component
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || 'pk_test_51SKtYdPxciP71bVE1Y1v0hT56aelWLNmMOyFEP7ubIdFt0Aq88HdN4vzVUwKCHlegMMui7dxPlyzit7cfdUyyyFd0045RlcApx');
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 /**
  * Inner Payment Form Component for Onboarding
