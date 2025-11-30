@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+import { PaymentSuccessAnimation } from '../../../../components/PaymentSuccessAnimation';
 import './ScreenStyles.css';
 
 // Initialize Stripe outside component
@@ -649,168 +650,11 @@ const PaymentScreen = ({ data, updateData, jumpToStep, onBack }) => {
 
   // Show success screen - "Welcome to Trackabite Pro"
   if (showSuccess) {
-    // Calculate trial end date (7 days from now)
-    const trialEndDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-
     return (
-      <div className="onboarding-screen" style={{
-        background: 'linear-gradient(135deg, #4fcf61, #45b854)',
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px'
-      }}>
-        <div style={{
-          background: 'white',
-          borderRadius: '24px',
-          padding: '50px 40px',
-          maxWidth: '600px',
-          width: '100%',
-          textAlign: 'center',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.2)',
-          animation: 'slideIn 0.5s ease-out'
-        }}>
-          {/* Party emoji icon */}
-          <div style={{
-            fontSize: '80px',
-            marginBottom: '20px',
-            animation: 'bounce 0.6s ease-in-out'
-          }}>
-            🎉
-          </div>
-
-          {/* Title */}
-          <h1 style={{
-            fontSize: '36px',
-            fontWeight: '700',
-            color: '#1a1a1a',
-            marginBottom: '16px'
-          }}>
-            Welcome to Trackabite Pro
-          </h1>
-
-          {/* Message */}
-          <p style={{
-            fontSize: '18px',
-            color: '#666',
-            lineHeight: '1.6',
-            marginBottom: '32px'
-          }}>
-            Your 7-day free trial has started. You now have unlimited access to all premium features!
-          </p>
-
-          {/* Features list */}
-          <div style={{
-            background: '#f8f9fa',
-            borderRadius: '12px',
-            padding: '24px',
-            marginBottom: '30px',
-            textAlign: 'left'
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '10px 0',
-              fontSize: '16px',
-              color: '#333'
-            }}>
-              <span style={{ fontSize: '20px', flexShrink: 0 }}>✅</span>
-              <span>Unlimited inventory tracking</span>
-            </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '10px 0',
-              fontSize: '16px',
-              color: '#333'
-            }}>
-              <span style={{ fontSize: '20px', flexShrink: 0 }}>✅</span>
-              <span>Unlimited recipe imports & uploads</span>
-            </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '10px 0',
-              fontSize: '16px',
-              color: '#333'
-            }}>
-              <span style={{ fontSize: '20px', flexShrink: 0 }}>✅</span>
-              <span>AI-powered recipe recommendations</span>
-            </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '10px 0',
-              fontSize: '16px',
-              color: '#333'
-            }}>
-              <span style={{ fontSize: '20px', flexShrink: 0 }}>✅</span>
-              <span>Advanced analytics & insights</span>
-            </div>
-          </div>
-
-          {/* Trial info box */}
-          <div style={{
-            background: '#e7f7ea',
-            borderRadius: '12px',
-            padding: '20px',
-            marginBottom: '30px'
-          }}>
-            <p style={{
-              margin: '8px 0',
-              fontSize: '15px',
-              color: '#333'
-            }}>
-              <strong style={{ color: '#4fcf61' }}>Your FREE week has started.</strong> You won't be charged until Nov 22, 2025.
-            </p>
-            <p style={{
-              fontSize: '13px',
-              color: '#666',
-              marginTop: '12px'
-            }}>
-              You'll be charged $4.99/month after your trial ends. Cancel anytime.
-            </p>
-          </div>
-
-          {/* Continue button */}
-          <button
-            onClick={() => jumpToStep(13)}
-            style={{
-              width: '100%',
-              padding: '16px 32px',
-              background: '#4fcf61',
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              fontSize: '18px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.2s'
-            }}
-            onMouseOver={(e) => {
-              e.target.style.background = '#45b854';
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 6px 20px rgba(79, 207, 97, 0.4)';
-            }}
-            onMouseOut={(e) => {
-              e.target.style.background = '#4fcf61';
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
-            }}
-          >
-            Enjoy Trackabite Pro
-          </button>
-        </div>
-      </div>
+      <PaymentSuccessAnimation
+        status="success"
+        onComplete={() => jumpToStep(13)}
+      />
     );
   }
 

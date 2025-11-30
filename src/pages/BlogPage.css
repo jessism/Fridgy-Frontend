@@ -1,0 +1,556 @@
+/* BLOG PAGE STYLES */
+.blog-page {
+  min-height: 100vh;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f8f9fa;
+}
+
+/* Header */
+.blog-page__header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 20px 0;
+  background: transparent;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.blog-page__header--scrolled {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+}
+
+.blog-page__container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* Wider container for recipe grid */
+.blog-page__recipes .blog-page__container {
+  max-width: 100%;
+  padding: 0 60px;
+}
+
+.blog-page__header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.blog-page__logo-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.blog-page__logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.blog-page__brand-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  background: linear-gradient(to right, var(--primary-green), var(--primary-green-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.blog-page__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Hero Section */
+.blog-page__hero {
+  padding: 100px 0 40px 0;
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+  text-align: center;
+}
+
+.blog-page__title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  color: #222222;
+  margin: 0 0 20px 0;
+  line-height: 1.1;
+}
+
+.blog-page__subtitle {
+  font-size: 1.25rem;
+  color: #666666;
+  margin: 0 auto;
+  max-width: 500px;
+}
+
+/* Search Bar */
+.blog-page__search {
+  position: relative;
+  max-width: 560px;
+  margin: 32px auto 0;
+  display: flex;
+  align-items: center;
+  background: #f3f3f4;
+  border-radius: 50px;
+  padding: 6px;
+}
+
+.blog-page__search-input {
+  flex: 1;
+  padding: 12px 20px;
+  font-size: 1rem;
+  border: none;
+  background: transparent;
+  outline: none;
+}
+
+.blog-page__search-input::placeholder {
+  color: #999999;
+}
+
+.blog-page__search-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: var(--primary-green);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.blog-page__search-button:hover {
+  background: var(--primary-green-dark);
+  transform: scale(1.05);
+}
+
+/* Filter Pills */
+.blog-page__filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.blog-page__filter-pill {
+  padding: 10px 20px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #555555;
+  background: transparent;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.blog-page__filter-pill:hover {
+  background: #f0f0f0;
+  color: #333333;
+}
+
+.blog-page__filter-pill--active {
+  background: #f5f5dc;
+  color: #333333;
+}
+
+/* No Results */
+.blog-page__no-results {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666666;
+}
+
+.blog-page__no-results p:first-child {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 8px;
+}
+
+.blog-page__no-results p:last-child {
+  font-size: 1rem;
+  color: #888888;
+}
+
+/* Recipe Grid */
+.blog-page__recipes {
+  padding: 40px 0 100px 0;
+}
+
+.blog-page__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+/* Recipe Card */
+.blog-page__card {
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.blog-page__card:hover {
+  transform: translateY(-5px);
+}
+
+.blog-page__card-image {
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.blog-page__card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.blog-page__card:hover .blog-page__card-image img {
+  transform: scale(1.05);
+}
+
+.blog-page__card-content {
+  padding: 16px 4px;
+}
+
+.blog-page__card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #222222;
+  margin: 0 0 10px 0;
+  line-height: 1.3;
+}
+
+.blog-page__card-description {
+  font-size: 0.9375rem;
+  color: #666666;
+  line-height: 1.5;
+  margin: 0 0 16px 0;
+}
+
+.blog-page__card-meta {
+  display: flex;
+  gap: 20px;
+  font-size: 0.875rem;
+  color: #888888;
+}
+
+.blog-page__card-time,
+.blog-page__card-servings {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.blog-page__card-time svg,
+.blog-page__card-servings svg {
+  color: #999999;
+}
+
+/* Recipe Modal */
+.blog-page__modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.blog-page__modal {
+  background: white;
+  border-radius: 20px;
+  max-width: calc(100vw - 80px);
+  width: calc(100vw - 80px);
+  max-height: 95vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.blog-page__modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background 0.2s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.blog-page__modal-close:hover {
+  background: white;
+}
+
+.blog-page__modal-close svg {
+  color: #333333;
+}
+
+.blog-page__modal-image {
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+}
+
+.blog-page__modal-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.blog-page__modal-content {
+  padding: 32px;
+}
+
+.blog-page__modal-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #222222;
+  margin: 0 0 12px 0;
+}
+
+.blog-page__modal-description {
+  font-size: 1.0625rem;
+  color: #666666;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+}
+
+.blog-page__modal-meta {
+  display: flex;
+  gap: 32px;
+  padding: 20px 0;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 32px;
+}
+
+.blog-page__modal-meta-item {
+  text-align: center;
+}
+
+.blog-page__modal-meta-label {
+  display: block;
+  font-size: 0.8125rem;
+  color: #888888;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.blog-page__modal-meta-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #222222;
+}
+
+.blog-page__modal-section {
+  margin-bottom: 28px;
+}
+
+.blog-page__modal-section:last-child {
+  margin-bottom: 0;
+}
+
+.blog-page__modal-section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #222222;
+  margin: 0 0 16px 0;
+}
+
+.blog-page__modal-ingredients {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.blog-page__modal-ingredients li {
+  padding: 10px 0;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 0.9375rem;
+  color: #444444;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.blog-page__modal-ingredients li::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: var(--primary-green);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.blog-page__modal-ingredients li:last-child {
+  border-bottom: none;
+}
+
+.blog-page__modal-instructions {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  counter-reset: step;
+}
+
+.blog-page__modal-instructions li {
+  padding: 16px 0;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 0.9375rem;
+  color: #444444;
+  line-height: 1.6;
+  display: flex;
+  gap: 16px;
+  counter-increment: step;
+}
+
+.blog-page__modal-instructions li::before {
+  content: counter(step);
+  width: 28px;
+  height: 28px;
+  background: var(--primary-green);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.blog-page__modal-instructions li:last-child {
+  border-bottom: none;
+}
+
+/* Responsive Grid */
+@media (max-width: 1200px) {
+  .blog-page__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .blog-page__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .blog-page__container {
+    padding: 0 20px;
+  }
+
+  .blog-page__recipes .blog-page__container {
+    padding: 0 20px;
+  }
+
+  .blog-page__hero {
+    padding: 140px 0 40px 0;
+  }
+
+  .blog-page__title {
+    font-size: 2rem;
+  }
+
+  .blog-page__subtitle {
+    font-size: 1.125rem;
+  }
+
+  .blog-page__recipes {
+    padding: 30px 0 80px 0;
+  }
+
+  .blog-page__grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .blog-page__card-image {
+    height: 200px;
+  }
+
+  .blog-page__card-content {
+    padding: 20px;
+  }
+
+  .blog-page__modal-overlay {
+    padding: 10px;
+    align-items: flex-start;
+    padding-top: 60px;
+  }
+
+  .blog-page__modal {
+    max-height: none;
+    border-radius: 16px;
+  }
+
+  .blog-page__modal-image {
+    height: 220px;
+  }
+
+  .blog-page__modal-content {
+    padding: 24px;
+  }
+
+  .blog-page__modal-title {
+    font-size: 1.5rem;
+  }
+
+  .blog-page__modal-meta {
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .blog-page__header-actions .button {
+    padding: 8px 16px;
+    font-size: 0.875rem;
+  }
+
+  .blog-page__modal-meta {
+    gap: 16px;
+  }
+
+  .blog-page__modal-meta-item {
+    flex: 1;
+    min-width: 80px;
+  }
+}

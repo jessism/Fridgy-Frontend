@@ -44,6 +44,10 @@ import CancelSubscriptionPage from './pages/CancelSubscriptionPage';
 import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
+import AboutPage from './pages/AboutPage';
+import FeaturesPage from './pages/FeaturesPage';
+import PublicSupportPage from './pages/PublicSupportPage';
+import BlogPage from './pages/BlogPage';
 
 // Navigation listener component to handle service worker messages
 function NavigationListener() {
@@ -269,6 +273,12 @@ function App() {
           {/* Legal Pages (Public - No Auth Required) */}
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
+
+          {/* Public Footer Pages */}
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/product/features" element={<FeaturesPage />} />
+          <Route path="/product/support" element={<PublicSupportPage />} />
+          <Route path="/resources/blog" element={<BlogPage />} />
         </Routes>
           </Router>
         </GuidedTourProvider>
