@@ -431,9 +431,34 @@ const RecipeImportPage = () => {
     }
   };
 
+  // Detect if URL is Instagram or general web
+  const isInstagramUrl = (url) => {
+    return url && url.includes('instagram.com');
+  };
+
   const handleMultiModalImport = async () => {
     if (!importUrl) {
-      setError('Please enter an Instagram URL');
+      setError('Please enter a recipe URL');
+      return;
+    }
+
+    // Validate URL format
+    try {
+      new URL(importUrl);
+    } catch {
+      setError('Please enter a valid URL');
+      return;
+    }
+
+    // Check imported recipes limit
+    const limitCheck = canAccess('imported_recipes');
+    if (!limitCheck.allowed) {
+      setUpgradeModal({
+        isOpen: true,
+        feature: 'imported recipes',
+        current: limitCheck.current,
+        limit: limitCheck.limit
+      });
       return;
     }
 
@@ -442,13 +467,24 @@ const RecipeImportPage = () => {
     setExtractedRecipe(null);
     setIsTimeoutError(false);
 
+    // Determine which endpoint to use based on URL type
+    const isInstagram = isInstagramUrl(importUrl);
+    const endpoint = isInstagram ? '/recipes/multi-modal-extract' : '/recipes/import-web';
+
     // Show progress message
-    const progressMessages = [
-      '📝 Analyzing caption text...',
-      '🎥 Processing video frames...',
-      '🎤 Extracting audio narration...',
-      '🧠 Synthesizing all sources...'
-    ];
+    const progressMessages = isInstagram
+      ? [
+          '📝 Analyzing caption text...',
+          '🎥 Processing video frames...',
+          '🎤 Extracting audio narration...',
+          '🧠 Synthesizing all sources...'
+        ]
+      : [
+          '🌐 Fetching recipe page...',
+          '📝 Extracting ingredients...',
+          '📋 Parsing instructions...',
+          '🧠 Analyzing recipe data...'
+        ];
 
     let messageIndex = 0;
     const progressInterval = setInterval(() => {
@@ -474,7 +510,7 @@ const RecipeImportPage = () => {
       }
 
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${apiUrl}/recipes/multi-modal-extract`, {
+      const response = await fetch(`${apiUrl}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -485,32 +521,48 @@ const RecipeImportPage = () => {
 
       clearInterval(progressInterval);
       const data = await response.json();
-      console.log('[MultiModal] Response data:', data); // Log the actual response to see errors
+      console.log(`[${isInstagram ? 'MultiModal' : 'WebImport'}] Response data:`, data);
 
       if (data.success && data.recipe) {
-        console.log('[MultiModal] Recipe extracted successfully');
+        console.log(`[${isInstagram ? 'MultiModal' : 'WebImport'}] Recipe extracted successfully`);
         setExtractedRecipe(data.recipe);
 
         // Show success message
         const statusEl = document.querySelector('.recipe-import-page__error');
         if (statusEl) {
-          statusEl.textContent = `✅ Recipe extracted with ${Math.round((data.confidence || 0.85) * 100)}% confidence!`;
+          const confidence = data.confidence || data.extractionMeta?.confidence || 0.95;
+          statusEl.textContent = `✅ Recipe extracted with ${Math.round(confidence * 100)}% confidence!`;
           statusEl.style.color = '#4fcf61';
         }
 
-        // Auto-save after 2 seconds
-        setTimeout(() => {
-          handleSaveExtractedRecipe(data.recipe);
-        }, 2000);
+        // For web imports, recipe is already saved - navigate directly
+        if (!isInstagram) {
+          setStatus('✅ Recipe imported successfully!');
+
+          // Check if user is in guided tour
+          if (isActive) {
+            setTourSuccessRecipe(data.recipe);
+            goToStep(STEPS.IMPORT_RECIPE_SUCCESS);
+          } else {
+            setTimeout(() => navigate('/saved-recipes'), 2000);
+          }
+        } else {
+          // For Instagram, auto-save after 2 seconds (existing behavior)
+          setTimeout(() => {
+            handleSaveExtractedRecipe(data.recipe);
+          }, 2000);
+        }
       } else {
-        console.error('[MultiModal] Extraction failed:', data);
+        console.error(`[${isInstagram ? 'MultiModal' : 'WebImport'}] Extraction failed:`, data);
 
         // Handle timeout errors specially
         if (data.isTimeout) {
-          setError(data.error || 'Instagram is taking longer than usual. Please try again.');
+          setError(data.error || 'Request is taking longer than usual. Please try again.');
           setIsTimeoutError(true);
-          // Keep the URL populated for easy retry
-          // The URL is already in the state, so no need to change it
+        } else if (data.requiresManualInput) {
+          setStatus('📝 Need your help to complete the recipe...');
+          setExtractedRecipe(data.partialRecipe);
+          setShowManualForm(true);
         } else {
           setError(data.error || 'Failed to extract recipe. Please try again.');
           setIsTimeoutError(false);
@@ -518,7 +570,7 @@ const RecipeImportPage = () => {
       }
     } catch (error) {
       clearInterval(progressInterval);
-      console.error('[MultiModal] Error:', error);
+      console.error(`[${isInstagramUrl(importUrl) ? 'MultiModal' : 'WebImport'}] Error:`, error);
       setError('Failed to extract recipe. Please try again.');
     } finally {
       setLoading(false);
@@ -671,7 +723,7 @@ const RecipeImportPage = () => {
                 {status || 'Importing your recipe...'}
               </div>
               <div className="recipe-import-page__loading-subtitle">
-                Fridgy is analyzing the Instagram post
+                Fridgy is analyzing the recipe
               </div>
               <div className="recipe-import-page__loading-spinner"></div>
             </>
@@ -694,7 +746,7 @@ const RecipeImportPage = () => {
               <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <h1>Import Recipe from Instagram</h1>
+          <h1>Import Recipe</h1>
         </div>
 
         {/* Quick Save Section - for iOS users */}
@@ -743,15 +795,15 @@ const RecipeImportPage = () => {
         {/* Import Form */}
         {!showManualForm && (
           <div className="recipe-import-page__form">
-            <h2 className="recipe-import-page__section-title">Paste URL</h2>
+            <h2 className="recipe-import-page__section-title">Paste Recipe URL</h2>
             <p className="recipe-import-page__section-description">
-              Copy a recipe link from Instagram and paste it below.
+              Paste a recipe link from Instagram or any recipe website.
             </p>
             <div className="recipe-import-page__input-group">
               <input
                 id="url"
                 type="url"
-                placeholder="https://www.instagram.com/p/..."
+                placeholder="https://www.instagram.com/p/... or https://allrecipes.com/..."
                 value={importUrl}
                 onChange={(e) => setImportUrl(e.target.value)}
                 disabled={loading}

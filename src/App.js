@@ -21,6 +21,7 @@ import AboutYouPage from './pages/AboutYouPage';
 import DietaryPreferencesPage from './pages/DietaryPreferencesPage';
 import NotificationSettingsPage from './pages/NotificationSettingsPage';
 import MealHistoryPage from './pages/MealHistoryPage';
+import MealPlanPage from './pages/MealPlanPage';
 import SavedRecipesPage from './pages/SavedRecipesPage';
 import PastAIRecipesPage from './pages/PastAIRecipesPage';
 import UploadedRecipesPage from './pages/UploadedRecipesPage';
@@ -115,6 +116,18 @@ function App() {
               <ShoppingListDetailPage />
             </AuthGuard>
           } />
+          {/* Meals routes - /meals is the main route (renamed from /meal-plans) */}
+          <Route path="/meals" element={
+            <AuthGuard>
+              <MealPlansPage />
+            </AuthGuard>
+          } />
+          <Route path="/meals/recipes" element={
+            <AuthGuard>
+              <MealPlansPage defaultTab="recipes" />
+            </AuthGuard>
+          } />
+          {/* Keep old routes for backwards compatibility */}
           <Route path="/meal-plans" element={
             <AuthGuard>
               <MealPlansPage />
@@ -123,6 +136,12 @@ function App() {
           <Route path="/meal-plans/recipes" element={
             <AuthGuard>
               <MealPlansPage defaultTab="recipes" />
+            </AuthGuard>
+          } />
+          {/* New meal planning page */}
+          <Route path="/meal-plan" element={
+            <AuthGuard>
+              <MealPlanPage />
             </AuthGuard>
           } />
           <Route path="/ai-recipes" element={
