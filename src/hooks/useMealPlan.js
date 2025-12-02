@@ -272,6 +272,48 @@ const useMealPlan = () => {
     return addRecipeToSlot(date, mealType, newRecipe, recipeSource);
   }, [addRecipeToSlot]);
 
+  // Update a meal's scheduled time
+  const updateMealTime = useCallback(async (planId, scheduledTime) => {
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/meal-plans/${planId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ scheduled_time: scheduledTime })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update meal time');
+      }
+
+      const data = await response.json();
+
+      // Update local state
+      setDailyMeals(prev => {
+        const updated = { ...prev };
+        for (const mealType of ['breakfast', 'lunch', 'dinner', 'snack']) {
+          if (updated[mealType]?.id === planId) {
+            updated[mealType] = data.plan;
+            break;
+          }
+        }
+        return updated;
+      });
+
+      return data.plan;
+    } catch (err) {
+      console.error('Error updating meal time:', err);
+      throw err;
+    }
+  }, []);
+
   return {
     // State
     plans,
@@ -288,6 +330,7 @@ const useMealPlan = () => {
     removeFromSlot,
     completeMeal,
     swapRecipe,
+    updateMealTime,
 
     // Utilities
     formatDate

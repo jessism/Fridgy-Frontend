@@ -58,6 +58,10 @@ const MealPlansPage = ({ defaultTab }) => {
   const [pastAIRecipesLoading, setPastAIRecipesLoading] = useState(true);
   const [pastAIRecipesError, setPastAIRecipesError] = useState(null);
 
+  // Upcoming meal plans state
+  const [upcomingMeals, setUpcomingMeals] = useState([]);
+  const [upcomingMealsLoading, setUpcomingMealsLoading] = useState(true);
+
   // Image preloading state for saved recipes
   const [imageStates, setImageStates] = useState({});
 
@@ -320,6 +324,68 @@ const MealPlansPage = ({ defaultTab }) => {
     }
   };
 
+  // Fetch upcoming meal plans (next 7 days)
+  const fetchUpcomingMeals = async () => {
+    try {
+      console.log('📅 [MealPlans] Fetching upcoming meals...');
+      setUpcomingMealsLoading(true);
+
+      const token = localStorage.getItem('fridgy_token');
+      if (!token) {
+        console.log('📅 [MealPlans] No token found');
+        setUpcomingMeals([]);
+        setUpcomingMealsLoading(false);
+        return;
+      }
+
+      // Fetch meals from today onwards (next 7 days)
+      const today = new Date();
+      const nextWeek = new Date(today);
+      nextWeek.setDate(nextWeek.getDate() + 7);
+
+      const startDate = today.toISOString().split('T')[0];
+      const endDate = nextWeek.toISOString().split('T')[0];
+
+      console.log('📅 [MealPlans] Fetching meals from', startDate, 'to', endDate);
+
+      const response = await fetch(
+        `${API_BASE_URL}/meal-plans?start_date=${startDate}&end_date=${endDate}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.log('📅 [MealPlans] Unauthorized - clearing upcoming meals');
+          setUpcomingMeals([]);
+          setUpcomingMealsLoading(false);
+          return;
+        }
+        throw new Error(`Failed to fetch upcoming meals: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('📅 [MealPlans] Upcoming meals found:', data.plans?.length || 0);
+
+      // Sort by date and time, take first 2
+      const sorted = (data.plans || []).sort((a, b) => {
+        const dateA = new Date(a.date + 'T' + (a.scheduled_time || '00:00'));
+        const dateB = new Date(b.date + 'T' + (b.scheduled_time || '00:00'));
+        return dateA - dateB;
+      });
+
+      setUpcomingMeals(sorted.slice(0, 2));
+    } catch (error) {
+      console.error('📅 [MealPlans] Error fetching upcoming meals:', error);
+      setUpcomingMeals([]);
+    } finally {
+      setUpcomingMealsLoading(false);
+    }
+  };
+
   // Handle tab switching based on props and URL changes
   useEffect(() => {
     if (defaultTab) {
@@ -352,6 +418,9 @@ const MealPlansPage = ({ defaultTab }) => {
 
     // Fetch past AI recipes (available for all users now!)
     fetchPastAIRecipes();
+
+    // Fetch upcoming meal plans
+    fetchUpcomingMeals();
   }, []); // Only fetch once on mount
 
   // Auto-advance tour step when landing on Meals page
@@ -1004,6 +1073,86 @@ const MealPlansPage = ({ defaultTab }) => {
     </div>
   );
 
+  // Helper function to format upcoming meal date
+  const formatUpcomingDate = (dateStr) => {
+    const date = new Date(dateStr + 'T00:00:00'); // Ensure local timezone
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    if (date.toDateString() === today.toDateString()) return 'Today';
+    if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
+    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  };
+
+  // Render upcoming meal card
+  const renderUpcomingMealCard = (plan) => {
+    const recipe = plan.recipe || plan.recipe_snapshot;
+    const imageUrl = recipe?.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+    const dateLabel = formatUpcomingDate(plan.date);
+
+    return (
+      <div
+        key={plan.id}
+        className="meal-plans-page__saved-recipe-card"
+        onClick={() => navigate('/meal-plan')}
+      >
+        <div className="meal-plans-page__saved-recipe-image">
+          <img
+            src={imageUrl}
+            alt={recipe?.title || 'Planned meal'}
+            onError={(e) => {
+              if (!e.target.dataset.failed) {
+                e.target.dataset.failed = 'true';
+                e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+              }
+            }}
+          />
+          {/* Date badge in top right corner */}
+          <div className="meal-plans-page__saved-recipe-badge">
+            <span>{dateLabel}</span>
+          </div>
+        </div>
+        <div className="meal-plans-page__saved-recipe-content">
+          <h3 className="meal-plans-page__saved-recipe-title">
+            {recipe?.title || 'Planned meal'}
+          </h3>
+          {/* Meal type under the title */}
+          {plan.meal_type && (
+            <p className="meal-plans-page__saved-recipe-author" style={{ textTransform: 'capitalize' }}>
+              {plan.meal_type}
+            </p>
+          )}
+          <div className="meal-plans-page__saved-recipe-meta">
+            {recipe?.readyInMinutes && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="#666" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M12 6V12L15 15" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                {recipe.readyInMinutes} min
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Render empty state for upcoming meals
+  const renderUpcomingMealsEmptyState = () => (
+    <div className="meal-plans-page__saved-recipes-empty">
+      <p className="meal-plans-page__saved-recipes-empty-text">No upcoming meals planned</p>
+      <button
+        className="meal-plans-page__saved-recipes-empty-button"
+        onClick={() => navigate('/meal-plan')}
+      >
+        Plan Your Meals
+      </button>
+    </div>
+  );
+
   return (
     <div className="meal-plans-page">
       <AppNavBar />
@@ -1041,17 +1190,6 @@ const MealPlansPage = ({ defaultTab }) => {
           {/* Conditional Content Based on Active Tab */}
           {activeTab === 'meals' ? (
             <>
-              {/* Scan Your Meal Section Header */}
-              <div className="meal-plans-page__scan-header">
-                <h2 className="meal-plans-page__scan-title">Scan your meal</h2>
-                <button className="meal-plans-page__scan-button" onClick={handleLogMeal}>
-                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                    <circle cx="16" cy="16" r="14" fill="var(--primary-green)"/>
-                    <path d="M16 10V22M10 16H22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                </button>
-              </div>
-
               {/* Your Meal Plan Section */}
               <div className="meal-plans-page__analytics-section">
                 <div className="meal-plans-page__analytics-text-section">
@@ -1070,6 +1208,49 @@ const MealPlansPage = ({ defaultTab }) => {
                     </button>
                   </div>
                 </div>
+
+                {/* Upcoming Meal Cards or Empty State */}
+                {upcomingMealsLoading ? (
+                  <div className="meal-plans-page__saved-recipes-loading">
+                    <div className="meal-plans-page__saved-recipes-grid">
+                      <div className="meal-plans-page__saved-recipe-card loading">
+                        <div className="meal-plans-page__saved-recipe-image">
+                          <div className="loading-placeholder" style={{ height: '120px' }}></div>
+                        </div>
+                        <div className="meal-plans-page__saved-recipe-content">
+                          <div className="loading-placeholder" style={{ height: '16px', marginBottom: '8px' }}></div>
+                          <div className="loading-placeholder" style={{ height: '12px' }}></div>
+                        </div>
+                      </div>
+                      <div className="meal-plans-page__saved-recipe-card loading">
+                        <div className="meal-plans-page__saved-recipe-image">
+                          <div className="loading-placeholder" style={{ height: '120px' }}></div>
+                        </div>
+                        <div className="meal-plans-page__saved-recipe-content">
+                          <div className="loading-placeholder" style={{ height: '16px', marginBottom: '8px' }}></div>
+                          <div className="loading-placeholder" style={{ height: '12px' }}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : upcomingMeals.length > 0 ? (
+                  <div className="meal-plans-page__saved-recipes-grid">
+                    {upcomingMeals.slice(0, 2).map(plan => renderUpcomingMealCard(plan))}
+                  </div>
+                ) : (
+                  renderUpcomingMealsEmptyState()
+                )}
+              </div>
+
+              {/* Scan Your Meal Section */}
+              <div className="meal-plans-page__scan-header">
+                <h2 className="meal-plans-page__scan-title">Scan your meal</h2>
+                <button className="meal-plans-page__scan-button" onClick={handleLogMeal}>
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <circle cx="16" cy="16" r="14" fill="var(--primary-green)"/>
+                    <path d="M16 10V22M10 16H22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </button>
               </div>
 
               {/* View Meal History Section */}

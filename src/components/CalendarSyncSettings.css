@@ -1,0 +1,468 @@
+/* CalendarSyncSettings Component Styles */
+
+.calendar-sync-settings {
+  padding: 0 20px 20px 20px;
+}
+
+/* Loading State */
+.calendar-sync-settings__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 12px;
+  color: #666;
+}
+
+.calendar-sync-settings__spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f0f0f0;
+  border-top-color: var(--primary-green, #4fcf61);
+  border-radius: 50%;
+  animation: calendar-sync-spin 0.8s linear infinite;
+}
+
+@keyframes calendar-sync-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Premium Gate */
+.calendar-sync-settings__premium-gate {
+  text-align: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%);
+  border-radius: 16px;
+  margin-top: 10px;
+}
+
+.calendar-sync-settings__premium-icon {
+  margin-bottom: 16px;
+  color: #666;
+}
+
+.calendar-sync-settings__premium-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 12px 0;
+}
+
+.calendar-sync-settings__premium-description {
+  font-size: 0.95rem;
+  color: #666;
+  line-height: 1.5;
+  margin: 0 0 24px 0;
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.calendar-sync-settings__upgrade-button {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #000;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calendar-sync-settings__upgrade-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 165, 0, 0.4);
+}
+
+/* Section Styles */
+.calendar-sync-settings__section {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.calendar-sync-settings__section:last-of-type {
+  border-bottom: none;
+}
+
+.calendar-sync-settings__section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.calendar-sync-settings__section-description {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0 0 16px 0;
+}
+
+/* Connection Card - Not Connected */
+.calendar-sync-settings__connect-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 12px;
+  margin-top: 12px;
+}
+
+.calendar-sync-settings__google-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.calendar-sync-settings__connect-info {
+  flex: 1;
+}
+
+.calendar-sync-settings__connect-text {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+}
+
+.calendar-sync-settings__connect-button {
+  background: var(--primary-green, #4fcf61);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calendar-sync-settings__connect-button:hover {
+  background: #45b857;
+  transform: translateY(-1px);
+}
+
+/* Connected Card */
+.calendar-sync-settings__connected-card {
+  padding: 16px;
+  background: #e8f5e9;
+  border-radius: 12px;
+  margin-top: 12px;
+}
+
+.calendar-sync-settings__connected-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.calendar-sync-settings__status-dot {
+  width: 10px;
+  height: 10px;
+  background: #4caf50;
+  border-radius: 50%;
+}
+
+.calendar-sync-settings__connected-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.calendar-sync-settings__connected-email {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0 0 12px 0;
+}
+
+.calendar-sync-settings__disconnect-button {
+  background: transparent;
+  color: #666;
+  border: 1px solid #ccc;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calendar-sync-settings__disconnect-button:hover {
+  background: #f5f5f5;
+  border-color: #999;
+}
+
+.calendar-sync-settings__disconnect-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Error Message */
+.calendar-sync-settings__error {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: #ffebee;
+  color: #c62828;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+/* Time Pickers */
+.calendar-sync-settings__time-pickers {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.calendar-sync-settings__time-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #fafafa;
+  border-radius: 10px;
+}
+
+.calendar-sync-settings__time-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.calendar-sync-settings__time-input {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #333;
+  background: white;
+  cursor: pointer;
+}
+
+.calendar-sync-settings__time-input:focus {
+  outline: none;
+  border-color: var(--primary-green, #4fcf61);
+}
+
+/* Duration Select */
+.calendar-sync-settings__duration-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #fafafa;
+  border-radius: 10px;
+}
+
+.calendar-sync-settings__duration-label {
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.calendar-sync-settings__duration-select {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #333;
+  background: white;
+  cursor: pointer;
+}
+
+.calendar-sync-settings__duration-select:focus {
+  outline: none;
+  border-color: var(--primary-green, #4fcf61);
+}
+
+/* Toggle Row */
+.calendar-sync-settings__toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 10px;
+}
+
+.calendar-sync-settings__toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calendar-sync-settings__toggle-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.calendar-sync-settings__toggle-description {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* Toggle Switch */
+.calendar-sync-settings__toggle {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.calendar-sync-settings__toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.calendar-sync-settings__toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.3s;
+  border-radius: 28px;
+}
+
+.calendar-sync-settings__toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-sync-settings__toggle input:checked + .calendar-sync-settings__toggle-slider {
+  background-color: var(--primary-green, #4fcf61);
+}
+
+.calendar-sync-settings__toggle input:checked + .calendar-sync-settings__toggle-slider:before {
+  transform: translateX(24px);
+}
+
+/* Action Buttons */
+.calendar-sync-settings__actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.calendar-sync-settings__save-button {
+  flex: 1;
+  background: var(--primary-green, #4fcf61);
+  color: white;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calendar-sync-settings__save-button:hover {
+  background: #45b857;
+  transform: translateY(-1px);
+}
+
+.calendar-sync-settings__sync-button {
+  flex: 1;
+  background: white;
+  color: var(--primary-green, #4fcf61);
+  border: 2px solid var(--primary-green, #4fcf61);
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calendar-sync-settings__sync-button:hover {
+  background: rgba(79, 207, 97, 0.1);
+}
+
+.calendar-sync-settings__sync-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Success Message */
+.calendar-sync-settings__success {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .calendar-sync-settings {
+    padding: 0 16px 16px 16px;
+  }
+
+  .calendar-sync-settings__connect-card {
+    flex-wrap: wrap;
+  }
+
+  .calendar-sync-settings__connect-button {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .calendar-sync-settings__actions {
+    flex-direction: column;
+  }
+
+  .calendar-sync-settings__time-row,
+  .calendar-sync-settings__duration-row,
+  .calendar-sync-settings__toggle-row {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-sync-settings {
+    padding: 0 12px 12px 12px;
+  }
+
+  .calendar-sync-settings__premium-gate {
+    padding: 30px 16px;
+  }
+
+  .calendar-sync-settings__premium-title {
+    font-size: 1.1rem;
+  }
+
+  .calendar-sync-settings__premium-description {
+    font-size: 0.9rem;
+  }
+
+  .calendar-sync-settings__section-title {
+    font-size: 1rem;
+  }
+
+  .calendar-sync-settings__time-input,
+  .calendar-sync-settings__duration-select {
+    font-size: 16px; /* Prevent iOS zoom */
+  }
+}

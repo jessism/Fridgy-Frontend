@@ -2,10 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
-import { ChevronLeft, Check, RefreshCw, X } from 'lucide-react';
+import { ChevronLeft, X, Calendar, Check } from 'lucide-react';
 import useMealPlan from '../hooks/useMealPlan';
+import useCalendarSync from '../hooks/useCalendarSync';
 import RecipePickerModal from '../components/modals/RecipePickerModal';
 import RecipeDetailModal from '../components/modals/RecipeDetailModal';
+import TimePickerModal from '../components/modals/TimePickerModal';
 import './MealPlanPage.css';
 
 // Meal type icons
@@ -25,15 +27,28 @@ const MealPlanPage = () => {
     addRecipeToSlot,
     removeFromSlot,
     completeMeal,
+    updateMealTime,
     formatDate
   } = useMealPlan();
+
+  const {
+    isConnected: calendarConnected,
+    syncing: calendarSyncing,
+    preferences: calendarPreferences,
+    syncWeek,
+    syncMeal,
+    formatTimeDisplay,
+    getDefaultTimeForMeal
+  } = useCalendarSync();
 
   // State
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
   const [pickerModal, setPickerModal] = useState({ isOpen: false, mealType: null });
   const [recipeDetailModal, setRecipeDetailModal] = useState({ isOpen: false, recipe: null });
+  const [timePickerModal, setTimePickerModal] = useState({ isOpen: false, mealType: null, planId: null, currentTime: null });
   const [actionLoading, setActionLoading] = useState(null);
+  const [syncMessage, setSyncMessage] = useState(null);
 
   // Swipe gesture state
   const [touchStart, setTouchStart] = useState(null);
@@ -212,17 +227,66 @@ const MealPlanPage = () => {
     setRecipeDetailModal({ isOpen: true, recipe });
   };
 
+  const handleSyncWeek = async () => {
+    const weekDates = getCurrentWeekDates();
+    const startDate = formatDate(weekDates[0].fullDate);
+    const endDate = formatDate(weekDates[6].fullDate);
+
+    const result = await syncWeek(startDate, endDate);
+    if (result.success) {
+      const syncedCount = (result.results?.synced || 0) + (result.results?.updated || 0);
+      setSyncMessage(`Synced ${syncedCount} meals to calendar`);
+      setTimeout(() => setSyncMessage(null), 3000);
+    } else {
+      setSyncMessage('Failed to sync meals');
+      setTimeout(() => setSyncMessage(null), 3000);
+    }
+  };
+
+  const handleOpenTimePicker = (mealType, plan, currentTime) => {
+    setTimePickerModal({
+      isOpen: true,
+      mealType,
+      planId: plan.id,
+      currentTime
+    });
+  };
+
+  const handleTimeChange = async (newTime) => {
+    const { planId, mealType } = timePickerModal;
+    setTimePickerModal({ isOpen: false, mealType: null, planId: null, currentTime: null });
+
+    try {
+      setActionLoading(mealType);
+      await updateMealTime(planId, newTime);
+
+      // If synced to calendar, re-sync to update the event time
+      const plan = dailyMeals[mealType];
+      if (plan?.calendar_event_id && calendarConnected) {
+        await syncMeal(planId);
+      }
+    } catch (error) {
+      console.error('Failed to update time:', error);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   // Meal Slot Card Component
   const MealSlotCard = ({ mealType, plan }) => {
     const config = getMealConfig(mealType);
     const hasRecipe = plan && (plan.recipe || plan.recipe_snapshot);
     const isCompleted = plan?.is_completed;
     const isLoadingThis = actionLoading === mealType;
+    const isSynced = plan?.calendar_event_id;
 
     // Get recipe info from either linked recipe or snapshot
     const recipeTitle = plan?.recipe?.title || plan?.recipe_snapshot?.title;
     const recipeImage = plan?.recipe?.image || plan?.recipe_snapshot?.image;
     const recipeTime = plan?.recipe?.readyInMinutes || plan?.recipe_snapshot?.readyInMinutes;
+
+    // Get meal time for display
+    const mealTime = plan?.scheduled_time || getDefaultTimeForMeal(mealType);
 
     return (
       <div className={`meal-plan-page__slot-card ${isCompleted ? 'meal-plan-page__slot-card--completed' : ''}`}>
@@ -233,6 +297,18 @@ const MealPlanPage = () => {
             </div>
           )}
           <span className="meal-plan-page__slot-label">{config.label}</span>
+          {calendarConnected && hasRecipe && (
+            <span
+              className="meal-plan-page__time-badge meal-plan-page__time-badge--clickable"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOpenTimePicker(mealType, plan, mealTime);
+              }}
+            >
+              {formatTimeDisplay(mealTime)}
+              {isSynced && <Check size={12} className="meal-plan-page__sync-check" />}
+            </span>
+          )}
           {!hasRecipe && (
             <button
               className="meal-plan-page__add-btn"
@@ -262,45 +338,22 @@ const MealPlanPage = () => {
                 <span className="meal-plan-page__recipe-time">{recipeTime} min</span>
               )}
             </div>
-            <div className="meal-plan-page__recipe-actions" onClick={(e) => e.stopPropagation()}>
-              {!isCompleted && (
-                <>
-                  <button
-                    className="meal-plan-page__action-btn meal-plan-page__action-btn--complete"
-                    onClick={() => handleCompleteMeal(mealType, plan.id)}
-                    disabled={isLoadingThis}
-                    title="Mark as cooked"
-                  >
-                    <Check size={16} />
-                  </button>
-                  <button
-                    className="meal-plan-page__action-btn meal-plan-page__action-btn--swap"
-                    onClick={() => handleSwapRecipe(mealType)}
-                    disabled={isLoadingThis}
-                    title="Swap recipe"
-                  >
-                    <RefreshCw size={16} />
-                  </button>
-                </>
-              )}
-              <button
-                className="meal-plan-page__action-btn meal-plan-page__action-btn--remove"
-                onClick={() => handleRemoveRecipe(mealType, plan.id)}
-                disabled={isLoadingThis}
-                title="Remove"
-              >
-                <X size={16} />
-              </button>
-            </div>
+            <button
+              className="meal-plan-page__remove-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRemoveRecipe(mealType, plan.id);
+              }}
+              disabled={isLoadingThis}
+              title="Remove"
+            >
+              <X size={14} />
+            </button>
             {isCompleted && (
               <span className="meal-plan-page__completed-badge">Cooked</span>
             )}
           </div>
-        ) : (
-          <div className="meal-plan-page__empty-slot">
-            <span>Tap + to plan {config.label.toLowerCase()}</span>
-          </div>
-        )}
+        ) : null}
       </div>
     );
   };
@@ -321,7 +374,25 @@ const MealPlanPage = () => {
               <ChevronLeft size={20} />
             </button>
             <h1 className="meal-plan-page__title">Meal Plan</h1>
+            {calendarConnected && (
+              <button
+                className="meal-plan-page__sync-btn"
+                onClick={handleSyncWeek}
+                disabled={calendarSyncing}
+                aria-label="Sync to calendar"
+              >
+                <Calendar size={18} />
+                {calendarSyncing ? 'Syncing...' : 'Sync'}
+              </button>
+            )}
           </div>
+
+          {/* Sync message */}
+          {syncMessage && (
+            <div className="meal-plan-page__sync-message">
+              {syncMessage}
+            </div>
+          )}
 
           {/* Calendar */}
           <div className="meal-plan-page__calendar">
@@ -434,6 +505,15 @@ const MealPlanPage = () => {
         isOpen={recipeDetailModal.isOpen}
         onClose={() => setRecipeDetailModal({ isOpen: false, recipe: null })}
         recipe={recipeDetailModal.recipe}
+      />
+
+      {/* Time Picker Modal */}
+      <TimePickerModal
+        isOpen={timePickerModal.isOpen}
+        onClose={() => setTimePickerModal({ isOpen: false, mealType: null, planId: null, currentTime: null })}
+        onSave={handleTimeChange}
+        initialTime={timePickerModal.currentTime}
+        mealType={timePickerModal.mealType}
       />
     </div>
   );

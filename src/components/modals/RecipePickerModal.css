@@ -138,8 +138,7 @@
   flex: 1;
   overflow-y: auto;
   padding: 1rem;
-  min-height: 300px;
-  max-height: calc(95vh - 200px);
+  height: calc(95vh - 200px);
 }
 
 .recipe-picker-modal__loading,
@@ -338,7 +337,7 @@
   }
 
   .recipe-picker-modal__content {
-    max-height: calc(85vh - 200px);
+    height: calc(85vh - 200px);
   }
 }
 

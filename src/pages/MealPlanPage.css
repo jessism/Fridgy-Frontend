@@ -48,6 +48,43 @@
   font-weight: 600;
   color: #333;
   margin: 0;
+  flex: 1;
+}
+
+/* Sync Button in Header */
+.meal-plan-page__sync-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  border: 1.5px solid var(--primary-green, #4fcf61);
+  color: var(--primary-green, #4fcf61);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.meal-plan-page__sync-btn:hover {
+  background: rgba(79, 207, 97, 0.1);
+}
+
+.meal-plan-page__sync-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Sync Message */
+.meal-plan-page__sync-message {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  text-align: center;
+  margin-bottom: 0.75rem;
 }
 
 /* Calendar */
@@ -291,6 +328,38 @@
   flex: 1;
 }
 
+/* Time Badge (shows meal time when calendar connected) */
+.meal-plan-page__time-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #f0f0f0;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #666;
+}
+
+.meal-plan-page__sync-check {
+  color: #4fcf61;
+}
+
+/* Clickable time badge */
+.meal-plan-page__time-badge--clickable {
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.meal-plan-page__time-badge--clickable:hover {
+  background: #e0e0e0;
+}
+
+.meal-plan-page__time-badge--clickable:active {
+  background: #d0d0d0;
+  transform: scale(0.95);
+}
+
 .meal-plan-page__add-btn {
   background: linear-gradient(135deg, #81e053 0%, #4fcf61 100%);
   border: none;
@@ -378,56 +447,30 @@
   color: #888;
 }
 
-/* Recipe Actions */
-.meal-plan-page__recipe-actions {
-  display: flex;
-  gap: 0.25rem;
-  flex-shrink: 0;
-}
-
-.meal-plan-page__action-btn {
-  background: white;
-  border: 1px solid #e0e0e0;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+/* Small Remove Button */
+.meal-plan-page__remove-btn {
+  background: transparent;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #666;
+  color: #999;
+  flex-shrink: 0;
 }
 
-.meal-plan-page__action-btn:hover {
-  background: #f5f5f5;
+.meal-plan-page__remove-btn:hover {
+  background: #fee;
+  color: #ff6b6b;
 }
 
-.meal-plan-page__action-btn:disabled {
+.meal-plan-page__remove-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.meal-plan-page__action-btn--complete {
-  color: #4fcf61;
-  border-color: #4fcf61;
-}
-
-.meal-plan-page__action-btn--complete:hover {
-  background: #e8fce8;
-}
-
-.meal-plan-page__action-btn--swap {
-  color: #666;
-}
-
-.meal-plan-page__action-btn--remove {
-  color: #ff6b6b;
-  border-color: #ffd0d0;
-}
-
-.meal-plan-page__action-btn--remove:hover {
-  background: #fff0f0;
 }
 
 /* Completed Badge */

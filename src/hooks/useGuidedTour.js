@@ -67,8 +67,8 @@ const useGuidedTour = () => {
         const data = JSON.parse(saved);
         console.log('[useGuidedTour] Parsed data:', data);
 
-        // If tour is not completed, set the current step
-        if (data.currentStep !== STEPS.COMPLETED) {
+        // If tour is not completed AND not skipped, restore the current step
+        if (data.currentStep !== STEPS.COMPLETED && !data.skipped) {
           console.log('[useGuidedTour] Restoring tour:', data.currentStep, 'isActive:', data.isActive);
           setCurrentStep(data.currentStep || STEPS.NOT_STARTED);
           setIsActive(data.isActive !== false);
