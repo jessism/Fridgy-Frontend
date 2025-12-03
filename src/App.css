@@ -19,7 +19,7 @@ body {
   background: white;
   min-height: 100vh;
   color: var(--black);
-  overflow-x: hidden;
+  overflow-x: clip; /* Use clip instead of hidden to preserve sticky behavior */
 
   /* PWA safe area support for notch only (not bottom - handled by mobile nav) */
   padding-top: env(safe-area-inset-top);
@@ -30,7 +30,7 @@ body {
 .App {
   min-height: 100vh;
   width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip; /* Use clip instead of hidden to preserve sticky behavior */
 }
 
 /* MOBILE STYLES (Default - Mobile First) */

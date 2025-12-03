@@ -5,6 +5,7 @@ import { AuthProvider } from './features/auth/context/AuthContext';
 import { GuidedTourProvider } from './contexts/GuidedTourContext';
 import AuthGuard from './features/auth/components/AuthGuard';
 import NewLandingPage from './pages/NewLandingPage';
+import NewLandingPage2 from './pages/NewLandingPage2';
 import SignUpPage from './pages/SignUpPage';
 import SignInPage from './pages/SignInPage';
 import HomePage from './pages/HomePage';
@@ -89,6 +90,7 @@ function App() {
             <NavigationListener />
             <Routes>
           <Route path="/" element={<NewLandingPage />} />
+          <Route path="/landing2" element={<NewLandingPage2 />} />
           <Route path="/onboarding" element={<OnboardingFlow />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/signin" element={<SignInPage />} />

@@ -466,3 +466,546 @@
     font-size: 16px; /* Prevent iOS zoom */
   }
 }
+
+/* =============================================================================
+   Provider Selection (Not Connected State)
+============================================================================= */
+
+.calendar-sync-settings__provider-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.calendar-sync-settings__provider-description {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0 0 8px 0;
+}
+
+.calendar-sync-settings__provider-button {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px;
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.calendar-sync-settings__provider-button:hover {
+  background: #f0f0f0;
+  border-color: #ddd;
+  transform: translateY(-1px);
+}
+
+.calendar-sync-settings__provider-button:active {
+  transform: translateY(0);
+}
+
+.calendar-sync-settings__provider-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.calendar-sync-settings__provider-button--download .calendar-sync-settings__provider-icon {
+  color: #666;
+}
+
+.calendar-sync-settings__provider-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.calendar-sync-settings__provider-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.calendar-sync-settings__provider-subtitle {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+/* Provider button hover effects */
+.calendar-sync-settings__provider-button--google:hover {
+  border-color: #4285F4;
+  background: rgba(66, 133, 244, 0.05);
+}
+
+.calendar-sync-settings__provider-button--apple:hover {
+  border-color: #333;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.calendar-sync-settings__provider-button--download:hover {
+  border-color: var(--primary-green, #4fcf61);
+  background: rgba(79, 207, 97, 0.05);
+}
+
+/* =============================================================================
+   Connected Card Updates
+============================================================================= */
+
+.calendar-sync-settings__connected-header {
+  margin-bottom: 12px;
+}
+
+.calendar-sync-settings__connected-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.calendar-sync-settings__connected-card--ics {
+  background: #e3f2fd;
+}
+
+.calendar-sync-settings__connected-card--ics .calendar-sync-settings__status-dot {
+  background: #1976d2;
+}
+
+.calendar-sync-settings__connected-card--ics .calendar-sync-settings__connected-text {
+  color: #1565c0;
+}
+
+.calendar-sync-settings__ics-info {
+  font-size: 0.85rem;
+  color: #5c6bc0;
+  margin: 0;
+}
+
+.calendar-sync-settings__readd-button {
+  background: white;
+  color: #1976d2;
+  border: 1px solid #1976d2;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calendar-sync-settings__readd-button:hover {
+  background: rgba(25, 118, 210, 0.08);
+}
+
+/* Update sync button in connected actions */
+.calendar-sync-settings__connected-actions .calendar-sync-settings__sync-button {
+  flex: none;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  border-width: 1px;
+}
+
+/* Mobile adjustments for provider buttons */
+@media (max-width: 480px) {
+  .calendar-sync-settings__provider-button {
+    padding: 14px;
+  }
+
+  .calendar-sync-settings__provider-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .calendar-sync-settings__provider-name {
+    font-size: 0.9rem;
+  }
+
+  .calendar-sync-settings__connected-actions {
+    flex-direction: column;
+  }
+
+  .calendar-sync-settings__connected-actions .calendar-sync-settings__sync-button,
+  .calendar-sync-settings__connected-actions .calendar-sync-settings__disconnect-button,
+  .calendar-sync-settings__readd-button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* =============================================================================
+   ICS Subscription Modal
+============================================================================= */
+
+.calendar-sync-settings__modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: calendar-modal-fade-in 0.2s ease;
+}
+
+@keyframes calendar-modal-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.calendar-sync-settings__modal {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: calendar-modal-slide-up 0.3s ease;
+  position: relative;
+}
+
+/* Simplified modal variant */
+.calendar-sync-settings__modal--simple {
+  max-width: 340px;
+  padding: 24px;
+  text-align: center;
+}
+
+.calendar-sync-settings__modal--simple .calendar-sync-settings__modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+@keyframes calendar-modal-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.calendar-sync-settings__modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.calendar-sync-settings__modal-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.calendar-sync-settings__modal-close {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.calendar-sync-settings__modal-close:hover {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.calendar-sync-settings__modal-content {
+  padding: 24px;
+}
+
+/* Centered content for simple modal */
+.calendar-sync-settings__modal-content--centered {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.calendar-sync-settings__modal-icon {
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.calendar-sync-settings__modal-title--centered {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.calendar-sync-settings__modal-subtitle {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.calendar-sync-settings__modal-description {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0 0 20px 0;
+}
+
+.calendar-sync-settings__modal-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.calendar-sync-settings__modal-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.calendar-sync-settings__modal-step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: #f0f0f0;
+  color: #666;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.calendar-sync-settings__modal-step-text {
+  font-size: 0.9rem;
+  color: #444;
+  line-height: 1.5;
+  padding-top: 2px;
+}
+
+.calendar-sync-settings__modal-open-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 20px;
+  background: #333;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 36px;
+  max-width: calc(100% - 36px);
+}
+
+.calendar-sync-settings__modal-open-button:hover {
+  background: #444;
+  transform: translateY(-1px);
+}
+
+.calendar-sync-settings__modal-open-button:active {
+  transform: translateY(0);
+}
+
+.calendar-sync-settings__modal-done-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 20px;
+  background: var(--primary-green, #4fcf61);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 36px;
+  max-width: calc(100% - 36px);
+}
+
+.calendar-sync-settings__modal-done-button:hover {
+  background: #45b857;
+  transform: translateY(-1px);
+}
+
+.calendar-sync-settings__modal-done-button:active {
+  transform: translateY(0);
+}
+
+/* Full-width done button for simple modal */
+.calendar-sync-settings__modal-done-button--full {
+  width: 100%;
+  margin: 8px 0 0 0;
+  max-width: none;
+}
+
+/* Text-style cancel button for simple modal */
+.calendar-sync-settings__modal-cancel-button--text {
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  color: #888;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.calendar-sync-settings__modal-cancel-button--text:hover {
+  color: #555;
+  background: none;
+}
+
+.calendar-sync-settings__modal-divider {
+  display: flex;
+  align-items: center;
+  margin: 24px 0 16px 0;
+  color: #999;
+  font-size: 0.8rem;
+}
+
+.calendar-sync-settings__modal-divider::before,
+.calendar-sync-settings__modal-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e8e8e8;
+}
+
+.calendar-sync-settings__modal-divider span {
+  padding: 0 12px;
+}
+
+.calendar-sync-settings__modal-url-container {
+  display: flex;
+  gap: 8px;
+}
+
+.calendar-sync-settings__modal-url-input {
+  flex: 1;
+  padding: 12px 14px;
+  background: #f5f5f5;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #666;
+  font-family: monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calendar-sync-settings__modal-url-input:focus {
+  outline: none;
+  border-color: #ddd;
+}
+
+.calendar-sync-settings__modal-copy-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: #f5f5f5;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.calendar-sync-settings__modal-copy-button:hover {
+  background: #e8e8e8;
+  color: #333;
+}
+
+.calendar-sync-settings__modal-copy-button svg {
+  stroke: currentColor;
+}
+
+.calendar-sync-settings__modal-footer {
+  padding: 16px 24px 24px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.calendar-sync-settings__modal-cancel-button {
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calendar-sync-settings__modal-cancel-button:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+/* Modal mobile responsive */
+@media (max-width: 480px) {
+  .calendar-sync-settings__modal-overlay {
+    padding: 16px;
+    align-items: flex-end;
+  }
+
+  .calendar-sync-settings__modal {
+    max-width: 100%;
+    border-radius: 20px 20px 0 0;
+    max-height: 85vh;
+  }
+
+  .calendar-sync-settings__modal-header {
+    padding: 16px 20px;
+  }
+
+  .calendar-sync-settings__modal-content {
+    padding: 20px;
+  }
+
+  .calendar-sync-settings__modal-open-button,
+  .calendar-sync-settings__modal-done-button {
+    margin-left: 0;
+    max-width: 100%;
+  }
+
+  .calendar-sync-settings__modal-step {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .calendar-sync-settings__modal-footer {
+    padding: 12px 20px 20px;
+  }
+}

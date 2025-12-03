@@ -1,6 +1,6 @@
 /**
  * useCalendarSync Hook
- * Manages Google Calendar connection and meal sync state
+ * Manages calendar connection (Google or ICS) and meal sync state
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -8,8 +8,19 @@ import { useState, useEffect, useCallback } from 'react';
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const useCalendarSync = () => {
+  // Connection state
   const [isConnected, setIsConnected] = useState(false);
-  const [connectedEmail, setConnectedEmail] = useState(null);
+  const [provider, setProvider] = useState(null); // 'google' | 'ics' | null
+  const [connectedEmail, setConnectedEmail] = useState(null); // For Google
+  const [webcalUrl, setWebcalUrl] = useState(null); // For ICS
+  const [downloadUrl, setDownloadUrl] = useState(null); // For ICS
+
+  // ICS Modal state (for two-step confirmation flow)
+  const [showICSModal, setShowICSModal] = useState(false);
+  const [pendingWebcalUrl, setPendingWebcalUrl] = useState(null);
+  const [pendingDownloadUrl, setPendingDownloadUrl] = useState(null);
+
+  // Preferences
   const [preferences, setPreferences] = useState({
     breakfast_time: '08:00',
     lunch_time: '12:00',
@@ -19,6 +30,8 @@ const useCalendarSync = () => {
     auto_sync: false,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
   });
+
+  // UI state
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState(null);
@@ -26,7 +39,7 @@ const useCalendarSync = () => {
   const getAuthToken = () => localStorage.getItem('fridgy_token');
 
   /**
-   * Check if calendar is connected
+   * Check if calendar is connected (supports both providers)
    */
   const checkStatus = useCallback(async () => {
     const token = getAuthToken();
@@ -43,7 +56,26 @@ const useCalendarSync = () => {
       if (res.ok) {
         const data = await res.json();
         setIsConnected(data.connected);
-        setConnectedEmail(data.email || null);
+
+        if (data.connected) {
+          setProvider(data.provider);
+
+          if (data.provider === 'google') {
+            setConnectedEmail(data.email || null);
+            setWebcalUrl(null);
+            setDownloadUrl(null);
+          } else if (data.provider === 'ics') {
+            setConnectedEmail(null);
+            setWebcalUrl(data.webcalUrl || null);
+            setDownloadUrl(data.downloadUrl || null);
+          }
+        } else {
+          // Not connected - clear all state
+          setProvider(null);
+          setConnectedEmail(null);
+          setWebcalUrl(null);
+          setDownloadUrl(null);
+        }
       }
     } catch (err) {
       console.error('[CalendarSync] Error checking status:', err);
@@ -80,9 +112,9 @@ const useCalendarSync = () => {
   }, []);
 
   /**
-   * Initiate Google Calendar connection (redirect to OAuth)
+   * Connect to Google Calendar (redirect to OAuth)
    */
-  const connect = async () => {
+  const connectGoogle = async () => {
     const token = getAuthToken();
     if (!token) {
       setError('Please log in first');
@@ -105,13 +137,167 @@ const useCalendarSync = () => {
       // Redirect to Google OAuth
       window.location.href = data.url;
     } catch (err) {
-      console.error('[CalendarSync] Error connecting:', err);
+      console.error('[CalendarSync] Error connecting to Google:', err);
       setError(err.message || 'Failed to connect to Google Calendar');
     }
   };
 
   /**
-   * Disconnect Google Calendar
+   * Start ICS subscription flow - opens webcal:// immediately and shows confirmation modal
+   * User must confirm via confirmICSConnection() after subscribing
+   */
+  const connectICS = async () => {
+    const token = getAuthToken();
+    if (!token) {
+      setError('Please log in first');
+      return;
+    }
+
+    try {
+      setError(null);
+      const res = await fetch(`${API_BASE_URL}/calendar/connect-ics`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to create subscription');
+      }
+
+      const data = await res.json();
+
+      // Store pending URLs
+      setPendingWebcalUrl(data.webcalUrl);
+      setPendingDownloadUrl(data.downloadUrl);
+
+      // Open webcal:// URL immediately (triggers system dialog)
+      window.location.href = data.webcalUrl;
+
+      // Show confirmation modal (will appear after system dialog)
+      setShowICSModal(true);
+    } catch (err) {
+      console.error('[CalendarSync] Error starting ICS connection:', err);
+      setError(err.message || 'Failed to create calendar subscription');
+    }
+  };
+
+  /**
+   * Open the webcal:// URL to trigger system calendar dialog
+   * Can be called multiple times from the modal
+   */
+  const openWebcal = () => {
+    if (pendingWebcalUrl) {
+      window.location.href = pendingWebcalUrl;
+    }
+  };
+
+  /**
+   * Confirm ICS connection after user has subscribed in their calendar app
+   */
+  const confirmICSConnection = async () => {
+    const token = getAuthToken();
+    if (!token) {
+      setError('Please log in first');
+      return;
+    }
+
+    try {
+      setError(null);
+      const res = await fetch(`${API_BASE_URL}/calendar/confirm-ics`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to confirm subscription');
+      }
+
+      const data = await res.json();
+
+      // NOW mark as connected
+      setIsConnected(true);
+      setProvider('ics');
+      setWebcalUrl(data.webcalUrl);
+      setDownloadUrl(data.downloadUrl);
+      setConnectedEmail(null);
+
+      // Close modal and clear pending state
+      setShowICSModal(false);
+      setPendingWebcalUrl(null);
+      setPendingDownloadUrl(null);
+    } catch (err) {
+      console.error('[CalendarSync] Error confirming ICS connection:', err);
+      setError(err.message || 'Failed to confirm calendar subscription');
+    }
+  };
+
+  /**
+   * Cancel ICS modal - delete pending connection and close modal
+   */
+  const cancelICSModal = async () => {
+    const token = getAuthToken();
+
+    // Close modal immediately for responsiveness
+    setShowICSModal(false);
+    setPendingWebcalUrl(null);
+    setPendingDownloadUrl(null);
+
+    // Clean up pending connection in background
+    if (token) {
+      try {
+        await fetch(`${API_BASE_URL}/calendar/cancel-pending-ics`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      } catch (err) {
+        console.error('[CalendarSync] Error cancelling pending ICS:', err);
+        // Don't show error to user - modal is already closed
+      }
+    }
+  };
+
+  /**
+   * Download ICS file (for manual import)
+   * Also uses two-step flow to avoid false "connected" state
+   */
+  const downloadICS = async () => {
+    const token = getAuthToken();
+    if (!token) {
+      setError('Please log in first');
+      return;
+    }
+
+    try {
+      setError(null);
+      const res = await fetch(`${API_BASE_URL}/calendar/connect-ics`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to create subscription');
+      }
+
+      const data = await res.json();
+
+      // Store pending URLs and show modal (same flow as connectICS)
+      setPendingWebcalUrl(data.webcalUrl);
+      setPendingDownloadUrl(data.downloadUrl);
+      setShowICSModal(true);
+
+      // Also trigger the download
+      window.location.href = data.downloadUrl;
+    } catch (err) {
+      console.error('[CalendarSync] Error downloading ICS:', err);
+      setError(err.message || 'Failed to download calendar file');
+    }
+  };
+
+  /**
+   * Disconnect any calendar provider
    */
   const disconnect = async () => {
     const token = getAuthToken();
@@ -126,7 +312,10 @@ const useCalendarSync = () => {
 
       if (res.ok) {
         setIsConnected(false);
+        setProvider(null);
         setConnectedEmail(null);
+        setWebcalUrl(null);
+        setDownloadUrl(null);
       } else {
         throw new Error('Failed to disconnect');
       }
@@ -171,11 +360,11 @@ const useCalendarSync = () => {
   };
 
   /**
-   * Sync a single meal to calendar
+   * Sync a single meal to Google Calendar
    */
   const syncMeal = async (mealPlanId) => {
     const token = getAuthToken();
-    if (!token || !isConnected) return false;
+    if (!token || !isConnected || provider !== 'google') return false;
 
     try {
       setSyncing(true);
@@ -202,11 +391,11 @@ const useCalendarSync = () => {
   };
 
   /**
-   * Sync all meals for a date range
+   * Sync all meals for a date range (Google Calendar only)
    */
   const syncWeek = async (startDate, endDate) => {
     const token = getAuthToken();
-    if (!token || !isConnected) return { success: false };
+    if (!token || !isConnected || provider !== 'google') return { success: false };
 
     try {
       setSyncing(true);
@@ -238,7 +427,7 @@ const useCalendarSync = () => {
   };
 
   /**
-   * Remove a meal from calendar
+   * Remove a meal from calendar (Google Calendar only)
    */
   const unsyncMeal = async (mealPlanId) => {
     const token = getAuthToken();
@@ -312,17 +501,32 @@ const useCalendarSync = () => {
   return {
     // Connection state
     isConnected,
-    connectedEmail,
+    provider, // 'google' | 'ics' | null
+    connectedEmail, // For Google
+    webcalUrl, // For ICS
+    downloadUrl, // For ICS
     loading,
     syncing,
     error,
 
+    // ICS Modal state
+    showICSModal,
+    pendingWebcalUrl,
+    pendingDownloadUrl,
+
     // Preferences
     preferences,
 
-    // Actions
-    connect,
-    disconnect,
+    // Connection actions
+    connectGoogle, // Connect via Google OAuth
+    connectICS, // Start ICS connection (shows modal)
+    openWebcal, // Open webcal:// URL from modal
+    confirmICSConnection, // Confirm ICS subscription
+    cancelICSModal, // Cancel ICS modal
+    downloadICS, // Download ICS file (also shows modal)
+    disconnect, // Disconnect any provider
+
+    // Google Calendar sync actions
     updatePreferences,
     syncMeal,
     syncWeek,
@@ -332,7 +536,10 @@ const useCalendarSync = () => {
     formatTimeDisplay,
     getDefaultTimeForMeal,
     refresh: checkStatus,
-    clearError: () => setError(null)
+    clearError: () => setError(null),
+
+    // Legacy alias for backwards compatibility
+    connect: connectGoogle
   };
 };
 

@@ -83,6 +83,12 @@ const NewLandingPage = () => {
               <span className="landing-page-v2__brand-name">Trackabite</span>
             </div>
             <div className="landing-page-v2__header-actions">
+              <Link to="/landing2" className="landing-page-v2__design-toggle">
+                <span className="landing-page-v2__design-toggle-text">Try New Design</span>
+                <svg className="landing-page-v2__design-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" />
+                </svg>
+              </Link>
               <Button variant="secondary" size="medium" href="/signin">
                 Sign in
               </Button>

@@ -12,6 +12,20 @@ import ShortcutInstallModal from '../components/guided-tour/ShortcutInstallModal
 import ShortcutConfirmationModal from '../components/guided-tour/ShortcutConfirmationModal';
 import '../components/guided-tour/GuidedTour.css'; // Import guided tour styles
 
+// Fun food facts to display while importing
+const FOOD_FACTS = [
+  "Honey never spoils. Archaeologists found 3000-year-old honey in Egyptian tombs that was still edible!",
+  "Carrots were originally purple before the orange variety was developed in the Netherlands.",
+  "A chef's hat traditionally has 100 folds to represent the 100 ways to cook an egg.",
+  "Apples float in water because they're 25% air.",
+  "The world's most expensive spice by weight is saffron.",
+  "Bananas are berries, but strawberries aren't!",
+  "Chocolate was once used as currency by the Aztecs.",
+  "Peanuts aren't nuts - they're legumes that grow underground.",
+  "The average American eats 35 tons of food in their lifetime.",
+  "Vanilla is the world's most labor-intensive crop.",
+];
+
 const RecipeImportPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -41,6 +55,17 @@ const RecipeImportPage = () => {
   const [showShortcutInstallModal, setShowShortcutInstallModal] = useState(false);
   const [showShortcutConfirmation, setShowShortcutConfirmation] = useState(false);
   const [shortcutInstallTimer, setShortcutInstallTimer] = useState(null);
+  const [currentFactIndex, setCurrentFactIndex] = useState(0);
+
+  // Rotate food facts while loading
+  useEffect(() => {
+    if (loading || apifyLoading) {
+      const interval = setInterval(() => {
+        setCurrentFactIndex(prev => (prev + 1) % FOOD_FACTS.length);
+      }, 7000);
+      return () => clearInterval(interval);
+    }
+  }, [loading, apifyLoading]);
 
   // Detect iOS device
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -674,11 +699,17 @@ const RecipeImportPage = () => {
     return (
       <div className="recipe-import-page__loading-screen">
         <div className="recipe-import-page__loading-content">
-          <img
-            src={FridgyLogo}
-            alt="Fridgy"
-            className={`recipe-import-page__analyzing-icon ${error ? 'recipe-import-page__analyzing-icon--error' : ''}`}
-          />
+          {/* Logo with scan line overlay */}
+          <div className={`recipe-import-page__scan-container ${error ? 'recipe-import-page__scan-container--error' : ''}`}>
+            <img
+              src={FridgyLogo}
+              alt="Bitee"
+              className="recipe-import-page__analyzing-icon"
+            />
+            {!error && !status?.includes('✅') && (
+              <div className="recipe-import-page__scan-line"></div>
+            )}
+          </div>
 
           {error ? (
             // Error State
@@ -720,12 +751,17 @@ const RecipeImportPage = () => {
             // Loading State
             <>
               <div className="recipe-import-page__loading-title">
-                {status || 'Importing your recipe...'}
+                Bitee is analyzing your recipe...
               </div>
-              <div className="recipe-import-page__loading-subtitle">
-                Fridgy is analyzing the recipe
+              <div className="recipe-import-page__fun-fact" key={currentFactIndex}>
+                <span className="recipe-import-page__fun-fact-label">Did you know?</span>
+                <span className="recipe-import-page__fun-fact-text">
+                  {FOOD_FACTS[currentFactIndex]}
+                  <span className="recipe-import-page__loading-dots">
+                    <span>.</span><span>.</span><span>.</span>
+                  </span>
+                </span>
               </div>
-              <div className="recipe-import-page__loading-spinner"></div>
             </>
           )}
         </div>

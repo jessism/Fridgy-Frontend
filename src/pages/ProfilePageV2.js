@@ -152,7 +152,7 @@ const ProfilePageV2 = () => {
           <span className="profile-v2__menu-text">Notification settings</span>
         </div>
 
-        {/* Google Calendar */}
+        {/* Calendar Sync */}
         <div className="profile-v2__menu-item" onClick={handleCalendarSettings}>
           <div className="profile-v2__menu-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -162,7 +162,7 @@ const ProfilePageV2 = () => {
               <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" strokeWidth="2"/>
             </svg>
           </div>
-          <span className="profile-v2__menu-text">Google Calendar</span>
+          <span className="profile-v2__menu-text">Calendar Sync</span>
         </div>
 
         {/* Replay Welcome Tour */}

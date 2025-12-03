@@ -78,6 +78,54 @@
   gap: 12px;
 }
 
+/* Design Toggle Link */
+.landing-page-v2__design-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(129, 224, 83, 0.15);
+  border: 1px solid rgba(129, 224, 83, 0.3);
+  color: var(--primary-green-dark, #6bc93f);
+  text-decoration: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.landing-page-v2__design-toggle:hover {
+  background: rgba(129, 224, 83, 0.25);
+  border-color: var(--primary-green, #81e053);
+  transform: translateY(-1px);
+}
+
+.landing-page-v2__design-toggle-text {
+  white-space: nowrap;
+}
+
+.landing-page-v2__design-toggle-icon {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+}
+
+@media (max-width: 768px) {
+  .landing-page-v2__design-toggle-text {
+    display: none;
+  }
+
+  .landing-page-v2__design-toggle {
+    padding: 8px;
+    border-radius: 50%;
+  }
+
+  .landing-page-v2__design-toggle-icon {
+    width: 16px;
+    height: 16px;
+  }
+}
+
 .landing-page-v2__download-btn {
   background: #222222;
   color: white;
