@@ -76,12 +76,20 @@ const useInventory = () => {
   const updateItem = async (itemId, updateData) => {
     try {
       setError(null);
-      
+
       console.log('🔄 Updating item:', itemId, updateData);
-      
+
+      // Convert camelCase to snake_case for backend compatibility
+      const snakeCaseData = {
+        item_name: updateData.itemName,
+        quantity: updateData.quantity,
+        category: updateData.category,
+        expiration_date: updateData.expiryDate
+      };
+
       const response = await apiRequest(`/inventory/${itemId}`, {
         method: 'PUT',
-        body: safeJSONStringify(updateData),
+        body: safeJSONStringify(snakeCaseData),
       });
 
       if (response.success) {

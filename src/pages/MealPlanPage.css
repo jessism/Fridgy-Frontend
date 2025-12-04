@@ -203,20 +203,36 @@
 }
 
 .meal-plan-page__date-cell--today .meal-plan-page__date-number {
+  width: 3rem;
+  height: 3rem;
+  aspect-ratio: 1;
   background-color: #e6e6e6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .meal-plan-page__date-cell--selected .meal-plan-page__date-number {
+  width: 3rem;
+  height: 3rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
   background: linear-gradient(135deg, #81e053 0%, #4fcf61 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: white;
 }
 
 .meal-plan-page__date-number {
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 400;
   color: #333;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 3rem;
+  height: 3rem;
+  aspect-ratio: 1;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -502,9 +518,19 @@
   }
 
   .meal-plan-page__date-number {
-    width: 2.5rem;
-    height: 2.5rem;
-    font-size: 0.9375rem;
+    font-size: 1rem;
+    min-width: 1.75rem;
+    min-height: 1.75rem;
+  }
+
+  .meal-plan-page__date-cell--selected .meal-plan-page__date-number {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .meal-plan-page__date-cell--today .meal-plan-page__date-number {
+    width: 3rem;
+    height: 3rem;
   }
 
   .meal-plan-page__slot-card {
@@ -524,9 +550,15 @@
   }
 
   .meal-plan-page__date-number {
-    width: 2.25rem;
-    height: 2.25rem;
     font-size: 0.875rem;
+    min-width: 1.5rem;
+    min-height: 1.5rem;
+  }
+
+  .meal-plan-page__date-cell--selected .meal-plan-page__date-number,
+  .meal-plan-page__date-cell--today .meal-plan-page__date-number {
+    width: 2.5rem;
+    height: 2.5rem;
   }
 
   .meal-plan-page__date-number::before {

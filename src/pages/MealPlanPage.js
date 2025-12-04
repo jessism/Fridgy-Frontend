@@ -135,7 +135,11 @@ const MealPlanPage = () => {
     );
   };
 
-  const handleDateClick = (dateObj) => {
+  const handleDateClick = (dateObj, event) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     setSelectedDate(new Date(dateObj));
   };
 
@@ -638,7 +642,11 @@ const MealPlanPage = () => {
                       } ${
                         isSelectedDate(dateInfo.fullDate) ? 'meal-plan-page__date-cell--selected' : ''
                       }`}
-                      onClick={() => handleDateClick(dateInfo.fullDate)}
+                      onClick={(e) => handleDateClick(dateInfo.fullDate, e)}
+                      onTouchEnd={(e) => {
+                        e.preventDefault();
+                        handleDateClick(dateInfo.fullDate, e);
+                      }}
                     >
                       <span className={`meal-plan-page__date-number ${progressClass}`}>
                         {dateInfo.date}

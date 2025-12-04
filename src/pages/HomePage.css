@@ -1059,6 +1059,17 @@
   font-weight: 500;
 }
 
+/* Fresh items styles (for "Use Next" section) */
+.days-left.fresh {
+  color: #4fcf61;
+  background: rgba(79, 207, 97, 0.1);
+}
+
+.fresh-subtitle p {
+  color: #4fcf61;
+  font-weight: 500;
+}
+
 /* SHOPPING LIST SECTION */
 .shopping-list {
   padding: 0;
