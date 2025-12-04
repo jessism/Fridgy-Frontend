@@ -49,6 +49,8 @@ const MealPlanPage = () => {
   const [timePickerModal, setTimePickerModal] = useState({ isOpen: false, mealType: null, planId: null, currentTime: null });
   const [actionLoading, setActionLoading] = useState(null);
   const [syncMessage, setSyncMessage] = useState(null);
+  const [showMonthCalendar, setShowMonthCalendar] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(new Date());
 
   // Swipe gesture state
   const [touchStart, setTouchStart] = useState(null);
@@ -109,7 +111,11 @@ const MealPlanPage = () => {
   };
 
   const getCurrentMonthYear = () => {
-    return `${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
+    // Use the middle of the displayed week to determine the month
+    // This handles weeks that span two months by showing the month with more days
+    const weekDates = getCurrentWeekDates();
+    const midWeekDate = weekDates[3].fullDate;
+    return `${monthNames[midWeekDate.getMonth()]} ${midWeekDate.getFullYear()}`;
   };
 
   const isToday = (dateObj) => {
@@ -141,6 +147,31 @@ const MealPlanPage = () => {
     setCurrentWeekOffset(prev => prev + 1);
   };
 
+  // Month calendar date selection handler
+  const handleMonthCalendarDateSelect = (date) => {
+    // Update selected date
+    setSelectedDate(date);
+
+    // Calculate week offset to show the week containing the selected date
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const todayWeekStart = new Date(today);
+    todayWeekStart.setDate(today.getDate() - today.getDay()); // Start of current week
+
+    const selectedWeekStart = new Date(date);
+    selectedWeekStart.setDate(date.getDate() - date.getDay()); // Start of selected date's week
+
+    // Calculate difference in weeks
+    const diffTime = selectedWeekStart.getTime() - todayWeekStart.getTime();
+    const diffWeeks = Math.round(diffTime / (7 * 24 * 60 * 60 * 1000));
+
+    setCurrentWeekOffset(diffWeeks);
+
+    // Close the modal
+    setShowMonthCalendar(false);
+  };
+
   // Swipe handlers
   const handleTouchStart = (e) => {
     setTouchEnd(null);
@@ -152,12 +183,20 @@ const MealPlanPage = () => {
   };
 
   const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
+    if (!touchStart || !touchEnd) {
+      // Reset state even if no swipe detected (simple tap)
+      setTouchStart(null);
+      setTouchEnd(null);
+      return;
+    }
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
     if (isLeftSwipe) goToNextWeek();
     if (isRightSwipe) goToPreviousWeek();
+    // Reset state after swipe
+    setTouchStart(null);
+    setTouchEnd(null);
   };
 
   const formatSelectedDate = () => {
@@ -270,6 +309,141 @@ const MealPlanPage = () => {
     } finally {
       setActionLoading(null);
     }
+  };
+
+  // Month Calendar Modal Component
+  const MonthCalendarModal = () => {
+    const getDaysInMonth = (date) => {
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const daysInMonth = lastDay.getDate();
+      const startingDayOfWeek = firstDay.getDay();
+
+      const days = [];
+
+      // Add empty cells for days before month starts
+      for (let i = 0; i < startingDayOfWeek; i++) {
+        days.push(null);
+      }
+
+      // Add all days of the month
+      for (let i = 1; i <= daysInMonth; i++) {
+        days.push(new Date(year, month, i));
+      }
+
+      // Pad with empty cells to always have 42 cells (6 rows * 7 columns)
+      while (days.length < 42) {
+        days.push(null);
+      }
+
+      return days;
+    };
+
+    const navigateMonth = (direction) => {
+      const newMonth = new Date(calendarMonth);
+      newMonth.setMonth(newMonth.getMonth() + direction);
+      setCalendarMonth(newMonth);
+    };
+
+    const goToToday = () => {
+      const today = new Date();
+      setCalendarMonth(today);
+      handleMonthCalendarDateSelect(today);
+    };
+
+    const formatMonthYear = () => {
+      const fullMonthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+      return `${fullMonthNames[calendarMonth.getMonth()]} ${calendarMonth.getFullYear()}`;
+    };
+
+    const isTodayDate = (date) => {
+      if (!date) return false;
+      const today = new Date();
+      return date.getDate() === today.getDate() &&
+             date.getMonth() === today.getMonth() &&
+             date.getFullYear() === today.getFullYear();
+    };
+
+    const isSelected = (date) => {
+      if (!date) return false;
+      return date.getDate() === selectedDate.getDate() &&
+             date.getMonth() === selectedDate.getMonth() &&
+             date.getFullYear() === selectedDate.getFullYear();
+    };
+
+    const days = getDaysInMonth(calendarMonth);
+
+    return (
+      <div className="meal-plan-page__month-modal-overlay" onClick={() => setShowMonthCalendar(false)}>
+        <div className="meal-plan-page__month-modal" onClick={(e) => e.stopPropagation()}>
+          {/* Modal Header */}
+          <div className="meal-plan-page__month-modal-header">
+            <button
+              className="meal-plan-page__month-nav-btn"
+              onClick={() => navigateMonth(-1)}
+              aria-label="Previous month"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+
+            <h2 className="meal-plan-page__month-modal-title">{formatMonthYear()}</h2>
+
+            <button
+              className="meal-plan-page__month-nav-btn"
+              onClick={() => navigateMonth(1)}
+              aria-label="Next month"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
+
+          {/* Days of week header */}
+          <div className="meal-plan-page__month-weekdays">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+              <div key={day} className="meal-plan-page__month-weekday">{day}</div>
+            ))}
+          </div>
+
+          {/* Calendar Grid */}
+          <div className="meal-plan-page__month-grid">
+            {days.map((date, index) => (
+              <div
+                key={`cell-${index}`}
+                className={`meal-plan-page__month-day ${
+                  !date ? 'meal-plan-page__month-day--empty' : ''
+                } ${
+                  isTodayDate(date) ? 'meal-plan-page__month-day--today' : ''
+                } ${
+                  isSelected(date) ? 'meal-plan-page__month-day--selected' : ''
+                }`}
+                onClick={() => date && handleMonthCalendarDateSelect(date)}
+              >
+                {date && date.getDate()}
+              </div>
+            ))}
+          </div>
+
+          {/* Today Button */}
+          <div className="meal-plan-page__month-modal-footer">
+            <button
+              className="meal-plan-page__month-today-btn"
+              onClick={goToToday}
+            >
+              Today
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // Meal Slot Card Component
@@ -408,11 +582,20 @@ const MealPlanPage = () => {
                 </svg>
               </button>
 
-              <div className="meal-plan-page__month-year">
+              <button
+                className="meal-plan-page__month-year-btn"
+                onClick={() => {
+                  setCalendarMonth(new Date(selectedDate));
+                  setShowMonthCalendar(true);
+                }}
+              >
                 <span className="meal-plan-page__month-year-text">
                   {getCurrentMonthYear()}
                 </span>
-              </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="meal-plan-page__dropdown-arrow">
+                  <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
 
               <button
                 className="meal-plan-page__nav-arrow"
@@ -515,6 +698,9 @@ const MealPlanPage = () => {
         initialTime={timePickerModal.currentTime}
         mealType={timePickerModal.mealType}
       />
+
+      {/* Month Calendar Modal */}
+      {showMonthCalendar && <MonthCalendarModal />}
     </div>
   );
 };

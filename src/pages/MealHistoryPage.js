@@ -72,7 +72,11 @@ const MealHistoryPage = () => {
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   const getCurrentMonthYear = () => {
-    return `${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
+    // Use the middle of the displayed week to determine the month
+    // This handles weeks that span two months by showing the month with more days
+    const weekDates = getCurrentWeekDates();
+    const midWeekDate = weekDates[3].fullDate;
+    return `${monthNames[midWeekDate.getMonth()]} ${midWeekDate.getFullYear()}`;
   };
 
   const getCurrentWeekDates = () => {

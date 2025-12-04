@@ -8,11 +8,22 @@ const RecipePickerModal = ({ isOpen, onClose, onSelect, mealType }) => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [recipes, setRecipes] = useState({
-    saved: [],
-    ai: [],
-    suggestions: []
+    imported: [],
+    uploaded: [],
+    ai: []
   });
   const [loading, setLoading] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  // Handle close with animation
+  const handleClose = () => {
+    if (isClosing) return; // Prevent double-close
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 250); // Match the slideDown animation duration
+  };
 
   const getAuthToken = () => localStorage.getItem('fridgy_token');
 
@@ -44,33 +55,42 @@ const RecipePickerModal = ({ isOpen, onClose, onSelect, mealType }) => {
 
     try {
       // Fetch all sources in parallel
-      const [savedRes, aiRes, suggestionsRes] = await Promise.allSettled([
-        // Saved recipes
-        fetch(`${API_BASE_URL}/saved-recipes?limit=50`, {
+      const [importedRes, uploadedRes, aiRes] = await Promise.allSettled([
+        // Imported recipes (from Instagram/TikTok)
+        fetch(`${API_BASE_URL}/saved-recipes?filter=imported&limit=50`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        // Uploaded recipes (manually added)
+        fetch(`${API_BASE_URL}/saved-recipes?filter=uploaded&limit=50`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
         // AI recipes
         fetch(`${API_BASE_URL}/ai-recipes/history?limit=20`, {
           headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        // Spoonacular suggestions
-        fetch(`${API_BASE_URL}/recipes/suggestions?limit=20`, {
-          headers: { 'Authorization': `Bearer ${token}` }
         })
       ]);
 
       const newRecipes = {
-        saved: [],
-        ai: [],
-        suggestions: []
+        imported: [],
+        uploaded: [],
+        ai: []
       };
 
-      // Process saved recipes
-      if (savedRes.status === 'fulfilled' && savedRes.value.ok) {
-        const data = await savedRes.value.json();
-        newRecipes.saved = (data.recipes || []).map(r => ({
+      // Process imported recipes
+      if (importedRes.status === 'fulfilled' && importedRes.value.ok) {
+        const data = await importedRes.value.json();
+        newRecipes.imported = (data.recipes || []).map(r => ({
           ...r,
-          source: 'saved'
+          source: 'imported'
+        }));
+      }
+
+      // Process uploaded recipes
+      if (uploadedRes.status === 'fulfilled' && uploadedRes.value.ok) {
+        const data = await uploadedRes.value.json();
+        newRecipes.uploaded = (data.recipes || []).map(r => ({
+          ...r,
+          source: 'uploaded'
         }));
       }
 
@@ -86,15 +106,6 @@ const RecipePickerModal = ({ isOpen, onClose, onSelect, mealType }) => {
           }
           return [{ ...item, source: 'ai' }];
         }).filter(r => r.title);
-      }
-
-      // Process suggestions
-      if (suggestionsRes.status === 'fulfilled' && suggestionsRes.value.ok) {
-        const data = await suggestionsRes.value.json();
-        newRecipes.suggestions = (data.suggestions || []).map(r => ({
-          ...r,
-          source: 'suggestion'
-        }));
       }
 
       setRecipes(newRecipes);
@@ -119,13 +130,13 @@ const RecipePickerModal = ({ isOpen, onClose, onSelect, mealType }) => {
     let result = [];
 
     if (activeTab === 'all') {
-      result = [...recipes.saved, ...recipes.ai, ...recipes.suggestions];
-    } else if (activeTab === 'saved') {
-      result = recipes.saved;
+      result = [...recipes.imported, ...recipes.uploaded, ...recipes.ai];
+    } else if (activeTab === 'imported') {
+      result = recipes.imported;
+    } else if (activeTab === 'uploaded') {
+      result = recipes.uploaded;
     } else if (activeTab === 'ai') {
       result = recipes.ai;
-    } else if (activeTab === 'suggestions') {
-      result = recipes.suggestions;
     }
 
     // Apply search filter
@@ -156,11 +167,11 @@ const RecipePickerModal = ({ isOpen, onClose, onSelect, mealType }) => {
 
   const getSourceBadge = (source) => {
     const badges = {
-      saved: { label: 'Saved', className: 'recipe-picker-modal__badge--saved' },
-      ai: { label: 'AI', className: 'recipe-picker-modal__badge--ai' },
-      suggestion: { label: 'Suggested', className: 'recipe-picker-modal__badge--suggestion' }
+      imported: { label: 'Imported', className: 'recipe-picker-modal__badge--saved' },
+      uploaded: { label: 'Uploaded', className: 'recipe-picker-modal__badge--suggestion' },
+      ai: { label: 'AI', className: 'recipe-picker-modal__badge--ai' }
     };
-    return badges[source] || badges.saved;
+    return badges[source] || badges.imported;
   };
 
   if (!isOpen) return null;
@@ -168,11 +179,11 @@ const RecipePickerModal = ({ isOpen, onClose, onSelect, mealType }) => {
   const filteredRecipes = getFilteredRecipes();
 
   return (
-    <div className="recipe-picker-modal__overlay" onClick={onClose}>
-      <div className="recipe-picker-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="recipe-picker-modal__overlay" onClick={handleClose}>
+      <div className={`recipe-picker-modal ${isClosing ? 'recipe-picker-modal--closing' : ''}`} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="recipe-picker-modal__header">
-          <button className="recipe-picker-modal__close-btn" onClick={onClose}>
+          <button className="recipe-picker-modal__close-btn" onClick={handleClose}>
             <X size={20} />
           </button>
           <h2 className="recipe-picker-modal__title">
@@ -195,13 +206,13 @@ const RecipePickerModal = ({ isOpen, onClose, onSelect, mealType }) => {
 
         {/* Source Tabs */}
         <div className="recipe-picker-modal__tabs">
-          {['all', 'saved', 'ai', 'suggestions'].map((tab) => (
+          {['all', 'imported', 'uploaded', 'ai'].map((tab) => (
             <button
               key={tab}
               className={`recipe-picker-modal__tab ${activeTab === tab ? 'recipe-picker-modal__tab--active' : ''}`}
               onClick={() => setActiveTab(tab)}
             >
-              {tab === 'all' ? 'All' : tab === 'saved' ? 'Saved' : tab === 'ai' ? 'AI' : 'Suggestions'}
+              {tab === 'all' ? 'All' : tab === 'imported' ? 'Imported' : tab === 'uploaded' ? 'Uploaded' : 'AI'}
             </button>
           ))}
         </div>

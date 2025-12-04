@@ -5,8 +5,11 @@ import appLogo from '../assets/images/Logo.png';
 import phoneLeftImage from '../assets/product mockup/HomepageS_Step1.jpeg';
 import phoneRightImage from '../assets/product mockup/Homepage_personalized recipes.jpeg';
 import step1Image from '../assets/product mockup/HomepageS_Step1.jpeg';
+import step1Video from '../assets/product mockup/Track inventory.mp4';
 import step2Image from '../assets/product mockup/Homepage_Step2.jpeg';
+import step2Video from '../assets/product mockup/Save recipes.mp4';
 import step3Image from '../assets/product mockup/Homepage_Step3.jpeg';
+import step3Video from '../assets/product mockup/Personalized recipes.mp4';
 import sharedListImage from '../assets/product mockup/Share_List_People.png';
 import googleCalendarIcon from '../assets/icons/Google calendar.png';
 import appleCalendarIcon from '../assets/icons/Apple Calendar.png';
@@ -191,7 +194,14 @@ const NewLandingPage2 = () => {
                 <div className="landing-page-v3__step-image landing-page-v3__step-image--overflow">
                   <div className="landing-page-v3__step-phone-frame landing-page-v3__step-phone-frame--transparent">
                     <div className="landing-page-v3__step-phone-screen">
-                      <img src={step1Image} alt="Track your inventory" className="landing-page-v3__step-phone" />
+                      <video
+                        src={step1Video}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="landing-page-v3__step-phone"
+                      />
                     </div>
                   </div>
                 </div>
@@ -213,7 +223,14 @@ const NewLandingPage2 = () => {
                 <div className="landing-page-v3__step-image landing-page-v3__step-image--overflow">
                   <div className="landing-page-v3__step-phone-frame landing-page-v3__step-phone-frame--transparent">
                     <div className="landing-page-v3__step-phone-screen">
-                      <img src={step2Image} alt="Save recipes from anywhere" className="landing-page-v3__step-phone" />
+                      <video
+                        src={step2Video}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="landing-page-v3__step-phone"
+                      />
                     </div>
                   </div>
                 </div>
@@ -235,7 +252,14 @@ const NewLandingPage2 = () => {
                 <div className="landing-page-v3__step-image landing-page-v3__step-image--overflow">
                   <div className="landing-page-v3__step-phone-frame landing-page-v3__step-phone-frame--transparent">
                     <div className="landing-page-v3__step-phone-screen">
-                      <img src={step3Image} alt="Get personalized recipes" className="landing-page-v3__step-phone" />
+                      <video
+                        src={step3Video}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="landing-page-v3__step-phone"
+                      />
                     </div>
                   </div>
                 </div>
