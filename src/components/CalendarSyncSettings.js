@@ -163,18 +163,28 @@ const CalendarSyncSettings = () => {
               </div>
 
               <h3 className="calendar-sync-settings__modal-title--centered">
-                Did you add the calendar?
+                Add to Calendar
               </h3>
 
               <p className="calendar-sync-settings__modal-subtitle">
-                Click "Done" after you've subscribed in your calendar app.
+                Tap the button below to open your calendar app, then tap "Done" after subscribing.
               </p>
 
-              <button
+              {/* Direct link - iOS Safari requires user tap on actual link for custom URL schemes */}
+              <a
+                href={pendingWebcalUrl}
                 className="calendar-sync-settings__modal-done-button calendar-sync-settings__modal-done-button--full"
-                onClick={confirmICSConnection}
+                style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}
               >
-                Done
+                Open Calendar App
+              </a>
+
+              <button
+                className="calendar-sync-settings__modal-done-button"
+                onClick={confirmICSConnection}
+                style={{ marginTop: '12px', background: '#6c757d' }}
+              >
+                Done - I've Subscribed
               </button>
 
               <button

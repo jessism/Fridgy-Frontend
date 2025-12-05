@@ -1616,8 +1616,16 @@
 
 /* Final CTA - Mobile */
 @media (max-width: 768px) {
+  .landing-page-v3__testimonial::after {
+    display: none;
+  }
+
   .landing-page-v3__final-cta {
     padding: 40px 20px;
+    top: 0;
+    margin-bottom: 0;
+    border-radius: 0;
+    z-index: 20;
   }
 
   .landing-page-v3__final-cta-tagline {
