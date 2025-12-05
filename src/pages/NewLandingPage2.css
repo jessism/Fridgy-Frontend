@@ -513,8 +513,7 @@
 .landing-page-v3__step-slide-container {
   background: #F5F5F5;
   border-radius: 32px;
-  padding: 60px;
-  padding-bottom: 0;
+  padding: 50px 80px;
   max-width: 1400px;
   width: calc(100% - 80px);
   overflow: hidden;
@@ -645,15 +644,16 @@
   font-size: clamp(32px, 4vw, 48px);
   font-weight: 700;
   color: #222222;
-  margin: 0 0 16px 0;
+  margin: 0 0 24px 0;
+  line-height: 1;
 }
 
 .landing-page-v3__step-description {
-  font-size: 1.125rem;
+  font-size: 1rem;
   color: #222222;
-  line-height: 1.6;
+  line-height: 1.3;
   margin: 0;
-  max-width: 450px;
+  max-width: 650px;
 }
 
 /* ===== FEATURES SECTION (Shared Background) ===== */
@@ -820,7 +820,7 @@
 
 .landing-page-v3__feature-wide-image {
   width: 100%;
-  height: 350px;
+  height: 700px;
   border-radius: 24px;
   overflow: hidden;
 }
@@ -1119,26 +1119,74 @@
 
   .landing-page-v3__step-image {
     order: 2;
+    margin-top: 24px;
   }
 
   .landing-page-v3__step-content {
     display: contents;
-    text-align: center;
+    text-align: left;
   }
 
   .landing-page-v3__step-number {
     order: 1;
-    text-align: center;
+    text-align: left;
+    width: 100%;
   }
 
   .landing-page-v3__step-heading {
     order: 1;
-    text-align: center;
+    text-align: left;
+    width: 100%;
+  }
+
+  .landing-page-v3__mobile-break {
+    display: block;
+    text-align: left;
   }
 
   .landing-page-v3__step-description {
     order: 1;
+    text-align: left;
+  }
+
+  /* Step 1 - narrower text container on mobile */
+  .landing-page-v3__step-slide:nth-child(1) .landing-page-v3__step-number {
     text-align: center;
+  }
+
+  .landing-page-v3__step-slide:nth-child(1) .landing-page-v3__step-heading,
+  .landing-page-v3__step-slide:nth-child(1) .landing-page-v3__step-description {
+    max-width: 280px;
+  }
+
+  /* Step 2 - narrower text container on mobile, heading centered */
+  .landing-page-v3__step-slide:nth-child(2) .landing-page-v3__step-number {
+    text-align: center;
+  }
+
+  .landing-page-v3__step-slide:nth-child(2) .landing-page-v3__step-heading {
+    max-width: 280px;
+    text-align: center;
+  }
+
+  .landing-page-v3__step-slide:nth-child(2) .landing-page-v3__step-description {
+    max-width: 280px;
+    text-align: left;
+  }
+
+  /* Step 3 - narrower text container on mobile, heading centered */
+  .landing-page-v3__step-slide:nth-child(3) .landing-page-v3__step-number {
+    text-align: center;
+  }
+
+  .landing-page-v3__step-slide:nth-child(3) .landing-page-v3__step-heading {
+    max-width: 280px;
+    text-align: left;
+  }
+
+  .landing-page-v3__step-slide:nth-child(3) .landing-page-v3__step-description {
+    max-width: 280px;
+    text-align: left;
   }
 
   .landing-page-v3__step-phone-frame {

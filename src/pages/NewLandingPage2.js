@@ -15,6 +15,7 @@ import mealPlanningVideo from '../assets/product mockup/Meal planning.mp4';
 import reminderVideo from '../assets/product mockup/Reminder.mp4';
 import googleCalendarIcon from '../assets/icons/Google calendar.png';
 import appleCalendarIcon from '../assets/icons/Apple Calendar.png';
+import googleCalendarVideo from '../assets/product mockup/Google calendar.mp4';
 import './NewLandingPage2.css';
 
 const NewLandingPage2 = () => {
@@ -217,9 +218,9 @@ const NewLandingPage2 = () => {
               <div className="landing-page-v3__step-slide-content">
                 <div className="landing-page-v3__step-content">
                   <span className="landing-page-v3__step-number">Step 1.</span>
-                  <h3 className="landing-page-v3__step-heading">Track your inventory</h3>
+                  <h3 className="landing-page-v3__step-heading">Snap & manage <span className="landing-page-v3__mobile-break">your groceries.</span></h3>
                   <p className="landing-page-v3__step-description">
-                    Snap a photo of your groceries and let AI do the rest. Know exactly what's in your fridge and when items expire.
+                    Just snap a photo and let Trackabite sort everything for you.<br /><br />Know exactly what you've got, what's running low, and what's about to go rogue in the back of your fridge.
                   </p>
                 </div>
                 <div className="landing-page-v3__step-image landing-page-v3__step-image--overflow">
@@ -246,9 +247,9 @@ const NewLandingPage2 = () => {
               <div className="landing-page-v3__step-slide-content">
                 <div className="landing-page-v3__step-content">
                   <span className="landing-page-v3__step-number">Step 2.</span>
-                  <h3 className="landing-page-v3__step-heading">Save recipes from anywhere</h3>
+                  <h3 className="landing-page-v3__step-heading">Save your favorite recipes from <em>anywhere.</em></h3>
                   <p className="landing-page-v3__step-description">
-                    Import your favorite recipes directly from Instagram and TikTok. Build your personal recipe collection effortlessly.
+                    Pull recipes from any Instagram Reel & Post, upload your own creations, and keep everything tidy so you can quickly find them when you need dinner ideas.
                   </p>
                 </div>
                 <div className="landing-page-v3__step-image landing-page-v3__step-image--overflow">
@@ -275,9 +276,11 @@ const NewLandingPage2 = () => {
               <div className="landing-page-v3__step-slide-content">
                 <div className="landing-page-v3__step-content">
                   <span className="landing-page-v3__step-number">Step 3.</span>
-                  <h3 className="landing-page-v3__step-heading">Get personalized recipes</h3>
+                  <h3 className="landing-page-v3__step-heading">Get personalized meal ideas you'll <em>actually</em> make.</h3>
                   <p className="landing-page-v3__step-description">
-                    Generate custom meal ideas based on what's already in your fridge. Cook smarter, waste less.
+                    Trackabite checks what you've got, what you like, even how much energy you're operating with today.<br /><br />
+                    Too tired to chop? Feeling adventurous today?<br /><br />
+                    You'll get ideas that feel doable - not the perfectly staged Pinterest dishes that require three hours and a ring light.
                   </p>
                 </div>
                 <div className="landing-page-v3__step-image landing-page-v3__step-image--overflow">
@@ -379,7 +382,14 @@ const NewLandingPage2 = () => {
                 <div className="landing-page-v3__feature-phone-frame">
                   <div className="landing-page-v3__feature-phone-notch"></div>
                   <div className="landing-page-v3__feature-phone-screen">
-                    <img src={step3Image} alt="Calendar integration" className="landing-page-v3__feature-phone-img" />
+                    <video
+                      src={googleCalendarVideo}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="landing-page-v3__feature-phone-img"
+                    />
                   </div>
                 </div>
               </div>
