@@ -10,7 +10,7 @@ import step2Image from '../assets/product mockup/Homepage_Step2.jpeg';
 import step2Video from '../assets/product mockup/Save recipes.mp4';
 import step3Image from '../assets/product mockup/Homepage_Step3.jpeg';
 import step3Video from '../assets/product mockup/Personalized recipes.mp4';
-import sharedListImage from '../assets/product mockup/Share_List_People.png';
+import sharedListImage from '../assets/product mockup/Shop together.jpg';
 import mealPlanningVideo from '../assets/product mockup/Meal planning.mp4';
 import reminderVideo from '../assets/product mockup/Reminder.mp4';
 import googleCalendarIcon from '../assets/icons/Google calendar.png';
@@ -22,6 +22,7 @@ const NewLandingPage2 = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [highlightVisible, setHighlightVisible] = useState(false);
+  const [wayItalicized, setWayItalicized] = useState(false);
   const highlightRef = useRef(null);
   const totalTestimonials = 10;
   const navigate = useNavigate();
@@ -59,6 +60,15 @@ const NewLandingPage2 = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Italicize "WAY" after 2 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setWayItalicized(true);
+    }, 2000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   // Intersection Observer for "in 3 simple steps" highlight effect
@@ -108,12 +118,6 @@ const NewLandingPage2 = () => {
           <span className="landing-page-v3__brand-name">Trackabite</span>
         </div>
         <div className="landing-page-v3__header-actions">
-          <Link to="/" className="landing-page-v3__design-toggle">
-            <span className="landing-page-v3__design-toggle-text">Back to Original</span>
-            <svg className="landing-page-v3__design-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-          </Link>
           <Link to="/signin" className="landing-page-v3__signin-btn">
             Sign in
           </Link>
@@ -125,7 +129,7 @@ const NewLandingPage2 = () => {
         {/* Giant Background Text */}
         <div className="landing-page-v3__bg-text">
           <h1 className="landing-page-v3__bg-text-line">YOUR DINNER JUST</h1>
-          <h1 className="landing-page-v3__bg-text-line landing-page-v3__bg-text-line--second">GOT WAY EASIER.</h1>
+          <h1 className="landing-page-v3__bg-text-line landing-page-v3__bg-text-line--second">GOT <span className={`landing-page-v3__way-text ${wayItalicized ? 'landing-page-v3__way-text--italic' : ''}`}>WAY</span> EASIER.</h1>
         </div>
 
         {/* Subtitle and CTA - centered below title */}
@@ -328,7 +332,7 @@ const NewLandingPage2 = () => {
                 Meal planning made easy.
               </h2>
               <p className="landing-page-v3__feature-description">
-                Plan your whole week in minutes and view it anytime, anywhere.
+                Plan your whole week in minutes and access it anytime, anywhere — so eating well doesn't feel like a full-time job.
               </p>
               <button className="landing-page-v3__feature-cta" onClick={() => navigate('/register')}>
                 GET STARTED FOR FREE
@@ -349,7 +353,7 @@ const NewLandingPage2 = () => {
             <div className="landing-page-v3__feature-card">
               <h3 className="landing-page-v3__feature-card-title">Get expiry reminders</h3>
               <p className="landing-page-v3__feature-card-description">
-                Never miss expiration dates again. Get timely notifications about items nearing their expiry.
+                Say goodbye to wasted groceries. Trackabite reminds you <em>before</em> things go bad, so you can cook more, save more.
               </p>
               <div className="landing-page-v3__feature-card-phone">
                 <div className="landing-page-v3__feature-phone-frame">
@@ -370,9 +374,9 @@ const NewLandingPage2 = () => {
 
             {/* Right Card - Calendar Integration */}
             <div className="landing-page-v3__feature-card">
-              <h3 className="landing-page-v3__feature-card-title">Connect to your Google or iCalendar</h3>
+              <h3 className="landing-page-v3__feature-card-title">Connect to your <span style={{whiteSpace: 'nowrap'}}>Google or iCalendar</span></h3>
               <p className="landing-page-v3__feature-card-description">
-                Sync your meal plans directly to your calendar. Never forget what's for dinner.
+                Keep your week running smoothly. Sync meals to your schedule so dinner becomes simple, predictable, and one less thing to think about.
               </p>
               <div className="landing-page-v3__calendar-icons">
                 <img src={googleCalendarIcon} alt="Google Calendar" className="landing-page-v3__calendar-icon" />
@@ -399,13 +403,23 @@ const NewLandingPage2 = () => {
 
         {/* Shop Smarter Together */}
         <div className="landing-page-v3__feature-block landing-page-v3__feature-block--wide">
-          <h2 className="landing-page-v3__feature-block-title landing-page-v3__feature-block-title--left">
-            <span className="landing-page-v3__feature-block-title-small">Shop smarter.</span>
-            <span className="landing-page-v3__feature-block-title-large">Together.</span>
-          </h2>
-          <p className="landing-page-v3__feature-block-subtitle">
-            Share your shopping list with family in real-time. Everyone stays synced, no duplicate purchases, and grocery trips become a breeze.
-          </p>
+          <div className="landing-page-v3__shop-header">
+            <div className="landing-page-v3__shop-title-row">
+              <h2 className="landing-page-v3__feature-block-title landing-page-v3__feature-block-title--left">
+                <span className="landing-page-v3__feature-block-title-small">Shop smarter.</span>
+                <span className="landing-page-v3__feature-block-title-large">Together.</span>
+              </h2>
+              <img src={appLogo} alt="Trackabite mascot" className="landing-page-v3__shop-mascot" />
+            </div>
+            <div className="landing-page-v3__shop-info">
+              <p className="landing-page-v3__feature-block-subtitle">
+                Share your shopping list with family in real-time. Everyone stays synced, no duplicate purchases, and grocery trips become a breeze.
+              </p>
+              <button className="landing-page-v3__shop-cta" onClick={() => navigate('/register')}>
+                GET STARTED FOR FREE
+              </button>
+            </div>
+          </div>
           <div className="landing-page-v3__feature-wide-image">
             <img src={sharedListImage} alt="Shop smarter together" />
           </div>
@@ -574,12 +588,84 @@ const NewLandingPage2 = () => {
           Start eating better today
         </h2>
         <p className="landing-page-v3__final-cta-description">
-          Track what you've got, plan what you need, and let Trackabite do the heavy lifting.
+          Save time, reduce waste, and make everyday meals easier.<br />
+          You're just one tap away.
         </p>
         <button className="landing-page-v3__cta-btn" onClick={handleGetStarted}>
           GET STARTED FOR FREE
         </button>
       </section>
+
+      {/* Footer */}
+      <footer className="landing-page-v3__footer">
+        <div className="landing-page-v3__footer-container">
+          <div className="landing-page-v3__footer-content">
+
+            {/* Left Column - Branding */}
+            <div className="landing-page-v3__footer-brand">
+              <div className="landing-page-v3__footer-logo">
+                <img src={appLogo} alt="Trackabite logo" className="landing-page-v3__footer-logo-img" />
+                <span className="landing-page-v3__footer-brand-name">Trackabite</span>
+              </div>
+              <p className="landing-page-v3__footer-description">
+                Trackabite helps you track what's in your fridge, reduce food waste, and discover recipes — making meal planning effortless.
+              </p>
+              <a
+                href="https://instagram.com/trackabite"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="landing-page-v3__footer-social"
+                aria-label="Follow us on Instagram"
+              >
+                <svg className="landing-page-v3__footer-instagram-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+              </a>
+            </div>
+
+            {/* Right Columns - Navigation */}
+            <div className="landing-page-v3__footer-nav">
+
+              {/* Product Column */}
+              <div className="landing-page-v3__footer-column">
+                <h4 className="landing-page-v3__footer-column-title">Product</h4>
+                <ul className="landing-page-v3__footer-links">
+                  <li><Link to="/product/features">Features</Link></li>
+                  <li><Link to="/product/support">Support</Link></li>
+                </ul>
+              </div>
+
+              {/* Resources Column */}
+              <div className="landing-page-v3__footer-column">
+                <h4 className="landing-page-v3__footer-column-title">Resources</h4>
+                <ul className="landing-page-v3__footer-links">
+                  <li><Link to="/resources/blog">Blog</Link></li>
+                </ul>
+              </div>
+
+              {/* Company Column */}
+              <div className="landing-page-v3__footer-column">
+                <h4 className="landing-page-v3__footer-column-title">Company</h4>
+                <ul className="landing-page-v3__footer-links">
+                  <li><Link to="/about">About</Link></li>
+                </ul>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Footer Bottom */}
+          <div className="landing-page-v3__footer-bottom">
+            <p className="landing-page-v3__footer-copyright">
+              © {new Date().getFullYear()} Trackabite. All rights reserved.
+            </p>
+            <div className="landing-page-v3__footer-legal">
+              <Link to="/privacy">Privacy Policy</Link>
+              <Link to="/terms">Terms of Service</Link>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

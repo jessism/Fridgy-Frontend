@@ -89,8 +89,7 @@ function App() {
             <ScrollToTop />
             <NavigationListener />
             <Routes>
-          <Route path="/" element={<NewLandingPage />} />
-          <Route path="/landing2" element={<NewLandingPage2 />} />
+          <Route path="/" element={<NewLandingPage2 />} />
           <Route path="/onboarding" element={<OnboardingFlow />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/signin" element={<SignInPage />} />
