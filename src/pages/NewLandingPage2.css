@@ -463,6 +463,31 @@
   margin: 0;
 }
 
+/* "in 3 simple steps" gradient highlight animation */
+@keyframes gradientFillIn {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0% 0;
+  }
+}
+
+.landing-page-v3__steps-title-highlight {
+  display: inline;
+  background: linear-gradient(90deg, #81e053 0%, #6bc93f 50%, #222222 50%, #222222 100%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.landing-page-v3__steps-title-highlight--active {
+  animation: gradientFillIn 0.6s ease-out forwards;
+}
+
 /* Sticky Slides Container */
 .landing-page-v3__steps-sticky-container {
   position: relative;
@@ -636,6 +661,19 @@
   background: #FFFFFF;
   padding: 0;
   padding-bottom: 120px;
+  position: relative;
+}
+
+/* White block to fill in the corners behind the rounded Step 3 section */
+.landing-page-v3__features-section::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background: #FFFFFF;
+  z-index: 0;
 }
 
 .landing-page-v3__feature-block {
@@ -644,7 +682,7 @@
   align-items: center;
   justify-content: center;
   background: #F5F5F5;
-  border-radius: 40px 40px 0 0;
+  border-radius: 40px;
   margin-top: -40px;
   position: relative;
   z-index: 5;
@@ -665,6 +703,7 @@
   min-height: auto;
   padding: 60px;
   padding-top: 100px;
+  padding-bottom: 100px;
   background: #FFFFFF;
   border-radius: 40px 40px 0 0;
 }
@@ -683,7 +722,28 @@
   font-size: clamp(36px, 5vw, 56px);
   font-weight: 700;
   color: #222222;
-  margin: 0 0 40px 0;
+  margin: 0 0 80px 0;
+}
+
+/* Left-aligned variant with two-line styling */
+.landing-page-v3__feature-block-title--left {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.landing-page-v3__feature-block-title-small {
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 600;
+  display: block;
+}
+
+.landing-page-v3__feature-block-title-large {
+  font-size: clamp(48px, 7vw, 80px);
+  font-weight: 800;
+  display: block;
+  line-height: 1;
 }
 
 .landing-page-v3__feature-cards {
@@ -793,7 +853,6 @@
   color: #222222;
   line-height: 1;
   margin: 0 0 24px 0;
-  text-transform: uppercase;
   letter-spacing: -2px;
 }
 
@@ -1142,24 +1201,39 @@
   /* Features Section - Mobile */
   .landing-page-v3__features-section {
     padding: 40px 20px;
-    padding-top: 80px;
+    padding-top: 20px;
   }
 
   .landing-page-v3__feature-block {
     min-height: auto;
     padding: 40px 20px;
-    margin-top: 40px;
+    margin-top: 0;
+    border-radius: 40px;
   }
 
   /* Grid Layout - Mobile */
   .landing-page-v3__feature-block--grid {
-    padding: 40px 0;
+    padding: 60px 0;
   }
 
   .landing-page-v3__feature-block-title {
     font-size: clamp(28px, 7vw, 36px);
-    margin-bottom: 24px;
+    margin-bottom: 40px;
     text-align: center;
+  }
+
+  /* Keep left-aligned variant left on mobile */
+  .landing-page-v3__feature-block-title--left {
+    text-align: left;
+    padding-left: 20px;
+  }
+
+  .landing-page-v3__feature-block-title-small {
+    font-size: clamp(20px, 5vw, 28px);
+  }
+
+  .landing-page-v3__feature-block-title-large {
+    font-size: clamp(36px, 10vw, 56px);
   }
 
   .landing-page-v3__feature-cards {
@@ -1169,10 +1243,17 @@
 
   .landing-page-v3__feature-card {
     padding: 24px;
+    padding-top: 40px;
   }
 
   .landing-page-v3__feature-card-title {
     font-size: clamp(20px, 5vw, 24px);
+    margin-bottom: 20px;
+  }
+
+  .landing-page-v3__feature-card-description {
+    margin-top: 0;
+    margin-bottom: 32px;
   }
 
   .landing-page-v3__feature-card-phone .landing-page-v3__feature-phone-frame {
@@ -1184,13 +1265,25 @@
     padding: 40px 0;
   }
 
+  .landing-page-v3__feature-block--wide .landing-page-v3__feature-block-title--left {
+    padding-left: 0;
+  }
+
+  .landing-page-v3__feature-block--wide .landing-page-v3__feature-block-subtitle {
+    padding-left: 0;
+    padding-right: 20px;
+  }
+
   .landing-page-v3__feature-block-subtitle {
     font-size: 1rem;
-    margin-bottom: 24px;
+    margin-bottom: 40px;
   }
 
   .landing-page-v3__feature-wide-image {
     border-radius: 16px;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
   }
 
   .landing-page-v3__feature-block-content {
@@ -1294,11 +1387,24 @@
 /* ===== TESTIMONIAL SECTION ===== */
 .landing-page-v3__testimonial {
   padding: 100px 40px;
+  padding-bottom: 100px;
   background: #F5F5F5;
   border-radius: 40px 40px 0 0;
   margin-top: 80px;
+  margin-bottom: 0;
   position: relative;
   z-index: 15;
+}
+
+.landing-page-v3__testimonial::after {
+  content: '';
+  position: absolute;
+  bottom: -100px;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: #F5F5F5;
+  z-index: -1;
 }
 
 .landing-page-v3__testimonial-content {
@@ -1322,7 +1428,11 @@
 }
 
 .landing-page-v3__testimonial-highlight {
-  color: #4a7c2e;
+  background: linear-gradient(90deg, #a8f078 0%, #81e053 50%, #6bc93f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 .landing-page-v3__testimonial-description {
@@ -1349,19 +1459,19 @@
   min-width: calc((100% - 60px) / 3);
   flex: 0 0 calc((100% - 60px) / 3);
   background: white;
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
+  border: none;
+  border-radius: 16px;
   padding: 32px 24px;
   display: flex;
   flex-direction: column;
   gap: 20px;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 .landing-page-v3__testimonial-card:hover {
-  border-color: #a8f078;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(168, 240, 120, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
 .landing-page-v3__testimonial-text {
@@ -1469,5 +1579,48 @@
 
   .landing-page-v3__testimonial-nav {
     display: none;
+  }
+}
+
+/* ===== FINAL CTA SECTION ===== */
+.landing-page-v3__final-cta {
+  padding: 80px 40px;
+  background: #a8f078;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-top: 0;
+  border-radius: 40px 40px 0 0;
+  position: relative;
+  top: -40px;
+  margin-bottom: -40px;
+}
+
+.landing-page-v3__final-cta-tagline {
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 700;
+  color: #4a7c2e;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+.landing-page-v3__final-cta-description {
+  font-size: 1.125rem;
+  color: #2d4a1c;
+  margin: 0 0 32px 0;
+  max-width: 500px;
+  line-height: 1.5;
+}
+
+/* Final CTA - Mobile */
+@media (max-width: 768px) {
+  .landing-page-v3__final-cta {
+    padding: 40px 20px;
+  }
+
+  .landing-page-v3__final-cta-tagline {
+    font-size: clamp(24px, 6vw, 32px);
   }
 }

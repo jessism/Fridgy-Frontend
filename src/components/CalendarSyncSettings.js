@@ -20,6 +20,7 @@ const CalendarSyncSettings = () => {
     preferences,
     // ICS Modal state
     showICSModal,
+    pendingWebcalUrl,
     // Connection actions
     connectGoogle,
     connectICS,

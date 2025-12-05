@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/context/AuthContext';
 import appLogo from '../assets/images/Logo.png';
@@ -11,6 +11,8 @@ import step2Video from '../assets/product mockup/Save recipes.mp4';
 import step3Image from '../assets/product mockup/Homepage_Step3.jpeg';
 import step3Video from '../assets/product mockup/Personalized recipes.mp4';
 import sharedListImage from '../assets/product mockup/Share_List_People.png';
+import mealPlanningVideo from '../assets/product mockup/Meal planning.mp4';
+import reminderVideo from '../assets/product mockup/Reminder.mp4';
 import googleCalendarIcon from '../assets/icons/Google calendar.png';
 import appleCalendarIcon from '../assets/icons/Apple Calendar.png';
 import './NewLandingPage2.css';
@@ -18,6 +20,8 @@ import './NewLandingPage2.css';
 const NewLandingPage2 = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [highlightVisible, setHighlightVisible] = useState(false);
+  const highlightRef = useRef(null);
   const totalTestimonials = 10;
   const navigate = useNavigate();
   const { isAuthenticated, loading } = useAuth();
@@ -54,6 +58,30 @@ const NewLandingPage2 = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Intersection Observer for "in 3 simple steps" highlight effect
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setHighlightVisible(true);
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    if (highlightRef.current) {
+      observer.observe(highlightRef.current);
+    }
+
+    return () => {
+      if (highlightRef.current) {
+        observer.unobserve(highlightRef.current);
+      }
+    };
   }, []);
 
   const handleGetStarted = () => {
@@ -113,7 +141,7 @@ const NewLandingPage2 = () => {
         <span className="landing-page-v3__index">(01)</span>
 
         {/* Year */}
-        <span className="landing-page-v3__year">2024</span>
+        <span className="landing-page-v3__year">2025</span>
 
         {/* Phones Row - Tagline on left, Phones in center */}
         <div className="landing-page-v3__phones-row">
@@ -173,7 +201,10 @@ const NewLandingPage2 = () => {
         {/* Section Title */}
         <div className="landing-page-v3__steps-header">
           <h2 className="landing-page-v3__steps-title">
-            Plan smarter, eat smarter<br />
+            <span
+              ref={highlightRef}
+              className={`landing-page-v3__steps-title-highlight ${highlightVisible ? 'landing-page-v3__steps-title-highlight--active' : ''}`}
+            >Plan smarter, eat better</span><br />
             in 3 simple steps
           </h2>
         </div>
@@ -278,15 +309,20 @@ const NewLandingPage2 = () => {
               <div className="landing-page-v3__feature-phone-frame">
                 <div className="landing-page-v3__feature-phone-notch"></div>
                 <div className="landing-page-v3__feature-phone-screen">
-                  <img src={step3Image} alt="Meal planning" className="landing-page-v3__feature-phone-img" />
+                  <video
+                      src={mealPlanningVideo}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="landing-page-v3__feature-phone-img"
+                    />
                 </div>
               </div>
             </div>
             <div className="landing-page-v3__feature-text">
               <h2 className="landing-page-v3__feature-heading">
-                Meal<br />
-                planning<br />
-                made easy
+                Meal planning made easy.
               </h2>
               <p className="landing-page-v3__feature-description">
                 Plan your whole week in minutes and view it anytime, anywhere.
@@ -300,7 +336,10 @@ const NewLandingPage2 = () => {
 
         {/* Stay Connected Section */}
         <div className="landing-page-v3__feature-block landing-page-v3__feature-block--grid">
-          <h2 className="landing-page-v3__feature-block-title">Always stay connected.</h2>
+          <h2 className="landing-page-v3__feature-block-title landing-page-v3__feature-block-title--left">
+            <span className="landing-page-v3__feature-block-title-small">Always stay</span>
+            <span className="landing-page-v3__feature-block-title-large">Connected.</span>
+          </h2>
 
           <div className="landing-page-v3__feature-cards">
             {/* Left Card - Expiry Reminders */}
@@ -313,7 +352,14 @@ const NewLandingPage2 = () => {
                 <div className="landing-page-v3__feature-phone-frame">
                   <div className="landing-page-v3__feature-phone-notch"></div>
                   <div className="landing-page-v3__feature-phone-screen">
-                    <img src={step1Image} alt="Expiry reminders" className="landing-page-v3__feature-phone-img" />
+                    <video
+                      src={reminderVideo}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="landing-page-v3__feature-phone-img"
+                    />
                   </div>
                 </div>
               </div>
@@ -343,7 +389,10 @@ const NewLandingPage2 = () => {
 
         {/* Shop Smarter Together */}
         <div className="landing-page-v3__feature-block landing-page-v3__feature-block--wide">
-          <h2 className="landing-page-v3__feature-block-title">Shop smarter together.</h2>
+          <h2 className="landing-page-v3__feature-block-title landing-page-v3__feature-block-title--left">
+            <span className="landing-page-v3__feature-block-title-small">Shop smarter.</span>
+            <span className="landing-page-v3__feature-block-title-large">Together.</span>
+          </h2>
           <p className="landing-page-v3__feature-block-subtitle">
             Share your shopping list with family in real-time. Everyone stays synced, no duplicate purchases, and grocery trips become a breeze.
           </p>
@@ -507,6 +556,19 @@ const NewLandingPage2 = () => {
 
         </div>
         </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section className="landing-page-v3__final-cta">
+        <h2 className="landing-page-v3__final-cta-tagline">
+          Start eating better today
+        </h2>
+        <p className="landing-page-v3__final-cta-description">
+          Track what you've got, plan what you need, and let Trackabite do the heavy lifting.
+        </p>
+        <button className="landing-page-v3__cta-btn" onClick={handleGetStarted}>
+          GET STARTED FOR FREE
+        </button>
       </section>
     </div>
   );

@@ -171,10 +171,8 @@ const useCalendarSync = () => {
       setPendingWebcalUrl(data.webcalUrl);
       setPendingDownloadUrl(data.downloadUrl);
 
-      // Open webcal:// URL immediately (triggers system dialog)
-      window.location.href = data.webcalUrl;
-
-      // Show confirmation modal (will appear after system dialog)
+      // Show modal with clickable link - iOS Safari blocks programmatic
+      // navigation to custom URL schemes after async operations
       setShowICSModal(true);
     } catch (err) {
       console.error('[CalendarSync] Error starting ICS connection:', err);
