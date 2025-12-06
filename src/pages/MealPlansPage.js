@@ -39,6 +39,16 @@ const MealPlansPage = ({ defaultTab }) => {
   // Tab state management
   const [activeTab, setActiveTab] = useState(defaultTab || 'meals');
 
+  // Recipe search state
+  const [recipeSearchTerm, setRecipeSearchTerm] = useState('');
+
+  // Recipe filter state
+  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'sources' | 'time'
+
+  // All recipes combined state (for "All" filter view)
+  const [allRecipes, setAllRecipes] = useState([]);
+  const [allRecipesLoading, setAllRecipesLoading] = useState(false);
+
   // Saved recipes state
   const [savedRecipes, setSavedRecipes] = useState([]);
   const [savedRecipesLoading, setSavedRecipesLoading] = useState(true);
@@ -102,6 +112,9 @@ const MealPlansPage = ({ defaultTab }) => {
   // Track hidden recipes (for session-only deletion)
   const [hiddenRecipeIds, setHiddenRecipeIds] = useState(new Set());
 
+  // Track which recipe is being deleted (for loading state)
+  const [deletingRecipeId, setDeletingRecipeId] = useState(null);
+
   // API base URL
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -119,8 +132,7 @@ const MealPlansPage = ({ defaultTab }) => {
 
       // Fetch uploaded recipes with filter
       const params = new URLSearchParams({
-        filter: 'uploaded',
-        limit: 2
+        filter: 'uploaded'
       });
 
       const response = await fetch(`${API_BASE_URL}/saved-recipes?${params}`, {
@@ -174,8 +186,7 @@ const MealPlansPage = ({ defaultTab }) => {
       }
 
       const params = new URLSearchParams({
-        filter: 'imported',
-        limit: 2
+        filter: 'imported'
       });
 
       const response = await fetch(`${API_BASE_URL}/saved-recipes?${params}`, {
@@ -386,6 +397,63 @@ const MealPlansPage = ({ defaultTab }) => {
     }
   };
 
+  // Fetch all recipes for "All" filter view
+  const fetchAllRecipes = async () => {
+    setAllRecipesLoading(true);
+    const token = localStorage.getItem('fridgy_token');
+    if (!token) {
+      setAllRecipes([]);
+      setAllRecipesLoading(false);
+      return;
+    }
+
+    try {
+      // Fetch ALL saved recipes (no limit, no filter - gets both imported and uploaded)
+      const savedResponse = await fetch(`${API_BASE_URL}/saved-recipes`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const savedData = savedResponse.ok ? await savedResponse.json() : { recipes: [] };
+
+      // Fetch ALL AI recipes
+      const aiResponse = await fetch(`${API_BASE_URL}/ai-recipes/history`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const aiData = aiResponse.ok ? await aiResponse.json() : { data: { generations: [] } };
+
+      // Normalize AI recipes (flatten generations)
+      const aiRecipes = (aiData.data?.generations || []).flatMap((gen) =>
+        (gen.recipes || []).map((recipe, recipeIndex) => ({
+          ...recipe,
+          id: `ai-${gen.id}-${recipeIndex}`,
+          _type: 'ai',
+          _imageUrl: gen.image_urls?.[recipeIndex],
+          _createdAt: gen.created_at
+        }))
+      );
+
+      // Normalize saved recipes (mark type based on source_type)
+      const normalizedSaved = (savedData.recipes || []).map(recipe => ({
+        ...recipe,
+        _type: recipe.import_method ? 'uploaded' : 'imported'
+      }));
+
+      // Combine and sort by created_at (newest first)
+      const combined = [...normalizedSaved, ...aiRecipes].sort((a, b) => {
+        const dateA = new Date(a.created_at || a._createdAt || 0);
+        const dateB = new Date(b.created_at || b._createdAt || 0);
+        return dateB - dateA;
+      });
+
+      console.log('[MealPlans] All recipes combined:', combined.length);
+      setAllRecipes(combined);
+    } catch (error) {
+      console.error('[MealPlans] Error fetching all recipes:', error);
+      setAllRecipes([]);
+    } finally {
+      setAllRecipesLoading(false);
+    }
+  };
+
   // Handle tab switching based on props and URL changes
   useEffect(() => {
     if (defaultTab) {
@@ -422,6 +490,13 @@ const MealPlansPage = ({ defaultTab }) => {
     // Fetch upcoming meal plans
     fetchUpcomingMeals();
   }, []); // Only fetch once on mount
+
+  // Fetch all recipes when filter is 'all' (including on mount since 'all' is default)
+  useEffect(() => {
+    if (activeFilter === 'all') {
+      fetchAllRecipes();
+    }
+  }, [activeFilter]);
 
   // Auto-advance tour step when landing on Meals page
   useEffect(() => {
@@ -619,6 +694,100 @@ const MealPlansPage = ({ defaultTab }) => {
     setIsModalOpen(false);
     setSelectedRecipe(null);
   };
+
+  // Handle toggling favorite in "All" view
+  const handleToggleFavoriteInAllView = async (recipeId, event) => {
+    event.stopPropagation();
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      const response = await fetch(`${API_BASE_URL}/saved-recipes/${recipeId}/favorite`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        // Update in allRecipes state
+        setAllRecipes(prev =>
+          prev.map(recipe =>
+            recipe.id === recipeId
+              ? { ...recipe, is_favorite: !recipe.is_favorite }
+              : recipe
+          )
+        );
+        // Also update in savedRecipes if present
+        setSavedRecipes(prev =>
+          prev.map(recipe =>
+            recipe.id === recipeId
+              ? { ...recipe, is_favorite: !recipe.is_favorite }
+              : recipe
+          )
+        );
+      }
+    } catch (error) {
+      console.error('[MealPlans] Error toggling favorite:', error);
+    }
+  };
+
+  // Handle delete from "All" view (with event.stopPropagation)
+  const handleDeleteFromAllView = async (recipeId, recipeType, event) => {
+    event.stopPropagation();
+
+    // Prevent multiple clicks
+    if (deletingRecipeId === recipeId) return;
+
+    setDeletingRecipeId(recipeId);
+
+    try {
+      // AI recipes can't be deleted from here - just remove from view
+      if (recipeType === 'ai') {
+        setAllRecipes(prev => prev.filter(r => r.id !== recipeId));
+        setDeletingRecipeId(null);
+        return;
+      }
+
+      // For saved/uploaded recipes, delete from database
+      const token = localStorage.getItem('fridgy_token');
+      const response = await fetch(`${API_BASE_URL}/saved-recipes/${recipeId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        console.log('[MealPlans] Recipe deleted successfully');
+        setAllRecipes(prev => prev.filter(r => r.id !== recipeId));
+        setSavedRecipes(prev => prev.filter(r => r.id !== recipeId));
+        setUserUploadedRecipes(prev => prev.filter(r => r.id !== recipeId));
+      } else {
+        console.error('[MealPlans] Failed to delete recipe');
+      }
+    } catch (error) {
+      console.error('[MealPlans] Error deleting recipe:', error);
+    } finally {
+      setDeletingRecipeId(null);
+    }
+  };
+
+  // Filter recipes based on search term
+  const filterRecipes = (recipes, term) => {
+    if (!term.trim()) return recipes;
+    const lowerTerm = term.toLowerCase();
+    return recipes.filter(recipe =>
+      recipe.title?.toLowerCase().includes(lowerTerm) ||
+      recipe.source_author?.toLowerCase().includes(lowerTerm)
+    );
+  };
+
+  const filteredSavedRecipes = filterRecipes(savedRecipes, recipeSearchTerm);
+  const filteredUploadedRecipes = filterRecipes(userUploadedRecipes, recipeSearchTerm);
+  const filteredPastAIRecipes = pastAIRecipes.filter(generation => {
+    if (!recipeSearchTerm.trim()) return true;
+    const lowerTerm = recipeSearchTerm.toLowerCase();
+    return generation.recipes?.some(r => r.title?.toLowerCase().includes(lowerTerm));
+  });
 
   const renderRecipeCard = (recipe, isPreference = false) => (
     <div 
@@ -831,11 +1000,18 @@ const MealPlansPage = ({ defaultTab }) => {
               setImageStates(prev => ({ ...prev, [recipe.id]: 'loaded' }));
             }}
           />
-          {recipe.source_type === 'instagram' && (
-            <div className="meal-plans-page__saved-recipe-badge">
-              <span>Instagram</span>
-            </div>
-          )}
+          {/* Badge for recipe source */}
+          {(() => {
+            if (recipe.source_type === 'instagram') {
+              return <div className="meal-plans-page__saved-recipe-badge"><span>Instagram</span></div>;
+            }
+            if (recipe.source_type === 'url' ||
+                recipe.source_type === 'website' ||
+                (recipe.source_url && !recipe.source_url.includes('instagram'))) {
+              return <div className="meal-plans-page__saved-recipe-badge"><span>Web Blog</span></div>;
+            }
+            return null;
+          })()}
         </div>
         <div className="meal-plans-page__saved-recipe-content">
           <h3 className="meal-plans-page__saved-recipe-title">{recipe.title}</h3>
@@ -941,6 +1117,165 @@ const MealPlansPage = ({ defaultTab }) => {
                 {recipe.servings} servings
               </span>
             )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Render unified recipe card for "All" filter view (with heart and trash icons)
+  const renderUnifiedRecipeCard = (recipe) => {
+    // Helper function to check if URL needs proxying
+    const needsProxy = (url) => {
+      return url &&
+             (url.includes('cdninstagram.com') ||
+              url.includes('instagram.com') ||
+              url.includes('fbcdn.net') ||
+              url.includes('instagram.')) &&
+             !url.includes('URL_OF_IMAGE') &&
+             !url.includes('example.com') &&
+             url !== 'URL of image';
+    };
+
+    // Get image URL based on recipe type
+    let imageUrl;
+    if (recipe._type === 'ai') {
+      imageUrl = recipe._imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+    } else {
+      const baseImageUrl = recipe.image || recipe.image_urls?.[0];
+      if (!baseImageUrl) {
+        imageUrl = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+      } else if (needsProxy(baseImageUrl)) {
+        imageUrl = `${API_BASE_URL}/proxy-image?url=${encodeURIComponent(baseImageUrl)}`;
+      } else {
+        imageUrl = baseImageUrl;
+      }
+    }
+
+    // Get badge text
+    const getBadgeText = () => {
+      if (recipe._type === 'ai') return 'AI Generated';
+      if (recipe.source_type === 'instagram') return 'Instagram';
+      // Check for web-imported recipes (URL/website source or has source_url that's not Instagram)
+      if (recipe.source_type === 'url' ||
+          recipe.source_type === 'website' ||
+          (recipe.source_url && !recipe.source_url.includes('instagram'))) {
+        return 'Web Blog';
+      }
+      if (recipe._type === 'uploaded' || recipe.import_method) return 'Uploaded';
+      return null;
+    };
+
+    const badgeText = getBadgeText();
+
+    // Parse time for AI recipes
+    const getReadyTime = () => {
+      if (recipe.readyInMinutes) return recipe.readyInMinutes;
+      if (recipe.total_time) {
+        const match = String(recipe.total_time).match(/(\d+)/);
+        return match ? parseInt(match[1]) : null;
+      }
+      return null;
+    };
+
+    const readyTime = getReadyTime();
+
+    const handleCardClick = () => {
+      if (recipe._type === 'ai') {
+        handleViewAIRecipeDetails(recipe, recipe._imageUrl);
+      } else {
+        handleViewRecipeDetails(recipe);
+      }
+    };
+
+    // AI recipes don't support favorite (no database record)
+    const showFavoriteButton = recipe._type !== 'ai';
+
+    return (
+      <div
+        key={recipe.id}
+        className="meal-plans-page__saved-recipe-card"
+        onClick={handleCardClick}
+      >
+        <div className="meal-plans-page__saved-recipe-image">
+          <img
+            src={imageUrl}
+            alt={recipe.title}
+            className="meal-plans-page__recipe-img meal-plans-page__recipe-img--loaded"
+            onError={(e) => {
+              if (!e.target.dataset.failed) {
+                e.target.dataset.failed = 'true';
+                e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+              }
+            }}
+          />
+          {badgeText && (
+            <div className="meal-plans-page__saved-recipe-badge">
+              <span>{badgeText}</span>
+            </div>
+          )}
+        </div>
+        <div className="meal-plans-page__saved-recipe-content">
+          <h3 className="meal-plans-page__saved-recipe-title">{recipe.title}</h3>
+          {recipe.source_author && (
+            <p className="meal-plans-page__saved-recipe-author">@{recipe.source_author}</p>
+          )}
+          <div className="meal-plans-page__saved-recipe-meta">
+            {readyTime && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="#666" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M12 6V12L15 15" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                {readyTime} min
+              </span>
+            )}
+            {recipe.servings && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <rect x="5" y="6" width="14" height="13" rx="2" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M10 12h4" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                {recipe.servings} servings
+              </span>
+            )}
+          </div>
+
+          {/* Action buttons - Heart and Trash */}
+          <div className="meal-plans-page__recipe-actions">
+            {showFavoriteButton && (
+              <button
+                className={`meal-plans-page__favorite-btn ${recipe.is_favorite ? 'active' : ''}`}
+                onClick={(e) => handleToggleFavoriteInAllView(recipe.id, e)}
+              >
+                {recipe.is_favorite ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#4fcf61" stroke="#4fcf61" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                )}
+              </button>
+            )}
+            <button
+              className={`meal-plans-page__delete-btn ${deletingRecipeId === recipe.id ? 'deleting' : ''}`}
+              onClick={(e) => handleDeleteFromAllView(recipe.id, recipe._type, e)}
+              disabled={deletingRecipeId === recipe.id}
+            >
+              {deletingRecipeId === recipe.id ? (
+                <span>...</span>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="3,6 5,6 21,6"/>
+                  <path d="M19,6v14a2,2 0 0,1-2,2H7a2,2 0 0,1-2-2V6m3,0V4a2,2 0 0,1,2-2h4a2,2 0 0,1,2,2v2"/>
+                  <line x1="10" y1="11" x2="10" y2="17"/>
+                  <line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+              )}
+            </button>
           </div>
         </div>
       </div>
@@ -1310,6 +1645,133 @@ const MealPlansPage = ({ defaultTab }) => {
             <>
               {/* Recipes Tab Content */}
 
+              {/* Recipe Search Bar */}
+              <div className="meal-plans-page__search-container">
+                <svg className="meal-plans-page__search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search recipes..."
+                  value={recipeSearchTerm}
+                  onChange={(e) => setRecipeSearchTerm(e.target.value)}
+                  className="meal-plans-page__search-input"
+                />
+                {recipeSearchTerm && (
+                  <button
+                    onClick={() => setRecipeSearchTerm('')}
+                    className="meal-plans-page__search-clear"
+                    title="Clear search"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2"/>
+                      <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2"/>
+                    </svg>
+                  </button>
+                )}
+              </div>
+
+              {/* Filter Pills */}
+              <div className="meal-plans-page__filter-pills">
+                <button
+                  className={`meal-plans-page__filter-pill ${activeFilter === 'all' ? 'meal-plans-page__filter-pill--active' : ''}`}
+                  onClick={() => setActiveFilter('all')}
+                >
+                  All
+                </button>
+                <button
+                  className={`meal-plans-page__filter-pill ${activeFilter === 'sources' ? 'meal-plans-page__filter-pill--active' : ''}`}
+                  onClick={() => setActiveFilter('sources')}
+                >
+                  By sources
+                </button>
+                <button
+                  className={`meal-plans-page__filter-pill ${activeFilter === 'mealtype' ? 'meal-plans-page__filter-pill--active' : ''}`}
+                  onClick={() => setActiveFilter('mealtype')}
+                >
+                  Meal type
+                </button>
+              </div>
+
+              {/* Conditional content based on active filter */}
+              {activeFilter === 'all' ? (
+                /* ALL RECIPES VIEW - Unified grid */
+                <>
+                  {/* Easy AI Recipes Section */}
+                  <div className="meal-plans-page__easy-ai-section">
+                    <h2 className="meal-plans-page__easy-ai-title">Easy AI Recipes</h2>
+                    <button
+                      className="meal-plans-page__generate-new-btn"
+                      onClick={() => {
+                        navigate('/ai-recipes');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M14.5 2L15.5 8L21 9.5L15.5 11L14.5 17L13.5 11L8 9.5L13.5 8L14.5 2Z"/>
+                        <path d="M5.5 0L6 3L9 4L6 5L5.5 8L5 5L2 4L5 3L5.5 0Z"/>
+                        <path d="M6 16L6.5 19L9.5 20L6.5 21L6 24L5.5 21L2.5 20L5.5 19L6 16Z"/>
+                      </svg>
+                      <span>Generate new</span>
+                    </button>
+                  </div>
+
+                  <div className="meal-plans-page__all-recipes-section">
+                    <h2 className="meal-plans-page__section-title">All Recipes</h2>
+                  {allRecipesLoading ? (
+                    <div className="meal-plans-page__saved-recipes-grid">
+                      {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="meal-plans-page__saved-recipe-card loading">
+                          <div className="meal-plans-page__saved-recipe-image">
+                            <div className="loading-placeholder" style={{ height: '120px' }}></div>
+                          </div>
+                          <div className="meal-plans-page__saved-recipe-content">
+                            <div className="loading-placeholder" style={{ height: '16px', marginBottom: '8px' }}></div>
+                            <div className="loading-placeholder" style={{ height: '12px' }}></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : allRecipes.length > 0 ? (
+                    <div className="meal-plans-page__all-recipes-grid">
+                      {allRecipes.map(recipe => renderUnifiedRecipeCard(recipe))}
+                    </div>
+                  ) : (
+                    <div className="meal-plans-page__saved-recipes-empty">
+                      <p className="meal-plans-page__saved-recipes-empty-text">No recipes yet</p>
+                      <button
+                        className="meal-plans-page__saved-recipes-empty-button"
+                        onClick={() => navigate('/import')}
+                      >
+                        Import Your First Recipe
+                      </button>
+                    </div>
+                  )}
+                  </div>
+                </>
+              ) : activeFilter === 'sources' ? (
+                /* BY SOURCES VIEW - Sectioned layout (existing) */
+                <>
+                  {/* Easy AI Recipes Section */}
+              <div className="meal-plans-page__easy-ai-section">
+                <h2 className="meal-plans-page__easy-ai-title">Easy AI Recipes</h2>
+                <button
+                  className="meal-plans-page__generate-new-btn"
+                  onClick={() => {
+                    navigate('/ai-recipes');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14.5 2L15.5 8L21 9.5L15.5 11L14.5 17L13.5 11L8 9.5L13.5 8L14.5 2Z"/>
+                    <path d="M5.5 0L6 3L9 4L6 5L5.5 8L5 5L2 4L5 3L5.5 0Z"/>
+                    <path d="M6 16L6.5 19L9.5 20L6.5 21L6 24L5.5 21L2.5 20L5.5 19L6 16Z"/>
+                  </svg>
+                  <span>Generate new</span>
+                </button>
+              </div>
+
               {/* Your Saved Recipes Section */}
               <div className="meal-plans-page__analytics-section">
                 {/* Text Section */}
@@ -1317,17 +1779,6 @@ const MealPlansPage = ({ defaultTab }) => {
                   <div className="meal-plans-page__section-header-with-action">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
                       <h2 className="meal-plans-page__section-title" style={{ margin: 0 }}>Imported recipes</h2>
-                      <button
-                        className="meal-plans-page__import-add-button"
-                        onClick={() => navigate('/import')}
-                        title="Import recipe"
-                        style={{ position: 'relative', top: 'auto', right: 'auto' }}
-                      >
-                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                          <circle cx="16" cy="16" r="14" fill="var(--primary-green)"/>
-                          <path d="M16 10V22M10 16H22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                        </svg>
-                      </button>
                       {savedRecipes.length > 0 && (
                         <button
                           className="meal-plans-page__view-more-arrow-btn"
@@ -1369,10 +1820,9 @@ const MealPlansPage = ({ defaultTab }) => {
                       </div>
                     </div>
                   </div>
-                ) : savedRecipes.length > 0 ? (
-                  <div className="meal-plans-page__saved-recipes-grid">
-                    {savedRecipes.slice(0, 2).map(recipe => renderSavedRecipeCard(recipe, true))}
-                    {savedRecipes.length === 1 && renderImportPromptCard()}
+                ) : filteredSavedRecipes.length > 0 ? (
+                  <div className="meal-plans-page__recipes-slider">
+                    {filteredSavedRecipes.map(recipe => renderSavedRecipeCard(recipe, true))}
                   </div>
                 ) : (
                   renderSavedRecipesEmptyState()
@@ -1384,16 +1834,6 @@ const MealPlansPage = ({ defaultTab }) => {
                 <div className="meal-plans-page__section-header-with-action">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
                     <h2 className="meal-plans-page__section-title" style={{ margin: 0 }}>Uploaded recipes</h2>
-                    <button
-                      className="meal-plans-page__add-button"
-                      onClick={() => setShowRecipeCreationModal(true)}
-                      style={{ position: 'relative', top: 'auto', right: 'auto' }}
-                    >
-                      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                        <circle cx="16" cy="16" r="14" fill="var(--primary-green)"/>
-                        <path d="M16 10V22M10 16H22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                      </svg>
-                    </button>
                     {userUploadedRecipes.length > 0 && (
                       <button
                         className="meal-plans-page__view-more-arrow-btn"
@@ -1412,9 +1852,9 @@ const MealPlansPage = ({ defaultTab }) => {
                   <div style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>
                     Loading...
                   </div>
-                ) : userUploadedRecipes.length > 0 ? (
-                  <div className="meal-plans-page__saved-recipes-grid">
-                    {userUploadedRecipes.slice(0, 2).map(recipe => renderSavedRecipeCard(recipe, true))}
+                ) : filteredUploadedRecipes.length > 0 ? (
+                  <div className="meal-plans-page__recipes-slider">
+                    {filteredUploadedRecipes.map(recipe => renderSavedRecipeCard(recipe, true))}
                   </div>
                 ) : (
                   <div style={{ padding: '2rem', textAlign: 'center' }}>
@@ -1427,7 +1867,7 @@ const MealPlansPage = ({ defaultTab }) => {
               <AIRecipeSection />
 
               {/* Your Past AI Recipes Section (Available for ALL users!) */}
-              {pastAIRecipes.length > 0 && (
+              {filteredPastAIRecipes.length > 0 && (
                 <div className="meal-plans-page__analytics-section" style={{ marginTop: '40px' }}>
                   <div className="meal-plans-page__analytics-text-section">
                     <div className="meal-plans-page__section-header-with-action">
@@ -1474,7 +1914,7 @@ const MealPlansPage = ({ defaultTab }) => {
                     </div>
                   ) : (
                     <div className="meal-plans-page__saved-recipes-grid">
-                      {pastAIRecipes.slice(0, 2).map((generation, genIndex) => {
+                      {filteredPastAIRecipes.slice(0, 2).map((generation, genIndex) => {
                         // Show first recipe from each generation (each generation has 3 recipes)
                         const recipe = generation.recipes[0];
                         // Image URLs are stored in the generation object
@@ -1494,6 +1934,77 @@ const MealPlansPage = ({ defaultTab }) => {
                     </div>
                   )}
                 </div>
+              )}
+                </>
+              ) : (
+                /* BY MEAL TYPE VIEW - Filter by dish types */
+                (() => {
+                  // Define meal type categories and their matching dishTypes
+                  const mealTypeCategories = [
+                    { name: 'Breakfast', matches: ['breakfast'] },
+                    { name: 'Lunch', matches: ['lunch', 'main course'] },
+                    { name: 'Dinner', matches: ['dinner', 'main course'] },
+                    { name: 'Desserts', matches: ['dessert'] },
+                    { name: 'Drinks / Beverages', matches: ['beverage', 'drink'] },
+                    { name: 'Sides', matches: ['side dish'] },
+                    { name: 'Appetizers', matches: ['appetizer', 'fingerfood'] },
+                    { name: 'Soups', matches: ['soup'] },
+                    { name: 'Salads', matches: ['salad'] },
+                  ];
+
+                  // Filter recipes for each category
+                  const getRecipesForCategory = (matches) => {
+                    return allRecipes.filter(recipe => {
+                      const dishTypes = recipe.dishTypes || recipe.dish_types || [];
+                      return dishTypes.some(dt =>
+                        matches.some(match => dt?.toLowerCase().includes(match.toLowerCase()))
+                      );
+                    });
+                  };
+
+                  // Check if any category has recipes
+                  const hasAnyRecipes = mealTypeCategories.some(cat => getRecipesForCategory(cat.matches).length > 0);
+
+                  return (
+                    <div className="meal-plans-page__meal-type-section">
+                      {allRecipesLoading ? (
+                        <div style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>
+                          Loading...
+                        </div>
+                      ) : !hasAnyRecipes ? (
+                        <div className="meal-plans-page__saved-recipes-empty">
+                          <p className="meal-plans-page__saved-recipes-empty-text">No recipes yet</p>
+                          <button
+                            className="meal-plans-page__saved-recipes-empty-button"
+                            onClick={() => navigate('/import')}
+                          >
+                            Import Your First Recipe
+                          </button>
+                        </div>
+                      ) : (
+                        mealTypeCategories.map(category => {
+                          const categoryRecipes = getRecipesForCategory(category.matches);
+                          if (categoryRecipes.length === 0) return null;
+
+                          return (
+                            <div key={category.name} className="meal-plans-page__analytics-section" style={{ marginBottom: '1.5rem' }}>
+                              <div className="meal-plans-page__analytics-text-section">
+                                <div className="meal-plans-page__section-header-with-action">
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+                                    <h2 className="meal-plans-page__section-title" style={{ margin: 0 }}>{category.name}</h2>
+                                  </div>
+                                </div>
+                                <div className="meal-plans-page__saved-recipes-grid" style={{ marginTop: '1rem' }}>
+                                  {categoryRecipes.slice(0, 4).map(recipe => renderUnifiedRecipeCard(recipe))}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  );
+                })()
               )}
             </>
           )}

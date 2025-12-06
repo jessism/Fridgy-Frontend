@@ -200,6 +200,34 @@
   }
 }
 
+/* Horizontal Recipes Slider */
+.meal-plans-page__recipes-slider {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+  margin-left: -1rem;
+  margin-right: -1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.meal-plans-page__recipes-slider::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.meal-plans-page__recipes-slider > * {
+  flex: 0 0 45%;
+  min-width: 45%;
+  max-width: 45%;
+  scroll-snap-align: start;
+}
+
 /* My Uploaded Recipes Section */
 .meal-plans-page__uploaded-section {
   margin-bottom: 2rem;
@@ -851,4 +879,224 @@
   .meal-plans-page__recipe-card {
     margin: 0 -0.5rem;
   }
+}
+
+/* Recipe Search Bar */
+.meal-plans-page__search-container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 1.5rem;
+}
+
+.meal-plans-page__search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.meal-plans-page__search-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 16px 0 48px;
+  border: none;
+  border-radius: 22px;
+  background: #f5f5f5;
+  font-size: 1rem;
+  color: #333;
+  outline: none;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.meal-plans-page__search-input:focus {
+  background: #f0f0f0;
+  box-shadow: none;
+}
+
+.meal-plans-page__search-input::placeholder {
+  color: #aaa;
+  font-weight: 400;
+}
+
+.meal-plans-page__search-clear {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.meal-plans-page__search-clear:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+/* Filter Pills */
+.meal-plans-page__filter-pills {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.meal-plans-page__filter-pills::-webkit-scrollbar {
+  display: none;
+}
+
+.meal-plans-page__filter-pill {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid #e0e0e0;
+  background: white;
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.meal-plans-page__filter-pill:hover {
+  border-color: #ccc;
+  background: #fafafa;
+}
+
+.meal-plans-page__filter-pill--active {
+  background: #333;
+  color: white;
+  border-color: #333;
+}
+
+.meal-plans-page__filter-pill--active:hover {
+  background: #222;
+  border-color: #222;
+}
+
+/* All Recipes Section (for "All" filter view) */
+.meal-plans-page__all-recipes-section {
+  margin-bottom: 2rem;
+}
+
+.meal-plans-page__all-recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 769px) {
+  .meal-plans-page__all-recipes-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .meal-plans-page__all-recipes-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Recipe Card Actions (Heart and Trash buttons) */
+.meal-plans-page__recipe-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.meal-plans-page__favorite-btn,
+.meal-plans-page__delete-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.meal-plans-page__favorite-btn:hover,
+.meal-plans-page__delete-btn:hover {
+  background: #f5f5f5;
+}
+
+.meal-plans-page__favorite-btn.active svg {
+  fill: #4fcf61;
+  stroke: #4fcf61;
+}
+
+.meal-plans-page__delete-btn.deleting {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.meal-plans-page__delete-btn:hover svg {
+  stroke: #e74c3c;
+}
+
+/* Easy AI Recipes Section */
+.meal-plans-page__easy-ai-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.meal-plans-page__easy-ai-title {
+  font-family: var(--header-font);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--header-color);
+  margin: 0;
+}
+
+.meal-plans-page__generate-new-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.meal-plans-page__generate-new-btn span {
+  background: linear-gradient(135deg, #5fd96a 0%, #4fcf61 50%, #3db854 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.meal-plans-page__generate-new-btn:hover {
+  border-color: #ccc;
+}
+
+.meal-plans-page__generate-new-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: #4fcf61;
 }

@@ -25,6 +25,7 @@ import { useSubscription } from '../hooks/useSubscription';
 import { PremiumBadge } from '../components/common/PremiumBadge';
 import { UpgradeModal } from '../components/modals/UpgradeModal';
 import { CheckoutModal } from '../components/modals/CheckoutModal';
+import RecipeDetailModal from '../components/modals/RecipeDetailModal';
 import { ReactComponent as AddToFridgeIcon } from '../assets/icons/quickaccess/add-to-fridge.svg';
 import { ReactComponent as MyFridgeIcon } from '../assets/icons/quickaccess/my-fridge.svg';
 import { ReactComponent as ShopListsIcon } from '../assets/icons/quickaccess/shop-lists.svg';
@@ -42,6 +43,7 @@ import importRecipeStep1Image from '../assets/product mockup/Import Recipes/Impo
 import importRecipeStep4Image from '../assets/product mockup/Import Recipes/Import_recipe_allow_api.png';
 import cookingIcon from '../assets/icons/Cooking.png';
 import FridgyLogo from '../assets/images/Logo.png';
+import crownIcon from '../assets/icons/crown.png';
 import './HomePage.css';
 
 // Helper function to calculate days until expiry (reused from InventoryPage)
@@ -83,12 +85,119 @@ const HomePage = () => {
   const [shortcutInstallTimer, setShortcutInstallTimer] = useState(null);
   const [userClickedInstall, setUserClickedInstall] = useState(false);
 
+  // Recently added recipes state
+  const [recentRecipes, setRecentRecipes] = useState([]);
+  const [recipesLoading, setRecipesLoading] = useState(true);
+  const [recipeImageStates, setRecipeImageStates] = useState({});
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [isRecipeModalOpen, setIsRecipeModalOpen] = useState(false);
+
   // Color palette - Option 2 (Medium Green)
   const colors = {
     primary: '#81e053',
     primaryLight: 'rgba(129, 224, 83, 0.3)',
     primaryDark: '#6bc93f',
   };
+
+  // Default recommended recipes for new users with no saved recipes
+  const DEFAULT_RECOMMENDED_RECIPES = [
+    {
+      id: 'recommended-1',
+      title: "Mama's Minestrone Soup",
+      image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=800&q=80',
+      readyInMinutes: 45,
+      servings: 6,
+      source_type: 'recommended',
+      cuisines: ['Italian'],
+      dishTypes: ['soup', 'main course'],
+      extendedIngredients: [
+        { original: '2 tablespoons olive oil' },
+        { original: '1 large onion, diced' },
+        { original: '3 carrots, sliced' },
+        { original: '3 celery stalks, sliced' },
+        { original: '4 cloves garlic, minced' },
+        { original: '1 medium zucchini, diced' },
+        { original: '1 cup green beans, trimmed and cut' },
+        { original: '1 can (14 oz) diced tomatoes' },
+        { original: '1 can (15 oz) cannellini beans, drained' },
+        { original: '6 cups vegetable broth' },
+        { original: '1 cup small pasta (ditalini or elbow)' },
+        { original: '2 cups fresh spinach' },
+        { original: '1 teaspoon Italian herbs' },
+        { original: 'Salt and pepper to taste' },
+        { original: 'Parmesan cheese for serving' }
+      ],
+      instructions: '1. Heat olive oil in a large pot over medium heat. Add onion, carrots, and celery. Cook for 5 minutes until softened.\n\n2. Add garlic and cook for 1 minute until fragrant. Add zucchini and green beans, cook for 3 minutes.\n\n3. Pour in diced tomatoes and vegetable broth. Add Italian herbs, salt, and pepper. Bring to a boil.\n\n4. Reduce heat and simmer for 15 minutes. Add pasta and cannellini beans. Cook for 10 more minutes until pasta is tender.\n\n5. Stir in fresh spinach until wilted. Serve hot with freshly grated Parmesan cheese.'
+    },
+    {
+      id: 'recommended-2',
+      title: 'Healthy One Pot Pasta',
+      image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=800&q=80',
+      readyInMinutes: 25,
+      servings: 4,
+      source_type: 'recommended',
+      cuisines: ['Italian'],
+      dishTypes: ['main course', 'pasta'],
+      extendedIngredients: [
+        { original: '12 oz spaghetti or linguine' },
+        { original: '2 cups cherry tomatoes, halved' },
+        { original: '3 cups fresh spinach' },
+        { original: '4 cloves garlic, thinly sliced' },
+        { original: '3 tablespoons olive oil' },
+        { original: '1/2 cup fresh basil leaves' },
+        { original: '4 cups vegetable broth' },
+        { original: '1/2 cup Parmesan cheese, grated' },
+        { original: '1/4 teaspoon red pepper flakes' },
+        { original: 'Salt and pepper to taste' }
+      ],
+      instructions: '1. Add pasta, cherry tomatoes, spinach, garlic, olive oil, basil, and vegetable broth to a large pot.\n\n2. Bring to a boil over high heat, stirring frequently to prevent pasta from sticking.\n\n3. Reduce heat to medium and cook for 10-12 minutes, stirring often, until pasta is al dente and liquid has reduced to a sauce.\n\n4. Remove from heat. Stir in Parmesan cheese and red pepper flakes. Season with salt and pepper.\n\n5. Serve immediately, garnished with extra basil and Parmesan.'
+    },
+    {
+      id: 'recommended-3',
+      title: 'Garlic Noodles',
+      image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&q=80',
+      readyInMinutes: 20,
+      servings: 4,
+      source_type: 'recommended',
+      cuisines: ['Asian', 'Fusion'],
+      dishTypes: ['main course', 'side dish'],
+      extendedIngredients: [
+        { original: '12 oz egg noodles or spaghetti' },
+        { original: '4 tablespoons butter' },
+        { original: '8 cloves garlic, minced' },
+        { original: '2 tablespoons soy sauce' },
+        { original: '1 tablespoon oyster sauce' },
+        { original: '1/2 cup Parmesan cheese, grated' },
+        { original: '4 green onions, sliced' },
+        { original: '1/4 teaspoon black pepper' }
+      ],
+      instructions: '1. Cook noodles according to package directions. Reserve 1/2 cup pasta water, then drain.\n\n2. In the same pot, melt butter over medium heat. Add minced garlic and cook for 1-2 minutes until golden and fragrant (be careful not to burn).\n\n3. Add soy sauce and oyster sauce to the garlic butter. Stir to combine.\n\n4. Return noodles to the pot. Toss to coat evenly with the garlic butter sauce. Add pasta water if needed.\n\n5. Remove from heat. Add Parmesan cheese and toss. Serve topped with green onions and black pepper.'
+    },
+    {
+      id: 'recommended-4',
+      title: 'One Pan Mediterranean Chicken',
+      image: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=800&q=80',
+      readyInMinutes: 35,
+      servings: 4,
+      source_type: 'recommended',
+      cuisines: ['Mediterranean', 'Greek'],
+      dishTypes: ['main course', 'dinner'],
+      extendedIngredients: [
+        { original: '4 bone-in chicken thighs' },
+        { original: '3 tablespoons olive oil' },
+        { original: '1 lemon, juiced and zested' },
+        { original: '4 cloves garlic, minced' },
+        { original: '1 cup cherry tomatoes' },
+        { original: '1/2 cup Kalamata olives' },
+        { original: '1 can (14 oz) artichoke hearts, drained' },
+        { original: '1/2 cup feta cheese, crumbled' },
+        { original: '1 tablespoon dried oregano' },
+        { original: 'Salt and pepper to taste' },
+        { original: 'Fresh parsley for garnish' }
+      ],
+      instructions: '1. Preheat oven to 425°F (220°C). Season chicken thighs with salt, pepper, and oregano.\n\n2. Heat olive oil in a large oven-safe skillet over medium-high heat. Sear chicken skin-side down for 5 minutes until golden. Flip and cook 2 more minutes.\n\n3. Add garlic, cherry tomatoes, olives, and artichoke hearts around the chicken. Drizzle with lemon juice.\n\n4. Transfer skillet to oven. Roast for 20-25 minutes until chicken reaches 165°F internal temperature.\n\n5. Remove from oven. Top with crumbled feta, lemon zest, and fresh parsley. Serve immediately.'
+    }
+  ];
 
   // Clean up shortcut install timer on unmount or when tour step changes
   useEffect(() => {
@@ -130,6 +239,78 @@ const HomePage = () => {
       markFirstLaunchComplete();
     }
   }, [isPWA, isFirstPWALaunch, shouldShowNotificationPrompt, user, markFirstLaunchComplete, getDebugInfo]);
+
+  // Fetch recently added recipes (from both saved_recipes and ai_generated_recipes)
+  useEffect(() => {
+    const fetchRecentRecipes = async () => {
+      if (!user) {
+        setRecipesLoading(false);
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('fridgy_token');
+        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+        // Fetch from both sources in parallel
+        const [savedResponse, aiResponse] = await Promise.all([
+          fetch(`${API_BASE_URL}/saved-recipes`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }),
+          fetch(`${API_BASE_URL}/ai-recipes/cached`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+        ]);
+
+        let allRecipes = [];
+
+        // Process saved recipes (imported/uploaded)
+        if (savedResponse.ok) {
+          const savedData = await savedResponse.json();
+          const savedRecipes = (savedData.recipes || []).map(recipe => ({
+            ...recipe,
+            _source: 'saved',
+            _sortDate: new Date(recipe.created_at || recipe.updated_at)
+          }));
+          allRecipes = [...allRecipes, ...savedRecipes];
+          console.log('[HomePage] Fetched saved recipes:', savedRecipes.length);
+        } else {
+          console.error('[HomePage] Failed to fetch saved recipes:', savedResponse.status);
+        }
+
+        // Process AI-generated recipes
+        if (aiResponse.ok) {
+          const aiData = await aiResponse.json();
+          if (aiData.success && aiData.data?.recipes) {
+            const aiRecipes = aiData.data.recipes.map((recipe, index) => ({
+              id: recipe.id || `ai-${index}`,
+              title: recipe.title,
+              image: recipe.imageUrl,
+              readyInMinutes: recipe.readyInMinutes,
+              servings: recipe.servings,
+              source_type: 'ai_generated',
+              _source: 'ai',
+              _sortDate: new Date(aiData.data.metadata?.generatedAt || Date.now())
+            }));
+            allRecipes = [...allRecipes, ...aiRecipes];
+            console.log('[HomePage] Fetched AI recipes:', aiRecipes.length);
+          }
+        }
+
+        // Sort by date (newest first)
+        allRecipes.sort((a, b) => b._sortDate - a._sortDate);
+
+        console.log('[HomePage] Total recent recipes to show:', allRecipes.length);
+        setRecentRecipes(allRecipes);
+      } catch (error) {
+        console.error('[HomePage] Error fetching recent recipes:', error);
+      } finally {
+        setRecipesLoading(false);
+      }
+    };
+
+    fetchRecentRecipes();
+  }, [user]);
 
   // Handle PWA notification prompt close
   const handlePWAPromptClose = (notificationsEnabled) => {
@@ -221,7 +402,90 @@ const HomePage = () => {
   const expiringItems = getExpiringItems();
   const expiredItems = getExpiredItems();
   const earliestItems = getEarliestExpiringItems();
-  
+
+  // Render a recent recipe card
+  const renderRecentRecipeCard = (recipe) => {
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+    // Get image URL with fallback
+    let imageUrl = recipe.image || (recipe.image_urls && recipe.image_urls[0]);
+
+    // Proxy Instagram CDN images
+    if (imageUrl && imageUrl.includes('cdninstagram.com')) {
+      imageUrl = `${API_BASE_URL}/proxy-image?url=${encodeURIComponent(imageUrl)}`;
+    }
+
+    const imageState = recipeImageStates[recipe.id] || 'loading';
+    const isAiRecipe = recipe._source === 'ai' || recipe.source_type === 'ai_generated';
+
+    // Open recipe detail modal
+    const handleClick = () => {
+      setSelectedRecipe(recipe);
+      setIsRecipeModalOpen(true);
+    };
+
+    // Determine badge text
+    let badgeText = null;
+    if (recipe.source_type === 'instagram') {
+      badgeText = 'Instagram';
+    } else if (recipe.source_type === 'url' ||
+               recipe.source_type === 'website' ||
+               (recipe.source_url && !recipe.source_url.includes('instagram'))) {
+      badgeText = 'Web Blog';
+    } else if (isAiRecipe) {
+      badgeText = 'AI';
+    } else if (recipe.source_type === 'recommended') {
+      badgeText = "Chef's Pick";
+    }
+
+    return (
+      <div
+        key={recipe.id}
+        className="home-page__recent-recipe-card"
+        onClick={handleClick}
+      >
+        <div className="home-page__recent-recipe-image">
+          {imageState === 'loading' && (
+            <div className="home-page__image-placeholder" />
+          )}
+          {imageUrl && (
+            <img
+              src={imageUrl}
+              alt={recipe.title}
+              className={`home-page__recipe-img ${imageState === 'loaded' ? 'home-page__recipe-img--loaded' : ''}`}
+              onLoad={() => setRecipeImageStates(prev => ({ ...prev, [recipe.id]: 'loaded' }))}
+              onError={() => setRecipeImageStates(prev => ({ ...prev, [recipe.id]: 'error' }))}
+            />
+          )}
+          {badgeText && (
+            <div className="home-page__recent-recipe-badge">
+              <span>{badgeText}</span>
+            </div>
+          )}
+        </div>
+        <div className="home-page__recent-recipe-content">
+          <h3 className="home-page__recent-recipe-title">{recipe.title}</h3>
+          {recipe.source_author && (
+            <p className="home-page__recent-recipe-author">@{recipe.source_author}</p>
+          )}
+          <div className="home-page__recent-recipe-meta">
+            {recipe.readyInMinutes && <span>&#9201; {recipe.readyInMinutes} min</span>}
+            {recipe.servings && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <rect x="5" y="6" width="14" height="13" rx="2" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M10 12h4" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                {recipe.servings} servings
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="homepage" style={{
       '--primary-green': colors.primary,
@@ -261,7 +525,10 @@ const HomePage = () => {
         <div className="container">
           <div className="greeting-content left-aligned">
             <div className="greeting-text">
-              <h1 className="greeting-hello">Hello {user?.firstName || 'User'},</h1>
+              <h1 className="greeting-hello">
+                Hello {user?.firstName || 'User'}
+                {isPremium && <img src={crownIcon} alt="Premium" className="premium-crown" />}
+              </h1>
               <p className="greeting-subtitle">What are you cooking today?</p>
             </div>
           </div>
@@ -492,6 +759,47 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Recently Added / Recommended Recipes Section */}
+      {(!recipesLoading || recentRecipes.length > 0) && (
+        <section className="home-page__recently-added">
+          <div className="container">
+            <div className="section-header">
+              <h2 className="section-title">
+                {recentRecipes.length > 0 ? 'Recently Added' : 'Recommended Recipes'}
+              </h2>
+            </div>
+            <div className="home-page__recently-added-slider">
+              {recipesLoading ? (
+                <>
+                  <div className="home-page__recent-recipe-card home-page__recent-recipe-card--loading">
+                    <div className="home-page__recent-recipe-image">
+                      <div className="home-page__image-placeholder" />
+                    </div>
+                    <div className="home-page__recent-recipe-content">
+                      <div className="home-page__loading-text" style={{ width: '80%', height: '16px' }} />
+                      <div className="home-page__loading-text" style={{ width: '50%', height: '12px', marginTop: '8px' }} />
+                    </div>
+                  </div>
+                  <div className="home-page__recent-recipe-card home-page__recent-recipe-card--loading">
+                    <div className="home-page__recent-recipe-image">
+                      <div className="home-page__image-placeholder" />
+                    </div>
+                    <div className="home-page__recent-recipe-content">
+                      <div className="home-page__loading-text" style={{ width: '70%', height: '16px' }} />
+                      <div className="home-page__loading-text" style={{ width: '40%', height: '12px', marginTop: '8px' }} />
+                    </div>
+                  </div>
+                </>
+              ) : recentRecipes.length > 0 ? (
+                recentRecipes.map(recipe => renderRecentRecipeCard(recipe))
+              ) : (
+                DEFAULT_RECOMMENDED_RECIPES.map(recipe => renderRecentRecipeCard(recipe))
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Cook What You Have Section - COMMENTED OUT
       <section className="cook-what-you-have">
@@ -924,7 +1232,7 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-      
+
       <MobileBottomNav />
 
       {/* PWA First Launch Notification Prompt */}
@@ -1298,6 +1606,16 @@ const HomePage = () => {
           }}
         />
       )}
+
+      {/* Recipe Detail Modal */}
+      <RecipeDetailModal
+        isOpen={isRecipeModalOpen}
+        onClose={() => {
+          setIsRecipeModalOpen(false);
+          setSelectedRecipe(null);
+        }}
+        recipe={selectedRecipe}
+      />
     </div>
   );
 };
