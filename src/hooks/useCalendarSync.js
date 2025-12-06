@@ -425,6 +425,43 @@ const useCalendarSync = () => {
   };
 
   /**
+   * Sync ALL meals to calendar (Google Calendar only)
+   * No date range - syncs everything
+   */
+  const syncAll = async () => {
+    const token = getAuthToken();
+    if (!token || !isConnected || provider !== 'google') return { success: false };
+
+    try {
+      setSyncing(true);
+      setError(null);
+
+      const res = await fetch(`${API_BASE_URL}/calendar/sync-week`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({}) // No dates = sync all
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Sync failed');
+      }
+
+      const data = await res.json();
+      return { success: true, results: data.results };
+    } catch (err) {
+      console.error('[CalendarSync] Error syncing all:', err);
+      setError(err.message || 'Failed to sync meals');
+      return { success: false };
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  /**
    * Remove a meal from calendar (Google Calendar only)
    */
   const unsyncMeal = async (mealPlanId) => {
@@ -528,6 +565,7 @@ const useCalendarSync = () => {
     updatePreferences,
     syncMeal,
     syncWeek,
+    syncAll,
     unsyncMeal,
 
     // Helpers

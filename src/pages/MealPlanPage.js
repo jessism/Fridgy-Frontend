@@ -35,7 +35,7 @@ const MealPlanPage = () => {
     isConnected: calendarConnected,
     syncing: calendarSyncing,
     preferences: calendarPreferences,
-    syncWeek,
+    syncAll,
     syncMeal,
     formatTimeDisplay,
     getDefaultTimeForMeal
@@ -270,12 +270,8 @@ const MealPlanPage = () => {
     setRecipeDetailModal({ isOpen: true, recipe });
   };
 
-  const handleSyncWeek = async () => {
-    const weekDates = getCurrentWeekDates();
-    const startDate = formatDate(weekDates[0].fullDate);
-    const endDate = formatDate(weekDates[6].fullDate);
-
-    const result = await syncWeek(startDate, endDate);
+  const handleSyncAll = async () => {
+    const result = await syncAll();
     if (result.success) {
       const syncedCount = (result.results?.synced || 0) + (result.results?.updated || 0);
       setSyncMessage(`Synced ${syncedCount} meals to calendar`);
@@ -555,7 +551,7 @@ const MealPlanPage = () => {
             {calendarConnected && (
               <button
                 className="meal-plan-page__sync-btn"
-                onClick={handleSyncWeek}
+                onClick={handleSyncAll}
                 disabled={calendarSyncing}
                 aria-label="Sync to calendar"
               >
