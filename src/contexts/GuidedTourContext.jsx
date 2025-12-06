@@ -26,18 +26,27 @@ export const GuidedTourProvider = ({ children }) => {
     }
 
     // Backend is the PRIMARY source of truth
-    // Check new tour_status field - only show if not completed or skipped
     const tourStatus = user.tourStatus || 'not_started';
 
-    if (tourStatus !== 'completed' && tourStatus !== 'skipped') {
-      console.log(`[GuidedTour] User has not completed/skipped tour (tour_status=${tourStatus}), starting welcome tour`);
-
-      // Start tour with welcome screen after 4 second delay
+    // Only show tour for brand new users
+    if (tourStatus === 'not_started') {
+      console.log('[GuidedTour] Starting welcome tour for new user');
       setTimeout(() => {
         guidedTour.startTour(); // Starts at WELCOME_SCREEN
       }, 4000);
-    } else {
-      console.log(`[GuidedTour] Tour already ${tourStatus}, not showing again`);
+      return;
+    }
+
+    // For ANY other status (completed, skipped, started/abandoned) - clear stale state
+    console.log(`[GuidedTour] Tour status is '${tourStatus}', clearing any stale localStorage`);
+    if (guidedTour.isActive || guidedTour.currentStep !== guidedTour.STEPS.COMPLETED) {
+      // Clear localStorage and reset state
+      localStorage.setItem('trackabite_guided_tour', JSON.stringify({
+        currentStep: 'completed',
+        isActive: false,
+        clearedAt: new Date().toISOString()
+      }));
+      guidedTour.resetTour();
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
