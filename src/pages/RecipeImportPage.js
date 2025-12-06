@@ -116,70 +116,108 @@ const RecipeImportPage = () => {
       setLoading(true);
       setStatus('📥 Importing recipe from Instagram...');
 
-      // Poll for new recipe every 500ms for faster detection
+      // Track baseline recipe ID to detect NEW recipes (not just recent ones)
+      // This fixes the issue where clicking notification late would never detect the recipe
+      let baselineRecipeId = null;
       let pollErrorCount = 0;
-      pollInterval = setInterval(async () => {
+
+      // Get baseline recipe before starting to poll
+      const startPolling = async () => {
         try {
           const token = localStorage.getItem('fridgy_token');
           if (!token) {
-            clearInterval(pollInterval);
             setError('Please sign in to continue.');
             return;
           }
 
           const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-          const response = await fetch(`${apiUrl}/saved-recipes?limit=1`, {
+
+          // First, capture the current latest recipe as baseline
+          const baselineResponse = await fetch(`${apiUrl}/saved-recipes?limit=1`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
 
-          if (response.ok) {
-            const data = await response.json();
-            const latestRecipe = data.recipes?.[0];
-
-            // Check if recipe was created in last 60 seconds
-            if (latestRecipe && latestRecipe.created_at) {
-              const recipeAge = Date.now() - new Date(latestRecipe.created_at).getTime();
-              if (recipeAge < 60000) {
-                console.log('[RecipeImport] New recipe detected!', latestRecipe.title);
-                clearInterval(pollInterval);
-                clearTimeout(timeoutId);
-                setStatus('✅ Recipe imported successfully!');
-                setError('');
-
-                // Check if user is in guided tour
-                if (isActive) {
-                  console.log('[RecipeImport] User in tour - showing success celebration');
-                  setTourSuccessRecipe(latestRecipe);
-                  goToStep(STEPS.IMPORT_RECIPE_SUCCESS);
-                } else {
-                  // Normal flow - navigate to saved recipes
-                  setTimeout(() => navigate('/saved-recipes'), 1500);
-                }
-              }
-            }
-          } else if (response.status === 401) {
-            clearInterval(pollInterval);
-            setError('Session expired. Please sign in again.');
+          if (baselineResponse.ok) {
+            const baselineData = await baselineResponse.json();
+            baselineRecipeId = baselineData.recipes?.[0]?.id || null;
+            console.log('[RecipeImport] Baseline recipe ID:', baselineRecipeId);
           }
         } catch (error) {
-          console.error('[RecipeImport] Polling error:', error);
-          pollErrorCount++;
-          // If multiple consecutive errors, stop polling and show error
-          if (pollErrorCount >= 5) {
-            clearInterval(pollInterval);
-            clearTimeout(timeoutId);
-            setError('Connection issue while checking for your recipe. Please check your internet connection and try again.');
-          }
+          console.log('[RecipeImport] Could not get baseline, will detect any recent recipe');
         }
-      }, 500); // Poll every 500ms for faster detection
 
-      // Stop polling after 60 seconds and show error
+        // Now start polling for new recipes
+        pollInterval = setInterval(async () => {
+          try {
+            const token = localStorage.getItem('fridgy_token');
+            if (!token) {
+              clearInterval(pollInterval);
+              setError('Please sign in to continue.');
+              return;
+            }
+
+            const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+            const response = await fetch(`${apiUrl}/saved-recipes?limit=1`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              const latestRecipe = data.recipes?.[0];
+
+              if (latestRecipe && latestRecipe.created_at) {
+                // Detect if this is a NEW recipe (different from baseline)
+                const isNewRecipe = baselineRecipeId === null || latestRecipe.id !== baselineRecipeId;
+                const recipeAge = Date.now() - new Date(latestRecipe.created_at).getTime();
+                // Accept recipes created within the last 5 minutes (300000ms)
+                const isRecentEnough = recipeAge < 300000;
+
+                if (isNewRecipe && isRecentEnough) {
+                  console.log('[RecipeImport] New recipe detected!', latestRecipe.title,
+                    `(age: ${Math.round(recipeAge/1000)}s, baseline: ${baselineRecipeId})`);
+                  clearInterval(pollInterval);
+                  clearTimeout(timeoutId);
+                  setStatus('✅ Recipe imported successfully!');
+                  setError('');
+
+                  // Check if user is in guided tour
+                  if (isActive) {
+                    console.log('[RecipeImport] User in tour - showing success celebration');
+                    setTourSuccessRecipe(latestRecipe);
+                    goToStep(STEPS.IMPORT_RECIPE_SUCCESS);
+                  } else {
+                    // Normal flow - navigate to saved recipes
+                    setTimeout(() => navigate('/saved-recipes'), 1500);
+                  }
+                }
+              }
+            } else if (response.status === 401) {
+              clearInterval(pollInterval);
+              setError('Session expired. Please sign in again.');
+            }
+          } catch (error) {
+            console.error('[RecipeImport] Polling error:', error);
+            pollErrorCount++;
+            // If multiple consecutive errors, stop polling and show error
+            if (pollErrorCount >= 5) {
+              clearInterval(pollInterval);
+              clearTimeout(timeoutId);
+              setError('Connection issue while checking for your recipe. Please check your internet connection and try again.');
+            }
+          }
+        }, 500); // Poll every 500ms for faster detection
+      };
+
+      // Start the polling process
+      startPolling();
+
+      // Stop polling after 90 seconds and show error (increased from 60s for longer imports)
       timeoutId = setTimeout(() => {
         clearInterval(pollInterval);
         // Keep loading=true to stay on loading screen, but show error
         setError('Import is taking longer than expected. The recipe might still be saved - check your saved recipes, or try importing again.');
         setStatus('');
-      }, 60000);
+      }, 90000);
     }
 
     // Check both url and text parameters for Instagram links (only if not in importing mode)

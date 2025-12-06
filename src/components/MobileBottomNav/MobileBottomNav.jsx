@@ -105,17 +105,18 @@ const MobileBottomNav = () => {
       label: 'Home'
     },
     {
-      path: '/inventory',
+      path: '/meal-plans/recipes',
       icon: (isActive) => isActive ? (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <rect x="3" y="4" width="18" height="2" rx="1"/>
-          <rect x="3" y="11" width="18" height="2" rx="1"/>
-          <rect x="3" y="18" width="18" height="2" rx="1"/>
+          {/* Fork - filled */}
+          <path d="M7 2v6l2 2v12h-2V10l-2-2V2h2zm0 0h-2v4h2V2zm-2 0h-2v4h2V2zm4 0h-2v4h2V2z" />
+          {/* Knife - filled */}
+          <path d="M17 2v20h2V2h-2zm0 0c2 0 3 1.5 3 3.5S19 9 17 9V2z" />
         </svg>
       ) : (
-        <ListIcon />
+        <MealsIcon />
       ),
-      label: 'Inventory'
+      label: 'Meals'
     },
     {
       path: '/batchcamera',
@@ -129,18 +130,17 @@ const MobileBottomNav = () => {
       isAddButton: true
     },
     {
-      path: '/meal-plans/recipes',
+      path: '/inventory',
       icon: (isActive) => isActive ? (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          {/* Fork - filled */}
-          <path d="M7 2v6l2 2v12h-2V10l-2-2V2h2zm0 0h-2v4h2V2zm-2 0h-2v4h2V2zm4 0h-2v4h2V2z" />
-          {/* Knife - filled */}
-          <path d="M17 2v20h2V2h-2zm0 0c2 0 3 1.5 3 3.5S19 9 17 9V2z" />
+          <rect x="3" y="4" width="18" height="2" rx="1"/>
+          <rect x="3" y="11" width="18" height="2" rx="1"/>
+          <rect x="3" y="18" width="18" height="2" rx="1"/>
         </svg>
       ) : (
-        <MealsIcon />
+        <ListIcon />
       ),
-      label: 'Meals'
+      label: 'Inventory'
     },
     {
       path: '/profile',

@@ -99,6 +99,156 @@ const HomePage = () => {
     primaryDark: '#6bc93f',
   };
 
+  // Popular recipes for "Popular now" section (from testa@gmail.com's saved recipes)
+  const POPULAR_RECIPES = [
+    {
+      id: '061944e9-8c71-4e94-b87c-b7f03f01f1a2',
+      title: 'Cheesy Breakfast Egg Tacos',
+      image: 'https://aimvjpndmipmtavpmjnn.supabase.co/storage/v1/object/public/recipe-images/6bea1ad3-6552-45b9-9d21-acec968d3655/temp-1760491267509-fi29k26qk-1760491268402.jpg',
+      readyInMinutes: 15,
+      servings: 2,
+      source_type: 'popular',
+      source_author: 'madeleinesmeals',
+      summary: 'Cheesy breakfast egg tacos with melted cheese on warm tortillas, creamy smashed avocado, a crispy fried egg & all the zesty fresh toppings.',
+      vegetarian: true,
+      extendedIngredients: [
+        { name: 'tortillas', unit: 'small', amount: 2, original: '2 small tortillas' },
+        { name: 'grated cheese', unit: 'handful', amount: 1, original: 'A handful of grated cheese' },
+        { name: 'avocado', unit: null, amount: 1, original: 'Avocado' },
+        { name: 'diced cherry tomatoes', unit: 'handful', amount: 1, original: 'A large handful of diced cherry tomatoes' },
+        { name: 'diced red onion', unit: null, amount: 0.5, original: '½ diced red onion' },
+        { name: 'finely sliced green chilli', unit: 'small', amount: 1, original: '1 small finely sliced green chilli' },
+        { name: 'eggs', unit: null, amount: 2, original: '2 eggs' },
+        { name: 'fresh coriander', unit: null, amount: 1, original: 'Fresh coriander' },
+        { name: 'lime', unit: null, amount: 1, original: 'Lime' },
+        { name: 'chilli oil', unit: null, amount: 1, original: 'Chilli oil' },
+      ],
+      analyzedInstructions: [
+        { name: '', steps: [
+          { step: 'In a small bowl, mix diced tomatoes, red onion, chopped coriander and a squeeze of lime. Season with salt & set aside.', number: 1 },
+          { step: 'Mash the avocado with a pinch of salt, pepper, a drizzle of olive oil and a little lime juice.', number: 2 },
+          { step: 'Add tortillas to a pan & warm each side. Sprinkle over some grated cheese. Let them melt & bubble slightly.', number: 3 },
+          { step: 'Fry your eggs to your liking - I like to get a crispy bottom! Season with salt, pepper & some optional chilli.', number: 4 },
+          { step: 'Spread avocado over the cheesy tortilla, top with a fried egg, spoon over the tomato salsa. Finish with green chilli, coriander, sesame seeds & chilli oil.', number: 5 },
+        ]}
+      ],
+    },
+    {
+      id: 'e1b510ab-7c08-47cb-b04f-4f902994f492',
+      title: 'Nutella Stuffed Gingerbread Men',
+      image: 'https://aimvjpndmipmtavpmjnn.supabase.co/storage/v1/object/public/recipe-images/6bea1ad3-6552-45b9-9d21-acec968d3655/temp-1765047051259-a5ad2d80y-1765047051339.jpg',
+      readyInMinutes: 20,
+      servings: 4,
+      source_type: 'popular',
+      source_author: 'fitwafflekitchen',
+      summary: 'Quick and easy Christmas pastries filled with Nutella and dusted with icing sugar.',
+      extendedIngredients: [
+        { name: 'ready roll puff pastry', unit: 'sheet', amount: 1, original: '1 sheet ready roll puff pastry' },
+        { name: 'Nutella', unit: 'serving', amount: 1, original: 'Nutella (or spread of your choice)' },
+        { name: 'egg', unit: 'small', amount: 1, original: '1 small egg' },
+        { name: 'milk or water', unit: 'tsp', amount: 1, original: '1 tsp milk or water' },
+        { name: 'icing sugar', unit: 'serving', amount: 1, original: 'icing sugar' },
+      ],
+      analyzedInstructions: [
+        { name: 'Instructions', steps: [
+          { step: 'Use cookie cutters to cut shapes from puff pastry.', number: 1 },
+          { step: 'Fill with Nutella.', number: 2 },
+          { step: 'Make egg wash with egg and milk/water.', number: 3 },
+          { step: 'Brush with egg wash.', number: 4 },
+          { step: 'Bake.', number: 5 },
+          { step: 'Dust with icing sugar.', number: 6 },
+        ]}
+      ],
+    },
+    {
+      id: '23f34c08-19df-457e-b0e4-db3ca263e535',
+      title: 'Sugar Cookie Rice Krispies',
+      image: 'https://aimvjpndmipmtavpmjnn.supabase.co/storage/v1/object/public/recipe-images/6bea1ad3-6552-45b9-9d21-acec968d3655/temp-1765047401979-2g6lxbn4i-1765047402123.jpg',
+      readyInMinutes: 20,
+      servings: 4,
+      source_type: 'popular',
+      source_author: 'foodtherapywithmeg',
+      summary: 'Festive Rice Krispies treats with a sugar cookie twist, perfect for Christmas.',
+      extendedIngredients: [
+        { name: 'rice krispies', unit: 'cup', amount: 4, original: '4 cups rice krispies' },
+        { name: 'big marshmallows', unit: 'bag', amount: 1, original: '1 bag big marshmallows' },
+        { name: 'mini marshmallows', unit: 'cup', amount: 1, original: '1 cup mini marshmallows' },
+        { name: 'sugar cookie mix', unit: 'cup', amount: 0.33, original: '1/3 cup sugar cookie mix' },
+        { name: 'butter', unit: 'cup', amount: 0.5, original: '1 stick butter' },
+        { name: 'christmas sprinkles', unit: 'serving', amount: 1, original: 'christmas sprinkles' },
+      ],
+      analyzedInstructions: [
+        { name: '', steps: [
+          { step: 'Over medium high heat melt the butter and than add the big marshmallows and mix until combined.', number: 1 },
+          { step: 'Mix in the sugar cookie mix and mix until combined.', number: 2 },
+          { step: 'Turn the heat off and mix in the Rice Krispies, mini marshmallows, and sprinkles.', number: 3 },
+          { step: 'Top with more sprinkles. enjoy!!', number: 4 },
+        ]}
+      ],
+    },
+    {
+      id: 'b1bf8e97-d5f4-4544-87ea-3b64203247da',
+      title: 'Garlic Mozzarella Puffs',
+      image: 'https://aimvjpndmipmtavpmjnn.supabase.co/storage/v1/object/public/recipe-images/6bea1ad3-6552-45b9-9d21-acec968d3655/temp-1765046911643-m8lp738ew-1765046912037.jpg',
+      readyInMinutes: 20,
+      servings: 36,
+      source_type: 'popular',
+      source_author: 'mumsfoodies',
+      summary: 'Delicious and easy garlic mozzarella puffs, perfect for appetizers.',
+      extendedIngredients: [
+        { name: 'puff pastry', unit: 'sheet', amount: 1, original: '1 sheet puff pastry' },
+        { name: 'grated mozzarella', unit: 'g', amount: 200, original: '200g grated mozzarella' },
+        { name: 'garlic cloves', unit: '', amount: 3, original: '3 garlic cloves crushed' },
+        { name: 'oregano', unit: 'tsp', amount: 0.5, original: '1/2 tsp oregano' },
+        { name: 'pancetta or bacon', unit: 'g', amount: 100, original: '100g pancetta or bacon crispy' },
+        { name: 'egg', unit: '', amount: 1, original: '1 egg for brushing' },
+        { name: 'chopped parsley', unit: '', amount: 1, original: 'Chopped parsley' },
+        { name: 'olive oil', unit: 'ml', amount: 20, original: '20-30ml olive oil' },
+      ],
+      analyzedInstructions: [
+        { name: '', steps: [
+          { step: 'Preheat oven to 180C.', number: 1 },
+          { step: 'Mix mozzarella, garlic, oregano salt and pepper and sprinkle it on your pastry.', number: 2 },
+          { step: "Break up pancetta if you're using it and sprinkle over.", number: 3 },
+          { step: 'Slice down the middle lengthways and then widthways about 1-1.5cm wide to create 2 strips per row.', number: 4 },
+          { step: "Press down the edges and roll them up, once they're rolled press them down well to flatten them.", number: 5 },
+          { step: 'Brush with egg wash and bake for 14-20 min depending on your oven.', number: 6 },
+          { step: 'Brush with the garlic oil as soon as they come out.', number: 7 },
+        ]}
+      ],
+    },
+    {
+      id: 'e022283b-07af-4657-bf00-726a18ea26f6',
+      title: 'Roast Potatoes',
+      image: 'https://aimvjpndmipmtavpmjnn.supabase.co/storage/v1/object/public/recipe-images/6bea1ad3-6552-45b9-9d21-acec968d3655/temp-1765045709517-34ziswaz7-1765045710042.jpg',
+      readyInMinutes: 90,
+      servings: 6,
+      source_type: 'popular',
+      source_author: 'easyfoodrecipesgram',
+      summary: 'Classic roast potatoes, perfect for Christmas dinner or any roast.',
+      extendedIngredients: [
+        { name: 'king edward potatoes', unit: 'kg', amount: 2, original: '2kg king Edward potatoes, peeled and cut into chunks' },
+        { name: 'garlic cloves', unit: 'cloves', amount: 4, original: 'A few garlic cloves, peeled and crushed' },
+        { name: 'goose / duck / beef fat', unit: 'g', amount: 500, original: '500g goose / duck / beef fat' },
+        { name: 'rosemary sprigs', unit: 'sprigs', amount: 3, original: 'Few sprigs of rosemary' },
+        { name: 'lemon zest', unit: 'zest', amount: 1, original: 'Zest of 1 lemon' },
+        { name: 'sea salt', unit: 'sprinkling', amount: 1, original: 'Generous sprinkling of sea salt' },
+      ],
+      analyzedInstructions: [
+        { name: '', steps: [
+          { step: 'Add the potatoes into a pot with a pinch of salt and the garlic cloves, cover with cold water and bring to a boil. Cook for roughly 10 minutes until fork tender.', number: 1 },
+          { step: 'Preheat an oven to 200 C / 390 F fan.', number: 2 },
+          { step: "Strain the boiled potatoes then leave to steam dry in the colander for a few minutes. Add back into the dry pot, cover with a lid and shake to lightly fluff them up.", number: 3 },
+          { step: 'Add the goose fat into two baking trays, place into the oven and preheat the oil for 15 minutes.', number: 4 },
+          { step: 'Remove the tray from the oven and carefully add in the potatoes. Coat each potato in the goose fat.', number: 5 },
+          { step: 'Cook the potatoes for 60-75 minutes, turning every 20 minutes or so.', number: 6 },
+          { step: 'Blend together the rosemary, lemon zest and salt for the rosemary salt.', number: 7 },
+          { step: 'Once golden brown, remove and toss with rosemary salt.', number: 8 },
+        ]}
+      ],
+    },
+  ];
+
   // Default recommended recipes for new users with no saved recipes
   const DEFAULT_RECOMMENDED_RECIPES = [
     {
@@ -436,6 +586,8 @@ const HomePage = () => {
       badgeText = 'AI';
     } else if (recipe.source_type === 'recommended') {
       badgeText = "Chef's Pick";
+    } else if (recipe.source_type === 'popular') {
+      badgeText = 'Popular';
     }
 
     return (
@@ -534,6 +686,60 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Popular now Section */}
+      <section className="home-page__popular-now">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">Popular Now 🔥</h2>
+            <p className="section-description">Impress your loved ones this Christmas.</p>
+          </div>
+          <div className="home-page__recently-added-slider">
+            {POPULAR_RECIPES.map(recipe => renderRecentRecipeCard(recipe))}
+          </div>
+        </div>
+      </section>
+
+      {/* Recently Added / Recommended Recipes Section */}
+      {(!recipesLoading || recentRecipes.length > 0) && (
+        <section className="home-page__recently-added">
+          <div className="container">
+            <div className="section-header">
+              <h2 className="section-title">
+                {recentRecipes.length > 0 ? 'You Recently Added' : 'Recommended Recipes'}
+              </h2>
+            </div>
+            <div className="home-page__recently-added-slider">
+              {recipesLoading ? (
+                <>
+                  <div className="home-page__recent-recipe-card home-page__recent-recipe-card--loading">
+                    <div className="home-page__recent-recipe-image">
+                      <div className="home-page__image-placeholder" />
+                    </div>
+                    <div className="home-page__recent-recipe-content">
+                      <div className="home-page__loading-text" style={{ width: '80%', height: '16px' }} />
+                      <div className="home-page__loading-text" style={{ width: '50%', height: '12px', marginTop: '8px' }} />
+                    </div>
+                  </div>
+                  <div className="home-page__recent-recipe-card home-page__recent-recipe-card--loading">
+                    <div className="home-page__recent-recipe-image">
+                      <div className="home-page__image-placeholder" />
+                    </div>
+                    <div className="home-page__recent-recipe-content">
+                      <div className="home-page__loading-text" style={{ width: '70%', height: '16px' }} />
+                      <div className="home-page__loading-text" style={{ width: '40%', height: '12px', marginTop: '8px' }} />
+                    </div>
+                  </div>
+                </>
+              ) : recentRecipes.length > 0 ? (
+                recentRecipes.map(recipe => renderRecentRecipeCard(recipe))
+              ) : (
+                DEFAULT_RECOMMENDED_RECIPES.map(recipe => renderRecentRecipeCard(recipe))
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Featured Categories */}
       <section className="featured-categories">
@@ -759,47 +965,6 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-
-      {/* Recently Added / Recommended Recipes Section */}
-      {(!recipesLoading || recentRecipes.length > 0) && (
-        <section className="home-page__recently-added">
-          <div className="container">
-            <div className="section-header">
-              <h2 className="section-title">
-                {recentRecipes.length > 0 ? 'Recently Added' : 'Recommended Recipes'}
-              </h2>
-            </div>
-            <div className="home-page__recently-added-slider">
-              {recipesLoading ? (
-                <>
-                  <div className="home-page__recent-recipe-card home-page__recent-recipe-card--loading">
-                    <div className="home-page__recent-recipe-image">
-                      <div className="home-page__image-placeholder" />
-                    </div>
-                    <div className="home-page__recent-recipe-content">
-                      <div className="home-page__loading-text" style={{ width: '80%', height: '16px' }} />
-                      <div className="home-page__loading-text" style={{ width: '50%', height: '12px', marginTop: '8px' }} />
-                    </div>
-                  </div>
-                  <div className="home-page__recent-recipe-card home-page__recent-recipe-card--loading">
-                    <div className="home-page__recent-recipe-image">
-                      <div className="home-page__image-placeholder" />
-                    </div>
-                    <div className="home-page__recent-recipe-content">
-                      <div className="home-page__loading-text" style={{ width: '70%', height: '16px' }} />
-                      <div className="home-page__loading-text" style={{ width: '40%', height: '12px', marginTop: '8px' }} />
-                    </div>
-                  </div>
-                </>
-              ) : recentRecipes.length > 0 ? (
-                recentRecipes.map(recipe => renderRecentRecipeCard(recipe))
-              ) : (
-                DEFAULT_RECOMMENDED_RECIPES.map(recipe => renderRecentRecipeCard(recipe))
-              )}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Cook What You Have Section - COMMENTED OUT
       <section className="cook-what-you-have">

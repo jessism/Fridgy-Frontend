@@ -2245,7 +2245,7 @@ const MealPlansPage = ({ defaultTab }) => {
       {shouldShowTooltip(STEPS.GENERATE_RECIPES_START_BUTTON) && !isStartButtonVisible && (
         <GuidedTooltip
           targetSelector=".meal-plans-page__ai-access"
-          message="Scroll down and tap 'Start personalized recipes' ↓"
+          message="Tap 'Generate new'"
           position="top"
           showAction={false}
         />
