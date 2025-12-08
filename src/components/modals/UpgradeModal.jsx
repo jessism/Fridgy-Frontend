@@ -4,10 +4,12 @@
  */
 
 import React, { useState } from 'react';
+import { usePrice } from '../../contexts/PriceContext';
 import './UpgradeModal.css';
 
 export function UpgradeModal({ isOpen, onClose, feature, current, limit, startCheckout, previewContent }) {
   const [loading, setLoading] = useState(false);
+  const { formattedWithInterval } = usePrice();
 
   if (!isOpen) return null;
 
@@ -117,7 +119,7 @@ export function UpgradeModal({ isOpen, onClose, feature, current, limit, startCh
         </div>
 
         <p className="upgrade-modal__pricing-headline">
-          Free for 7 days, then $4.99/month
+          Free for 7 days, then {formattedWithInterval}
         </p>
 
         <button

@@ -4,9 +4,12 @@
  */
 
 import React from 'react';
+import { usePrice } from '../contexts/PriceContext';
 import './LegalPage.css';
 
 function TermsPage() {
+  const { formattedWithInterval, formatted } = usePrice();
+
   return (
     <div className="legal-page">
       <div className="legal-page__container">
@@ -54,10 +57,10 @@ function TermsPage() {
               <li>No access to AI recipe recommendations or analytics features</li>
             </ul>
 
-            <h3>Premium Tier ($4.99/month)</h3>
+            <h3>Premium Tier ({formattedWithInterval})</h3>
             <ul>
               <li>7-day free trial with payment method required</li>
-              <li>Automatically renews monthly at $4.99 unless canceled</li>
+              <li>Automatically renews monthly at {formatted} unless canceled</li>
               <li>Unlimited access to all features</li>
               <li>Cancel anytime through your billing portal</li>
             </ul>

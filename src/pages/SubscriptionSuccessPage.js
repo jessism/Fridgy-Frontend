@@ -7,12 +7,14 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../features/auth/context/AuthContext';
+import { usePrice } from '../contexts/PriceContext';
 import './SubscriptionSuccessPage.css';
 
 function SubscriptionSuccessPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, isAuthenticated } = useAuth();
+  const { formattedWithInterval } = usePrice();
   const [isInPWA, setIsInPWA] = useState(false);
   const [countdown, setCountdown] = useState(3);
 
@@ -115,7 +117,7 @@ function SubscriptionSuccessPage() {
               })}
             </p>
             <p className="subscription-success__billing-note">
-              You'll be charged $4.99/month after your trial ends. Cancel anytime.
+              You'll be charged {formattedWithInterval} after your trial ends. Cancel anytime.
             </p>
           </div>
 
@@ -191,7 +193,7 @@ function SubscriptionSuccessPage() {
             })}
           </p>
           <p className="subscription-success__billing-note">
-            You'll be charged $4.99/month after your trial ends. Cancel anytime
+            You'll be charged {formattedWithInterval} after your trial ends. Cancel anytime
             from your billing page.
           </p>
         </div>

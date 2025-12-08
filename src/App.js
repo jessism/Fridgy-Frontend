@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-route
 import './App.css';
 import { AuthProvider } from './features/auth/context/AuthContext';
 import { GuidedTourProvider } from './contexts/GuidedTourContext';
+import { PriceProvider } from './contexts/PriceContext';
 import AuthGuard from './features/auth/components/AuthGuard';
 import NewLandingPage from './pages/NewLandingPage';
 import NewLandingPage2 from './pages/NewLandingPage2';
@@ -85,9 +86,10 @@ function NavigationListener() {
 function App() {
   return (
     <div className="App">
-      <AuthProvider>
-        <GuidedTourProvider>
-          <Router>
+      <PriceProvider>
+        <AuthProvider>
+          <GuidedTourProvider>
+            <Router>
             <ScrollToTop />
             <NavigationListener />
             <Routes>
@@ -317,10 +319,11 @@ function App() {
           <Route path="/product/features" element={<FeaturesPage />} />
           <Route path="/product/support" element={<PublicSupportPage />} />
           <Route path="/resources/blog" element={<BlogPage />} />
-        </Routes>
-          </Router>
-        </GuidedTourProvider>
-      </AuthProvider>
+          </Routes>
+            </Router>
+          </GuidedTourProvider>
+        </AuthProvider>
+      </PriceProvider>
     </div>
   );
 }

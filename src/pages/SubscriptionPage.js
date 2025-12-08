@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../features/auth/context/AuthContext';
 import { useSubscription } from '../hooks/useSubscription';
+import { usePrice } from '../contexts/PriceContext';
 import { CheckoutModal } from '../components/modals/CheckoutModal';
 import './SubscriptionPage.css';
 
@@ -36,6 +37,7 @@ const SubscriptionPage = () => {
     closeCheckout,
     refresh,
   } = useSubscription();
+  const { formattedWithInterval, formatted } = usePrice();
 
   const [promoCode, setPromoCode] = useState('');
   const [portalLoading, setPortalLoading] = useState(false);
@@ -175,7 +177,7 @@ const SubscriptionPage = () => {
               <div style={{ textAlign: 'left' }}>
                 <div style={{ fontSize: '14px', opacity: 0.85, marginBottom: '6px', fontWeight: '500' }}>Details:</div>
                 <div style={{ fontSize: '14px', fontWeight: '700', whiteSpace: 'nowrap' }}>
-                  {subscription?.billing?.baseAmountFormatted || '$4.99'}/month
+                  {subscription?.billing?.baseAmountFormatted || formatted}/month
                   {subscription?.billing?.discount && (
                     <span style={{ fontSize: '11px', marginLeft: '6px', color: '#2ecc71' }}>
                       ({subscription.billing.discount.percentOff}% off first month)
@@ -209,8 +211,8 @@ const SubscriptionPage = () => {
                     ? `Trial canceled. You can still use Trackabite Pro until ${new Date(subscription?.billing?.date || subscription.trial_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}. You won't be charged.`
                     : `Subscription canceled. Access until ${new Date(subscription?.billing?.date || subscription.current_period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}. Your card won't be charged again.`)
                   : (subscription?.status === 'trialing'
-                    ? `You're on a 7-day free trial. Your card will be charged ${subscription?.billing?.amountFormatted || '$4.99'} on ${new Date(subscription?.billing?.date || subscription.trial_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}.${subscription?.billing?.discount ? ` (${subscription.billing.discount.percentOff}% discount applied)` : ''}`
-                    : `Subscribed through Trackabite. Your next charge will be ${subscription?.billing?.amountFormatted || '$4.99'} on ${new Date(subscription?.billing?.date || subscription.current_period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}.${subscription?.billing?.discount ? ` (${subscription.billing.discount.percentOff}% discount applied)` : ''}`)}
+                    ? `You're on a 7-day free trial. Your card will be charged ${subscription?.billing?.amountFormatted || formatted} on ${new Date(subscription?.billing?.date || subscription.trial_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}.${subscription?.billing?.discount ? ` (${subscription.billing.discount.percentOff}% discount applied)` : ''}`
+                    : `Subscribed through Trackabite. Your next charge will be ${subscription?.billing?.amountFormatted || formatted} on ${new Date(subscription?.billing?.date || subscription.current_period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}.${subscription?.billing?.discount ? ` (${subscription.billing.discount.percentOff}% discount applied)` : ''}`)}
             </div>
 
             {subscription?.tier !== 'grandfathered' && (
@@ -392,7 +394,7 @@ const SubscriptionPage = () => {
                 textAlign: 'center',
                 color: '#666'
               }}>
-                Then $4.99/month • Cancel anytime
+                Then {formattedWithInterval} • Cancel anytime
               </p>
             </div>
           </div>
@@ -428,7 +430,7 @@ const SubscriptionPage = () => {
                 </div>
                 <div className="comparison-table__cell comparison-table__cell--plan comparison-table__cell--premium">
                   <h3>Pro</h3>
-                  <p className="plan-price">$4.99/month</p>
+                  <p className="plan-price">{formattedWithInterval}</p>
                 </div>
               </div>
 

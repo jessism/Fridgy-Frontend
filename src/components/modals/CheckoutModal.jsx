@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { PaymentSuccessAnimation } from '../PaymentSuccessAnimation';
+import { usePrice } from '../../contexts/PriceContext';
 import './CheckoutModal.css';
 
 // Initialize Stripe outside component
@@ -33,6 +34,7 @@ const PaymentForm = ({
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
+  const { formattedWithInterval } = usePrice();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submittingRef = useRef(false);
@@ -202,10 +204,10 @@ const PaymentForm = ({
       <p className="checkout-modal__subtitle">
         {promoDiscount ? (
           <span style={{ color: '#10B981', fontWeight: '600' }}>
-            ✓ {promoDiscount} • Then $4.99/month • Cancel anytime
+            ✓ {promoDiscount} • Then {formattedWithInterval} • Cancel anytime
           </span>
         ) : (
-          '$4.99/month after trial ends • Cancel anytime'
+          `${formattedWithInterval} after trial ends • Cancel anytime`
         )}
       </p>
 

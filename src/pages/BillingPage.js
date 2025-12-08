@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react';
 import { useSubscription } from '../hooks/useSubscription';
+import { usePrice } from '../contexts/PriceContext';
 import { UsageIndicator } from '../components/common/UsageIndicator';
 import { PremiumBadge } from '../components/common/PremiumBadge';
 import './BillingPage.css';
@@ -19,6 +20,7 @@ function BillingPage() {
     openBillingPortal,
     startCheckout,
   } = useSubscription();
+  const { formattedWithInterval } = usePrice();
 
   const [promoCode, setPromoCode] = useState('');
   const [portalLoading, setPortalLoading] = useState(false);
@@ -161,7 +163,7 @@ function BillingPage() {
               </button>
 
               <p className="billing-page__trial-note">
-                Then $4.99/month. Cancel anytime.
+                Then {formattedWithInterval}. Cancel anytime.
               </p>
             </div>
           )}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { PaymentSuccessAnimation } from '../../../../components/PaymentSuccessAnimation';
+import { usePrice } from '../../../../contexts/PriceContext';
 import './ScreenStyles.css';
 
 // Initialize Stripe outside component
@@ -30,6 +31,7 @@ const PaymentForm = ({
 }) => {
   const stripe = useStripe();
   const elements = useElements();
+  const { formattedWithInterval } = usePrice();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submittingRef = useRef(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -387,7 +389,7 @@ const PaymentForm = ({
         }}>
           {promoDiscount
             ? promoDiscount
-            : '$4.99/month after trial ends. Your trial starts immediately and you can cancel anytime during the 7-day trial period.'
+            : `${formattedWithInterval} after trial ends. Your trial starts immediately and you can cancel anytime during the 7-day trial period.`
           }
         </p>
       </div>

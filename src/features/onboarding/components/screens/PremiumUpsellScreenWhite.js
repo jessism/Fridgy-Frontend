@@ -1,9 +1,12 @@
 import React, { useEffect } from 'react';
 import { trackOnboardingStepViewed, trackPaymentChoice } from '../../../../utils/onboardingTracking';
+import { usePrice } from '../../../../contexts/PriceContext';
 import './ScreenStyles.css';
 import Logo from '../../../../assets/images/Logo.png';
 
 const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep, updateData }) => {
+  const { formattedWithInterval } = usePrice();
+
   useEffect(() => {
     trackOnboardingStepViewed(9);
   }, []);
@@ -219,7 +222,7 @@ const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep, up
               color: '#666',
               textAlign: 'center'
             }}>
-              7 days free, then $4.99/month
+              7 days free, then {formattedWithInterval}
             </div>
             <div style={{
               fontSize: '13px',

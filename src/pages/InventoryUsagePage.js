@@ -4,6 +4,7 @@ import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import { useAuth } from '../features/auth/context/AuthContext';
 import { useSubscription } from '../hooks/useSubscription';
+import { usePrice } from '../contexts/PriceContext';
 import { PremiumBadge } from '../components/common/PremiumBadge';
 import useInventoryAnalytics from '../hooks/useInventoryAnalytics';
 import './InventoryUsagePage.css';
@@ -12,6 +13,7 @@ const InventoryUsagePage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isPremium, startCheckout, loading: subscriptionLoading } = useSubscription();
+  const { formattedWithInterval } = usePrice();
   const [dateRange, setDateRange] = useState('30'); // Default to last 30 days
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   
@@ -232,7 +234,7 @@ const InventoryUsagePage = () => {
             Upgrade to Premium
           </button>
           <p style={{ fontSize: '14px', color: '#999', marginTop: '16px' }}>
-            7-day free trial, then $4.99/month
+            7-day free trial, then {formattedWithInterval}
           </p>
         </div>
 
