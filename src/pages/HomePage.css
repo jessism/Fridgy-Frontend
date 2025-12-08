@@ -471,13 +471,6 @@
   margin-bottom: 16px;
 }
 
-/* Desktop only - add top spacing to first content section to avoid touching navbar */
-@media (min-width: 769px) {
-  .home-page__popular-now {
-    padding-top: 120px;
-  }
-}
-
 .featured-categories .container {
   width: 96vw;
   max-width: none;
@@ -1704,6 +1697,24 @@
     width: calc(100vw - 1rem);
     margin: 0 0.5rem;
     padding: 0.75rem;
+  }
+}
+
+/* Desktop - add top spacing to avoid touching navbar */
+@media (min-width: 769px) {
+  .home-page__popular-now {
+    padding-top: 100px;
+  }
+
+  /* Stack title and description vertically on desktop */
+  .home-page__popular-now .section-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .home-page__popular-now .section-description {
+    margin-top: 0.25rem;
   }
 }
 
@@ -2975,6 +2986,12 @@ h2.section-title::after {
   color: #9ca3af;
 }
 
+.info-text-icon-img {
+  width: 16px;
+  height: 16px;
+  opacity: 0.6;
+}
+
 .info-text {
   text-transform: capitalize;
   color: #6b7280;
@@ -3000,21 +3017,14 @@ h2.section-title::after {
 
 /* Single row layout for all action items */
 .recipe-action-row.single-row {
-  gap: 1.25rem;
-  justify-content: space-between;
+  gap: 0.75rem;
+  justify-content: stretch;
   padding: 0;
   width: 100%;
 }
 
-.recipe-action-row.single-row .servings-display {
-  flex: 0 0 auto;
-  min-width: fit-content;
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-}
-
 .recipe-action-row.single-row button {
-  flex: 0 0 auto;
+  flex: 1;
   padding: 0.5rem 1.5rem;
   font-size: 0.9rem;
 }
@@ -3033,7 +3043,7 @@ h2.section-title::after {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.5rem;
   padding: 0.625rem 1.5rem;
   background: #f3f4f6;
   border: none;
@@ -3045,9 +3055,61 @@ h2.section-title::after {
   min-width: 0;
 }
 
+.servings-icon-img {
+  width: 16px;
+  height: 16px;
+  opacity: 0.6;
+}
+
 .servings-display .minus-btn,
 .servings-display .plus-btn {
   display: none;
+}
+
+/* Serving Size Control - next to Ingredients heading */
+.recipe-detail-modal__ingredients-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+
+.recipe-detail-modal__ingredients-header .section-title {
+  margin-bottom: 0;
+}
+
+.recipe-detail-modal__servings-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.recipe-detail-modal__serving-value {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.recipe-detail-modal__serving-btn {
+  background: transparent;
+  border: none;
+  color: #374151;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.recipe-detail-modal__serving-btn:hover:not(:disabled) {
+  color: #111827;
+}
+
+.recipe-detail-modal__serving-btn:disabled {
+  color: #d1d5db;
+  cursor: not-allowed;
 }
 
 .save-recipe-action-btn {
@@ -3091,16 +3153,11 @@ h2.section-title::after {
     flex-wrap: nowrap;
     gap: 0.5rem;
     padding: 0;
-    justify-content: space-between;
     width: 100%;
   }
 
-  .recipe-action-row.single-row .servings-display {
-    font-size: 0.85rem;
-    padding: 0.45rem 0.75rem;
-  }
-
   .recipe-action-row.single-row button {
+    flex: 1;
     font-size: 0.85rem;
     padding: 0.45rem 1rem;
   }

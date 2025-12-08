@@ -1,0 +1,236 @@
+/* Create Cookbook Modal Styles */
+
+.create-cookbook-modal__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  animation: createCookbookFadeIn 0.2s ease-out;
+  padding: 20px;
+}
+
+.create-cookbook-modal__content {
+  background: white;
+  border-radius: 24px;
+  padding: 32px;
+  max-width: 420px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  animation: createCookbookSlideUp 0.3s ease-out;
+}
+
+/* Close button */
+.create-cookbook-modal__close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #9CA3AF;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.create-cookbook-modal__close:hover {
+  background: #F3F4F6;
+  color: #4B5563;
+}
+
+/* Icon */
+.create-cookbook-modal__icon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #E8FFF0 0%, #D1FAE5 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  animation: createCookbookBounce 0.5s ease-out 0.2s both;
+}
+
+.create-cookbook-modal__icon svg {
+  color: #4fcf61;
+}
+
+/* Header */
+.create-cookbook-modal__header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.create-cookbook-modal__header h2 {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.3px;
+}
+
+.create-cookbook-modal__header p {
+  font-size: 0.9375rem;
+  color: #6B7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Input group */
+.create-cookbook-modal__input-group {
+  margin-bottom: 24px;
+}
+
+.create-cookbook-modal__input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  font-size: 1rem;
+  color: #111827;
+  transition: all 0.2s ease;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.create-cookbook-modal__input:focus {
+  border-color: #4fcf61;
+  box-shadow: 0 0 0 3px rgba(79, 207, 97, 0.1);
+}
+
+.create-cookbook-modal__input::placeholder {
+  color: #9CA3AF;
+}
+
+.create-cookbook-modal__error {
+  color: #EF4444;
+  font-size: 0.875rem;
+  margin: 8px 0 0 0;
+}
+
+/* Footer buttons */
+.create-cookbook-modal__footer {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.create-cookbook-modal__button {
+  padding: 12px 32px;
+  border-radius: 12px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  min-width: 100px;
+}
+
+.create-cookbook-modal__button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.create-cookbook-modal__button--secondary {
+  background: #F3F4F6;
+  color: #374151;
+}
+
+.create-cookbook-modal__button--secondary:hover:not(:disabled) {
+  background: #E5E7EB;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.create-cookbook-modal__button--primary {
+  background: #4fcf61;
+  color: white;
+}
+
+.create-cookbook-modal__button--primary:hover:not(:disabled) {
+  background: #3cb54c;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.25);
+}
+
+.create-cookbook-modal__button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Animations */
+@keyframes createCookbookFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes createCookbookSlideUp {
+  from {
+    transform: translateY(20px) scale(0.97);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes createCookbookBounce {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 520px) {
+  .create-cookbook-modal__content {
+    padding: 24px;
+    margin: 10px;
+  }
+
+  .create-cookbook-modal__header h2 {
+    font-size: 1.25rem;
+  }
+
+  .create-cookbook-modal__header p {
+    font-size: 0.875rem;
+  }
+
+  .create-cookbook-modal__input {
+    padding: 12px 14px;
+    font-size: 0.9375rem;
+  }
+
+  .create-cookbook-modal__button {
+    padding: 10px 24px;
+    font-size: 0.875rem;
+    min-width: 90px;
+  }
+
+  .create-cookbook-modal__close {
+    width: 28px;
+    height: 28px;
+    padding: 6px;
+  }
+}

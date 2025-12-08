@@ -1,0 +1,197 @@
+/* JoinCookbook Component Styles */
+.join-cookbook {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.join-cookbook__container {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.join-cookbook__content {
+  padding: 3rem;
+  text-align: center;
+}
+
+.join-cookbook__icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  display: block;
+}
+
+.join-cookbook__title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.join-cookbook__message {
+  font-size: 1.1rem;
+  color: #4a5568;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.join-cookbook__redirect {
+  font-size: 0.95rem;
+  color: #718096;
+  margin-bottom: 1.5rem;
+  font-style: italic;
+}
+
+.join-cookbook__loading {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.join-cookbook__spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e2e8f0;
+  border-top: 3px solid #4fcf61;
+  border-radius: 50%;
+  animation: join-cookbook-spin 1s linear infinite;
+}
+
+@keyframes join-cookbook-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.join-cookbook__actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.join-cookbook__button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.join-cookbook__button--primary {
+  background-color: #4fcf61;
+  color: white;
+}
+
+.join-cookbook__button--primary:hover {
+  background-color: #45b359;
+  transform: translateY(-1px);
+}
+
+.join-cookbook__button--secondary {
+  background-color: #e2e8f0;
+  color: #4a5568;
+}
+
+.join-cookbook__button--secondary:hover {
+  background-color: #cbd5e0;
+  transform: translateY(-1px);
+}
+
+.join-cookbook__button:not(.join-cookbook__button--primary):not(.join-cookbook__button--secondary) {
+  background-color: #4fcf61;
+  color: white;
+}
+
+.join-cookbook__button:not(.join-cookbook__button--primary):not(.join-cookbook__button--secondary):hover {
+  background-color: #45b359;
+  transform: translateY(-1px);
+}
+
+.join-cookbook__help {
+  background-color: #f7fafc;
+  padding: 2rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.join-cookbook__help h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.join-cookbook__help ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.join-cookbook__help li {
+  padding: 0.5rem 0;
+  color: #4a5568;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.join-cookbook__help li::before {
+  content: '•';
+  color: #4fcf61;
+  position: absolute;
+  left: 0;
+  top: 0.5rem;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .join-cookbook {
+    padding: 1rem;
+  }
+
+  .join-cookbook__content {
+    padding: 2rem 1.5rem;
+  }
+
+  .join-cookbook__title {
+    font-size: 1.5rem;
+  }
+
+  .join-cookbook__message {
+    font-size: 1rem;
+  }
+
+  .join-cookbook__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .join-cookbook__button {
+    width: 100%;
+  }
+
+  .join-cookbook__help {
+    padding: 1.5rem;
+  }
+
+  .join-cookbook__help li {
+    font-size: 0.9rem;
+  }
+}

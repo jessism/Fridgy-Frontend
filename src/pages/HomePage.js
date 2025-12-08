@@ -26,6 +26,8 @@ import { PremiumBadge } from '../components/common/PremiumBadge';
 import { UpgradeModal } from '../components/modals/UpgradeModal';
 import { CheckoutModal } from '../components/modals/CheckoutModal';
 import RecipeDetailModal from '../components/modals/RecipeDetailModal';
+import ClockIcon from '../assets/icons/Clock.png';
+import ServingIcon from '../assets/icons/Serving.png';
 import { ReactComponent as AddToFridgeIcon } from '../assets/icons/quickaccess/add-to-fridge.svg';
 import { ReactComponent as MyFridgeIcon } from '../assets/icons/quickaccess/my-fridge.svg';
 import { ReactComponent as ShopListsIcon } from '../assets/icons/quickaccess/shop-lists.svg';
@@ -621,14 +623,15 @@ const HomePage = () => {
             <p className="home-page__recent-recipe-author">@{recipe.source_author}</p>
           )}
           <div className="home-page__recent-recipe-meta">
-            {recipe.readyInMinutes && <span>&#9201; {recipe.readyInMinutes} min</span>}
+            {recipe.readyInMinutes && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <img src={ClockIcon} alt="Time" width="14" height="14" style={{ opacity: 0.6 }} />
+                {recipe.readyInMinutes} min
+              </span>
+            )}
             {recipe.servings && (
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <rect x="5" y="6" width="14" height="13" rx="2" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M10 12h4" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <img src={ServingIcon} alt="Servings" width="14" height="14" style={{ opacity: 0.6 }} />
                 {recipe.servings} servings
               </span>
             )}

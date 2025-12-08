@@ -2,8 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import RecipeCookingConfirmation from '../../features/recipe-cooking/components/RecipeCookingConfirmation';
 import useShoppingLists from '../../hooks/useShoppingLists';
+import { useSubscription } from '../../hooks/useSubscription';
 import ShoppingListSelectionModal from '../ShoppingListSelectionModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
+import CookingModeModal from './CookingModeModal';
+import { UpgradeModal } from './UpgradeModal';
+import { highlightInstructions } from '../../utils/highlightInstructions';
+import ClockIcon from '../../assets/icons/Clock.png';
 
 const RecipeDetailModal = ({
   isOpen,
@@ -17,6 +22,15 @@ const RecipeDetailModal = ({
   const [activeTab, setActiveTab] = useState('ingredients');
   const [showCookingConfirmation, setShowCookingConfirmation] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [showCookingMode, setShowCookingMode] = useState(false);
+
+  // Serving size adjustment state
+  const [selectedServings, setSelectedServings] = useState(recipe?.servings || 1);
+
+  // Reset selected servings when recipe changes
+  React.useEffect(() => {
+    setSelectedServings(recipe?.servings || 1);
+  }, [recipe?.id, recipe?.servings]);
 
   // Shopping list selection modal state
   const [showShoppingListModal, setShowShoppingListModal] = useState(false);
@@ -24,6 +38,10 @@ const RecipeDetailModal = ({
 
   // Shopping lists hook
   const { lists: shoppingLists, createList, addItem: addToShoppingList } = useShoppingLists();
+
+  // Subscription hook for premium gating
+  const { isPremium, startCheckout } = useSubscription();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Navigation hook
   const navigate = useNavigate();
@@ -57,6 +75,50 @@ const RecipeDetailModal = ({
   };
   
   if (!isOpen) return null;
+
+  // Helper function to format amounts as Unicode fractions
+  const formatAmount = (amount) => {
+    if (!amount || amount === 0) return '';
+
+    const whole = Math.floor(amount);
+    const decimal = amount - whole;
+
+    // Common fraction mappings
+    const fractions = {
+      0.125: '⅛', 0.25: '¼', 0.33: '⅓', 0.375: '⅜',
+      0.5: '½', 0.625: '⅝', 0.67: '⅔', 0.75: '¾', 0.875: '⅞'
+    };
+
+    // If decimal is very small, just return whole number
+    if (decimal < 0.0625) {
+      return whole === 0 ? '' : String(whole);
+    }
+
+    // Find closest fraction
+    const fractionKeys = Object.keys(fractions).map(Number);
+    const closest = fractionKeys.reduce((a, b) =>
+      Math.abs(b - decimal) < Math.abs(a - decimal) ? b : a
+    );
+
+    const fractionStr = fractions[closest] || '';
+    return whole > 0 ? `${whole}${fractionStr}` : fractionStr;
+  };
+
+  // Helper function to calculate scaled ingredient amount
+  const getScaledAmount = (originalAmount, originalServings, newServings) => {
+    if (!originalAmount || !originalServings) return originalAmount;
+    const ratio = newServings / originalServings;
+    return originalAmount * ratio;
+  };
+
+  // Handle serving change with premium gate
+  const handleServingChange = (increment) => {
+    if (!isPremium) {
+      setShowUpgradeModal(true);
+      return;
+    }
+    setSelectedServings(prev => increment ? prev + 1 : Math.max(1, prev - 1));
+  };
 
   // Helper function to get cook time
   const getCookTime = () => {
@@ -101,11 +163,20 @@ const RecipeDetailModal = ({
   const transformIngredientsForShoppingList = () => {
     if (!recipe?.extendedIngredients) return [];
 
+    const originalServings = recipe?.servings || 1;
+
     return recipe.extendedIngredients.map(ingredient => {
+      // Calculate scaled amount based on selected servings
+      const scaledAmount = getScaledAmount(
+        ingredient.amount,
+        originalServings,
+        selectedServings
+      );
+
       // Combine amount and unit into quantity string
       let quantity = '';
-      if (ingredient.amount && ingredient.amount > 0) {
-        quantity = `${Math.round(ingredient.amount * 100) / 100}`;
+      if (scaledAmount && scaledAmount > 0) {
+        quantity = formatAmount(scaledAmount);
         if (ingredient.unit) {
           quantity += ` ${ingredient.unit}`;
         }
@@ -275,17 +346,26 @@ const RecipeDetailModal = ({
       return <p className="no-ingredients">No ingredients available</p>;
     }
 
+    const originalServings = recipe?.servings || 1;
+
     return (
       <div className="ingredients-list">
-        {recipe.extendedIngredients.map((ingredient, index) => (
-          <div key={index} className="ingredient-item">
-            <span className="ingredient-amount">
-              {ingredient.amount ? Math.round(ingredient.amount * 100) / 100 : ''}
-            </span>
-            <span className="ingredient-unit">{ingredient.unit || ''}</span>
-            <span className="ingredient-name">{ingredient.name}</span>
-          </div>
-        ))}
+        {recipe.extendedIngredients.map((ingredient, index) => {
+          const scaledAmount = getScaledAmount(
+            ingredient.amount,
+            originalServings,
+            selectedServings
+          );
+          return (
+            <div key={index} className="ingredient-item">
+              <span className="ingredient-amount">
+                {formatAmount(scaledAmount)}
+              </span>
+              <span className="ingredient-unit">{ingredient.unit || ''}</span>
+              <span className="ingredient-name">{ingredient.name}</span>
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -301,7 +381,7 @@ const RecipeDetailModal = ({
       return recipe.analyzedInstructions[0].steps.map((step, index) => (
         <div key={index} className="instruction-step">
           <span className="step-text">
-            <strong>Step {step.number || index + 1}:</strong> {step.step}
+            <strong>Step {step.number || index + 1}:</strong> {highlightInstructions(step.step, recipe?.extendedIngredients)}
           </span>
         </div>
       ));
@@ -312,7 +392,7 @@ const RecipeDetailModal = ({
       return recipe.instructionSteps.map((step, index) => (
         <div key={index} className="instruction-step">
           <span className="step-text">
-            <strong>Step {index + 1}:</strong> {step}
+            <strong>Step {index + 1}:</strong> {highlightInstructions(step, recipe?.extendedIngredients)}
           </span>
         </div>
       ));
@@ -330,7 +410,7 @@ const RecipeDetailModal = ({
         return cleanInstructions.map((step, index) => (
           <div key={index} className="instruction-step">
             <span className="step-text">
-              <strong>Step {index + 1}:</strong> {step.trim()}
+              <strong>Step {index + 1}:</strong> {highlightInstructions(step.trim(), recipe?.extendedIngredients)}
             </span>
           </div>
         ));
@@ -342,13 +422,50 @@ const RecipeDetailModal = ({
       return recipe.instructions.map((step, index) => (
         <div key={index} className="instruction-step">
           <span className="step-text">
-            <strong>Step {index + 1}:</strong> {step}
+            <strong>Step {index + 1}:</strong> {highlightInstructions(step, recipe?.extendedIngredients)}
           </span>
         </div>
       ));
     }
 
     return <p>No instructions available</p>;
+  };
+
+  // Helper function to extract instruction steps as array for CookingMode
+  const getInstructionSteps = () => {
+    // Format 1: analyzedInstructions (from Instagram imports)
+    if (recipe?.analyzedInstructions &&
+        Array.isArray(recipe.analyzedInstructions) &&
+        recipe.analyzedInstructions.length > 0 &&
+        recipe.analyzedInstructions[0].steps &&
+        Array.isArray(recipe.analyzedInstructions[0].steps) &&
+        recipe.analyzedInstructions[0].steps.length > 0) {
+      return recipe.analyzedInstructions[0].steps.map(step => step.step);
+    }
+
+    // Format 2: instructionSteps array
+    if (recipe?.instructionSteps && Array.isArray(recipe.instructionSteps) && recipe.instructionSteps.length > 0) {
+      return recipe.instructionSteps;
+    }
+
+    // Format 3: instructions string (parsed)
+    if (recipe?.instructions && typeof recipe.instructions === 'string') {
+      const cleanInstructions = recipe.instructions
+        .replace(/<[^>]*>/g, '') // Remove HTML tags
+        .split(/\.\s+|\n/)
+        .filter(step => step.trim().length > 10);
+
+      if (cleanInstructions.length > 0) {
+        return cleanInstructions.map(step => step.trim());
+      }
+    }
+
+    // Format 4: instructions array
+    if (recipe?.instructions && Array.isArray(recipe.instructions)) {
+      return recipe.instructions;
+    }
+
+    return [];
   };
 
   const renderNutrition = () => {
@@ -604,7 +721,7 @@ const RecipeDetailModal = ({
 
                   <div className="recipe-info-text">
                     <div className="info-text-item">
-                      <span className="info-text-icon">⏱</span>
+                      <img src={ClockIcon} alt="Time" className="info-text-icon-img" />
                       <span className="info-text">{getCookTime()}</span>
                     </div>
                     {getSpecialAttributes().slice(0, 2).map((attribute, index) => (
@@ -617,9 +734,6 @@ const RecipeDetailModal = ({
                   {/* Action Buttons */}
                   <div className="recipe-action-buttons">
                     <div className="recipe-action-row single-row">
-                      <div className="servings-display">
-                        {recipe.servings || 2} servings
-                      </div>
                       <button
                         className="recipe-add-items-button"
                         onClick={handleAddToShoppingList}
@@ -673,7 +787,31 @@ const RecipeDetailModal = ({
                   <div className="recipe-tab-content">
                     {activeTab === 'ingredients' && (
                       <div>
-                        <h2 className="section-title">Ingredients</h2>
+                        <div className="recipe-detail-modal__ingredients-header">
+                          <h2 className="section-title">Ingredients</h2>
+                          <div className="recipe-detail-modal__servings-inline">
+                            <button
+                              type="button"
+                              className="recipe-detail-modal__serving-btn"
+                              onClick={() => handleServingChange(false)}
+                              disabled={isPremium && selectedServings <= 1}
+                              aria-label="Decrease servings"
+                            >
+                              -
+                            </button>
+                            <span className="recipe-detail-modal__serving-value">
+                              {selectedServings} {selectedServings === 1 ? 'Serving' : 'Servings'}
+                            </span>
+                            <button
+                              type="button"
+                              className="recipe-detail-modal__serving-btn"
+                              onClick={() => handleServingChange(true)}
+                              aria-label="Increase servings"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
                         <div className="ingredients-container">
                           {renderIngredients()}
                         </div>
@@ -681,7 +819,21 @@ const RecipeDetailModal = ({
                     )}
                     {activeTab === 'method' && (
                       <div>
-                        <h2 className="section-title">Instructions</h2>
+                        <div className="cooking-mode__instructions-header">
+                          <h2 className="section-title">Instructions</h2>
+                          {getInstructionSteps().length > 0 && (
+                            <button
+                              className="cooking-mode__play-button"
+                              onClick={() => setShowCookingMode(true)}
+                              title="Start Cooking Mode"
+                              aria-label="Start step-by-step cooking mode"
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M8 5v14l11-7z"/>
+                              </svg>
+                            </button>
+                          )}
+                        </div>
                         <div className="instructions-container">
                           {renderInstructions()}
                         </div>
@@ -731,6 +883,23 @@ const RecipeDetailModal = ({
         onConfirm={handleConfirmDelete}
         itemName={recipe?.title}
         itemType="recipe"
+      />
+
+      {/* Cooking Mode Modal */}
+      <CookingModeModal
+        isOpen={showCookingMode}
+        onClose={() => setShowCookingMode(false)}
+        steps={getInstructionSteps()}
+        recipeName={recipe?.title}
+        ingredients={recipe?.extendedIngredients}
+      />
+
+      {/* Upgrade Modal for serving adjustment */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        feature="serving adjustment"
+        startCheckout={startCheckout}
       />
     </>
   );

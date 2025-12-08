@@ -1,0 +1,361 @@
+/* CookingModeModal.css - Scoped styles using BEM naming */
+
+/* ===========================
+   Play Button (in RecipeDetailModal)
+   =========================== */
+
+.cooking-mode__instructions-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.cooking-mode__instructions-header .section-title {
+  margin-bottom: 0;
+}
+
+.cooking-mode__play-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #1f2937;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.cooking-mode__play-button:hover {
+  background: #374151;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.cooking-mode__play-button:active {
+  transform: scale(0.95);
+}
+
+.cooking-mode__play-button svg {
+  margin-left: 2px; /* Visual centering for play triangle */
+}
+
+/* ===========================
+   Full-Screen Cooking Mode
+   =========================== */
+
+/* Full-screen overlay */
+.cooking-mode__overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  z-index: 2000; /* Above RecipeDetailModal (z-index: 1000) */
+  display: flex;
+  flex-direction: column;
+  animation: cooking-mode__fade-in 0.3s ease-out;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+@keyframes cooking-mode__fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Header */
+.cooking-mode__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+
+.cooking-mode__close-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #374151;
+  transition: all 0.2s ease;
+}
+
+.cooking-mode__close-button:hover {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.cooking-mode__close-button:active {
+  transform: scale(0.95);
+}
+
+.cooking-mode__step-indicator {
+  font-family: var(--header-font, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  font-size: 1rem;
+  font-weight: 600;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+}
+
+/* Recipe name */
+.cooking-mode__recipe-name {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #9ca3af;
+  padding: 0 1.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Main content area */
+.cooking-mode__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  overflow-y: auto;
+}
+
+.cooking-mode__step-number {
+  font-family: var(--header-font, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--primary-green, #4fcf61);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+.cooking-mode__step-text {
+  font-family: var(--header-font, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 1.6;
+  color: #111827;
+  max-width: 600px;
+}
+
+/* Progress dots */
+.cooking-mode__progress {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 1rem;
+  flex-wrap: wrap;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.cooking-mode__progress-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.cooking-mode__progress-dot:hover {
+  background: #d1d5db;
+  transform: scale(1.2);
+}
+
+.cooking-mode__progress-dot--active {
+  background: var(--primary-green, #4fcf61);
+  transform: scale(1.2);
+}
+
+/* Navigation buttons */
+.cooking-mode__navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem;
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+}
+
+.cooking-mode__nav-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 56px;
+  padding: 1rem 1.5rem;
+  border-radius: 16px;
+  font-family: var(--header-font, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.cooking-mode__nav-button--prev {
+  background: #f3f4f6;
+  color: #374151;
+  max-width: 140px;
+}
+
+.cooking-mode__nav-button--prev:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.cooking-mode__nav-button--prev:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.cooking-mode__nav-button--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.cooking-mode__nav-button--next {
+  background: var(--primary-green, #4fcf61);
+  color: white;
+}
+
+.cooking-mode__nav-button--next:hover {
+  background: #45b857;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3);
+}
+
+.cooking-mode__nav-button--next:active {
+  transform: scale(0.98);
+}
+
+.cooking-mode__nav-button--done {
+  background: var(--primary-green, #4fcf61);
+  color: white;
+}
+
+.cooking-mode__nav-button--done:hover {
+  background: #45b857;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.3);
+}
+
+.cooking-mode__nav-button--done:active {
+  transform: scale(0.98);
+}
+
+/* Swipe hint - shows briefly on mobile */
+.cooking-mode__swipe-hint {
+  position: absolute;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: #9ca3af;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  opacity: 0;
+  animation: cooking-mode__hint-fade 3s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes cooking-mode__hint-fade {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Hide swipe hint on desktop */
+@media (hover: hover) and (pointer: fine) {
+  .cooking-mode__swipe-hint {
+    display: none;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .cooking-mode__step-text {
+    font-size: 1.25rem;
+    padding: 0 0.5rem;
+  }
+
+  .cooking-mode__nav-button {
+    min-height: 52px;
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .cooking-mode__nav-button--prev {
+    max-width: 120px;
+  }
+
+  .cooking-mode__progress {
+    gap: 6px;
+  }
+
+  .cooking-mode__progress-dot {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+/* Tablet and larger */
+@media (min-width: 768px) {
+  .cooking-mode__step-text {
+    font-size: 1.75rem;
+  }
+
+  .cooking-mode__content {
+    padding: 3rem;
+  }
+
+  .cooking-mode__nav-button {
+    max-width: 200px;
+  }
+
+  .cooking-mode__navigation {
+    justify-content: center;
+    gap: 2rem;
+  }
+}
+
+/* Large screens */
+@media (min-width: 1024px) {
+  .cooking-mode__overlay {
+    padding: 2rem;
+  }
+
+  .cooking-mode__step-text {
+    font-size: 2rem;
+    max-width: 800px;
+  }
+}

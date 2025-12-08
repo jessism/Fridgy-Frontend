@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../auth/context/AuthContext';
 import RecipeDetailModal from '../../../components/modals/RecipeDetailModal';
 import { safeJSONStringify } from '../../../utils/jsonSanitizer';
@@ -9,9 +9,14 @@ import './RecipeScannerCamera.css';
 const RecipeScannerCamera = ({ onComplete }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
+
+  // Check if coming from cookbook flow
+  const cookbookId = location.state?.cookbookId;
+  const cookbookName = location.state?.cookbookName;
 
   // Camera and photo states
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -199,6 +204,28 @@ const RecipeScannerCamera = ({ onComplete }) => {
     }
   };
 
+  // Helper function to add recipe to cookbook
+  const addRecipeToCookbook = async (recipeId) => {
+    if (!cookbookId || !recipeId) return;
+    try {
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const token = localStorage.getItem('fridgy_token');
+      await fetch(`${API_BASE_URL}/cookbooks/${cookbookId}/recipes`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          recipes: [{ recipe_id: recipeId, recipe_source: 'saved' }]
+        })
+      });
+      console.log('[RecipeScanner] Recipe added to cookbook:', cookbookId);
+    } catch (error) {
+      console.error('[RecipeScanner] Failed to add recipe to cookbook:', error);
+    }
+  };
+
   const saveRecipe = async () => {
     if (!extractedRecipe) return;
 
@@ -226,14 +253,22 @@ const RecipeScannerCamera = ({ onComplete }) => {
       const data = await response.json();
 
       if (data.success) {
+        // Add to cookbook if coming from cookbook flow
+        if (cookbookId && data.recipe?.id) {
+          console.log('[RecipeScanner] Adding scanned recipe to cookbook:', cookbookId);
+          await addRecipeToCookbook(data.recipe.id);
+        }
+
         // Stop camera
         if (streamRef.current) {
           streamRef.current.getTracks().forEach(track => track.stop());
           setIsCameraActive(false);
         }
 
-        // Navigate to saved recipes
-        navigate('/saved-recipes');
+        // Navigate to saved recipes (or cookbook view if from cookbook flow)
+        navigate(cookbookId ? '/meal-plans/recipes' : '/saved-recipes', {
+          state: cookbookId ? { openCookbook: cookbookId, message: `Recipe added to "${cookbookName}"` } : undefined
+        });
       } else {
         console.error('Save failed:', data.error);
         alert('Failed to save recipe. Please try again.');

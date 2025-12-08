@@ -1391,3 +1391,166 @@
     height: 36px;
   }
 }
+
+/* =================================
+   Organize by Aisle Feature
+   ================================= */
+
+/* Toggle Pill */
+.shopping-list-section__organize-toggle {
+  padding: 8px 20px 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.shopping-list-section__organize-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.shopping-list-section__organize-pill:hover {
+  background: #ebebeb;
+  border-color: #d0d0d0;
+}
+
+.shopping-list-section__organize-pill--active {
+  background: var(--primary-green);
+  border-color: var(--primary-green);
+  color: white;
+}
+
+.shopping-list-section__organize-pill--active:hover {
+  background: var(--primary-green-dark);
+  border-color: var(--primary-green-dark);
+}
+
+/* Aisle Group Styles - Inventory Page Style */
+.shopping-list-section__aisle-group {
+  margin-bottom: 8px;
+}
+
+.shopping-list-section__aisle-group:last-child {
+  margin-bottom: 0;
+}
+
+.shopping-list-section__aisle-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  margin: 1rem 0 0.5rem 0;
+  background: #f0f9f0;
+  border: none;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.shopping-list-section__aisle-name {
+  flex: 1;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4a6741;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Category-specific colors (matching inventory page) */
+.shopping-list-section__aisle-header--produce {
+  background: #f0f9f0;
+}
+.shopping-list-section__aisle-header--produce .shopping-list-section__aisle-name {
+  color: #4a6741;
+}
+
+.shopping-list-section__aisle-header--dairy {
+  background: #fff5e6;
+}
+.shopping-list-section__aisle-header--dairy .shopping-list-section__aisle-name {
+  color: #8b6914;
+}
+
+.shopping-list-section__aisle-header--meat {
+  background: #fff0f0;
+}
+.shopping-list-section__aisle-header--meat .shopping-list-section__aisle-name {
+  color: #8b4561;
+}
+
+.shopping-list-section__aisle-header--bakery {
+  background: #fff8e6;
+}
+.shopping-list-section__aisle-header--bakery .shopping-list-section__aisle-name {
+  color: #8b7014;
+}
+
+.shopping-list-section__aisle-header--frozen {
+  background: #e6f3ff;
+}
+.shopping-list-section__aisle-header--frozen .shopping-list-section__aisle-name {
+  color: #4a6b8b;
+}
+
+.shopping-list-section__aisle-header--pantry {
+  background: #f5f0e6;
+}
+.shopping-list-section__aisle-header--pantry .shopping-list-section__aisle-name {
+  color: #6b5a41;
+}
+
+.shopping-list-section__aisle-header--snacks {
+  background: #f9f0f5;
+}
+.shopping-list-section__aisle-header--snacks .shopping-list-section__aisle-name {
+  color: #6b4161;
+}
+
+.shopping-list-section__aisle-header--condiments {
+  background: #fff0e6;
+}
+.shopping-list-section__aisle-header--condiments .shopping-list-section__aisle-name {
+  color: #8b5a14;
+}
+
+.shopping-list-section__aisle-header--other {
+  background: #f5f5f5;
+}
+.shopping-list-section__aisle-header--other .shopping-list-section__aisle-name {
+  color: #666666;
+}
+
+.shopping-list-section__aisle-items {
+  padding-left: 0;
+  border-left: none;
+  margin-left: 0;
+}
+
+/* Mobile adjustments for Organize by Aisle */
+@media (max-width: 768px) {
+  .shopping-list-section__organize-toggle {
+    padding: 6px 16px 12px;
+  }
+
+  .shopping-list-section__organize-pill {
+    padding: 6px 14px;
+    font-size: 0.8125rem;
+  }
+
+  .shopping-list-section__aisle-header {
+    padding: 0.4rem 0.75rem;
+    margin: 0.75rem 0 0.4rem 0;
+  }
+
+  .shopping-list-section__aisle-name {
+    font-size: 0.8125rem;
+  }
+}

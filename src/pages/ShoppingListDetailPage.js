@@ -36,6 +36,119 @@ const ShoppingListDetailPage = () => {
   const [tempItemQuantity, setTempItemQuantity] = useState('');
   const [updatingItemId, setUpdatingItemId] = useState(null);
   const [recentlyCheckedItems, setRecentlyCheckedItems] = useState([]);
+  const [organizeByAisle, setOrganizeByAisle] = useState(() => {
+    return localStorage.getItem('shopping_organize_by_aisle') === 'true';
+  });
+
+  // Toggle handler for organize by aisle
+  const handleToggleOrganizeByAisle = () => {
+    const newValue = !organizeByAisle;
+    setOrganizeByAisle(newValue);
+    localStorage.setItem('shopping_organize_by_aisle', String(newValue));
+  };
+
+  // Aisle configuration
+  const AISLE_ORDER = [
+    'Produce', 'Dairy & Eggs', 'Meat & Seafood', 'Bakery & Bread',
+    'Frozen Foods', 'Pantry & Canned Goods', 'Snacks & Beverages',
+    'Condiments & Sauces', 'Other'
+  ];
+
+  // Category keyword matching for local categorization
+  const CATEGORY_KEYWORDS = {
+    'Produce': ['apple', 'banana', 'lettuce', 'tomato', 'onion', 'garlic', 'carrot',
+      'broccoli', 'spinach', 'avocado', 'lemon', 'lime', 'orange', 'grape',
+      'strawberry', 'potato', 'cucumber', 'pepper', 'celery', 'mushroom',
+      'ginger', 'cilantro', 'parsley', 'basil', 'kale', 'green onion', 'scallion',
+      'cherry tomato', 'red onion', 'chilli', 'chili', 'coriander', 'herb', 'fresh',
+      'zucchini', 'squash', 'cabbage', 'cauliflower', 'asparagus', 'corn', 'pea',
+      'radish', 'beet', 'eggplant', 'leek', 'shallot', 'jalapeno', 'mango', 'papaya',
+      'pineapple', 'kiwi', 'melon', 'watermelon', 'peach', 'plum', 'berry', 'pear'],
+    'Dairy & Eggs': ['milk', 'cheese', 'butter', 'yogurt', 'cream', 'egg',
+      'mozzarella', 'cheddar', 'parmesan', 'feta', 'sour cream', 'cream cheese',
+      'grated cheese', 'ricotta', 'cottage', 'greek yogurt', 'half and half'],
+    'Meat & Seafood': ['chicken', 'beef', 'pork', 'turkey', 'fish', 'salmon',
+      'shrimp', 'bacon', 'sausage', 'steak', 'ham', 'tuna', 'crab', 'lobster',
+      'meat', 'seafood', 'lamb', 'duck', 'prosciutto', 'pepperoni', 'salami',
+      'ground beef', 'ground turkey', 'tilapia', 'cod', 'halibut'],
+    'Bakery & Bread': ['bread', 'bagel', 'roll', 'bun', 'croissant', 'muffin',
+      'tortilla', 'pita', 'naan', 'flatbread', 'baguette', 'ciabatta', 'sourdough',
+      'english muffin', 'cake', 'pie', 'donut', 'pastry', 'cookie', 'brownie'],
+    'Frozen Foods': ['frozen', 'ice cream', 'popsicle', 'sorbet', 'gelato',
+      'frozen pizza', 'frozen vegetable', 'frozen fruit', 'tv dinner'],
+    'Pantry & Canned Goods': ['rice', 'pasta', 'noodle', 'flour', 'sugar',
+      'canned', 'soup', 'broth', 'cereal', 'oatmeal', 'spaghetti', 'ramen',
+      'honey', 'syrup', 'peanut butter', 'almond butter', 'jam', 'jelly',
+      'quinoa', 'couscous', 'lentil', 'bean', 'chickpea', 'stock'],
+    'Snacks & Beverages': ['chips', 'crackers', 'cookies', 'soda', 'juice',
+      'water', 'coffee', 'tea', 'beer', 'wine', 'snack', 'popcorn', 'pretzel',
+      'chocolate', 'candy', 'energy drink', 'sparkling', 'cola', 'sprite'],
+    'Condiments & Sauces': ['ketchup', 'mustard', 'mayo', 'mayonnaise', 'sauce',
+      'salsa', 'soy sauce', 'hot sauce', 'bbq', 'sriracha', 'dressing', 'chilli oil',
+      'chili oil', 'sesame oil', 'teriyaki', 'worcestershire', 'vinaigrette',
+      'ranch', 'hummus', 'guacamole', 'pesto', 'marinara', 'alfredo',
+      'oil', 'olive oil', 'vegetable oil', 'neutral oil', 'vinegar', 'black vinegar',
+      'rice vinegar', 'balsamic', 'apple cider vinegar']
+  };
+
+  // Helper to categorize item by name - prioritizes longer/more specific matches
+  const categorizeByName = (itemName) => {
+    if (!itemName) return 'Other';
+    const name = itemName.toLowerCase();
+
+    // Collect all matching keywords with their categories
+    const matches = [];
+    for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+      for (const keyword of keywords) {
+        if (name.includes(keyword)) {
+          matches.push({ category, keyword, length: keyword.length });
+        }
+      }
+    }
+
+    // If no matches, return 'Other'
+    if (matches.length === 0) return 'Other';
+
+    // Sort by keyword length descending and return the category with longest match
+    matches.sort((a, b) => b.length - a.length);
+    return matches[0].category;
+  };
+
+  // Get header class based on aisle
+  const getAisleHeaderClass = (aisle) => {
+    const classMap = {
+      'Produce': 'produce',
+      'Dairy & Eggs': 'dairy',
+      'Meat & Seafood': 'meat',
+      'Bakery & Bread': 'bakery',
+      'Frozen Foods': 'frozen',
+      'Pantry & Canned Goods': 'pantry',
+      'Snacks & Beverages': 'snacks',
+      'Condiments & Sauces': 'condiments',
+      'Other': 'other'
+    };
+    return `shopping-list-section__aisle-header--${classMap[aisle] || 'other'}`;
+  };
+
+  // Group items by aisle - categorize by NAME, not stored category
+  const groupItemsByAisle = (items) => {
+    const groups = {};
+    AISLE_ORDER.forEach(aisle => groups[aisle] = []);
+
+    items.forEach(item => {
+      // Categorize by item NAME, not stored category
+      const category = categorizeByName(item.name);
+      if (groups[category]) {
+        groups[category].push(item);
+      } else {
+        groups['Other'].push(item);
+      }
+    });
+
+    return AISLE_ORDER
+      .filter(aisle => groups[aisle].length > 0)
+      .map(aisle => ({ aisle, items: groups[aisle] }));
+  };
 
   // Refs for direct DOM access - instant operations
   const itemNameInputRef = useRef(null);
@@ -606,6 +719,104 @@ const ShoppingListDetailPage = () => {
     return firstName;
   };
 
+  // Render a single item (used by both flat and grouped views)
+  const renderItem = (item) => (
+    <div key={item.id} className={`shopping-list-section__item-minimal ${item.is_checked ? 'shopping-list-section__item-minimal--checked' : ''}`}>
+      <span
+        className={`shopping-list-section__item-circle ${item.is_checked ? 'shopping-list-section__item-circle--checked' : ''} ${togglingItemId === item.id ? 'shopping-list-section__item-circle--loading' : ''}`}
+        onPointerDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleToggleItem(selectedList.id, item.id);
+        }}
+        style={{ opacity: togglingItemId === item.id ? 0.5 : 1 }}
+      >
+      </span>
+      <div className="shopping-list-section__item-info">
+        {editingItemId === item.id ? (
+          <>
+            <input
+              ref={editItemNameInputRef}
+              type="text"
+              value={tempItemName}
+              onChange={(e) => setTempItemName(e.target.value)}
+              onKeyDown={handleItemNameKeyPress}
+              onBlur={handleSaveItemEdit}
+              className="shopping-list-section__item-name-input"
+              disabled={updatingItemId === item.id}
+            />
+            <input
+              ref={editItemQuantityInputRef}
+              type="text"
+              value={tempItemQuantity}
+              onChange={(e) => setTempItemQuantity(e.target.value)}
+              onKeyDown={handleItemQuantityKeyPress}
+              onBlur={handleSaveItemEdit}
+              className="shopping-list-section__item-amount-input"
+              placeholder="1"
+              disabled={updatingItemId === item.id}
+            />
+          </>
+        ) : (
+          <>
+            <div
+              className="shopping-list-section__item-name-line shopping-list-section__item-name-line--editable"
+              onClick={() => !item.is_checked && handleStartEditItem(item, 'name')}
+            >
+              {item.name}
+            </div>
+            <div
+              className="shopping-list-section__item-amount-line shopping-list-section__item-amount-line--editable"
+              onClick={() => !item.is_checked && handleStartEditItem(item, 'quantity')}
+            >
+              {item.quantity ? `${item.quantity} ${item.unit || ''}` : 'Add quantity'}
+            </div>
+          </>
+        )}
+      </div>
+      {selectedList.shopping_list_members && selectedList.shopping_list_members.length > 1 && item.is_checked && item.checked_by_name && (
+        <div className="shopping-list-section__checked-by">
+          ✓ by {getCheckedByText(item)}
+        </div>
+      )}
+      <button
+        onClick={() => handleDeleteItem(selectedList.id, item.id)}
+        className="shopping-list-section__item-delete-btn"
+        aria-label="Remove item"
+      >
+        ×
+      </button>
+    </div>
+  );
+
+  // AisleGroup component for grouped view - simplified, always expanded
+  const AisleGroup = ({ aisle, items: aisleItems }) => {
+    const uncheckedCount = aisleItems.filter(i => !i.is_checked).length;
+
+    // Sort items within the group
+    const sortedItems = [...aisleItems].sort((a, b) => {
+      const aIsRecentlyChecked = recentlyCheckedItems.includes(a.id);
+      const bIsRecentlyChecked = recentlyCheckedItems.includes(b.id);
+      const aEffectivelyChecked = a.is_checked && !aIsRecentlyChecked;
+      const bEffectivelyChecked = b.is_checked && !bIsRecentlyChecked;
+      if (aEffectivelyChecked === bEffectivelyChecked) return 0;
+      return aEffectivelyChecked ? 1 : -1;
+    });
+
+    return (
+      <div className="shopping-list-section__aisle-group">
+        <div className={`shopping-list-section__aisle-header ${getAisleHeaderClass(aisle)}`}>
+          <span className="shopping-list-section__aisle-name">
+            {aisle.toUpperCase()} ({uncheckedCount})
+          </span>
+        </div>
+        <div className="shopping-list-section__aisle-items">
+          {sortedItems.map(item => renderItem(item))}
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="shopping-list-section__loading">
@@ -688,7 +899,17 @@ const ShoppingListDetailPage = () => {
             </div>
           </div>
 
-          {/* Add item form at the top */}
+          {/* Organize by Aisle Toggle */}
+          <div className="shopping-list-section__organize-toggle">
+            <button
+              className={`shopping-list-section__organize-pill ${organizeByAisle ? 'shopping-list-section__organize-pill--active' : ''}`}
+              onClick={handleToggleOrganizeByAisle}
+            >
+              Organize by Aisle
+            </button>
+          </div>
+
+          {/* Add item form */}
           <div className="shopping-list-section__item-minimal shopping-list-section__item-input">
             <span className="shopping-list-section__item-circle"></span>
             <div className="shopping-list-section__item-info">
@@ -713,90 +934,24 @@ const ShoppingListDetailPage = () => {
           {/* Items list below the input */}
           <div className="shopping-list-section__items-clean">
             {selectedList.shopping_list_items && selectedList.shopping_list_items.length > 0 && (
-              // Sort items: unchecked first, then checked (but keep recently checked in place)
-              [...selectedList.shopping_list_items]
-                .sort((a, b) => {
-                  const aIsRecentlyChecked = recentlyCheckedItems.includes(a.id);
-                  const bIsRecentlyChecked = recentlyCheckedItems.includes(b.id);
-
-                  // Treat recently checked items as unchecked for sorting purposes
-                  const aEffectivelyChecked = a.is_checked && !aIsRecentlyChecked;
-                  const bEffectivelyChecked = b.is_checked && !bIsRecentlyChecked;
-
-                  if (aEffectivelyChecked === bEffectivelyChecked) return 0;
-                  return aEffectivelyChecked ? 1 : -1;
-                })
-                .map(item => (
-                  <div key={item.id} className={`shopping-list-section__item-minimal ${item.is_checked ? 'shopping-list-section__item-minimal--checked' : ''}`}>
-                    <span
-                      className={`shopping-list-section__item-circle ${item.is_checked ? 'shopping-list-section__item-circle--checked' : ''} ${togglingItemId === item.id ? 'shopping-list-section__item-circle--loading' : ''}`}
-                      onPointerDown={(e) => {
-                        e.preventDefault(); // Prevent any default touch/mouse behavior
-                        e.stopPropagation(); // Stop event bubbling
-                        handleToggleItem(selectedList.id, item.id);
-                      }}
-                      style={{ opacity: togglingItemId === item.id ? 0.5 : 1 }}
-                    >
-                    </span>
-                    <div className="shopping-list-section__item-info">
-                      {editingItemId === item.id ? (
-                        // Edit mode - show input fields
-                        <>
-                          <input
-                            ref={editItemNameInputRef}
-                            type="text"
-                            value={tempItemName}
-                            onChange={(e) => setTempItemName(e.target.value)}
-                            onKeyDown={handleItemNameKeyPress}
-                            onBlur={handleSaveItemEdit}
-                            className="shopping-list-section__item-name-input"
-                            disabled={updatingItemId === item.id}
-                          />
-                          <input
-                            ref={editItemQuantityInputRef}
-                            type="text"
-                            value={tempItemQuantity}
-                            onChange={(e) => setTempItemQuantity(e.target.value)}
-                            onKeyDown={handleItemQuantityKeyPress}
-                            onBlur={handleSaveItemEdit}
-                            className="shopping-list-section__item-amount-input"
-                            placeholder="1"
-                            disabled={updatingItemId === item.id}
-                          />
-                        </>
-                      ) : (
-                        // Display mode - show text with click handlers
-                        <>
-                          <div
-                            className="shopping-list-section__item-name-line shopping-list-section__item-name-line--editable"
-                            onClick={() => !item.is_checked && handleStartEditItem(item, 'name')}
-                          >
-                            {item.name}
-                          </div>
-                          <div
-                            className="shopping-list-section__item-amount-line shopping-list-section__item-amount-line--editable"
-                            onClick={() => !item.is_checked && handleStartEditItem(item, 'quantity')}
-                          >
-                            {item.quantity ? `${item.quantity} ${item.unit || ''}` : 'Add quantity'}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                    {/* Show who checked the item in shared lists */}
-                    {selectedList.shopping_list_members && selectedList.shopping_list_members.length > 1 && item.is_checked && item.checked_by_name && (
-                      <div className="shopping-list-section__checked-by">
-                        ✓ by {getCheckedByText(item)}
-                      </div>
-                    )}
-                    <button
-                      onClick={() => handleDeleteItem(selectedList.id, item.id)}
-                      className="shopping-list-section__item-delete-btn"
-                      aria-label="Remove item"
-                    >
-                      ×
-                    </button>
-                  </div>
+              organizeByAisle ? (
+                // Grouped view by aisle
+                groupItemsByAisle(selectedList.shopping_list_items).map(({ aisle, items: aisleItems }) => (
+                  <AisleGroup key={aisle} aisle={aisle} items={aisleItems} />
                 ))
+              ) : (
+                // Flat view (existing behavior)
+                [...selectedList.shopping_list_items]
+                  .sort((a, b) => {
+                    const aIsRecentlyChecked = recentlyCheckedItems.includes(a.id);
+                    const bIsRecentlyChecked = recentlyCheckedItems.includes(b.id);
+                    const aEffectivelyChecked = a.is_checked && !aIsRecentlyChecked;
+                    const bEffectivelyChecked = b.is_checked && !bIsRecentlyChecked;
+                    if (aEffectivelyChecked === bEffectivelyChecked) return 0;
+                    return aEffectivelyChecked ? 1 : -1;
+                  })
+                  .map(item => renderItem(item))
+              )
             )}
           </div>
 

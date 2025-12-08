@@ -395,6 +395,38 @@ export const AuthProvider = ({ children }) => {
     return user !== null;
   };
 
+  // Update user profile (name and/or email)
+  const updateProfile = async (updates) => {
+    try {
+      const response = await apiRequest('/auth/profile', {
+        method: 'PATCH',
+        body: safeJSONStringify(updates)
+      });
+
+      if (response.success) {
+        // Update local user data
+        const updatedUser = { ...user, ...response.user };
+        setUserData(response.user);
+        setUser(updatedUser);
+
+        // Update PostHog with new data
+        posthog?.identify(response.user.id, {
+          email: response.user.email,
+          firstName: response.user.firstName,
+          subscription_tier: response.user.tier,
+          is_grandfathered: response.user.isGrandfathered
+        });
+
+        return { success: true, user: response.user };
+      } else {
+        throw new Error(response.error || 'Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Update profile error:', error);
+      throw error;
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -402,7 +434,8 @@ export const AuthProvider = ({ children }) => {
     signIn,
     signOut,
     logout: signOut, // Alias for backward compatibility
-    isAuthenticated
+    isAuthenticated,
+    updateProfile
   };
 
   return (

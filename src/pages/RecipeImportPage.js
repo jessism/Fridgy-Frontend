@@ -32,6 +32,10 @@ const RecipeImportPage = () => {
   const { canAccess, startCheckout, checkoutSecret, closeCheckout, refresh } = useSubscription();
   const { shouldShowTooltip, completeStep, goToStep, isActive, STEPS } = useGuidedTourContext();
 
+  // Check if coming from cookbook flow
+  const cookbookId = location.state?.cookbookId;
+  const cookbookName = location.state?.cookbookName;
+
   // Check if coming from push notification
   const params = new URLSearchParams(location.search);
   const importing = params.get('importing');
@@ -72,6 +76,28 @@ const RecipeImportPage = () => {
 
   // API base URL
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+  // Helper function to add recipe to cookbook
+  const addRecipeToCookbook = async (recipeId) => {
+    if (!cookbookId || !recipeId) return;
+
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      await fetch(`${API_BASE_URL}/cookbooks/${cookbookId}/recipes`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          recipes: [{ recipe_id: recipeId, recipe_source: 'saved' }]
+        })
+      });
+      console.log(`[RecipeImport] Added recipe ${recipeId} to cookbook ${cookbookId}`);
+    } catch (error) {
+      console.error('[RecipeImport] Failed to add recipe to cookbook:', error);
+    }
+  };
 
   // Quick install shortcut function
   const handleQuickShortcutInstall = () => {
@@ -660,6 +686,13 @@ const RecipeImportPage = () => {
       });
 
       if (response.ok) {
+        const data = await response.json();
+
+        // Add to cookbook if coming from cookbook flow
+        if (cookbookId && data.recipe?.id) {
+          await addRecipeToCookbook(data.recipe.id);
+        }
+
         // Mark guided tour step as complete
         if (shouldShowTooltip(STEPS.PASTE_URL)) {
           completeStep(STEPS.PASTE_URL);
@@ -670,11 +703,15 @@ const RecipeImportPage = () => {
 
           // Navigate after celebration (3 seconds)
           setTimeout(() => {
-            navigate('/saved-recipes');
+            navigate(cookbookId ? '/meal-plans/recipes' : '/saved-recipes', {
+              state: cookbookId ? { openCookbook: cookbookId, message: `Recipe added to "${cookbookName}"` } : undefined
+            });
           }, 3000);
         } else {
-          // Normal flow - navigate immediately
-          navigate('/saved-recipes');
+          // Normal flow - navigate with cookbook info if applicable
+          navigate(cookbookId ? '/meal-plans/recipes' : '/saved-recipes', {
+            state: cookbookId ? { openCookbook: cookbookId, message: `Recipe added to "${cookbookName}"` } : undefined
+          });
         }
       } else {
         setError('Failed to save recipe. Please try again.');
@@ -712,6 +749,12 @@ const RecipeImportPage = () => {
       if (data.success) {
         setStatus('✅ Recipe saved successfully!');
 
+        // Add to cookbook if coming from cookbook flow
+        if (cookbookId && data.recipe?.id) {
+          console.log('[RecipeImport] Adding manual recipe to cookbook:', cookbookId);
+          await addRecipeToCookbook(data.recipe.id);
+        }
+
         // Check if user is in guided tour
         if (isActive) {
           console.log('[RecipeImport] User in tour - showing success celebration (manual form)');
@@ -719,7 +762,11 @@ const RecipeImportPage = () => {
           goToStep(STEPS.IMPORT_RECIPE_SUCCESS);
         } else {
           // Normal flow - navigate after delay
-          setTimeout(() => navigate('/saved-recipes'), 1500);
+          setTimeout(() => {
+            navigate(cookbookId ? '/meal-plans/recipes' : '/saved-recipes', {
+              state: cookbookId ? { openCookbook: cookbookId, message: `Recipe added to "${cookbookName}"` } : undefined
+            });
+          }, 1500);
         }
       } else {
         setError('Failed to save recipe. Please try again.');

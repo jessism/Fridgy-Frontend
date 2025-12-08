@@ -1,0 +1,331 @@
+/* Share Cookbook Modal Styles */
+
+.share-cookbook-modal__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.share-cookbook-modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 420px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Header */
+.share-cookbook-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.share-cookbook-modal__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.share-cookbook-modal__close {
+  background: none;
+  border: none;
+  color: #6B7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.share-cookbook-modal__close:hover {
+  background: #F3F4F6;
+  color: #374151;
+}
+
+/* Content */
+.share-cookbook-modal__content {
+  padding: 20px;
+}
+
+.share-cookbook-modal__loading {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6B7280;
+}
+
+.share-cookbook-modal__spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #E5E7EB;
+  border-top-color: #4fcf61;
+  border-radius: 50%;
+  animation: shareCookbookSpin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+
+@keyframes shareCookbookSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Sections */
+.share-cookbook-modal__section {
+  margin-bottom: 24px;
+}
+
+.share-cookbook-modal__section:last-child {
+  margin-bottom: 0;
+}
+
+.share-cookbook-modal__label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 10px;
+}
+
+/* Share Code */
+.share-cookbook-modal__code-container {
+  text-align: center;
+}
+
+.share-cookbook-modal__code {
+  display: inline-block;
+  position: relative;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #4fcf61 0%, #3cb54c 100%);
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  user-select: none;
+}
+
+.share-cookbook-modal__code:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(79, 207, 97, 0.35);
+}
+
+.share-cookbook-modal__code:active {
+  transform: scale(0.98);
+}
+
+.share-cookbook-modal__copied {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #111827;
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  letter-spacing: 0;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.share-cookbook-modal__hint {
+  margin: 8px 0 0 0;
+  font-size: 0.75rem;
+  color: #9CA3AF;
+}
+
+/* Share Link */
+.share-cookbook-modal__link-row {
+  display: flex;
+  gap: 8px;
+}
+
+.share-cookbook-modal__input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  color: #6B7280;
+  background: #F9FAFB;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.share-cookbook-modal__copy-btn {
+  padding: 12px 14px;
+  background: #F3F4F6;
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  color: #374151;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.share-cookbook-modal__copy-btn:hover {
+  background: #E5E7EB;
+}
+
+/* Members List */
+.share-cookbook-modal__members {
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #F9FAFB;
+}
+
+.share-cookbook-modal__member {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.share-cookbook-modal__member:last-child {
+  border-bottom: none;
+}
+
+.share-cookbook-modal__member-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.share-cookbook-modal__member-name {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #111827;
+}
+
+.share-cookbook-modal__member-badge {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #4fcf61;
+  background: rgba(79, 207, 97, 0.1);
+  padding: 3px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.share-cookbook-modal__remove-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #9CA3AF;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.share-cookbook-modal__remove-btn:hover:not(:disabled) {
+  background: #FEE2E2;
+  color: #EF4444;
+}
+
+.share-cookbook-modal__remove-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.share-cookbook-modal__mini-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #E5E7EB;
+  border-top-color: #6B7280;
+  border-radius: 50%;
+  animation: shareCookbookSpin 0.6s linear infinite;
+}
+
+/* Error */
+.share-cookbook-modal__error {
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: #FEF2F2;
+  color: #DC2626;
+  border-radius: 10px;
+  font-size: 0.875rem;
+}
+
+/* Footer */
+.share-cookbook-modal__footer {
+  padding: 16px 20px;
+  border-top: 1px solid #E5E7EB;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.share-cookbook-modal__btn {
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.share-cookbook-modal__btn--secondary {
+  background: #F3F4F6;
+  color: #374151;
+}
+
+.share-cookbook-modal__btn--secondary:hover {
+  background: #E5E7EB;
+}
+
+.share-cookbook-modal__btn--primary {
+  background: #4fcf61;
+  color: white;
+}
+
+.share-cookbook-modal__btn--primary:hover {
+  background: #3cb54c;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .share-cookbook-modal__overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .share-cookbook-modal {
+    max-width: 100%;
+    border-radius: 20px 20px 0 0;
+    max-height: 85vh;
+  }
+
+  .share-cookbook-modal__code {
+    font-size: 1.25rem;
+    padding: 14px 28px;
+  }
+}

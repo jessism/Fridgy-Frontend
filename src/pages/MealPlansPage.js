@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import useRecipes from '../hooks/useRecipes';
+import useMealPlan from '../hooks/useMealPlan';
 import { useSubscription } from '../hooks/useSubscription';
 import { PremiumBadge } from '../components/common/PremiumBadge';
 import { CheckoutModal } from '../components/modals/CheckoutModal';
@@ -14,8 +15,16 @@ import '../components/guided-tour/GuidedTour.css'; // Import guided tour styles
 import RecipeDetailModal from '../components/modals/RecipeDetailModal';
 import MealDetailModal from '../components/modals/MealDetailModal.jsx';
 import RecipeCreationModal from '../components/modals/RecipeCreationModal';
+import CreateCookbookModal from '../components/modals/CreateCookbookModal';
+import AddRecipesToCookbookModal from '../components/modals/AddRecipesToCookbookModal';
+import DeleteConfirmationModal from '../components/modals/DeleteConfirmationModal';
+import CookbookCard, { CreateCookbookCard } from '../components/CookbookCard';
+// CookbookDetailView moved to separate route - /cookbook/:cookbookId
+import useCookbooks from '../hooks/useCookbooks';
 import { AIRecipeSection } from '../features/ai-recipes';
 import { IngredientMatchIcon, CookTimeIcon } from '../assets/icons';
+import ClockIcon from '../assets/icons/Clock.png';
+import ServingIcon from '../assets/icons/Serving.png';
 import './MealPlansPage.css';
 
 const MealPlansPage = ({ defaultTab }) => {
@@ -36,6 +45,30 @@ const MealPlansPage = ({ defaultTab }) => {
     refreshSuggestions
   } = useRecipes();
 
+  // Meal plan hook for calendar
+  const {
+    dailyMeals,
+    weekCounts,
+    fetchDailyMeals,
+    fetchWeekCounts,
+    formatDate
+  } = useMealPlan();
+
+  // Cookbooks hook
+  const {
+    cookbooks,
+    loading: cookbooksLoading,
+    fetchCookbooks,
+    createCookbook,
+    deleteCookbook
+  } = useCookbooks();
+
+  // Cookbook UI state
+  const [showCreateCookbookModal, setShowCreateCookbookModal] = useState(false);
+  const [showAddRecipesModal, setShowAddRecipesModal] = useState(false);
+  const [selectedCookbook, setSelectedCookbook] = useState(null);
+  const [cookbookToDelete, setCookbookToDelete] = useState(null);
+
   // Tab state management
   const [activeTab, setActiveTab] = useState(defaultTab || 'meals');
 
@@ -43,7 +76,7 @@ const MealPlansPage = ({ defaultTab }) => {
   const [recipeSearchTerm, setRecipeSearchTerm] = useState('');
 
   // Recipe filter state
-  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'sources' | 'time'
+  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'sources' | 'mealtype' | 'favorites'
 
   // All recipes combined state (for "All" filter view)
   const [allRecipes, setAllRecipes] = useState([]);
@@ -71,6 +104,11 @@ const MealPlansPage = ({ defaultTab }) => {
   // Upcoming meal plans state
   const [upcomingMeals, setUpcomingMeals] = useState([]);
   const [upcomingMealsLoading, setUpcomingMealsLoading] = useState(true);
+
+  // Calendar state
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
+  const [hasSelectedDate, setHasSelectedDate] = useState(false);
 
   // Image preloading state for saved recipes
   const [imageStates, setImageStates] = useState({});
@@ -109,11 +147,59 @@ const MealPlansPage = ({ defaultTab }) => {
   // Recipe creation modal state
   const [showRecipeCreationModal, setShowRecipeCreationModal] = useState(false);
 
+  // Add recipe modal state (for plus button in search bar)
+  const [showAddRecipeModal, setShowAddRecipeModal] = useState(false);
+
   // Track hidden recipes (for session-only deletion)
   const [hiddenRecipeIds, setHiddenRecipeIds] = useState(new Set());
 
   // Track which recipe is being deleted (for loading state)
   const [deletingRecipeId, setDeletingRecipeId] = useState(null);
+
+  // Calendar constants
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  // Calendar helper functions
+  const getCurrentWeekDates = React.useCallback(() => {
+    const today = new Date();
+    const currentWeekStart = new Date(today);
+    currentWeekStart.setDate(today.getDate() - today.getDay());
+    currentWeekStart.setDate(currentWeekStart.getDate() + (currentWeekOffset * 7));
+
+    const weekDates = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(currentWeekStart);
+      date.setDate(currentWeekStart.getDate() + i);
+      weekDates.push({
+        date: date.getDate(),
+        fullDate: new Date(date)
+      });
+    }
+    return weekDates;
+  }, [currentWeekOffset]);
+
+  const isToday = (dateObj) => {
+    const today = new Date();
+    return (
+      dateObj.getDate() === today.getDate() &&
+      dateObj.getMonth() === today.getMonth() &&
+      dateObj.getFullYear() === today.getFullYear()
+    );
+  };
+
+  const isSelectedDate = (dateObj) => {
+    return (
+      dateObj.getDate() === selectedDate.getDate() &&
+      dateObj.getMonth() === selectedDate.getMonth() &&
+      dateObj.getFullYear() === selectedDate.getFullYear()
+    );
+  };
+
+  const handleCalendarDateClick = (dateObj) => {
+    setSelectedDate(new Date(dateObj));
+    setHasSelectedDate(true);
+    fetchDailyMeals(dateObj);
+  };
 
   // API base URL
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -465,6 +551,16 @@ const MealPlansPage = ({ defaultTab }) => {
     }
   }, [location, defaultTab]);
 
+  // Handle opening a specific cookbook from navigation state (e.g., after importing a recipe)
+  useEffect(() => {
+    if (location.state?.openCookbook) {
+      // Navigate to cookbook detail page
+      navigate(`/cookbook/${location.state.openCookbook}`);
+      // Clear the state so it doesn't persist on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state?.openCookbook, navigate]);
+
   // useEffect for recipe suggestions - can update when inventory changes
   useEffect(() => {
     fetchSuggestions({
@@ -491,9 +587,17 @@ const MealPlansPage = ({ defaultTab }) => {
     fetchUpcomingMeals();
   }, []); // Only fetch once on mount
 
-  // Fetch all recipes when filter is 'all' (including on mount since 'all' is default)
+  // Fetch week counts for calendar when week changes
   useEffect(() => {
-    if (activeFilter === 'all') {
+    const weekDates = getCurrentWeekDates();
+    const startDate = weekDates[0].fullDate;
+    const endDate = weekDates[6].fullDate;
+    fetchWeekCounts(startDate, endDate);
+  }, [currentWeekOffset, fetchWeekCounts, getCurrentWeekDates]);
+
+  // Fetch all recipes when filter needs allRecipes data
+  useEffect(() => {
+    if (activeFilter === 'all' || activeFilter === 'favorites' || activeFilter === 'mealtype') {
       fetchAllRecipes();
     }
   }, [activeFilter]);
@@ -529,6 +633,13 @@ const MealPlansPage = ({ defaultTab }) => {
 
     return () => observer.disconnect();
   }, [shouldShowTooltip, STEPS.GENERATE_RECIPES_START_BUTTON]);
+
+  // Fetch cookbooks when cookbooks filter is active
+  useEffect(() => {
+    if (activeFilter === 'cookbooks' && activeTab === 'recipes') {
+      fetchCookbooks();
+    }
+  }, [activeFilter, activeTab, fetchCookbooks]);
 
   // Preload saved recipe images to prevent glitching
   useEffect(() => {
@@ -700,6 +811,40 @@ const MealPlansPage = ({ defaultTab }) => {
     event.stopPropagation();
     try {
       const token = localStorage.getItem('fridgy_token');
+
+      // Find the recipe to check its type
+      const recipe = allRecipes.find(r => r.id === recipeId);
+
+      // For AI recipes: save to saved_recipes table
+      if (recipe?._type === 'ai') {
+        const response = await fetch(`${API_BASE_URL}/saved-recipes/from-ai`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(recipe)
+        });
+
+        if (response.ok) {
+          const { recipe: savedRecipe } = await response.json();
+          // Replace AI recipe in list with saved version
+          setAllRecipes(prev =>
+            prev.map(r => r.id === recipeId
+              ? { ...savedRecipe, _type: 'uploaded', is_favorite: true }
+              : r
+            )
+          );
+          // Also add to savedRecipes list
+          setSavedRecipes(prev => [{ ...savedRecipe, _type: 'uploaded', is_favorite: true }, ...prev]);
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('[MealPlans] Failed to save AI recipe:', errorData);
+        }
+        return;
+      }
+
+      // For non-AI recipes: toggle favorite as before
       const response = await fetch(`${API_BASE_URL}/saved-recipes/${recipeId}/favorite`, {
         method: 'POST',
         headers: {
@@ -1021,20 +1166,13 @@ const MealPlansPage = ({ defaultTab }) => {
           <div className="meal-plans-page__saved-recipe-meta">
             {recipe.readyInMinutes && (
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" stroke="#666" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M12 6V12L15 15" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <img src={ClockIcon} alt="Time" width="14" height="14" style={{ opacity: 0.6 }} />
                 {recipe.readyInMinutes} min
               </span>
             )}
             {recipe.servings && (
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <rect x="5" y="6" width="14" height="13" rx="2" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M10 12h4" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <img src={ServingIcon} alt="Servings" width="14" height="14" style={{ opacity: 0.6 }} />
                 {recipe.servings} servings
               </span>
             )}
@@ -1100,20 +1238,13 @@ const MealPlansPage = ({ defaultTab }) => {
           <div className="meal-plans-page__saved-recipe-meta">
             {totalMinutes && (
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" stroke="#666" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M12 6V12L15 15" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <img src={ClockIcon} alt="Time" width="14" height="14" style={{ opacity: 0.6 }} />
                 {totalMinutes} min
               </span>
             )}
             {recipe.servings && (
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <rect x="5" y="6" width="14" height="13" rx="2" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M10 12h4" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <img src={ServingIcon} alt="Servings" width="14" height="14" style={{ opacity: 0.6 }} />
                 {recipe.servings} servings
               </span>
             )}
@@ -1188,8 +1319,8 @@ const MealPlansPage = ({ defaultTab }) => {
       }
     };
 
-    // AI recipes don't support favorite (no database record)
-    const showFavoriteButton = recipe._type !== 'ai';
+    // Show heart for all recipes including AI (clicking saves AI recipe to database)
+    const showFavoriteButton = true;
 
     return (
       <div
@@ -1223,20 +1354,13 @@ const MealPlansPage = ({ defaultTab }) => {
           <div className="meal-plans-page__saved-recipe-meta">
             {readyTime && (
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" stroke="#666" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M12 6V12L15 15" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <img src={ClockIcon} alt="Time" width="14" height="14" style={{ opacity: 0.6 }} />
                 {readyTime} min
               </span>
             )}
             {recipe.servings && (
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <rect x="5" y="6" width="14" height="13" rx="2" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M10 12h4" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <img src={ServingIcon} alt="Servings" width="14" height="14" style={{ opacity: 0.6 }} />
                 {recipe.servings} servings
               </span>
             )}
@@ -1250,7 +1374,7 @@ const MealPlansPage = ({ defaultTab }) => {
                 onClick={(e) => handleToggleFavoriteInAllView(recipe.id, e)}
               >
                 {recipe.is_favorite ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#4fcf61" stroke="#4fcf61" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#000" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                   </svg>
                 ) : (
@@ -1408,24 +1532,36 @@ const MealPlansPage = ({ defaultTab }) => {
     </div>
   );
 
-  // Helper function to format upcoming meal date
-  const formatUpcomingDate = (dateStr) => {
+  // Helper function to format upcoming meal date with meal type
+  const formatUpcomingDate = (dateStr, mealType) => {
     const date = new Date(dateStr + 'T00:00:00'); // Ensure local timezone
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    if (date.toDateString() === today.toDateString()) return 'Today';
-    if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
-    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    let dateLabel;
+    if (date.toDateString() === today.toDateString()) {
+      dateLabel = 'Today';
+    } else if (date.toDateString() === tomorrow.toDateString()) {
+      dateLabel = 'Tomorrow';
+    } else {
+      dateLabel = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    // Capitalize meal type and append
+    if (mealType) {
+      const capitalizedMealType = mealType.charAt(0).toUpperCase() + mealType.slice(1);
+      return `${dateLabel} ${capitalizedMealType}`;
+    }
+    return dateLabel;
   };
 
   // Render upcoming meal card
   const renderUpcomingMealCard = (plan) => {
     const recipe = plan.recipe || plan.recipe_snapshot;
     const imageUrl = recipe?.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
-    const dateLabel = formatUpcomingDate(plan.date);
+    const dateLabel = formatUpcomingDate(plan.date, plan.meal_type);
 
     return (
       <div
@@ -1444,7 +1580,7 @@ const MealPlansPage = ({ defaultTab }) => {
               }
             }}
           />
-          {/* Date badge in top right corner */}
+          {/* Date + meal type badge in top right corner */}
           <div className="meal-plans-page__saved-recipe-badge">
             <span>{dateLabel}</span>
           </div>
@@ -1453,24 +1589,85 @@ const MealPlansPage = ({ defaultTab }) => {
           <h3 className="meal-plans-page__saved-recipe-title">
             {recipe?.title || 'Planned meal'}
           </h3>
-          {/* Meal type under the title */}
-          {plan.meal_type && (
-            <p className="meal-plans-page__saved-recipe-author" style={{ textTransform: 'capitalize' }}>
-              {plan.meal_type}
-            </p>
-          )}
           <div className="meal-plans-page__saved-recipe-meta">
             {recipe?.readyInMinutes && (
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" stroke="#666" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M12 6V12L15 15" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <img src={ClockIcon} alt="Time" width="14" height="14" style={{ opacity: 0.6 }} />
                 {recipe.readyInMinutes} min
               </span>
             )}
           </div>
         </div>
+      </div>
+    );
+  };
+
+  // Render daily meals for selected date
+  const renderDailyMealsForDate = () => {
+    const mealTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
+    const plannedMeals = mealTypes
+      .map(type => ({ type, plan: dailyMeals[type] }))
+      .filter(({ plan }) => plan && (plan.recipe || plan.recipe_snapshot));
+
+    if (plannedMeals.length === 0) {
+      return (
+        <div className="meal-plans-page__saved-recipes-empty">
+          <p className="meal-plans-page__saved-recipes-empty-text">
+            No meals planned for {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+          </p>
+          <button
+            className="meal-plans-page__saved-recipes-empty-button"
+            onClick={() => navigate('/meal-plan')}
+          >
+            Plan Meals
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="meal-plans-page__saved-recipes-grid">
+        {plannedMeals.slice(0, 2).map(({ type, plan }) => {
+          const recipe = plan.recipe || plan.recipe_snapshot;
+          const imageUrl = recipe?.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+
+          return (
+            <div
+              key={plan.id}
+              className="meal-plans-page__saved-recipe-card"
+              onClick={() => navigate('/meal-plan')}
+            >
+              <div className="meal-plans-page__saved-recipe-image">
+                <img
+                  src={imageUrl}
+                  alt={recipe?.title || 'Planned meal'}
+                  onError={(e) => {
+                    if (!e.target.dataset.failed) {
+                      e.target.dataset.failed = 'true';
+                      e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+                    }
+                  }}
+                />
+                <div className="meal-plans-page__saved-recipe-badge">
+                  <span style={{ textTransform: 'capitalize' }}>{type}</span>
+                </div>
+              </div>
+              <div className="meal-plans-page__saved-recipe-content">
+                <h3 className="meal-plans-page__saved-recipe-title">
+                  {recipe?.title || 'Planned meal'}
+                </h3>
+                <div className="meal-plans-page__saved-recipe-meta">
+                  {recipe?.readyInMinutes && (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <img src={ClockIcon} alt="Time" width="14" height="14" style={{ opacity: 0.6 }} />
+                      {recipe.readyInMinutes} min
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -1544,36 +1741,79 @@ const MealPlansPage = ({ defaultTab }) => {
                   </div>
                 </div>
 
-                {/* Upcoming Meal Cards or Empty State */}
-                {upcomingMealsLoading ? (
-                  <div className="meal-plans-page__saved-recipes-loading">
-                    <div className="meal-plans-page__saved-recipes-grid">
-                      <div className="meal-plans-page__saved-recipe-card loading">
-                        <div className="meal-plans-page__saved-recipe-image">
-                          <div className="loading-placeholder" style={{ height: '120px' }}></div>
-                        </div>
-                        <div className="meal-plans-page__saved-recipe-content">
-                          <div className="loading-placeholder" style={{ height: '16px', marginBottom: '8px' }}></div>
-                          <div className="loading-placeholder" style={{ height: '12px' }}></div>
-                        </div>
+                {/* Week Calendar */}
+                <div className="meal-plans-page__week-calendar">
+                  {/* Days of Week Header */}
+                  <div className="meal-plans-page__calendar-days-header">
+                    {dayNames.map(day => (
+                      <div key={day} className="meal-plans-page__calendar-day-name">
+                        {day}
                       </div>
-                      <div className="meal-plans-page__saved-recipe-card loading">
-                        <div className="meal-plans-page__saved-recipe-image">
-                          <div className="loading-placeholder" style={{ height: '120px' }}></div>
+                    ))}
+                  </div>
+
+                  {/* Dates Row */}
+                  <div className="meal-plans-page__calendar-dates-row">
+                    {getCurrentWeekDates().map((dateInfo, index) => {
+                      const dateKey = formatDate(dateInfo.fullDate);
+                      const mealCount = weekCounts[dateKey] || 0;
+                      const progressClass = mealCount > 0 ? `meal-progress-${Math.min(mealCount, 4)}` : '';
+
+                      return (
+                        <div
+                          key={index}
+                          className={`meal-plans-page__calendar-date-cell ${
+                            isToday(dateInfo.fullDate) ? 'meal-plans-page__calendar-date-cell--today' : ''
+                          } ${
+                            isSelectedDate(dateInfo.fullDate) ? 'meal-plans-page__calendar-date-cell--selected' : ''
+                          }`}
+                          onClick={() => handleCalendarDateClick(dateInfo.fullDate)}
+                        >
+                          <span className={`meal-plans-page__calendar-date-number ${progressClass}`}>
+                            {dateInfo.date}
+                          </span>
                         </div>
-                        <div className="meal-plans-page__saved-recipe-content">
-                          <div className="loading-placeholder" style={{ height: '16px', marginBottom: '8px' }}></div>
-                          <div className="loading-placeholder" style={{ height: '12px' }}></div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Meal Cards: Show daily meals if date selected, otherwise upcoming meals */}
+                {hasSelectedDate ? (
+                  // Show meals for selected date
+                  renderDailyMealsForDate()
+                ) : (
+                  // Default: Show upcoming meals
+                  upcomingMealsLoading ? (
+                    <div className="meal-plans-page__saved-recipes-loading">
+                      <div className="meal-plans-page__saved-recipes-grid">
+                        <div className="meal-plans-page__saved-recipe-card loading">
+                          <div className="meal-plans-page__saved-recipe-image">
+                            <div className="loading-placeholder" style={{ height: '120px' }}></div>
+                          </div>
+                          <div className="meal-plans-page__saved-recipe-content">
+                            <div className="loading-placeholder" style={{ height: '16px', marginBottom: '8px' }}></div>
+                            <div className="loading-placeholder" style={{ height: '12px' }}></div>
+                          </div>
+                        </div>
+                        <div className="meal-plans-page__saved-recipe-card loading">
+                          <div className="meal-plans-page__saved-recipe-image">
+                            <div className="loading-placeholder" style={{ height: '120px' }}></div>
+                          </div>
+                          <div className="meal-plans-page__saved-recipe-content">
+                            <div className="loading-placeholder" style={{ height: '16px', marginBottom: '8px' }}></div>
+                            <div className="loading-placeholder" style={{ height: '12px' }}></div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ) : upcomingMeals.length > 0 ? (
-                  <div className="meal-plans-page__saved-recipes-grid">
-                    {upcomingMeals.slice(0, 2).map(plan => renderUpcomingMealCard(plan))}
-                  </div>
-                ) : (
-                  renderUpcomingMealsEmptyState()
+                  ) : upcomingMeals.length > 0 ? (
+                    <div className="meal-plans-page__saved-recipes-grid">
+                      {upcomingMeals.slice(0, 2).map(plan => renderUpcomingMealCard(plan))}
+                    </div>
+                  ) : (
+                    renderUpcomingMealsEmptyState()
+                  )
                 )}
               </div>
 
@@ -1645,31 +1885,42 @@ const MealPlansPage = ({ defaultTab }) => {
             <>
               {/* Recipes Tab Content */}
 
-              {/* Recipe Search Bar */}
-              <div className="meal-plans-page__search-container">
-                <svg className="meal-plans-page__search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Search recipes..."
-                  value={recipeSearchTerm}
-                  onChange={(e) => setRecipeSearchTerm(e.target.value)}
-                  className="meal-plans-page__search-input"
-                />
-                {recipeSearchTerm && (
-                  <button
-                    onClick={() => setRecipeSearchTerm('')}
-                    className="meal-plans-page__search-clear"
-                    title="Clear search"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2"/>
-                      <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2"/>
-                    </svg>
-                  </button>
-                )}
+              {/* Recipe Search Bar with Add Button */}
+              <div className="meal-plans-page__search-row">
+                <div className="meal-plans-page__search-container">
+                  <svg className="meal-plans-page__search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Search recipes..."
+                    value={recipeSearchTerm}
+                    onChange={(e) => setRecipeSearchTerm(e.target.value)}
+                    className="meal-plans-page__search-input"
+                  />
+                  {recipeSearchTerm && (
+                    <button
+                      onClick={() => setRecipeSearchTerm('')}
+                      className="meal-plans-page__search-clear"
+                      title="Clear search"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2"/>
+                        <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2"/>
+                      </svg>
+                    </button>
+                  )}
+                </div>
+
+                {/* Add Recipe Plus Button */}
+                <button
+                  className="meal-plans-page__add-button"
+                  onClick={() => setShowAddRecipeModal(true)}
+                  title="Add recipe"
+                >
+                  +
+                </button>
               </div>
 
               {/* Filter Pills */}
@@ -1678,7 +1929,13 @@ const MealPlansPage = ({ defaultTab }) => {
                   className={`meal-plans-page__filter-pill ${activeFilter === 'all' ? 'meal-plans-page__filter-pill--active' : ''}`}
                   onClick={() => setActiveFilter('all')}
                 >
-                  All
+                  All recipes
+                </button>
+                <button
+                  className={`meal-plans-page__filter-pill ${activeFilter === 'cookbooks' ? 'meal-plans-page__filter-pill--active' : ''}`}
+                  onClick={() => setActiveFilter('cookbooks')}
+                >
+                  Cookbooks
                 </button>
                 <button
                   className={`meal-plans-page__filter-pill ${activeFilter === 'sources' ? 'meal-plans-page__filter-pill--active' : ''}`}
@@ -1691,6 +1948,12 @@ const MealPlansPage = ({ defaultTab }) => {
                   onClick={() => setActiveFilter('mealtype')}
                 >
                   Meal type
+                </button>
+                <button
+                  className={`meal-plans-page__filter-pill ${activeFilter === 'favorites' ? 'meal-plans-page__filter-pill--active' : ''}`}
+                  onClick={() => setActiveFilter('favorites')}
+                >
+                  Favorites
                 </button>
               </div>
 
@@ -1829,12 +2092,12 @@ const MealPlansPage = ({ defaultTab }) => {
                 )}
               </div>
 
-              {/* My Uploaded Recipes Section */}
-              <div className="meal-plans-page__uploaded-section">
-                <div className="meal-plans-page__section-header-with-action">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
-                    <h2 className="meal-plans-page__section-title" style={{ margin: 0 }}>Uploaded recipes</h2>
-                    {userUploadedRecipes.length > 0 && (
+              {/* My Uploaded Recipes Section - Only show if user has uploaded recipes */}
+              {userUploadedRecipes.length > 0 && (
+                <div className="meal-plans-page__uploaded-section">
+                  <div className="meal-plans-page__section-header-with-action">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+                      <h2 className="meal-plans-page__section-title" style={{ margin: 0 }}>Uploaded recipes</h2>
                       <button
                         className="meal-plans-page__view-more-arrow-btn"
                         onClick={() => navigate('/uploaded-recipes')}
@@ -1845,38 +2108,31 @@ const MealPlansPage = ({ defaultTab }) => {
                           <path d="M9 18l6-6-6-6" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </button>
-                    )}
+                    </div>
                   </div>
+                  {userUploadedRecipesLoading ? (
+                    <div style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>
+                      Loading...
+                    </div>
+                  ) : (
+                    <div className="meal-plans-page__recipes-slider">
+                      {filteredUploadedRecipes.map(recipe => renderSavedRecipeCard(recipe, true))}
+                    </div>
+                  )}
                 </div>
-                {userUploadedRecipesLoading ? (
-                  <div style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>
-                    Loading...
-                  </div>
-                ) : filteredUploadedRecipes.length > 0 ? (
-                  <div className="meal-plans-page__recipes-slider">
-                    {filteredUploadedRecipes.map(recipe => renderSavedRecipeCard(recipe, true))}
-                  </div>
-                ) : (
-                  <div style={{ padding: '2rem', textAlign: 'center' }}>
-                    <p style={{ marginBottom: '1rem', fontSize: '1rem', color: '#666' }}>Upload your first recipe</p>
-                  </div>
-                )}
-              </div>
+              )}
 
-              {/* AI Recipe Section - Get perfect match with AI (Now available for ALL users!) */}
-              <AIRecipeSection />
-
-              {/* Your Past AI Recipes Section (Available for ALL users!) */}
+              {/* AI-recommended recipes Section (Available for ALL users!) */}
               {filteredPastAIRecipes.length > 0 && (
                 <div className="meal-plans-page__analytics-section" style={{ marginTop: '40px' }}>
                   <div className="meal-plans-page__analytics-text-section">
                     <div className="meal-plans-page__section-header-with-action">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
-                        <h2 className="meal-plans-page__section-title" style={{ margin: 0 }}>Your past AI recipes</h2>
+                        <h2 className="meal-plans-page__section-title" style={{ margin: 0 }}>AI-recommended recipes</h2>
                         <button
                           className="meal-plans-page__view-more-arrow-btn"
                           onClick={() => navigate('/past-ai-recipes')}
-                          title="View all past AI recipes"
+                          title="View all AI-recommended recipes"
                           style={{ marginLeft: 'auto' }}
                         >
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -1935,8 +2191,11 @@ const MealPlansPage = ({ defaultTab }) => {
                   )}
                 </div>
               )}
+
+              {/* AI Recipe Section - Get perfect match with AI (Now available for ALL users!) */}
+              <AIRecipeSection />
                 </>
-              ) : (
+              ) : activeFilter === 'mealtype' ? (
                 /* BY MEAL TYPE VIEW - Filter by dish types */
                 (() => {
                   // Define meal type categories and their matching dishTypes
@@ -2005,7 +2264,84 @@ const MealPlansPage = ({ defaultTab }) => {
                     </div>
                   );
                 })()
-              )}
+              ) : activeFilter === 'favorites' ? (
+                /* FAVORITES VIEW - Show only favorited recipes */
+                <div className="meal-plans-page__favorites-section">
+                  <h2 className="meal-plans-page__section-title">Your Favorite Recipes</h2>
+                  {allRecipesLoading ? (
+                    <div className="meal-plans-page__saved-recipes-grid">
+                      {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="meal-plans-page__saved-recipe-card loading">
+                          <div className="meal-plans-page__saved-recipe-image">
+                            <div className="loading-placeholder" style={{ height: '120px' }}></div>
+                          </div>
+                          <div className="meal-plans-page__saved-recipe-content">
+                            <div className="loading-placeholder" style={{ height: '16px', marginBottom: '8px' }}></div>
+                            <div className="loading-placeholder" style={{ height: '12px' }}></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : allRecipes.filter(r => r.is_favorite).length > 0 ? (
+                    <div className="meal-plans-page__all-recipes-grid">
+                      {allRecipes.filter(r => r.is_favorite).map(recipe => renderUnifiedRecipeCard(recipe))}
+                    </div>
+                  ) : (
+                    <div className="meal-plans-page__saved-recipes-empty">
+                      <p className="meal-plans-page__saved-recipes-empty-text">No favorite recipes yet</p>
+                      <p style={{ color: '#999', fontSize: '0.875rem', marginTop: '0.5rem' }}>
+                        Tap the heart icon on any recipe to add it to your favorites
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : activeFilter === 'cookbooks' ? (
+                /* COOKBOOKS VIEW */
+                <div className="meal-plans-page__cookbooks-view">
+                  {cookbooksLoading ? (
+                    /* Loading state */
+                    <div className="meal-plans-page__cookbooks-grid">
+                      {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="meal-plans-page__cookbook-skeleton">
+                          <div className="meal-plans-page__cookbook-skeleton-image"></div>
+                          <div className="meal-plans-page__cookbook-skeleton-text"></div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : cookbooks.length > 0 ? (
+                    /* Cookbooks grid with existing cookbooks */
+                    <div className="meal-plans-page__cookbooks-grid">
+                      <CreateCookbookCard onClick={() => setShowCreateCookbookModal(true)} />
+                      {cookbooks.map(cookbook => (
+                        <CookbookCard
+                          key={cookbook.id}
+                          cookbook={cookbook}
+                          onClick={() => navigate(`/cookbook/${cookbook.id}`)}
+                          onDelete={(cb) => setCookbookToDelete(cb)}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    /* Empty state */
+                    <div className="meal-plans-page__cookbooks-empty">
+                      <div
+                        className="meal-plans-page__cookbooks-empty-card"
+                        onClick={() => setShowCreateCookbookModal(true)}
+                      >
+                        <div className="meal-plans-page__cookbooks-empty-icon">
+                          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4fcf61" strokeWidth="2.5" strokeLinecap="round">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                          </svg>
+                        </div>
+                        <p className="meal-plans-page__cookbooks-empty-text">
+                          Create your first cookbook
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : null}
             </>
           )}
 
@@ -2217,6 +2553,92 @@ const MealPlansPage = ({ defaultTab }) => {
         isOpen={showRecipeCreationModal}
         onClose={() => setShowRecipeCreationModal(false)}
       />
+
+      {/* Create Cookbook Modal */}
+      <CreateCookbookModal
+        isOpen={showCreateCookbookModal}
+        onClose={() => setShowCreateCookbookModal(false)}
+        onCreated={async (name) => {
+          const newCookbook = await createCookbook(name);
+          setShowCreateCookbookModal(false);
+          setSelectedCookbook(newCookbook);
+          setShowAddRecipesModal(true);
+        }}
+      />
+
+      {/* Add Recipes to Cookbook Modal */}
+      <AddRecipesToCookbookModal
+        isOpen={showAddRecipesModal}
+        onClose={() => {
+          setShowAddRecipesModal(false);
+          setSelectedCookbook(null);
+        }}
+        cookbook={selectedCookbook}
+        onComplete={(addedCount) => {
+          setShowAddRecipesModal(false);
+          setSelectedCookbook(null);
+          fetchCookbooks();
+        }}
+      />
+
+      {/* Delete Cookbook Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={!!cookbookToDelete}
+        onClose={() => setCookbookToDelete(null)}
+        onConfirm={async () => {
+          if (cookbookToDelete) {
+            await deleteCookbook(cookbookToDelete.id);
+            setCookbookToDelete(null);
+            fetchCookbooks();
+          }
+        }}
+        itemName={cookbookToDelete?.name || ''}
+        itemType="cookbook"
+      />
+
+      {/* Add Recipe Modal (from plus button) */}
+      {showAddRecipeModal && (
+        <div className="meal-plans-page__add-modal-overlay" onClick={() => setShowAddRecipeModal(false)}>
+          <div className="meal-plans-page__add-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="meal-plans-page__add-modal-handle"></div>
+            <div className="meal-plans-page__add-modal-options">
+              <button
+                className="meal-plans-page__add-modal-option"
+                onClick={() => {
+                  setShowAddRecipeModal(false);
+                  navigate('/import');
+                }}
+              >
+                <div className="meal-plans-page__add-modal-option-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary-green)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M2 12h20"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                  </svg>
+                </div>
+                <span className="meal-plans-page__add-modal-option-label">Import from the internet</span>
+              </button>
+
+              <button
+                className="meal-plans-page__add-modal-option"
+                onClick={() => {
+                  setShowAddRecipeModal(false);
+                  navigate('/recipe-scanner');
+                }}
+              >
+                <div className="meal-plans-page__add-modal-option-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary-green)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                </div>
+                <span className="meal-plans-page__add-modal-option-label">Upload Recipe</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Checkout Modal with Payment Element */}
       {checkoutSecret && (

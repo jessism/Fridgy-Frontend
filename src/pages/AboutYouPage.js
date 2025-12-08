@@ -6,7 +6,7 @@ import './AboutYouPage.css';
 
 const AboutYouPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const {
     onboardingData,
     loading: onboardingLoading,
@@ -15,7 +15,6 @@ const AboutYouPage = () => {
     getFormattedBudget,
     getFormattedHouseholdSize,
     updateOnboardingField,
-    updateNotificationPreference,
     saving
   } = useUserOnboarding();
 
@@ -48,22 +47,35 @@ const AboutYouPage = () => {
       // Start editing
       setIsEditing(true);
       setEditData({
+        firstName: user?.firstName || '',
+        email: user?.email || '',
         primary_goal: onboardingData.primary_goal || '',
         household_size: onboardingData.household_size || 1,
-        weekly_budget: onboardingData.weekly_budget || '',
-        budget_currency: onboardingData.budget_currency || 'USD',
-        notification_preferences: { ...onboardingData.notification_preferences }
+        weekly_budget: onboardingData.weekly_budget,  // Keep as null if not set (don't convert to '')
+        budget_currency: onboardingData.budget_currency || 'USD'
       });
     }
   };
 
   const handleSaveChanges = async () => {
     try {
-      // Save each field that changed
+      // Save profile changes (firstName, email)
+      const profileUpdates = {};
+      if (editData.firstName && editData.firstName !== user?.firstName) {
+        profileUpdates.firstName = editData.firstName;
+      }
+      if (editData.email && editData.email !== user?.email) {
+        profileUpdates.email = editData.email;
+      }
+
+      if (Object.keys(profileUpdates).length > 0) {
+        await updateProfile(profileUpdates);
+      }
+
+      // Save onboarding fields that changed
       for (const [key, value] of Object.entries(editData)) {
-        if (key === 'notification_preferences') {
-          await updateOnboardingField('notification_preferences', value);
-        } else if (onboardingData[key] !== value) {
+        if (key === 'firstName' || key === 'email') continue; // Already handled above
+        if (onboardingData[key] !== value) {
           await updateOnboardingField(key, value);
         }
       }
@@ -78,16 +90,6 @@ const AboutYouPage = () => {
     setEditData(prev => ({
       ...prev,
       [field]: value
-    }));
-  };
-
-  const handleNotificationChange = (notifType, value) => {
-    setEditData(prev => ({
-      ...prev,
-      notification_preferences: {
-        ...prev.notification_preferences,
-        [notifType]: value
-      }
     }));
   };
 
@@ -148,17 +150,37 @@ const AboutYouPage = () => {
             {/* Name */}
             <div className="about-you__info-item">
               <label className="about-you__info-label">Full Name</label>
-              <span className="about-you__info-value">
-                {user?.firstName || 'Not provided'}
-              </span>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={editData.firstName || ''}
+                  onChange={(e) => handleFieldChange('firstName', e.target.value)}
+                  placeholder="Enter your name"
+                  className="about-you__edit-input"
+                />
+              ) : (
+                <span className="about-you__info-value">
+                  {user?.firstName || 'Not provided'}
+                </span>
+              )}
             </div>
 
             {/* Email */}
             <div className="about-you__info-item">
               <label className="about-you__info-label">Email Address</label>
-              <span className="about-you__info-value">
-                {user?.email || 'Not provided'}
-              </span>
+              {isEditing ? (
+                <input
+                  type="email"
+                  value={editData.email || ''}
+                  onChange={(e) => handleFieldChange('email', e.target.value)}
+                  placeholder="Enter your email"
+                  className="about-you__edit-input"
+                />
+              ) : (
+                <span className="about-you__info-value">
+                  {user?.email || 'Not provided'}
+                </span>
+              )}
             </div>
 
             {/* Member Since */}
@@ -270,62 +292,6 @@ const AboutYouPage = () => {
                 )}
               </div>
 
-              {/* Notification Preferences */}
-              <div className="about-you__info-item">
-                <label className="about-you__info-label">Notifications</label>
-                {isEditing ? (
-                  <div className="about-you__notification-edit-list">
-                    <label className="about-you__notification-edit-item">
-                      <input
-                        type="checkbox"
-                        checked={editData.notification_preferences?.mealReminders || false}
-                        onChange={(e) => handleNotificationChange('mealReminders', e.target.checked)}
-                        className="about-you__edit-checkbox"
-                      />
-                      <span className="about-you__notification-text">Meal reminders</span>
-                    </label>
-                    <label className="about-you__notification-edit-item">
-                      <input
-                        type="checkbox"
-                        checked={editData.notification_preferences?.expirationAlerts || false}
-                        onChange={(e) => handleNotificationChange('expirationAlerts', e.target.checked)}
-                        className="about-you__edit-checkbox"
-                      />
-                      <span className="about-you__notification-text">Expiration alerts</span>
-                    </label>
-                    <label className="about-you__notification-edit-item">
-                      <input
-                        type="checkbox"
-                        checked={editData.notification_preferences?.weeklyReports || false}
-                        onChange={(e) => handleNotificationChange('weeklyReports', e.target.checked)}
-                        className="about-you__edit-checkbox"
-                      />
-                      <span className="about-you__notification-text">Weekly reports</span>
-                    </label>
-                  </div>
-                ) : (
-                  <div className="about-you__notification-list">
-                    <div className="about-you__notification-item">
-                      <span className="about-you__notification-icon">
-                        {onboardingData.notification_preferences?.mealReminders ? '✅' : '❌'}
-                      </span>
-                      <span className="about-you__notification-text">Meal reminders</span>
-                    </div>
-                    <div className="about-you__notification-item">
-                      <span className="about-you__notification-icon">
-                        {onboardingData.notification_preferences?.expirationAlerts ? '✅' : '❌'}
-                      </span>
-                      <span className="about-you__notification-text">Expiration alerts</span>
-                    </div>
-                    <div className="about-you__notification-item">
-                      <span className="about-you__notification-icon">
-                        {onboardingData.notification_preferences?.weeklyReports ? '✅' : '❌'}
-                      </span>
-                      <span className="about-you__notification-text">Weekly reports</span>
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         ) : (

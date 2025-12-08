@@ -102,12 +102,12 @@ const ProfilePageV2 = () => {
       <div className="profile-v2__user-section">
         <div className="profile-v2__avatar">
           <span className="profile-v2__avatar-text">
-            {getUserInitials(user?.name || user?.email)}
+            {getUserInitials(user?.firstName || user?.email)}
           </span>
         </div>
         <div className="profile-v2__user-info">
           <h2 className="profile-v2__user-name">
-            {getFirstName(user?.name) || 'User'}
+            {getFirstName(user?.firstName) || 'User'}
           </h2>
           <p className="profile-v2__user-email">
             {user?.email || 'user@example.com'}

@@ -209,9 +209,9 @@
   -webkit-overflow-scrolling: touch;
   padding-bottom: 0.5rem;
   margin-bottom: 1.5rem;
-  margin-left: -1rem;
+  margin-left: 0;
   margin-right: -1rem;
-  padding-left: 1rem;
+  padding-left: 0;
   padding-right: 1rem;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
@@ -619,7 +619,7 @@
 .meal-plans-page__section-subtitle {
   font-size: 1rem;
   color: #666;
-  margin: 0 0 1rem 0;
+  margin: 0;
   line-height: 1.5;
 }
 
@@ -945,6 +945,125 @@
   color: #333;
 }
 
+/* Search Row with Add Button */
+.meal-plans-page__search-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.meal-plans-page__search-row .meal-plans-page__search-container {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.meal-plans-page__add-button {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  background: var(--primary-green);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.375rem;
+  font-weight: 300;
+  transition: all 0.2s ease;
+}
+
+.meal-plans-page__add-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 207, 97, 0.3);
+}
+
+/* Add Recipe Modal */
+.meal-plans-page__add-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.meal-plans-page__add-modal-content {
+  background: white;
+  border-radius: 20px 20px 0 0;
+  padding: 0.75rem 1.5rem 1.25rem;
+  width: 100%;
+  max-width: 500px;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.meal-plans-page__add-modal-handle {
+  width: 40px;
+  height: 4px;
+  background: #ddd;
+  border-radius: 2px;
+  margin: 0 auto 1rem;
+}
+
+.meal-plans-page__add-modal-options {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.meal-plans-page__add-modal-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1rem;
+  background: #f8f8f8;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  flex: 1;
+  max-width: 160px;
+  transition: all 0.2s ease;
+}
+
+.meal-plans-page__add-modal-option:hover {
+  background: #f0f0f0;
+  transform: translateY(-2px);
+}
+
+.meal-plans-page__add-modal-option-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(79, 207, 97, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.meal-plans-page__add-modal-option-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #333;
+  text-align: center;
+}
+
 /* Filter Pills */
 .meal-plans-page__filter-pills {
   display: flex;
@@ -1041,8 +1160,8 @@
 }
 
 .meal-plans-page__favorite-btn.active svg {
-  fill: #4fcf61;
-  stroke: #4fcf61;
+  fill: #000;
+  stroke: #000;
 }
 
 .meal-plans-page__delete-btn.deleting {
@@ -1099,4 +1218,233 @@
   width: 16px;
   height: 16px;
   fill: #4fcf61;
+}
+/* Cookbooks Empty State */
+.meal-plans-page__cookbooks-view {
+  padding: 1rem 0;
+}
+
+.meal-plans-page__cookbooks-empty {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.meal-plans-page__cookbooks-empty-card {
+  width: calc(50% - 8px);
+  max-width: 180px;
+  aspect-ratio: 1;
+  border: 2px dashed var(--primary-green, #81e053);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.meal-plans-page__cookbooks-empty-card:hover {
+  border-color: var(--primary-green-dark, #6bc93f);
+  background: #f8fff5;
+}
+
+.meal-plans-page__cookbooks-empty-icon {
+  margin-bottom: 12px;
+}
+
+.meal-plans-page__cookbooks-empty-text {
+  color: var(--primary-green, #4fcf61);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+/* Cookbooks Grid */
+.meal-plans-page__cookbooks-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+/* Cookbook Skeleton Loading */
+.meal-plans-page__cookbook-skeleton {
+  border-radius: 16px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.meal-plans-page__cookbook-skeleton-image {
+  aspect-ratio: 1;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.meal-plans-page__cookbook-skeleton-text {
+  height: 20px;
+  margin: 12px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Week Calendar Styles */
+.meal-plans-page__week-calendar {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.meal-plans-page__calendar-days-header {
+  display: flex;
+  width: 100%;
+  margin-bottom: 0.25rem;
+}
+
+.meal-plans-page__calendar-day-name {
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #999;
+  padding: 0.25rem;
+  flex: 1;
+  min-width: calc(100% / 7);
+}
+
+.meal-plans-page__calendar-dates-row {
+  display: flex;
+  min-width: 100%;
+}
+
+.meal-plans-page__calendar-date-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  min-width: calc(100% / 7);
+  position: relative;
+  -webkit-tap-highlight-color: rgba(79, 207, 97, 0.1);
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.meal-plans-page__calendar-date-cell:hover {
+  background-color: rgba(79, 207, 97, 0.1);
+}
+
+.meal-plans-page__calendar-date-cell:active {
+  transform: scale(0.95);
+}
+
+.meal-plans-page__calendar-date-number {
+  font-size: 1.125rem;
+  font-weight: 400;
+  color: #333;
+  width: 3rem;
+  height: 3rem;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: relative;
+  isolation: isolate;
+}
+
+/* Today state */
+.meal-plans-page__calendar-date-cell--today .meal-plans-page__calendar-date-number {
+  background-color: #e6e6e6;
+}
+
+/* Selected state */
+.meal-plans-page__calendar-date-cell--selected .meal-plans-page__calendar-date-number {
+  background: linear-gradient(135deg, #81e053 0%, #4fcf61 100%);
+  color: white;
+}
+
+/* Progress ring */
+.meal-plans-page__calendar-date-number::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  background: transparent;
+  z-index: -1;
+}
+
+/* 1 meal = 1/4 ring (90deg) */
+.meal-plans-page__calendar-date-number.meal-progress-1::before {
+  background: conic-gradient(from -90deg, #4fcf61 0deg, #4fcf61 90deg, transparent 90deg, transparent 360deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
+}
+
+/* 2 meals = 1/2 ring (180deg) */
+.meal-plans-page__calendar-date-number.meal-progress-2::before {
+  background: conic-gradient(from -90deg, #4fcf61 0deg, #4fcf61 180deg, transparent 180deg, transparent 360deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
+}
+
+/* 3 meals = 3/4 ring (270deg) */
+.meal-plans-page__calendar-date-number.meal-progress-3::before {
+  background: conic-gradient(from -90deg, #4fcf61 0deg, #4fcf61 270deg, transparent 270deg, transparent 360deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
+}
+
+/* 4 meals = full ring (360deg) */
+.meal-plans-page__calendar-date-number.meal-progress-4::before {
+  background: conic-gradient(from -90deg, #4fcf61 0deg, #4fcf61 360deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
+}
+
+/* Mobile responsive calendar */
+@media (max-width: 768px) {
+  .meal-plans-page__calendar-date-number {
+    font-size: 1rem;
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .meal-plans-page__calendar-date-number::before {
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+  }
+
+  .meal-plans-page__calendar-date-number.meal-progress-1::before,
+  .meal-plans-page__calendar-date-number.meal-progress-2::before,
+  .meal-plans-page__calendar-date-number.meal-progress-3::before,
+  .meal-plans-page__calendar-date-number.meal-progress-4::before {
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  }
+}
+
+@media (max-width: 375px) {
+  .meal-plans-page__calendar-date-number {
+    font-size: 0.875rem;
+    width: 2rem;
+    height: 2rem;
+  }
 }

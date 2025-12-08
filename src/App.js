@@ -38,7 +38,9 @@ import { MealCameraInterface, MealIngredientSelector } from './features/mealscan
 import OnboardingFlow from './features/onboarding/components/OnboardingFlow';
 import ShortcutSetupPage from './pages/ShortcutSetupPage';
 import ShoppingListDetailPage from './pages/ShoppingListDetailPage';
+import CookbookDetailPage from './pages/CookbookDetailPage';
 import JoinShoppingList from './components/JoinShoppingList';
+import JoinCookbook from './components/JoinCookbook';
 import PWATestPage from './pages/PWATestPage';
 import ScrollToTop from './components/ScrollToTop';
 import BillingPage from './pages/BillingPage';
@@ -116,6 +118,11 @@ function App() {
           <Route path="/shopping-list/:listId" element={
             <AuthGuard>
               <ShoppingListDetailPage />
+            </AuthGuard>
+          } />
+          <Route path="/cookbook/:cookbookId" element={
+            <AuthGuard>
+              <CookbookDetailPage />
             </AuthGuard>
           } />
           {/* Meals routes - /meals is the main route (renamed from /meal-plans) */}
@@ -264,6 +271,11 @@ function App() {
           <Route path="/mealscanner/ingredients" element={
             <AuthGuard>
               <MealIngredientSelector />
+            </AuthGuard>
+          } />
+          <Route path="/join/cookbook/:shareCode" element={
+            <AuthGuard>
+              <JoinCookbook />
             </AuthGuard>
           } />
           <Route path="/join/:shareCode" element={
