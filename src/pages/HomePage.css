@@ -3293,8 +3293,10 @@ h2.section-title::after {
   padding: 1rem;
   background-color: white;
   border-radius: 8px;
-  border-left: 4px solid var(--primary-green);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
 }
 
 .instruction-step:last-child {
@@ -3302,19 +3304,25 @@ h2.section-title::after {
 }
 
 .step-number {
-  display: block;
-  font-weight: 700;
-  color: var(--primary-green);
-  margin-bottom: 0.5rem;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  background: var(--primary-green);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  flex-shrink: 0;
 }
 
 .step-text {
-  color: var(--header-color);
+  color: #444444;
   line-height: 1.6;
   font-size: 0.9rem;
+  flex: 1;
 }
 
 /* No ingredients message */

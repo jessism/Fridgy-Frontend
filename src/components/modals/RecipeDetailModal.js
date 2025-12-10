@@ -380,9 +380,8 @@ const RecipeDetailModal = ({
         recipe.analyzedInstructions[0].steps.length > 0) {
       return recipe.analyzedInstructions[0].steps.map((step, index) => (
         <div key={index} className="instruction-step">
-          <span className="step-text">
-            <strong>Step {step.number || index + 1}:</strong> {highlightInstructions(step.step, recipe?.extendedIngredients)}
-          </span>
+          <span className="step-number">{step.number || index + 1}</span>
+          <span className="step-text">{highlightInstructions(step.step, recipe?.extendedIngredients)}</span>
         </div>
       ));
     }
@@ -391,9 +390,8 @@ const RecipeDetailModal = ({
     if (recipe?.instructionSteps && Array.isArray(recipe.instructionSteps) && recipe.instructionSteps.length > 0) {
       return recipe.instructionSteps.map((step, index) => (
         <div key={index} className="instruction-step">
-          <span className="step-text">
-            <strong>Step {index + 1}:</strong> {highlightInstructions(step, recipe?.extendedIngredients)}
-          </span>
+          <span className="step-number">{index + 1}</span>
+          <span className="step-text">{highlightInstructions(step, recipe?.extendedIngredients)}</span>
         </div>
       ));
     }
@@ -409,9 +407,8 @@ const RecipeDetailModal = ({
       if (cleanInstructions.length > 0) {
         return cleanInstructions.map((step, index) => (
           <div key={index} className="instruction-step">
-            <span className="step-text">
-              <strong>Step {index + 1}:</strong> {highlightInstructions(step.trim(), recipe?.extendedIngredients)}
-            </span>
+            <span className="step-number">{index + 1}</span>
+            <span className="step-text">{highlightInstructions(step.trim(), recipe?.extendedIngredients)}</span>
           </div>
         ));
       }
@@ -421,9 +418,8 @@ const RecipeDetailModal = ({
     if (recipe?.instructions && Array.isArray(recipe.instructions)) {
       return recipe.instructions.map((step, index) => (
         <div key={index} className="instruction-step">
-          <span className="step-text">
-            <strong>Step {index + 1}:</strong> {highlightInstructions(step, recipe?.extendedIngredients)}
-          </span>
+          <span className="step-number">{index + 1}</span>
+          <span className="step-text">{highlightInstructions(step, recipe?.extendedIngredients)}</span>
         </div>
       ));
     }

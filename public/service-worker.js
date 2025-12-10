@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-globals */
 
 // Cache name versioning
-const CACHE_NAME = 'trackabite-v8'; // v8: Context-aware beverage messages + auto-update on new versions
+const CACHE_NAME = 'trackabite-v9'; // v9: Fix notification click navigation when app is in background (iOS)
 const urlsToCache = [
   // Removed '/' to prevent caching landing page - fixes auth redirect issue
   '/static/css/main.css',
@@ -264,14 +264,24 @@ self.addEventListener('notificationclick', event => {
       .then(clientList => {
         // Check if there's already a window/tab open
         for (let client of clientList) {
-          if (client.url.includes(self.location.origin) && 'focus' in client) {
-            console.log('[Service Worker] App already open, sending navigation message');
-            // Use postMessage to trigger React Router navigation
-            client.postMessage({
-              type: 'NAVIGATE',
-              url: urlToOpen
-            });
-            return client.focus();
+          if (client.url.includes(self.location.origin) && 'navigate' in client) {
+            console.log('[Service Worker] App already open, navigating directly to:', urlToOpen);
+            // Use navigate() for reliable navigation - works even when JS is frozen (iOS background)
+            return client.navigate(urlToOpen)
+              .then(windowClient => {
+                if (windowClient) {
+                  console.log('[Service Worker] Navigation successful, focusing window');
+                  return windowClient.focus();
+                }
+                // navigate() returned null (URL outside scope?), fall through to openWindow
+                console.log('[Service Worker] navigate() returned null, falling back to openWindow');
+                return clients.openWindow(urlToOpen);
+              })
+              .catch(err => {
+                console.error('[Service Worker] navigate() failed:', err);
+                // Fall back to opening a new window
+                return clients.openWindow(urlToOpen);
+              });
           }
         }
         // If no window is open, open a new one with the URL

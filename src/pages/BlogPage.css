@@ -510,15 +510,30 @@
     padding: 20px;
   }
 
+  /* Full-screen modal on mobile */
   .blog-page__modal-overlay {
-    padding: 10px;
-    align-items: flex-start;
-    padding-top: 60px;
+    padding: 0;
+    align-items: stretch;
   }
 
   .blog-page__modal {
-    max-height: none;
-    border-radius: 16px;
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .blog-page__modal-close {
+    top: 12px;
+    left: 12px;
+    right: auto;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .blog-page__modal-close svg {
+    color: white;
   }
 
   .blog-page__modal-image {
