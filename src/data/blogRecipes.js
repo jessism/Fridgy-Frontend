@@ -424,5 +424,34 @@ export const blogRecipes = [
       "Add noodles, tamarind paste, and fish sauce.",
       "Toss with eggs and serve with peanuts and lime."
     ]
+  },
+  {
+    id: 17,
+    title: "Braised Beef with Mushrooms and Onions",
+    image: "https://aimvjpndmipmtavpmjnn.supabase.co/storage/v1/object/public/recipe-imagaes-manual/Braised%20Beef%20with%20Mushrooms%20and%20Onions.png",
+    description: "Tender, slow-braised beef in a rich mushroom-onion gravy, perfect for a hearty meal.",
+    prepTime: "15 mins",
+    cookTime: "2.5-3 hrs",
+    servings: 6,
+    ingredients: [
+      "2-3 lbs beef chuck roast (or short ribs)",
+      "2 cups mushrooms, halved",
+      "2 large onions, sliced or quartered",
+      "4 garlic cloves, minced",
+      "2 cups beef broth",
+      "1 cup red wine (optional but recommended)",
+      "2 tbsp tomato paste",
+      "2 tbsp Worcestershire sauce",
+      "2-3 fresh thyme sprigs",
+      "2 bay leaves (optional)",
+      "Salt & pepper",
+      "2-3 tbsp olive oil"
+    ],
+    instructions: [
+      "Heat olive oil in a Dutch oven. Season beef generously with salt and pepper. Sear on all sides until dark, caramelized crust forms.",
+      "Add onions and mushrooms to the pot, sauté until golden. Stir in garlic and tomato paste; cook 1 minute. Pour in red wine to deglaze, scraping up flavorful bits.",
+      "Add beef broth, Worcestershire sauce, thyme, and bay leaves. Return beef to the pot, cover, and simmer on low for 2.5-3 hours until fork-tender.",
+      "Remove herbs. Spoon the rich mushroom-onion gravy over the beef. Serve with mashed potatoes, rice, or crusty bread."
+    ]
   }
 ];

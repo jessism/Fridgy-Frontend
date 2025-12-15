@@ -76,6 +76,32 @@
   cursor: not-allowed;
 }
 
+/* Header Actions Container */
+.meal-plan-page__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* Grocery List Button */
+.meal-plan-page__grocery-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1.5px solid var(--primary-green, #4fcf61);
+  color: var(--primary-green, #4fcf61);
+  padding: 6px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.meal-plan-page__grocery-btn:hover {
+  background: rgba(79, 207, 97, 0.1);
+}
+
 /* Sync Message */
 .meal-plan-page__sync-message {
   background: #e8f5e9;

@@ -379,6 +379,14 @@ const UploadedRecipesPage = () => {
             // The modal will close automatically if deletion is successful
             // because handleDeleteRecipe sets selectedRecipe to null
           }}
+          onUpdate={(updatedRecipe) => {
+            // Update the recipe in the list
+            setRecipes(prevRecipes =>
+              prevRecipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r)
+            );
+            // Also update the selected recipe so the modal shows the new data
+            setSelectedRecipe(updatedRecipe);
+          }}
         />
       )}
 

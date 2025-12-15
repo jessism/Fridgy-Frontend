@@ -2,12 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
-import { ChevronLeft, X, Calendar, Check } from 'lucide-react';
+import { ChevronLeft, X, Calendar, Check, ShoppingCart } from 'lucide-react';
 import useMealPlan from '../hooks/useMealPlan';
 import useCalendarSync from '../hooks/useCalendarSync';
 import RecipePickerModal from '../components/modals/RecipePickerModal';
 import RecipeDetailModal from '../components/modals/RecipeDetailModal';
 import TimePickerModal from '../components/modals/TimePickerModal';
+import GenerateGroceryListModal from '../components/modals/GenerateGroceryListModal';
 import './MealPlanPage.css';
 
 // Meal type icons
@@ -51,6 +52,7 @@ const MealPlanPage = () => {
   const [syncMessage, setSyncMessage] = useState(null);
   const [showMonthCalendar, setShowMonthCalendar] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(new Date());
+  const [showGroceryListModal, setShowGroceryListModal] = useState(false);
 
   // Swipe gesture state
   const [touchStart, setTouchStart] = useState(null);
@@ -260,13 +262,25 @@ const MealPlanPage = () => {
   };
 
   const handleViewRecipe = (plan) => {
-    // Build recipe object from plan data
-    const recipe = plan.recipe || {
-      id: plan.recipe_id,
-      title: plan.recipe_snapshot?.title || 'Planned Meal',
-      image: plan.recipe_snapshot?.image,
-      readyInMinutes: plan.recipe_snapshot?.readyInMinutes
+    // Merge recipe data from linked recipe and/or snapshot
+    const linkedRecipe = plan.recipe || {};
+    const snapshot = plan.recipe_snapshot || {};
+
+    const recipe = {
+      id: linkedRecipe.id || plan.recipe_id,
+      title: linkedRecipe.title || snapshot.title || 'Planned Meal',
+      image: linkedRecipe.image || snapshot.image,
+      readyInMinutes: linkedRecipe.readyInMinutes || snapshot.readyInMinutes,
+      source_type: linkedRecipe.source_type || snapshot.source_type,
+      extendedIngredients: linkedRecipe.extendedIngredients || snapshot.extendedIngredients || [],
+      analyzedInstructions: linkedRecipe.analyzedInstructions || snapshot.analyzedInstructions || [],
+      nutrition: linkedRecipe.nutrition || snapshot.nutrition || null,
+      source_author: linkedRecipe.source_author || snapshot.source_author || null,
+      source_url: linkedRecipe.source_url || snapshot.source_url || null,
+      servings: linkedRecipe.servings || snapshot.servings || 1,
+      summary: linkedRecipe.summary || snapshot.summary || null
     };
+
     setRecipeDetailModal({ isOpen: true, recipe });
   };
 
@@ -548,17 +562,26 @@ const MealPlanPage = () => {
               <ChevronLeft size={20} />
             </button>
             <h1 className="meal-plan-page__title">Meal Plan</h1>
-            {calendarConnected && (
+            <div className="meal-plan-page__header-actions">
               <button
-                className="meal-plan-page__sync-btn"
-                onClick={handleSyncAll}
-                disabled={calendarSyncing}
-                aria-label="Sync to calendar"
+                className="meal-plan-page__grocery-btn"
+                onClick={() => setShowGroceryListModal(true)}
+                aria-label="Create grocery list"
               >
-                <Calendar size={18} />
-                {calendarSyncing ? 'Syncing...' : 'Sync'}
+                <ShoppingCart size={18} />
               </button>
-            )}
+              {calendarConnected && (
+                <button
+                  className="meal-plan-page__sync-btn"
+                  onClick={handleSyncAll}
+                  disabled={calendarSyncing}
+                  aria-label="Sync to calendar"
+                >
+                  <Calendar size={18} />
+                  {calendarSyncing ? 'Syncing...' : 'Sync'}
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Sync message */}
@@ -701,6 +724,13 @@ const MealPlanPage = () => {
         onSave={handleTimeChange}
         initialTime={timePickerModal.currentTime}
         mealType={timePickerModal.mealType}
+      />
+
+      {/* Generate Grocery List Modal */}
+      <GenerateGroceryListModal
+        isOpen={showGroceryListModal}
+        onClose={() => setShowGroceryListModal(false)}
+        onSuccess={() => setShowGroceryListModal(false)}
       />
 
       {/* Month Calendar Modal */}

@@ -143,12 +143,19 @@ const useMealPlan = () => {
         throw new Error('Not authenticated');
       }
 
-      // Create recipe snapshot for non-saved recipes
+      // Create recipe snapshot for non-saved recipes (includes all fields for RecipeDetailModal)
       const recipeSnapshot = {
         title: recipe.title,
         image: recipe.image,
         readyInMinutes: recipe.readyInMinutes,
-        source_type: recipe.source_type || recipeSource
+        source_type: recipe.source_type || recipeSource,
+        extendedIngredients: recipe.extendedIngredients || [],
+        analyzedInstructions: recipe.analyzedInstructions || [],
+        nutrition: recipe.nutrition || null,
+        source_author: recipe.source_author || null,
+        source_url: recipe.source_url || null,
+        servings: recipe.servings || 1,
+        summary: recipe.summary || null
       };
 
       const response = await fetch(`${API_BASE_URL}/meal-plans`, {

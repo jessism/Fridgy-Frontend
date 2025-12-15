@@ -44,10 +44,13 @@ const useShoppingLists = () => {
   }, []);
 
   // Create a new shopping list
-  const createList = async (name, color = '#c3f0ca', items = []) => {
+  const createList = async (name, color = '#c3f0ca', items = [], recipeMetadata = null) => {
     try {
       const token = getAuthToken();
       if (!token) throw new Error('Not authenticated');
+
+      // Build settings with recipe metadata if provided
+      const settings = recipeMetadata ? { source_recipes: [recipeMetadata] } : undefined;
 
       const response = await fetch(`${API_BASE_URL}/shopping-lists`, {
         method: 'POST',
@@ -55,7 +58,7 @@ const useShoppingLists = () => {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ name, color, items })
+        body: JSON.stringify({ name, color, items, settings })
       });
 
       const data = await response.json();
@@ -421,6 +424,33 @@ const useShoppingLists = () => {
     }
   };
 
+  // Add recipe metadata to an existing list (for carousel display)
+  const addRecipeToList = async (listId, recipeMetadata) => {
+    try {
+      const token = getAuthToken();
+      if (!token) throw new Error('Not authenticated');
+
+      const response = await fetch(`${API_BASE_URL}/shopping-lists/${listId}/add-recipe`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ recipe: recipeMetadata })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add recipe to list');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      console.error('Error adding recipe to list:', err);
+      throw err;
+    }
+  };
+
   // Initial fetch on mount
   useEffect(() => {
     const token = getAuthToken();
@@ -446,7 +476,8 @@ const useShoppingLists = () => {
     shareList,
     joinList,
     moveToInventory,
-    migrateLists
+    migrateLists,
+    addRecipeToList
   };
 };
 

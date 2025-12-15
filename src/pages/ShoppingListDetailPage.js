@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import useShoppingLists from '../hooks/useShoppingLists';
 import ShareListModal from '../components/modals/ShareListModal';
+import RecipeCarousel from '../components/RecipeCarousel';
+import RecipeQuickPreviewModal from '../components/modals/RecipeQuickPreviewModal';
 import { ChevronLeft, Users, Check, Trash2, RefreshCw } from 'lucide-react';
 import '../components/ShoppingListSection.css';
 
@@ -39,6 +41,7 @@ const ShoppingListDetailPage = () => {
   const [organizeByAisle, setOrganizeByAisle] = useState(() => {
     return localStorage.getItem('shopping_organize_by_aisle') === 'true';
   });
+  const [selectedRecipeForPreview, setSelectedRecipeForPreview] = useState(null);
 
   // Toggle handler for organize by aisle
   const handleToggleOrganizeByAisle = () => {
@@ -955,6 +958,14 @@ const ShoppingListDetailPage = () => {
             )}
           </div>
 
+          {/* Recipe Carousel - Show if list has associated recipes */}
+          {selectedList?.settings?.source_recipes?.length > 0 && (
+            <RecipeCarousel
+              recipes={selectedList.settings.source_recipes}
+              onRecipeClick={setSelectedRecipeForPreview}
+            />
+          )}
+
           {/* Members section if shared */}
           {selectedList.shopping_list_members && selectedList.shopping_list_members.length > 1 && (
             <div className="shopping-list-section__members">
@@ -1065,6 +1076,13 @@ const ShoppingListDetailPage = () => {
           setListToShare(null);
         }}
         onShare={handleShareList}
+      />
+
+      {/* Recipe Quick Preview Modal */}
+      <RecipeQuickPreviewModal
+        isOpen={!!selectedRecipeForPreview}
+        onClose={() => setSelectedRecipeForPreview(null)}
+        recipe={selectedRecipeForPreview}
       />
     </div>
   );

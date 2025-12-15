@@ -17,12 +17,19 @@ const RecipeDetailModal = ({
   isLoading,
   onCookNow,
   customActionLabel,
-  onDelete
+  onDelete,
+  onUpdate
 }) => {
   const [activeTab, setActiveTab] = useState('ingredients');
   const [showCookingConfirmation, setShowCookingConfirmation] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showCookingMode, setShowCookingMode] = useState(false);
+
+  // Action sheet and edit mode states
+  const [showActionSheet, setShowActionSheet] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editedRecipe, setEditedRecipe] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Serving size adjustment state
   const [selectedServings, setSelectedServings] = useState(recipe?.servings || 1);
@@ -37,7 +44,7 @@ const RecipeDetailModal = ({
   const [selectedIngredientsForList, setSelectedIngredientsForList] = useState(null);
 
   // Shopping lists hook
-  const { lists: shoppingLists, createList, addItem: addToShoppingList } = useShoppingLists();
+  const { lists: shoppingLists, createList, addItem: addToShoppingList, addRecipeToList } = useShoppingLists();
 
   // Subscription hook for premium gating
   const { isPremium, startCheckout } = useSubscription();
@@ -278,6 +285,18 @@ const RecipeDetailModal = ({
         await addToShoppingList(listId, ingredient);
       }
 
+      // Add recipe metadata for carousel display
+      if (recipe) {
+        const recipeMetadata = {
+          id: recipe.id,
+          title: recipe.title,
+          image: recipe.image || recipe.image_urls?.[0],
+          readyInMinutes: recipe.readyInMinutes,
+          servings: recipe.servings || 1
+        };
+        await addRecipeToList(listId, recipeMetadata);
+      }
+
       // Close modals
       setShowShoppingListModal(false);
       setSelectedIngredientsForList(null);
@@ -298,8 +317,17 @@ const RecipeDetailModal = ({
 
   const handleCreateNewListAndAdd = async (listName) => {
     try {
-      // Create list with all the ingredients already included
-      const newList = await createList(listName, '#4fcf61', selectedIngredientsForList);
+      // Build recipe metadata for carousel display
+      const recipeMetadata = recipe ? {
+        id: recipe.id,
+        title: recipe.title,
+        image: recipe.image || recipe.image_urls?.[0],
+        readyInMinutes: recipe.readyInMinutes,
+        servings: recipe.servings || 1
+      } : null;
+
+      // Create list with all the ingredients and recipe metadata
+      const newList = await createList(listName, '#4fcf61', selectedIngredientsForList, recipeMetadata);
 
       // Close modals
       setShowShoppingListModal(false);
@@ -339,6 +367,103 @@ const RecipeDetailModal = ({
 
   const handleCancelDelete = () => {
     setShowDeleteConfirmation(false);
+  };
+
+  // Edit mode handlers
+  const handleEnterEditMode = () => {
+    setShowActionSheet(false);
+    setEditedRecipe({ ...recipe });
+    setIsEditMode(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditMode(false);
+    setEditedRecipe(null);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editedRecipe) return;
+    setIsSaving(true);
+
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      const response = await fetch(
+        `${API_BASE_URL}/saved-recipes/${recipe.id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(editedRecipe)
+        }
+      );
+
+      if (response.ok) {
+        const updatedRecipe = await response.json();
+        if (onUpdate) onUpdate(updatedRecipe);
+        setIsEditMode(false);
+        setEditedRecipe(null);
+      } else {
+        console.error('Failed to save changes');
+        alert('Failed to save changes. Please try again.');
+      }
+    } catch (error) {
+      console.error('Save error:', error);
+      alert('Failed to save changes. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Helper functions for editing instructions
+  const handleUpdateStep = (index, newText) => {
+    if (!editedRecipe) return;
+
+    const currentInstructions = editedRecipe.analyzedInstructions?.[0]?.steps || [];
+    const newSteps = [...currentInstructions];
+    newSteps[index] = { ...newSteps[index], step: newText };
+
+    setEditedRecipe({
+      ...editedRecipe,
+      analyzedInstructions: [{
+        ...(editedRecipe.analyzedInstructions?.[0] || {}),
+        steps: newSteps
+      }]
+    });
+  };
+
+  const handleAddStep = () => {
+    if (!editedRecipe) return;
+
+    const currentSteps = editedRecipe.analyzedInstructions?.[0]?.steps || [];
+    const newSteps = [...currentSteps, { number: currentSteps.length + 1, step: '' }];
+
+    setEditedRecipe({
+      ...editedRecipe,
+      analyzedInstructions: [{
+        ...(editedRecipe.analyzedInstructions?.[0] || {}),
+        steps: newSteps
+      }]
+    });
+  };
+
+  const handleRemoveStep = (index) => {
+    if (!editedRecipe) return;
+
+    const currentSteps = editedRecipe.analyzedInstructions?.[0]?.steps || [];
+    const newSteps = currentSteps.filter((_, i) => i !== index).map((step, i) => ({
+      ...step,
+      number: i + 1
+    }));
+
+    setEditedRecipe({
+      ...editedRecipe,
+      analyzedInstructions: [{
+        ...(editedRecipe.analyzedInstructions?.[0] || {}),
+        steps: newSteps
+      }]
+    });
   };
 
   const renderIngredients = () => {
@@ -624,28 +749,44 @@ const RecipeDetailModal = ({
     <>
       <div className="recipe-modal-overlay" onClick={handleOverlayClick}>
         <div className="recipe-modal">
-          {/* Header with close and delete buttons */}
+          {/* Header with close/cancel and more options/save buttons */}
           <div className="recipe-modal-header">
             <button
               className="recipe-modal-close"
-              onClick={onClose}
-              aria-label="Close modal"
+              onClick={isEditMode ? handleCancelEdit : onClose}
+              aria-label={isEditMode ? "Cancel editing" : "Close modal"}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            {onDelete && recipe && (
-              <button
-                className="recipe-modal-delete"
-                onClick={handleDeleteRecipe}
-                aria-label="Delete recipe"
-              >
+              {isEditMode ? (
+                <span className="recipe-modal-cancel-text">Cancel</span>
+              ) : (
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5"/>
-                  <path d="M8 12h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
+              )}
+            </button>
+
+            {isEditMode ? (
+              <button
+                className="recipe-modal-save"
+                onClick={handleSaveEdit}
+                disabled={isSaving}
+              >
+                {isSaving ? 'Saving...' : 'Save'}
               </button>
+            ) : (
+              onDelete && recipe && (
+                <button
+                  className="recipe-modal-more"
+                  onClick={() => setShowActionSheet(true)}
+                  aria-label="More options"
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="6" r="1.5" fill="currentColor"/>
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                    <circle cx="12" cy="18" r="1.5" fill="currentColor"/>
+                  </svg>
+                </button>
+              )
             )}
           </div>
 
@@ -691,7 +832,17 @@ const RecipeDetailModal = ({
                 </div>
 
                 {/* Recipe Title Below Image */}
-                <h1 className="recipe-main-title">{recipe.title}</h1>
+                {isEditMode ? (
+                  <input
+                    type="text"
+                    className="recipe-edit-title"
+                    value={editedRecipe?.title || ''}
+                    onChange={(e) => setEditedRecipe({ ...editedRecipe, title: e.target.value })}
+                    placeholder="Recipe title"
+                  />
+                ) : (
+                  <h1 className="recipe-main-title">{recipe.title}</h1>
+                )}
 
                 {/* Description and Info Text Below Image */}
                 <div className="recipe-meta-info">
@@ -817,7 +968,7 @@ const RecipeDetailModal = ({
                       <div>
                         <div className="cooking-mode__instructions-header">
                           <h2 className="section-title">Instructions</h2>
-                          {getInstructionSteps().length > 0 && (
+                          {!isEditMode && getInstructionSteps().length > 0 && (
                             <button
                               className="cooking-mode__play-button"
                               onClick={() => setShowCookingMode(true)}
@@ -831,7 +982,36 @@ const RecipeDetailModal = ({
                           )}
                         </div>
                         <div className="instructions-container">
-                          {renderInstructions()}
+                          {isEditMode ? (
+                            <div className="recipe-edit-instructions">
+                              {(editedRecipe?.analyzedInstructions?.[0]?.steps || []).map((step, index) => (
+                                <div key={index} className="recipe-edit-step">
+                                  <span className="step-number">{index + 1}</span>
+                                  <textarea
+                                    className="recipe-edit-step-textarea"
+                                    value={step.step || ''}
+                                    onChange={(e) => handleUpdateStep(index, e.target.value)}
+                                    placeholder={`Step ${index + 1}`}
+                                  />
+                                  <button
+                                    className="recipe-edit-step-remove"
+                                    onClick={() => handleRemoveStep(index)}
+                                    aria-label="Remove step"
+                                  >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <line x1="18" y1="6" x2="6" y2="18"/>
+                                      <line x1="6" y1="6" x2="18" y2="18"/>
+                                    </svg>
+                                  </button>
+                                </div>
+                              ))}
+                              <button className="recipe-add-step-btn" onClick={handleAddStep}>
+                                + Add Step
+                              </button>
+                            </div>
+                          ) : (
+                            renderInstructions()
+                          )}
                         </div>
                       </div>
                     )}
@@ -897,6 +1077,37 @@ const RecipeDetailModal = ({
         feature="serving adjustment"
         startCheckout={startCheckout}
       />
+
+      {/* Action Sheet */}
+      {showActionSheet && (
+        <div className="recipe-action-sheet-overlay" onClick={() => setShowActionSheet(false)}>
+          <div className="recipe-action-sheet" onClick={e => e.stopPropagation()}>
+            <button
+              className="recipe-action-sheet__option"
+              onClick={handleEnterEditMode}
+            >
+              <span>EDIT RECIPE</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+            <button
+              className="recipe-action-sheet__option"
+              onClick={() => {
+                setShowActionSheet(false);
+                handleDeleteRecipe();
+              }}
+            >
+              <span>DELETE RECIPE</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="3,6 5,6 21,6"/>
+                <path d="M19,6v14a2,2 0 0,1-2,2H7a2,2 0 0,1-2-2V6m3,0V4a2,2 0 0,1,2-2h4a2,2 0 0,1,2,2v2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 };
