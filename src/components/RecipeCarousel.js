@@ -32,6 +32,7 @@ const RecipeCarousel = ({ recipes, onRecipeClick }) => {
             onClick={() => onRecipeClick(recipe)}
           >
             <div className="recipe-carousel__image">
+              <span className="recipe-carousel__count-badge">x{recipe.count || 1}</span>
               {getImageUrl(recipe.image) ? (
                 <img
                   src={getImageUrl(recipe.image)}

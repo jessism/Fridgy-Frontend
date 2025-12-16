@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import useShoppingLists from '../hooks/useShoppingLists';
 import ShareListModal from '../components/modals/ShareListModal';
 import RecipeCarousel from '../components/RecipeCarousel';
-import RecipeQuickPreviewModal from '../components/modals/RecipeQuickPreviewModal';
+import RecipeDetailModal from '../components/modals/RecipeDetailModal';
 import { ChevronLeft, Users, Check, Trash2, RefreshCw } from 'lucide-react';
 import '../components/ShoppingListSection.css';
 
@@ -48,6 +48,11 @@ const ShoppingListDetailPage = () => {
     const newValue = !organizeByAisle;
     setOrganizeByAisle(newValue);
     localStorage.setItem('shopping_organize_by_aisle', String(newValue));
+  };
+
+  // Handler for recipe carousel click - data is already in source_recipes
+  const handleRecipeClick = (recipe) => {
+    setSelectedRecipeForPreview(recipe);
   };
 
   // Aisle configuration
@@ -962,7 +967,7 @@ const ShoppingListDetailPage = () => {
           {selectedList?.settings?.source_recipes?.length > 0 && (
             <RecipeCarousel
               recipes={selectedList.settings.source_recipes}
-              onRecipeClick={setSelectedRecipeForPreview}
+              onRecipeClick={handleRecipeClick}
             />
           )}
 
@@ -1078,11 +1083,12 @@ const ShoppingListDetailPage = () => {
         onShare={handleShareList}
       />
 
-      {/* Recipe Quick Preview Modal */}
-      <RecipeQuickPreviewModal
+      {/* Recipe Detail Modal */}
+      <RecipeDetailModal
         isOpen={!!selectedRecipeForPreview}
         onClose={() => setSelectedRecipeForPreview(null)}
         recipe={selectedRecipeForPreview}
+        isLoading={false}
       />
     </div>
   );

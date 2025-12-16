@@ -5,7 +5,7 @@ import './GenerateGroceryListModal.css';
 // API base URL with fallback
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-const GenerateGroceryListModal = ({ isOpen, onClose, onSuccess }) => {
+const GenerateGroceryListModal = ({ isOpen, onClose, onSuccess, initialStartDate, initialEndDate }) => {
   const navigate = useNavigate();
 
   // State
@@ -37,10 +37,13 @@ const GenerateGroceryListModal = ({ isOpen, onClose, onSuccess }) => {
     };
   }, []);
 
-  // Format date for input element
+  // Format date for input element (using local date to avoid timezone issues)
   const formatDateForInput = (date) => {
     const d = new Date(date);
-    return d.toISOString().split('T')[0];
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   // Format date for display
@@ -49,17 +52,24 @@ const GenerateGroceryListModal = ({ isOpen, onClose, onSuccess }) => {
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  // Initialize dates to current week when modal opens
+  // Initialize dates when modal opens - use passed dates or fall back to current week
   useEffect(() => {
     if (isOpen) {
-      const { start, end } = getWeekRange(0);
-      setStartDate(start);
-      setEndDate(end);
+      if (initialStartDate && initialEndDate) {
+        // Use the visible week from meal plan page
+        setStartDate(formatDateForInput(initialStartDate));
+        setEndDate(formatDateForInput(initialEndDate));
+      } else {
+        // Fall back to current week
+        const { start, end } = getWeekRange(0);
+        setStartDate(start);
+        setEndDate(end);
+      }
       setPreview(null);
       setError(null);
       setExpandedCategories({});
     }
-  }, [isOpen, getWeekRange]);
+  }, [isOpen, initialStartDate, initialEndDate, getWeekRange]);
 
   // Auto-generate list name when dates change
   useEffect(() => {

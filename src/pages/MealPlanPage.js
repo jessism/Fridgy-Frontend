@@ -731,6 +731,8 @@ const MealPlanPage = () => {
         isOpen={showGroceryListModal}
         onClose={() => setShowGroceryListModal(false)}
         onSuccess={() => setShowGroceryListModal(false)}
+        initialStartDate={getCurrentWeekDates()[0].fullDate}
+        initialEndDate={getCurrentWeekDates()[6].fullDate}
       />
 
       {/* Month Calendar Modal */}

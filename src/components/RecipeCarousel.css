@@ -41,11 +41,25 @@
 }
 
 .recipe-carousel__image {
+  position: relative;
   width: 100px;
   height: 100px;
   border-radius: 12px;
   overflow: hidden;
   background: #f5f5f5;
+}
+
+.recipe-carousel__count-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  z-index: 1;
 }
 
 .recipe-carousel__image img {
