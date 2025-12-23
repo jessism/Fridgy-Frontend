@@ -66,6 +66,10 @@ const ProfilePageV2 = () => {
     navigate('/calendar-settings');
   };
 
+  const handleDriveSettings = () => {
+    navigate('/drive-settings');
+  };
+
   const handleReplayWelcomeTour = () => {
     // Navigate to welcome tour page
     console.log('[Profile] Opening welcome tour page');
@@ -163,6 +167,18 @@ const ProfilePageV2 = () => {
             </svg>
           </div>
           <span className="profile-v2__menu-text">Calendar Sync</span>
+        </div>
+
+        {/* Google Drive Backup */}
+        <div className="profile-v2__menu-item" onClick={handleDriveSettings}>
+          <div className="profile-v2__menu-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M2 17l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <span className="profile-v2__menu-text">Google Drive Backup</span>
         </div>
 
         {/* Replay Welcome Tour */}

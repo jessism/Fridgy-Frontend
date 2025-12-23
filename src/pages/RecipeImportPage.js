@@ -61,6 +61,12 @@ const RecipeImportPage = () => {
   const [shortcutInstallTimer, setShortcutInstallTimer] = useState(null);
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
 
+  // Facebook-specific state (separate from Instagram)
+  const [facebookUrl, setFacebookUrl] = useState('');
+  const [facebookLoading, setFacebookLoading] = useState(false);
+  const [facebookStatus, setFacebookStatus] = useState('');
+  const [facebookError, setFacebookError] = useState('');
+
   // Rotate food facts while loading
   useEffect(() => {
     if (loading || apifyLoading) {
@@ -246,19 +252,26 @@ const RecipeImportPage = () => {
       }, 90000);
     }
 
-    // Check both url and text parameters for Instagram links (only if not in importing mode)
+    // Check both url and text parameters for Instagram/Facebook links (only if not in importing mode)
     if (importing !== 'true') {
-      const instagramUrl = url || text;
+      const sharedUrl = url || text;
 
-      if (instagramUrl && instagramUrl.includes('instagram.com')) {
-        console.log('[RecipeImport] Detected Instagram URL from share/shortcut:', instagramUrl);
-        setImportUrl(instagramUrl);
+      if (sharedUrl && sharedUrl.includes('instagram.com')) {
+        console.log('[RecipeImport] Detected Instagram URL from share/shortcut:', sharedUrl);
+        setImportUrl(sharedUrl);
         setStatus('🎉 Recipe detected from Instagram!');
         // Auto-import after 1 second
-        setTimeout(() => handleImport(instagramUrl), 1000);
+        setTimeout(() => handleImport(sharedUrl), 1000);
+      } else if (sharedUrl && /facebook\.com|fb\.watch|m\.facebook\.com/i.test(sharedUrl)) {
+        // Facebook URL detected - use Facebook handler
+        console.log('[RecipeImport] Detected Facebook URL from share/shortcut:', sharedUrl);
+        setFacebookUrl(sharedUrl);
+        setFacebookStatus('🎉 Recipe detected from Facebook!');
+        // Auto-import after 1 second
+        setTimeout(() => handleFacebookImport(sharedUrl), 1000);
       }
 
-      // Check clipboard for Instagram URL (optional enhancement)
+      // Check clipboard for Instagram/Facebook URL (optional enhancement)
       checkClipboard();
 
       // Fetch Apify usage stats
@@ -290,6 +303,10 @@ const RecipeImportPage = () => {
           console.log('[RecipeImport] Found Instagram URL in clipboard:', text);
           setImportUrl(text);
           setStatus('📋 Found Instagram link in your clipboard!');
+        } else if (text && /facebook\.com|fb\.watch|m\.facebook\.com/i.test(text) && !facebookUrl) {
+          console.log('[RecipeImport] Found Facebook URL in clipboard:', text);
+          setFacebookUrl(text);
+          setFacebookStatus('📋 Found Facebook link in your clipboard!');
         }
       }
     } catch (err) {
@@ -523,6 +540,111 @@ const RecipeImportPage = () => {
   // Detect if URL is Instagram or general web
   const isInstagramUrl = (url) => {
     return url && url.includes('instagram.com');
+  };
+
+  // Detect if URL is Facebook
+  const isFacebookUrl = (url) => {
+    if (!url) return false;
+    return /facebook\.com|fb\.watch|m\.facebook\.com/i.test(url);
+  };
+
+  // Handle Facebook import (separate from Instagram)
+  const handleFacebookImport = async (url) => {
+    const urlToImport = url || facebookUrl;
+
+    if (!urlToImport || !isFacebookUrl(urlToImport)) {
+      setFacebookError('Please enter a valid Facebook URL');
+      return;
+    }
+
+    // Check imported recipes limit
+    const limitCheck = canAccess('imported_recipes');
+    if (!limitCheck.allowed) {
+      setUpgradeModal({
+        isOpen: true,
+        feature: 'imported recipes',
+        current: limitCheck.current,
+        limit: limitCheck.limit
+      });
+      return;
+    }
+
+    setFacebookLoading(true);
+    setFacebookError('');
+    setFacebookStatus('🔄 Extracting recipe from Facebook...');
+    setExtractedRecipe(null);
+
+    // Progress messages for Facebook
+    const progressMessages = [
+      '📝 Analyzing Facebook caption...',
+      '🎥 Processing video content...',
+      '🧠 Extracting recipe details...',
+      '✨ Finalizing recipe...'
+    ];
+
+    let messageIndex = 0;
+    const progressInterval = setInterval(() => {
+      if (messageIndex < progressMessages.length) {
+        setFacebookStatus(progressMessages[messageIndex]);
+        messageIndex++;
+      }
+    }, 2000);
+
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      if (!token) {
+        clearInterval(progressInterval);
+        setFacebookError('Please sign in to import recipes');
+        navigate('/signin');
+        return;
+      }
+
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${apiUrl}/facebook-recipes/multi-modal-extract`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ url: urlToImport })
+      });
+
+      clearInterval(progressInterval);
+      const data = await response.json();
+      console.log('[FacebookImport] Response:', data);
+
+      // Handle limit exceeded
+      if (response.status === 402 || data.limitExceeded) {
+        setUpgradeModal({
+          isOpen: true,
+          feature: 'imported recipes',
+          current: data.usage?.used,
+          limit: data.usage?.limit
+        });
+        setFacebookLoading(false);
+        return;
+      }
+
+      if (data.success && data.recipe) {
+        console.log('[FacebookImport] Recipe extracted successfully');
+        setFacebookStatus(`✅ Recipe extracted with ${Math.round((data.confidence || 0.9) * 100)}% confidence!`);
+        setExtractedRecipe(data.recipe);
+
+        // Auto-save after 2 seconds
+        setTimeout(() => {
+          handleSaveExtractedRecipe(data.recipe);
+        }, 2000);
+      } else {
+        console.error('[FacebookImport] Extraction failed:', data);
+        setFacebookError(data.error || 'Failed to extract recipe from Facebook. Please try again.');
+      }
+    } catch (error) {
+      clearInterval(progressInterval);
+      console.error('[FacebookImport] Error:', error);
+      setFacebookError('Failed to connect to server. Please try again.');
+    } finally {
+      setFacebookLoading(false);
+    }
   };
 
   const handleMultiModalImport = async () => {
@@ -780,23 +902,26 @@ const RecipeImportPage = () => {
   };
 
   // Show full-screen loading animation when processing
-  if (loading || apifyLoading) {
+  if (loading || apifyLoading || facebookLoading) {
+    // Determine which status/error to show
+    const displayStatus = facebookLoading ? facebookStatus : status;
+    const displayError = facebookLoading ? facebookError : error;
     return (
       <div className="recipe-import-page__loading-screen">
         <div className="recipe-import-page__loading-content">
           {/* Logo with scan line overlay */}
-          <div className={`recipe-import-page__scan-container ${error ? 'recipe-import-page__scan-container--error' : ''}`}>
+          <div className={`recipe-import-page__scan-container ${displayError ? 'recipe-import-page__scan-container--error' : ''}`}>
             <img
               src={FridgyLogo}
               alt="Bitee"
               className="recipe-import-page__analyzing-icon"
             />
-            {!error && !status?.includes('✅') && (
+            {!displayError && !displayStatus?.includes('✅') && (
               <div className="recipe-import-page__scan-line"></div>
             )}
           </div>
 
-          {error ? (
+          {displayError ? (
             // Error State
             <>
               <div className="recipe-import-page__error-icon">⚠️</div>
@@ -804,7 +929,7 @@ const RecipeImportPage = () => {
                 Import Issue
               </div>
               <div className="recipe-import-page__error-message">
-                {error}
+                {displayError}
               </div>
               <div className="recipe-import-page__action-buttons">
                 <button
@@ -821,7 +946,7 @@ const RecipeImportPage = () => {
                 </button>
               </div>
             </>
-          ) : status && status.includes('✅') ? (
+          ) : displayStatus && displayStatus.includes('✅') ? (
             // Success State
             <>
               <div className="recipe-import-page__success-icon">✅</div>
@@ -836,7 +961,7 @@ const RecipeImportPage = () => {
             // Loading State
             <>
               <div className="recipe-import-page__loading-title">
-                Bitee is analyzing your recipe...
+                {facebookLoading ? 'Bitee is analyzing your Facebook recipe...' : 'Bitee is analyzing your recipe...'}
               </div>
               <div className="recipe-import-page__fun-fact" key={currentFactIndex}>
                 <span className="recipe-import-page__fun-fact-label">Did you know?</span>
@@ -991,6 +1116,60 @@ const RecipeImportPage = () => {
                 />
               </div>
             )}
+          </div>
+        )}
+
+        {/* Facebook Import Section - Separate from Instagram */}
+        {!showManualForm && (
+          <div className="recipe-import-page__form" style={{ marginTop: '24px' }}>
+            <div className="recipe-import-page__divider" style={{ marginBottom: '16px' }}>
+              <span>Or import from Facebook</span>
+            </div>
+
+            <h2 className="recipe-import-page__section-title">Import from Facebook</h2>
+            <p className="recipe-import-page__section-description">
+              Paste a Facebook reel, video, or post URL containing a recipe.
+            </p>
+
+            {/* Facebook Status Messages */}
+            {facebookStatus && !facebookError && (
+              <div className="recipe-import-page__status recipe-import-page__status--info">
+                {facebookStatus}
+              </div>
+            )}
+
+            {facebookError && (
+              <div className="recipe-import-page__status recipe-import-page__status--error">
+                {facebookError}
+              </div>
+            )}
+
+            <div className="recipe-import-page__input-group">
+              <input
+                type="url"
+                placeholder="https://facebook.com/reel/... or https://fb.watch/..."
+                value={facebookUrl}
+                onChange={(e) => setFacebookUrl(e.target.value)}
+                disabled={facebookLoading}
+                className="recipe-import-page__input"
+              />
+            </div>
+
+            <div className="recipe-import-page__button-group">
+              <button
+                onClick={() => handleFacebookImport()}
+                className="recipe-import-page__button recipe-import-page__button--primary"
+                title="Import recipe from Facebook"
+                disabled={facebookLoading || !facebookUrl}
+                style={{ background: '#1877F2' }}
+              >
+                {facebookLoading ? (
+                  <span>🔄 Analyzing Facebook...</span>
+                ) : (
+                  <span>Import from Facebook</span>
+                )}
+              </button>
+            </div>
           </div>
         )}
 

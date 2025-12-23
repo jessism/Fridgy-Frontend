@@ -1,0 +1,46 @@
+.google-drive-settings-page {
+  min-height: 100vh;
+  background-color: white;
+}
+
+.google-drive-settings-page__header {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  background-color: white;
+}
+
+.google-drive-settings-page__back-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+  color: #333;
+}
+
+.google-drive-settings-page__back-button:hover {
+  background-color: #f0f0f0;
+}
+
+.google-drive-settings-page__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  margin-left: 12px;
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .google-drive-settings-page__header {
+    padding: 16px;
+  }
+
+  .google-drive-settings-page__title {
+    font-size: 1.25rem;
+  }
+}

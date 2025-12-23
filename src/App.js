@@ -23,6 +23,7 @@ import AboutYouPage from './pages/AboutYouPage';
 import DietaryPreferencesPage from './pages/DietaryPreferencesPage';
 import NotificationSettingsPage from './pages/NotificationSettingsPage';
 import CalendarSettingsPage from './pages/CalendarSettingsPage';
+import GoogleDriveSettingsPage from './pages/GoogleDriveSettingsPage';
 import MealHistoryPage from './pages/MealHistoryPage';
 import MealPlanPage from './pages/MealPlanPage';
 import SavedRecipesPage from './pages/SavedRecipesPage';
@@ -203,6 +204,11 @@ function App() {
           <Route path="/calendar-settings" element={
             <AuthGuard>
               <CalendarSettingsPage />
+            </AuthGuard>
+          } />
+          <Route path="/drive-settings" element={
+            <AuthGuard>
+              <GoogleDriveSettingsPage />
             </AuthGuard>
           } />
           <Route path="/meal-history" element={
