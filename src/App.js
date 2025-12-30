@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useParams, Navigate } from 'react-router-dom';
 import './App.css';
 import { AuthProvider } from './features/auth/context/AuthContext';
 import { GuidedTourProvider } from './contexts/GuidedTourContext';
@@ -40,6 +40,7 @@ import { MealCameraInterface, MealIngredientSelector } from './features/mealscan
 import OnboardingFlow from './features/onboarding/components/OnboardingFlow';
 import ShortcutSetupPage from './pages/ShortcutSetupPage';
 import LinkMessengerPage from './pages/LinkMessengerPage';
+import OpenRecipePage from './pages/OpenRecipePage';
 import ShoppingListDetailPage from './pages/ShoppingListDetailPage';
 import CookbookDetailPage from './pages/CookbookDetailPage';
 import JoinShoppingList from './components/JoinShoppingList';
@@ -83,6 +84,13 @@ function NavigationListener() {
   }, [navigate]);
 
   return null;
+}
+
+// Redirect /recipes/:id URLs directly to saved recipes page with auto-open modal
+function RecipeRedirect() {
+  const { id } = useParams();
+  // Go directly to saved recipes page with ?view= param to auto-open recipe detail modal
+  return <Navigate to={`/saved-recipes?view=${id}`} replace />;
 }
 
 function App() {
@@ -259,6 +267,12 @@ function App() {
           } />
           <Route path="/link-messenger" element={
             <LinkMessengerPage />
+          } />
+          {/* Redirect old /recipes/:id URLs to /open-recipe/:id (Messenger backward compatibility) */}
+          <Route path="/recipes/:id" element={<RecipeRedirect />} />
+          {/* Smart PWA deep link landing page for Messenger */}
+          <Route path="/open-recipe/:id" element={
+            <OpenRecipePage />
           } />
           <Route path="/analytics/inventory" element={
             <AuthGuard>

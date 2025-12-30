@@ -45,7 +45,6 @@ import importRecipeStep1Image from '../assets/product mockup/Import Recipes/Impo
 import importRecipeStep4Image from '../assets/product mockup/Import Recipes/Import_recipe_allow_api.png';
 import cookingIcon from '../assets/icons/Cooking.png';
 import FridgyLogo from '../assets/images/Logo.png';
-import crownIcon from '../assets/icons/crown.png';
 import './HomePage.css';
 
 // Helper function to calculate days until expiry (reused from InventoryPage)
@@ -682,7 +681,6 @@ const HomePage = () => {
             <div className="greeting-text">
               <h1 className="greeting-hello">
                 Hello {user?.firstName || 'User'}
-                {isPremium && <img src={crownIcon} alt="Premium" className="premium-crown" />}
               </h1>
               <p className="greeting-subtitle">What are you cooking today?</p>
             </div>
@@ -694,7 +692,7 @@ const HomePage = () => {
       <section className="home-page__popular-now">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">Popular Now 🔥</h2>
+            <h2 className="section-title">Popular Now</h2>
             <p className="section-description">Impress your loved ones this Christmas.</p>
           </div>
           <div className="home-page__recently-added-slider">

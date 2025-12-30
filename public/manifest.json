@@ -2,6 +2,13 @@
   "short_name": "Trackabite",
   "name": "Trackabite - Smart Food Tracker",
   "description": "AI-powered food inventory tracker that helps reduce food waste with expiration reminders and smart recipe suggestions",
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://trackabite.com/manifest.json"
+    }
+  ],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "favicon.ico",

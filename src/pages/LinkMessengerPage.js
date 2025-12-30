@@ -32,14 +32,14 @@ function LinkMessengerPage() {
   const handleLogin = () => {
     // Save the current URL to redirect back after login
     const returnUrl = `/link-messenger?psid=${psid}&token=${token}`;
-    localStorage.setItem('redirectAfterLogin', returnUrl);
+    sessionStorage.setItem('redirectAfterSignin', returnUrl);
     navigate('/signin');
   };
 
   const handleSignUp = () => {
     // Save the current URL to redirect back after signup
     const returnUrl = `/link-messenger?psid=${psid}&token=${token}`;
-    localStorage.setItem('redirectAfterLogin', returnUrl);
+    sessionStorage.setItem('redirectAfterSignup', returnUrl);
     navigate('/signup');
   };
 

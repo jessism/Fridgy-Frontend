@@ -1486,6 +1486,27 @@
   box-shadow: none !important;
 }
 
+/* Flat card styling for Recently Added section */
+.home-page__recently-added .home-page__recent-recipe-card {
+  box-shadow: none;
+  background: transparent;
+  border-radius: 0;
+}
+
+.home-page__recently-added .home-page__recent-recipe-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.home-page__recently-added .home-page__recent-recipe-image {
+  border-radius: 6px;
+}
+
+.home-page__recently-added .home-page__recent-recipe-content {
+  background: white;
+  padding: 0.75rem 0;
+}
+
 .home-page__recently-added-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1689,6 +1710,27 @@
   border: none !important;
   padding: 0 !important;
   box-shadow: none !important;
+}
+
+/* Flat card styling for Popular Now section */
+.home-page__popular-now .home-page__recent-recipe-card {
+  box-shadow: none;
+  background: transparent;
+  border-radius: 0;
+}
+
+.home-page__popular-now .home-page__recent-recipe-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.home-page__popular-now .home-page__recent-recipe-image {
+  border-radius: 6px;
+}
+
+.home-page__popular-now .home-page__recent-recipe-content {
+  background: white;
+  padding: 0.75rem 0;
 }
 
 /* Mobile Responsive for Popular Now */

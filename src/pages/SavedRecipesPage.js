@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import MobileBottomNav from '../components/MobileBottomNav';
 import RecipeDetailModal from '../components/modals/RecipeDetailModal';
 import RecipeCreationModal from '../components/modals/RecipeCreationModal';
@@ -11,6 +11,7 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api
 
 const SavedRecipesPage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [recipes, setRecipes] = useState([]);
   const [scannedRecipes, setScannedRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,10 +19,60 @@ const SavedRecipesPage = () => {
   const [showDetail, setShowDetail] = useState(false);
   const [showCreationModal, setShowCreationModal] = useState(false);
   const [deletingRecipeId, setDeletingRecipeId] = useState(null);
-  
+  const [viewRecipeId, setViewRecipeId] = useState(null);
+
+  // Check for ?view= query parameter on mount
+  useEffect(() => {
+    const viewId = searchParams.get('view');
+    if (viewId) {
+      setViewRecipeId(viewId);
+      // Clear the query param from URL without refreshing
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
   useEffect(() => {
     fetchRecipes();
   }, []);
+
+  // Auto-open recipe modal if viewRecipeId is set and recipes are loaded
+  useEffect(() => {
+    if (!loading && viewRecipeId) {
+      const recipeToView = recipes.find(r => r.id === viewRecipeId);
+      if (recipeToView) {
+        setSelectedRecipe(recipeToView);
+        setShowDetail(true);
+        setViewRecipeId(null); // Clear so it doesn't re-trigger
+      } else {
+        // Recipe not in filtered list (or list is empty), try fetching it directly
+        fetchSingleRecipe(viewRecipeId);
+      }
+    }
+  }, [loading, viewRecipeId, recipes]);
+
+  // Fetch a single recipe by ID (for deep linking)
+  const fetchSingleRecipe = async (recipeId) => {
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      if (!token) return;
+
+      const response = await fetch(`${API_BASE_URL}/saved-recipes/${recipeId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const recipe = await response.json();
+        setSelectedRecipe(recipe);
+        setShowDetail(true);
+      }
+      setViewRecipeId(null);
+    } catch (error) {
+      console.error('Error fetching single recipe:', error);
+      setViewRecipeId(null);
+    }
+  };
 
   const fetchScannedRecipes = async () => {
     try {
