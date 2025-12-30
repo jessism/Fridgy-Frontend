@@ -39,6 +39,7 @@ import RecipeScannerCamera from './features/recipe-scanner/components/RecipeScan
 import { MealCameraInterface, MealIngredientSelector } from './features/mealscanner';
 import OnboardingFlow from './features/onboarding/components/OnboardingFlow';
 import ShortcutSetupPage from './pages/ShortcutSetupPage';
+import LinkMessengerPage from './pages/LinkMessengerPage';
 import ShoppingListDetailPage from './pages/ShoppingListDetailPage';
 import CookbookDetailPage from './pages/CookbookDetailPage';
 import JoinShoppingList from './components/JoinShoppingList';
@@ -255,6 +256,9 @@ function App() {
             <AuthGuard>
               <ShortcutSetupPage />
             </AuthGuard>
+          } />
+          <Route path="/link-messenger" element={
+            <LinkMessengerPage />
           } />
           <Route path="/analytics/inventory" element={
             <AuthGuard>

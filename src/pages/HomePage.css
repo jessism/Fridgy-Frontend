@@ -4863,6 +4863,33 @@ h2.section-title::after {
   background: rgba(255, 255, 255, 0.1);
 }
 
+.recipe-action-sheet__option--synced {
+  color: #4fcf61;
+}
+
+.recipe-action-sheet__option--synced svg {
+  stroke: #4fcf61;
+}
+
+.recipe-action-sheet__option--syncing {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.recipe-action-sheet__option:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+@keyframes recipe-sync-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.recipe-action-sheet__spinner {
+  animation: recipe-sync-spin 1s linear infinite;
+}
+
 /* ========================================
    Recipe Edit Mode Styles
    ======================================== */

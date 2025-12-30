@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../features/auth/context/AuthContext';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 export const useGoogleDrive = () => {
-  const { token } = useAuth();
+  const getAuthToken = () => localStorage.getItem('fridgy_token');
+
   const [connected, setConnected] = useState(false);
   const [email, setEmail] = useState(null);
   const [autoSync, setAutoSync] = useState(false);
@@ -14,6 +14,7 @@ export const useGoogleDrive = () => {
   const [error, setError] = useState(null);
 
   const checkStatus = useCallback(async () => {
+    const token = getAuthToken();
     if (!token) {
       setLoading(false);
       return;
@@ -33,9 +34,10 @@ export const useGoogleDrive = () => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   const fetchSyncStats = useCallback(async () => {
+    const token = getAuthToken();
     if (!token || !connected) return;
 
     try {
@@ -49,7 +51,7 @@ export const useGoogleDrive = () => {
     } catch (err) {
       console.error('Failed to fetch sync stats:', err);
     }
-  }, [token, connected]);
+  }, [connected]);
 
   useEffect(() => {
     checkStatus();
@@ -62,6 +64,12 @@ export const useGoogleDrive = () => {
   }, [connected, fetchSyncStats]);
 
   const connect = async () => {
+    const token = getAuthToken();
+    if (!token) {
+      setError('Please log in first');
+      return;
+    }
+
     setError(null);
     try {
       const response = await fetch(`${API_BASE_URL}/drive/auth-url`, {
@@ -80,6 +88,9 @@ export const useGoogleDrive = () => {
   };
 
   const disconnect = async () => {
+    const token = getAuthToken();
+    if (!token) return;
+
     setError(null);
     try {
       await fetch(`${API_BASE_URL}/drive/disconnect`, {
@@ -97,6 +108,9 @@ export const useGoogleDrive = () => {
   };
 
   const toggleAutoSync = async () => {
+    const token = getAuthToken();
+    if (!token) return;
+
     setError(null);
     try {
       const response = await fetch(`${API_BASE_URL}/drive/settings`, {
@@ -116,6 +130,12 @@ export const useGoogleDrive = () => {
   };
 
   const syncRecipe = async (recipeId) => {
+    const token = getAuthToken();
+    if (!token) {
+      setError('Please log in first');
+      return;
+    }
+
     setError(null);
     try {
       setSyncing(true);
@@ -139,6 +159,12 @@ export const useGoogleDrive = () => {
   };
 
   const syncAll = async () => {
+    const token = getAuthToken();
+    if (!token) {
+      setError('Please log in first');
+      return;
+    }
+
     setError(null);
     try {
       setSyncing(true);

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import RecipeCookingConfirmation from '../../features/recipe-cooking/components/RecipeCookingConfirmation';
 import useShoppingLists from '../../hooks/useShoppingLists';
 import { useSubscription } from '../../hooks/useSubscription';
+import { useGoogleDrive } from '../../hooks/useGoogleDrive';
+import { useAuth } from '../../features/auth/context/AuthContext';
 import ShoppingListSelectionModal from '../ShoppingListSelectionModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import CookingModeModal from './CookingModeModal';
@@ -50,8 +52,15 @@ const RecipeDetailModal = ({
   const { isPremium, startCheckout } = useSubscription();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
+  // Google Drive sync hook
+  const { connected: driveConnected, syncing: driveSyncing, syncRecipe } = useGoogleDrive();
+  const [syncStatus, setSyncStatus] = useState(null); // 'syncing' | 'synced' | 'error' | null
+
   // Navigation hook
   const navigate = useNavigate();
+
+  // Auth hook for user info
+  const { user } = useAuth();
 
   // API base URL for proxy
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -80,7 +89,30 @@ const RecipeDetailModal = ({
       ? `${API_BASE_URL}/proxy-image?url=${encodeURIComponent(baseImageUrl)}`
       : baseImageUrl;
   };
-  
+
+  // Helper function to get source attribution text
+  const getSourceAttribution = () => {
+    // Instagram: @username
+    if (recipe?.source_type === 'instagram') {
+      return `@${recipe.source_author || 'View original post'}`;
+    }
+    // Facebook: page name
+    if (recipe?.source_type === 'facebook') {
+      return recipe.source_author || 'View original post';
+    }
+    // Web: extract domain from URL
+    if (recipe?.source_url) {
+      try {
+        return new URL(recipe.source_url).hostname.replace('www.', '');
+      } catch {
+        return 'View original';
+      }
+    }
+    // Manual/no source: Created by username
+    const userName = user?.email?.split('@')[0] || 'me';
+    return `Created by ${userName}`;
+  };
+
   if (!isOpen) return null;
 
   // Helper function to format amounts as Unicode fractions
@@ -367,6 +399,27 @@ const RecipeDetailModal = ({
 
   const handleCancelDelete = () => {
     setShowDeleteConfirmation(false);
+  };
+
+  // Google Drive sync handler
+  const handleSyncToDrive = async () => {
+    if (!driveConnected) {
+      setShowActionSheet(false);
+      navigate('/drive-settings');
+      return;
+    }
+
+    if (!recipe?.id) return;
+
+    setSyncStatus('syncing');
+    setShowActionSheet(false);
+    try {
+      await syncRecipe(recipe.id);
+      setSyncStatus('synced');
+    } catch (err) {
+      console.error('[RecipeDetailModal] Sync to Drive failed:', err);
+      setSyncStatus('error');
+    }
   };
 
   // Edit mode handlers
@@ -850,21 +903,23 @@ const RecipeDetailModal = ({
                     <p>{getDescription()}</p>
                   </div>
 
-                  {/* Instagram Attribution */}
-                  {recipe.source_type === 'instagram' && (recipe.source_author || recipe.source_url) && (
-                    <div className="recipe-instagram-attribution">
-                      {recipe.source_url && (
-                        <a
-                          href={recipe.source_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="recipe-instagram-link"
-                        >
-                          @{recipe.source_author || 'View original post'}
-                        </a>
-                      )}
-                    </div>
-                  )}
+                  {/* Source Attribution */}
+                  <div className="recipe-instagram-attribution">
+                    {recipe.source_url ? (
+                      <a
+                        href={recipe.source_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="recipe-instagram-link"
+                      >
+                        {getSourceAttribution()}
+                      </a>
+                    ) : (
+                      <span className="recipe-instagram-link" style={{ cursor: 'default' }}>
+                        {getSourceAttribution()}
+                      </span>
+                    )}
+                  </div>
 
                   <div className="recipe-info-text">
                     <div className="info-text-item">
@@ -1082,6 +1137,46 @@ const RecipeDetailModal = ({
       {showActionSheet && (
         <div className="recipe-action-sheet-overlay" onClick={() => setShowActionSheet(false)}>
           <div className="recipe-action-sheet" onClick={e => e.stopPropagation()}>
+            {/* Sync to Google Drive option */}
+            <button
+              className={`recipe-action-sheet__option ${
+                (recipe?.drive_sync_status === 'synced' || syncStatus === 'synced')
+                  ? 'recipe-action-sheet__option--synced'
+                  : ''
+              } ${
+                (syncStatus === 'syncing' || driveSyncing)
+                  ? 'recipe-action-sheet__option--syncing'
+                  : ''
+              }`}
+              onClick={handleSyncToDrive}
+              disabled={syncStatus === 'syncing' || driveSyncing}
+            >
+              <span>
+                {!driveConnected
+                  ? 'CONNECT GOOGLE DRIVE'
+                  : syncStatus === 'syncing' || driveSyncing
+                    ? 'SYNCING...'
+                    : recipe?.drive_sync_status === 'synced' || syncStatus === 'synced'
+                      ? 'SYNCED TO DRIVE'
+                      : 'SYNC TO DRIVE'}
+              </span>
+              {/* Google Drive / Cloud icon */}
+              {syncStatus === 'syncing' || driveSyncing ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="recipe-action-sheet__spinner">
+                  <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/>
+                </svg>
+              ) : recipe?.drive_sync_status === 'synced' || syncStatus === 'synced' ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20 6L9 17l-5-5"/>
+                </svg>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 15v3a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h3"/>
+                  <path d="M10 14L21 3"/>
+                  <path d="M15 3h6v6"/>
+                </svg>
+              )}
+            </button>
             <button
               className="recipe-action-sheet__option"
               onClick={handleEnterEditMode}
