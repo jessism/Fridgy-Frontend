@@ -99,9 +99,16 @@ function OpenRecipePage() {
     }
   };
 
-  // Handle "Continue in Browser" click
+  // Handle "Continue in Browser" click (for logged in users)
   const handleContinueInBrowser = () => {
     navigate(recipeTargetUrl);
+  };
+
+  // Handle Sign In click (for non-logged in users)
+  const handleSignIn = () => {
+    // Store redirect URL so user returns to recipe after signing in
+    sessionStorage.setItem('redirectAfterSignin', recipeTargetUrl);
+    navigate('/signin');
   };
 
   // Don't render if already in standalone mode (will redirect)
@@ -160,12 +167,21 @@ function OpenRecipePage() {
             </>
           ) : (
             <>
-              <button
-                className="open-recipe-page__btn open-recipe-page__btn--primary"
-                onClick={handleContinueInBrowser}
-              >
-                View Recipe
-              </button>
+              {localStorage.getItem('fridgy_token') ? (
+                <button
+                  className="open-recipe-page__btn open-recipe-page__btn--primary"
+                  onClick={handleContinueInBrowser}
+                >
+                  View Recipe
+                </button>
+              ) : (
+                <button
+                  className="open-recipe-page__btn open-recipe-page__btn--primary"
+                  onClick={handleSignIn}
+                >
+                  Sign in to view full recipe
+                </button>
+              )}
               <p className="open-recipe-page__install-hint">
                 For the best experience, add Trackabite to your home screen
               </p>

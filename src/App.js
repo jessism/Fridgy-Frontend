@@ -86,11 +86,18 @@ function NavigationListener() {
   return null;
 }
 
-// Redirect /recipes/:id URLs directly to saved recipes page with auto-open modal
+// Smart redirect that checks auth status
 function RecipeRedirect() {
   const { id } = useParams();
-  // Go directly to saved recipes page with ?view= param to auto-open recipe detail modal
-  return <Navigate to={`/saved-recipes?view=${id}`} replace />;
+  const token = localStorage.getItem('fridgy_token');
+
+  // If logged in, go directly to saved recipes (recipe detail opens)
+  if (token) {
+    return <Navigate to={`/saved-recipes?view=${id}`} replace />;
+  }
+
+  // If not logged in, render OpenRecipePage directly (shows preview + sign in)
+  return <OpenRecipePage />;
 }
 
 function App() {
