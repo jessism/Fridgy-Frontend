@@ -11,6 +11,17 @@ function OpenRecipePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('ingredients');
+  const [showSignupPrompt, setShowSignupPrompt] = useState(null);
+
+  // Get signup prompt message based on action
+  const getPromptMessage = () => {
+    switch(showSignupPrompt) {
+      case 'shopping': return 'Start Trackabite for free and create smart shopping list';
+      case 'cook': return 'Start Trackabite for free to cook this recipe';
+      case 'servings': return 'Start Trackabite for free to adjust the serving';
+      default: return 'Start Trackabite for free';
+    }
+  };
 
   // Fetch recipe from public endpoint (no auth needed)
   useEffect(() => {
@@ -437,6 +448,30 @@ function OpenRecipePage() {
                   </div>
                 ))}
               </div>
+
+              {/* Action Buttons */}
+              <div className="open-recipe-page__action-buttons">
+                <button
+                  className="open-recipe-page__action-btn"
+                  onClick={() => setShowSignupPrompt('shopping')}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 0 1-8 0"/>
+                  </svg>
+                  Shopping list
+                </button>
+                <button
+                  className="open-recipe-page__action-btn"
+                  onClick={() => setShowSignupPrompt('cook')}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Cook this
+                </button>
+              </div>
             </div>
 
             {/* Tabs Container */}
@@ -470,9 +505,23 @@ function OpenRecipePage() {
                     <div className="open-recipe-page__section-header">
                       <h2 className="open-recipe-page__section-title">Ingredients</h2>
                       {recipe.servings && (
-                        <span className="open-recipe-page__servings">
-                          {recipe.servings} {recipe.servings === 1 ? 'Serving' : 'Servings'}
-                        </span>
+                        <div className="open-recipe-page__servings-control">
+                          <button
+                            className="open-recipe-page__serving-btn"
+                            onClick={() => setShowSignupPrompt('servings')}
+                          >
+                            -
+                          </button>
+                          <span className="open-recipe-page__serving-value">
+                            {recipe.servings} {recipe.servings === 1 ? 'Serving' : 'Servings'}
+                          </span>
+                          <button
+                            className="open-recipe-page__serving-btn"
+                            onClick={() => setShowSignupPrompt('servings')}
+                          >
+                            +
+                          </button>
+                        </div>
                       )}
                     </div>
                     {renderIngredients()}
@@ -497,7 +546,7 @@ function OpenRecipePage() {
 
             {/* CTA Section */}
             <div className="open-recipe-page__cta">
-              <p>Want to save recipes and plan your meals?</p>
+              <p>Want to save recipes from anywhere and plan your meals?</p>
               <button
                 className="open-recipe-page__cta-btn"
                 onClick={() => navigate('/onboarding')}
@@ -508,12 +557,45 @@ function OpenRecipePage() {
                 className="open-recipe-page__cta-btn-secondary"
                 onClick={() => navigate('/signin')}
               >
-                Already have an account? Sign in
+                Already have an account? Create meal plan and smart shopping list from this recipe by opening it in app
               </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Signup Prompt Popup */}
+      {showSignupPrompt && (
+        <div className="open-recipe-page__signup-overlay" onClick={() => setShowSignupPrompt(null)}>
+          <div className="open-recipe-page__signup-popup" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="open-recipe-page__popup-close"
+              onClick={() => setShowSignupPrompt(null)}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+            <div className="open-recipe-page__popup-icon">
+              <img src="/logo192.png" alt="Trackabite" />
+            </div>
+            <p className="open-recipe-page__popup-message">{getPromptMessage()}</p>
+            <button
+              className="open-recipe-page__popup-btn-primary"
+              onClick={() => navigate('/onboarding')}
+            >
+              Get Started Free
+            </button>
+            <button
+              className="open-recipe-page__popup-btn-secondary"
+              onClick={() => setShowSignupPrompt(null)}
+            >
+              Maybe later
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
