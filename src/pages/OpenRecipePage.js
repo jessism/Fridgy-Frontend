@@ -36,54 +36,306 @@ function OpenRecipePage() {
     fetchRecipe();
   }, [id]);
 
-  // Format fraction for display
-  const formatFraction = (amount) => {
-    if (!amount) return '';
-    const fractions = {
-      0.25: '¼', 0.33: '⅓', 0.5: '½', 0.66: '⅔', 0.75: '¾',
-      0.125: '⅛', 0.375: '⅜', 0.625: '⅝', 0.875: '⅞'
-    };
-    const whole = Math.floor(amount);
-    const decimal = amount - whole;
-    const fraction = fractions[Math.round(decimal * 1000) / 1000] || '';
-    if (whole === 0 && fraction) return fraction;
-    if (fraction) return `${whole} ${fraction}`;
-    return amount % 1 === 0 ? amount.toString() : amount.toFixed(1);
-  };
-
-  // Get instructions from various formats
-  const getInstructions = () => {
-    if (!recipe) return [];
-
-    // Format 1: analyzedInstructions[0].steps
-    if (recipe.analyzedInstructions?.[0]?.steps) {
-      return recipe.analyzedInstructions[0].steps.map(s => s.step);
-    }
-    // Format 2: instructionSteps array
-    if (Array.isArray(recipe.instructionSteps)) {
-      return recipe.instructionSteps;
-    }
-    // Format 3: instructions as string
-    if (typeof recipe.instructions === 'string') {
-      return recipe.instructions.split(/\.\s+|\n/).filter(s => s.trim());
-    }
-    // Format 4: instructions as array
-    if (Array.isArray(recipe.instructions)) {
-      return recipe.instructions;
-    }
-    return [];
+  // Helper function to check if URL needs proxying
+  const needsProxy = (url) => {
+    return url &&
+           (url.includes('cdninstagram.com') ||
+            url.includes('instagram.com') ||
+            url.includes('fbcdn.net') ||
+            url.includes('instagram.')) &&
+           !url.includes('URL_OF_IMAGE') &&
+           !url.includes('example.com') &&
+           url !== 'URL of image';
   };
 
   // Get image URL with proxy for Instagram
   const getImageUrl = () => {
-    const baseUrl = recipe?.image || recipe?.image_urls?.[0];
-    if (!baseUrl) return null;
+    if (!recipe) return 'https://via.placeholder.com/400x300?text=No+Image';
+    const baseImageUrl = recipe.image || recipe.image_urls?.[0] || 'https://via.placeholder.com/400x300?text=No+Image';
+    return needsProxy(baseImageUrl)
+      ? `${API_BASE_URL}/proxy-image?url=${encodeURIComponent(baseImageUrl)}`
+      : baseImageUrl;
+  };
 
-    // Use proxy for Instagram images
-    if (baseUrl.includes('cdninstagram.com') || baseUrl.includes('fbcdn.net')) {
-      return `${API_BASE_URL}/proxy-image?url=${encodeURIComponent(baseUrl)}`;
+  // Format amounts as Unicode fractions
+  const formatAmount = (amount) => {
+    if (!amount || amount === 0) return '';
+    const whole = Math.floor(amount);
+    const decimal = amount - whole;
+    const fractions = {
+      0.125: '⅛', 0.25: '¼', 0.33: '⅓', 0.375: '⅜',
+      0.5: '½', 0.625: '⅝', 0.67: '⅔', 0.75: '¾', 0.875: '⅞'
+    };
+    if (decimal < 0.0625) {
+      return whole === 0 ? '' : String(whole);
     }
-    return baseUrl;
+    const fractionKeys = Object.keys(fractions).map(Number);
+    const closest = fractionKeys.reduce((a, b) =>
+      Math.abs(b - decimal) < Math.abs(a - decimal) ? b : a
+    );
+    const fractionStr = fractions[closest] || '';
+    return whole > 0 ? `${whole}${fractionStr}` : fractionStr;
+  };
+
+  // Get cook time
+  const getCookTime = () => {
+    if (recipe?.readyInMinutes) return `${recipe.readyInMinutes} minutes`;
+    if (recipe?.cookingMinutes) return `${recipe.cookingMinutes} minutes`;
+    return 'Time varies';
+  };
+
+  // Get dietary/special attributes
+  const getSpecialAttributes = () => {
+    const attributes = [];
+    if (recipe?.vegetarian) attributes.push('Vegetarian');
+    if (recipe?.vegan) attributes.push('Vegan');
+    if (recipe?.glutenFree) attributes.push('Gluten Free');
+    if (recipe?.dairyFree) attributes.push('Dairy Free');
+    if (recipe?.cuisines?.length > 0) attributes.push(recipe.cuisines[0]);
+    if (recipe?.dishTypes?.length > 0) {
+      const dishType = recipe.dishTypes[0];
+      if (!attributes.some(attr => attr.toLowerCase().includes(dishType.toLowerCase()))) {
+        attributes.push(dishType);
+      }
+    }
+    return attributes.slice(0, 3);
+  };
+
+  // Get clean description
+  const getDescription = () => {
+    if (!recipe?.summary) return 'A delicious recipe worth trying.';
+    const cleanSummary = recipe.summary
+      .replace(/<[^>]*>/g, '')
+      .replace(/&[^;]+;/g, ' ')
+      .trim();
+    const sentences = cleanSummary
+      .split(/[.!?]+/)
+      .filter(s => {
+        const sentence = s.trim().toLowerCase();
+        return sentence.length > 0 &&
+               !sentence.includes('serves') &&
+               !sentence.includes('serving') &&
+               !sentence.includes('costs') &&
+               !sentence.includes('$') &&
+               !sentence.includes('price');
+      });
+    if (sentences.length > 0) {
+      let firstSentence = sentences[0].trim();
+      if (firstSentence.length > 100) {
+        firstSentence = firstSentence.substring(0, 97) + '...';
+      }
+      return firstSentence + '.';
+    }
+    return 'A delicious recipe worth trying.';
+  };
+
+  // Get source attribution
+  const getSourceAttribution = () => {
+    if (recipe?.source_type === 'instagram') {
+      return `@${recipe.source_author || 'View original post'}`;
+    }
+    if (recipe?.source_type === 'facebook') {
+      return recipe.source_author || 'View original post';
+    }
+    if (recipe?.source_url) {
+      try {
+        return new URL(recipe.source_url).hostname.replace('www.', '');
+      } catch {
+        return 'View original';
+      }
+    }
+    return recipe?.source_author ? `Created by ${recipe.source_author}` : '';
+  };
+
+  // Render ingredients
+  const renderIngredients = () => {
+    if (!recipe?.extendedIngredients || recipe.extendedIngredients.length === 0) {
+      return <p className="open-recipe-page__no-content">No ingredients available</p>;
+    }
+    return (
+      <div className="open-recipe-page__ingredients-list">
+        {recipe.extendedIngredients.map((ingredient, index) => (
+          <div key={index} className="open-recipe-page__ingredient-item">
+            <span className="open-recipe-page__ingredient-amount">
+              {formatAmount(ingredient.amount)}
+            </span>
+            <span className="open-recipe-page__ingredient-unit">{ingredient.unit || ''}</span>
+            <span className="open-recipe-page__ingredient-name">{ingredient.name}</span>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // Render instructions
+  const renderInstructions = () => {
+    // Format 1: analyzedInstructions
+    if (recipe?.analyzedInstructions?.[0]?.steps?.length > 0) {
+      return recipe.analyzedInstructions[0].steps.map((step, index) => (
+        <div key={index} className="open-recipe-page__instruction-step">
+          <span className="open-recipe-page__step-number">{step.number || index + 1}</span>
+          <span className="open-recipe-page__step-text">{step.step}</span>
+        </div>
+      ));
+    }
+    // Format 2: instructionSteps array
+    if (recipe?.instructionSteps?.length > 0) {
+      return recipe.instructionSteps.map((step, index) => (
+        <div key={index} className="open-recipe-page__instruction-step">
+          <span className="open-recipe-page__step-number">{index + 1}</span>
+          <span className="open-recipe-page__step-text">{step}</span>
+        </div>
+      ));
+    }
+    // Format 3: instructions string
+    if (typeof recipe?.instructions === 'string') {
+      const steps = recipe.instructions
+        .replace(/<[^>]*>/g, '')
+        .split(/\.\s+|\n/)
+        .filter(step => step.trim().length > 10);
+      if (steps.length > 0) {
+        return steps.map((step, index) => (
+          <div key={index} className="open-recipe-page__instruction-step">
+            <span className="open-recipe-page__step-number">{index + 1}</span>
+            <span className="open-recipe-page__step-text">{step.trim()}</span>
+          </div>
+        ));
+      }
+    }
+    // Format 4: instructions array
+    if (Array.isArray(recipe?.instructions)) {
+      return recipe.instructions.map((step, index) => (
+        <div key={index} className="open-recipe-page__instruction-step">
+          <span className="open-recipe-page__step-number">{index + 1}</span>
+          <span className="open-recipe-page__step-text">{step}</span>
+        </div>
+      ));
+    }
+    return <p className="open-recipe-page__no-content">No instructions available</p>;
+  };
+
+  // Render nutrition
+  const renderNutrition = () => {
+    if (!recipe?.nutrition) {
+      return (
+        <p className="open-recipe-page__no-content">
+          Nutrition information not available
+        </p>
+      );
+    }
+
+    const { perServing, caloricBreakdown, isAIEstimated } = recipe.nutrition;
+
+    return (
+      <div className="open-recipe-page__nutrition-info">
+        {isAIEstimated && (
+          <p className="open-recipe-page__nutrition-estimate">Estimated nutrition</p>
+        )}
+
+        {/* Caloric Section */}
+        {caloricBreakdown && perServing?.calories && (
+          <div className="open-recipe-page__caloric-container">
+            <div className="open-recipe-page__calories-section">
+              <div className="open-recipe-page__calories-number">
+                {Math.round(perServing.calories.amount)}
+              </div>
+              <div className="open-recipe-page__calories-label">calories</div>
+            </div>
+            <div className="open-recipe-page__breakdown">
+              <h4 className="open-recipe-page__breakdown-title">Caloric Breakdown</h4>
+              <div className="open-recipe-page__breakdown-bars">
+                <div className="open-recipe-page__breakdown-item">
+                  <span className="open-recipe-page__breakdown-label">Protein</span>
+                  <div className="open-recipe-page__breakdown-bar-container">
+                    <div
+                      className="open-recipe-page__breakdown-bar open-recipe-page__breakdown-bar--protein"
+                      style={{ width: `${caloricBreakdown.percentProtein}%` }}
+                    />
+                  </div>
+                  <span className="open-recipe-page__breakdown-percent">{caloricBreakdown.percentProtein}%</span>
+                </div>
+                <div className="open-recipe-page__breakdown-item">
+                  <span className="open-recipe-page__breakdown-label">Carbs</span>
+                  <div className="open-recipe-page__breakdown-bar-container">
+                    <div
+                      className="open-recipe-page__breakdown-bar open-recipe-page__breakdown-bar--carbs"
+                      style={{ width: `${caloricBreakdown.percentCarbs}%` }}
+                    />
+                  </div>
+                  <span className="open-recipe-page__breakdown-percent">{caloricBreakdown.percentCarbs}%</span>
+                </div>
+                <div className="open-recipe-page__breakdown-item">
+                  <span className="open-recipe-page__breakdown-label">Fat</span>
+                  <div className="open-recipe-page__breakdown-bar-container">
+                    <div
+                      className="open-recipe-page__breakdown-bar open-recipe-page__breakdown-bar--fat"
+                      style={{ width: `${caloricBreakdown.percentFat}%` }}
+                    />
+                  </div>
+                  <span className="open-recipe-page__breakdown-percent">{caloricBreakdown.percentFat}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="open-recipe-page__nutrition-header">
+          <h3 className="open-recipe-page__nutrition-title">Nutritional information per serving:</h3>
+        </div>
+
+        {/* Nutrition Table */}
+        <div className="open-recipe-page__nutrition-table">
+          {perServing?.calories && (
+            <div className="open-recipe-page__nutrition-row">
+              <span className="open-recipe-page__nutrition-label">Calories</span>
+              <span className="open-recipe-page__nutrition-value">{Math.round(perServing.calories.amount)}kcal</span>
+            </div>
+          )}
+          {perServing?.fat && (
+            <div className="open-recipe-page__nutrition-row">
+              <span className="open-recipe-page__nutrition-label">Fat</span>
+              <span className="open-recipe-page__nutrition-value">{perServing.fat.amount}g</span>
+            </div>
+          )}
+          {perServing?.saturatedFat && (
+            <div className="open-recipe-page__nutrition-row">
+              <span className="open-recipe-page__nutrition-label">Saturated Fat</span>
+              <span className="open-recipe-page__nutrition-value">{perServing.saturatedFat.amount}g</span>
+            </div>
+          )}
+          {perServing?.fiber && (
+            <div className="open-recipe-page__nutrition-row">
+              <span className="open-recipe-page__nutrition-label">Dietary Fibre</span>
+              <span className="open-recipe-page__nutrition-value">{perServing.fiber.amount}g</span>
+            </div>
+          )}
+          {perServing?.carbohydrates && (
+            <div className="open-recipe-page__nutrition-row">
+              <span className="open-recipe-page__nutrition-label">Carbohydrates</span>
+              <span className="open-recipe-page__nutrition-value">{perServing.carbohydrates.amount}g</span>
+            </div>
+          )}
+          {perServing?.sugar && (
+            <div className="open-recipe-page__nutrition-row">
+              <span className="open-recipe-page__nutrition-label">Sugars</span>
+              <span className="open-recipe-page__nutrition-value">{perServing.sugar.amount}g</span>
+            </div>
+          )}
+          {perServing?.protein && (
+            <div className="open-recipe-page__nutrition-row">
+              <span className="open-recipe-page__nutrition-label">Protein</span>
+              <span className="open-recipe-page__nutrition-value">{perServing.protein.amount}g</span>
+            </div>
+          )}
+          {perServing?.sodium && (
+            <div className="open-recipe-page__nutrition-row">
+              <span className="open-recipe-page__nutrition-label">Sodium</span>
+              <span className="open-recipe-page__nutrition-value">{perServing.sodium.amount}mg</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   // Loading state
@@ -111,192 +363,157 @@ function OpenRecipePage() {
     );
   }
 
-  const instructions = getInstructions();
-  const imageUrl = getImageUrl();
-
   return (
     <div className="open-recipe-page">
-      {/* Header */}
-      <header className="open-recipe-page__header">
-        <div className="open-recipe-page__logo-small">
-          <img src="/logo192.png" alt="Trackabite" />
-          <span>Trackabite</span>
-        </div>
-      </header>
-
-      {/* Recipe Content */}
-      <div className="open-recipe-page__content">
-        {/* Recipe Image */}
-        {imageUrl && (
-          <div className="open-recipe-page__image">
-            <img
-              src={imageUrl}
-              alt={recipe.title}
-              onError={(e) => {
-                e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400';
-              }}
-            />
-          </div>
-        )}
-
-        {/* Title & Meta */}
-        <div className="open-recipe-page__title-section">
-          <h1>{recipe.title}</h1>
-          {recipe.source_author && (
-            <p className="open-recipe-page__author">by {recipe.source_author}</p>
-          )}
-
-          <div className="open-recipe-page__meta">
-            {recipe.readyInMinutes && (
-              <span className="open-recipe-page__meta-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M12 6v6l4 2"/>
-                </svg>
-                {recipe.readyInMinutes} min
-              </span>
-            )}
-            {recipe.servings && (
-              <span className="open-recipe-page__meta-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-                {recipe.servings} servings
-              </span>
-            )}
-          </div>
-
-          {/* Dietary tags */}
-          <div className="open-recipe-page__tags">
-            {recipe.vegetarian && <span className="open-recipe-page__tag">Vegetarian</span>}
-            {recipe.vegan && <span className="open-recipe-page__tag">Vegan</span>}
-            {recipe.glutenFree && <span className="open-recipe-page__tag">Gluten-Free</span>}
-            {recipe.dairyFree && <span className="open-recipe-page__tag">Dairy-Free</span>}
+      {/* Modal-style container */}
+      <div className="open-recipe-page__modal">
+        {/* Header */}
+        <div className="open-recipe-page__header">
+          <div className="open-recipe-page__logo">
+            <img src="/logo192.png" alt="Trackabite" />
+            <span>Trackabite</span>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="open-recipe-page__tabs">
-          <button
-            className={`open-recipe-page__tab ${activeTab === 'ingredients' ? 'active' : ''}`}
-            onClick={() => setActiveTab('ingredients')}
-          >
-            Ingredients
-          </button>
-          <button
-            className={`open-recipe-page__tab ${activeTab === 'instructions' ? 'active' : ''}`}
-            onClick={() => setActiveTab('instructions')}
-          >
-            Instructions
-          </button>
-          {recipe.nutrition && (
-            <button
-              className={`open-recipe-page__tab ${activeTab === 'nutrition' ? 'active' : ''}`}
-              onClick={() => setActiveTab('nutrition')}
-            >
-              Nutrition
-            </button>
-          )}
-        </div>
-
-        {/* Tab Content */}
-        <div className="open-recipe-page__tab-content">
-          {/* Ingredients Tab */}
-          {activeTab === 'ingredients' && (
-            <div className="open-recipe-page__ingredients">
-              {recipe.extendedIngredients?.length > 0 ? (
-                <ul>
-                  {recipe.extendedIngredients.map((ing, index) => (
-                    <li key={index}>
-                      <span className="open-recipe-page__ing-amount">
-                        {formatFraction(ing.amount)} {ing.unit}
-                      </span>
-                      <span className="open-recipe-page__ing-name">{ing.name || ing.original}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="open-recipe-page__empty">No ingredients available</p>
-              )}
+        {/* Content */}
+        <div className="open-recipe-page__content">
+          <div className="open-recipe-page__layout">
+            {/* Recipe Image */}
+            <div className="open-recipe-page__image-container">
+              <img
+                src={getImageUrl()}
+                alt={recipe.title}
+                className="open-recipe-page__main-image"
+                onError={(e) => {
+                  if (e.target.src !== 'https://via.placeholder.com/400x300?text=No+Image') {
+                    e.target.src = 'https://via.placeholder.com/400x300?text=No+Image';
+                  }
+                }}
+              />
             </div>
-          )}
 
-          {/* Instructions Tab */}
-          {activeTab === 'instructions' && (
-            <div className="open-recipe-page__instructions">
-              {instructions.length > 0 ? (
-                <ol>
-                  {instructions.map((step, index) => (
-                    <li key={index}>
-                      <span className="open-recipe-page__step-num">{index + 1}</span>
-                      <span className="open-recipe-page__step-text">{step}</span>
-                    </li>
-                  ))}
-                </ol>
-              ) : (
-                <p className="open-recipe-page__empty">No instructions available</p>
-              )}
-            </div>
-          )}
+            {/* Recipe Title */}
+            <h1 className="open-recipe-page__title">{recipe.title}</h1>
 
-          {/* Nutrition Tab */}
-          {activeTab === 'nutrition' && recipe.nutrition && (
-            <div className="open-recipe-page__nutrition">
-              <div className="open-recipe-page__calories">
-                <span className="open-recipe-page__calories-num">
-                  {Math.round(recipe.nutrition.perServing?.calories?.amount || recipe.nutrition.calories || 0)}
-                </span>
-                <span className="open-recipe-page__calories-label">calories per serving</span>
+            {/* Meta Info Section */}
+            <div className="open-recipe-page__meta-info">
+              {/* Description */}
+              <div className="open-recipe-page__description">
+                <p>{getDescription()}</p>
               </div>
-              <div className="open-recipe-page__macros">
-                <div className="open-recipe-page__macro">
-                  <span className="open-recipe-page__macro-value">
-                    {Math.round(recipe.nutrition.perServing?.protein?.amount || recipe.nutrition.protein || 0)}g
-                  </span>
-                  <span className="open-recipe-page__macro-label">Protein</span>
+
+              {/* Source Attribution */}
+              {getSourceAttribution() && (
+                <div className="open-recipe-page__attribution">
+                  {recipe.source_url ? (
+                    <a
+                      href={recipe.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="open-recipe-page__attribution-link"
+                    >
+                      {getSourceAttribution()}
+                    </a>
+                  ) : (
+                    <span className="open-recipe-page__attribution-link">
+                      {getSourceAttribution()}
+                    </span>
+                  )}
                 </div>
-                <div className="open-recipe-page__macro">
-                  <span className="open-recipe-page__macro-value">
-                    {Math.round(recipe.nutrition.perServing?.carbohydrates?.amount || recipe.nutrition.carbs || 0)}g
-                  </span>
-                  <span className="open-recipe-page__macro-label">Carbs</span>
+              )}
+
+              {/* Time and attributes */}
+              <div className="open-recipe-page__info-text">
+                <div className="open-recipe-page__info-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v6l4 2"/>
+                  </svg>
+                  <span>{getCookTime()}</span>
                 </div>
-                <div className="open-recipe-page__macro">
-                  <span className="open-recipe-page__macro-value">
-                    {Math.round(recipe.nutrition.perServing?.fat?.amount || recipe.nutrition.fat || 0)}g
-                  </span>
-                  <span className="open-recipe-page__macro-label">Fat</span>
-                </div>
+                {getSpecialAttributes().slice(0, 2).map((attribute, index) => (
+                  <div key={index} className="open-recipe-page__info-item">
+                    <span>{attribute}</span>
+                  </div>
+                ))}
               </div>
             </div>
-          )}
-        </div>
 
-        {/* CTA Section */}
-        <div className="open-recipe-page__cta">
-          <p>Want to save recipes and plan your meals?</p>
-          <button
-            className="open-recipe-page__cta-btn"
-            onClick={() => navigate('/onboarding')}
-          >
-            Get Started Free
-          </button>
-          <button
-            className="open-recipe-page__cta-btn-secondary"
-            onClick={() => navigate('/signin')}
-          >
-            Already have an account? Sign in
-          </button>
+            {/* Tabs Container */}
+            <div className="open-recipe-page__tabs-container">
+              {/* Tab Navigation */}
+              <div className="open-recipe-page__tabs">
+                <button
+                  className={`open-recipe-page__tab ${activeTab === 'ingredients' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('ingredients')}
+                >
+                  Ingredients
+                </button>
+                <button
+                  className={`open-recipe-page__tab ${activeTab === 'method' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('method')}
+                >
+                  Method
+                </button>
+                <button
+                  className={`open-recipe-page__tab ${activeTab === 'nutrition' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('nutrition')}
+                >
+                  Nutrition
+                </button>
+              </div>
+
+              {/* Tab Content */}
+              <div className="open-recipe-page__tab-content">
+                {activeTab === 'ingredients' && (
+                  <div>
+                    <div className="open-recipe-page__section-header">
+                      <h2 className="open-recipe-page__section-title">Ingredients</h2>
+                      {recipe.servings && (
+                        <span className="open-recipe-page__servings">
+                          {recipe.servings} {recipe.servings === 1 ? 'Serving' : 'Servings'}
+                        </span>
+                      )}
+                    </div>
+                    {renderIngredients()}
+                  </div>
+                )}
+                {activeTab === 'method' && (
+                  <div>
+                    <h2 className="open-recipe-page__section-title">Instructions</h2>
+                    <div className="open-recipe-page__instructions-container">
+                      {renderInstructions()}
+                    </div>
+                  </div>
+                )}
+                {activeTab === 'nutrition' && (
+                  <div>
+                    <h2 className="open-recipe-page__section-title">Nutrition</h2>
+                    {renderNutrition()}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* CTA Section */}
+            <div className="open-recipe-page__cta">
+              <p>Want to save recipes and plan your meals?</p>
+              <button
+                className="open-recipe-page__cta-btn"
+                onClick={() => navigate('/onboarding')}
+              >
+                Get Started Free
+              </button>
+              <button
+                className="open-recipe-page__cta-btn-secondary"
+                onClick={() => navigate('/signin')}
+              >
+                Already have an account? Sign in
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="open-recipe-page__footer">
-        <p>Trackabite - Smart Food Tracking</p>
-      </footer>
     </div>
   );
 }
