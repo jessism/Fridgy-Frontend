@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import { useAuth } from '../features/auth/context/AuthContext';
@@ -709,6 +709,11 @@ const HomePage = () => {
               <h2 className="section-title">
                 {recentRecipes.length > 0 ? 'You Recently Added' : 'Recommended Recipes'}
               </h2>
+              <Link to="/meal-plans/recipes" className="home-page__view-all-link" title="View all recipes">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 18l6-6-6-6" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Link>
             </div>
             <div className="home-page__recently-added-slider">
               {recipesLoading ? (

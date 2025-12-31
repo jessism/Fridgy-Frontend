@@ -1477,6 +1477,10 @@
 }
 
 .home-page__recently-added .section-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
   text-align: left;
   margin-top: 0.5rem;
   margin-bottom: 0;
@@ -1484,6 +1488,26 @@
   border: none !important;
   padding: 0 !important;
   box-shadow: none !important;
+}
+
+.home-page__recently-added .section-header .section-title {
+  margin: 0;
+  line-height: 1;
+}
+
+.home-page__view-all-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.home-page__view-all-link svg {
+  width: 24px;
+  height: 24px;
+}
+
+.home-page__view-all-link:hover svg path {
+  stroke: #666;
 }
 
 /* Flat card styling for Recently Added section */

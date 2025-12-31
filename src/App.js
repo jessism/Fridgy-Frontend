@@ -270,10 +270,8 @@ function App() {
           } />
           {/* Redirect old /recipes/:id URLs to /open-recipe/:id (Messenger backward compatibility) */}
           <Route path="/recipes/:id" element={<RecipeRedirect />} />
-          {/* Smart PWA deep link landing page for Messenger */}
-          <Route path="/open-recipe/:id" element={
-            <OpenRecipePage />
-          } />
+          {/* Redirect to saved recipes with auto-open recipe detail modal */}
+          <Route path="/open-recipe/:id" element={<RecipeRedirect />} />
           <Route path="/analytics/inventory" element={
             <AuthGuard>
               <InventoryUsagePage />
