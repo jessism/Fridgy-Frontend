@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useParams, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
 import { AuthProvider } from './features/auth/context/AuthContext';
 import { GuidedTourProvider } from './contexts/GuidedTourContext';
@@ -86,17 +86,8 @@ function NavigationListener() {
   return null;
 }
 
-// Smart redirect that checks auth status
+// Public recipe page - shows full recipe without login (for Messenger "Open in Trackabite" button)
 function RecipeRedirect() {
-  const { id } = useParams();
-  const token = localStorage.getItem('fridgy_token');
-
-  // If logged in, go directly to saved recipes (recipe detail opens)
-  if (token) {
-    return <Navigate to={`/saved-recipes?view=${id}`} replace />;
-  }
-
-  // If not logged in, render OpenRecipePage directly (shows preview + sign in)
   return <OpenRecipePage />;
 }
 
