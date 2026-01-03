@@ -16,8 +16,8 @@ function OpenRecipePage() {
   // Get signup prompt message based on action
   const getPromptMessage = () => {
     switch(showSignupPrompt) {
-      case 'shopping': return 'Start Trackabite for free and create smart shopping list';
-      case 'cook': return 'Start Trackabite for free to cook this recipe';
+      case 'shopping': return 'Start Trackabite for free to create smart shopping list.';
+      case 'cook': return 'Start Trackabite for free to log this recipe.';
       case 'servings': return 'Start Trackabite for free to adjust the serving';
       default: return 'Start Trackabite for free';
     }
@@ -586,12 +586,6 @@ function OpenRecipePage() {
               onClick={() => navigate('/onboarding')}
             >
               Get Started Free
-            </button>
-            <button
-              className="open-recipe-page__popup-btn-secondary"
-              onClick={() => setShowSignupPrompt(null)}
-            >
-              Maybe later
             </button>
           </div>
         </div>
