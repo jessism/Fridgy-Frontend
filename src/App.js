@@ -53,6 +53,7 @@ import CancelSubscriptionPage from './pages/CancelSubscriptionPage';
 import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
+import DataDeletionPage from './pages/DataDeletionPage';
 import AboutPage from './pages/AboutPage';
 import FeaturesPage from './pages/FeaturesPage';
 import PublicSupportPage from './pages/PublicSupportPage';
@@ -333,6 +334,7 @@ function App() {
           {/* Legal Pages (Public - No Auth Required) */}
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/data-deletion" element={<DataDeletionPage />} />
 
           {/* Public Footer Pages */}
           <Route path="/about" element={<AboutPage />} />
