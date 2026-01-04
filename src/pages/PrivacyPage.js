@@ -1,6 +1,6 @@
 /**
  * Privacy Policy Page
- * Privacy policy for Fridgy users
+ * Privacy policy for Trackabite users
  */
 
 import React from 'react';
@@ -11,13 +11,13 @@ function PrivacyPage() {
     <div className="legal-page">
       <div className="legal-page__container">
         <h1 className="legal-page__title">Privacy Policy</h1>
-        <p className="legal-page__updated">Last Updated: October 21, 2025</p>
+        <p className="legal-page__updated">Last Updated: January 3, 2026</p>
 
         <div className="legal-page__content">
           <section className="legal-page__section">
             <h2>1. Introduction</h2>
             <p>
-              Fridgy ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our fridge inventory management application.
+              Trackabite ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our food inventory management and recipe application.
             </p>
           </section>
 
@@ -26,31 +26,33 @@ function PrivacyPage() {
 
             <h3>Account Information</h3>
             <ul>
-              <li>Name and email address</li>
+              <li>First name and email address</li>
               <li>Password (encrypted)</li>
-              <li>Account preferences and settings</li>
+              <li>Timezone preference</li>
             </ul>
 
             <h3>Usage Data</h3>
             <ul>
-              <li>Inventory items you add (food names, quantities, expiration dates)</li>
-              <li>Recipes you save or upload</li>
-              <li>Meal logs and photos</li>
-              <li>Shopping lists</li>
-              <li>Dietary preferences and restrictions</li>
+              <li>Inventory items (food names, quantities, units, expiration dates, categories)</li>
+              <li>Saved and imported recipes (from Instagram, websites, or manual entry)</li>
+              <li>Meal logs and meal photos</li>
+              <li>Meal plans</li>
+              <li>Shopping lists (including collaborative lists with other users)</li>
+              <li>Dietary preferences, allergies, and preferred cuisines</li>
+              <li>Household size, budget preferences, and cooking time preferences</li>
             </ul>
 
             <h3>Payment Information</h3>
             <ul>
               <li>Payment information is processed by Stripe (we do not store credit card numbers)</li>
-              <li>Billing history and subscription status</li>
+              <li>Subscription status and billing history</li>
             </ul>
 
             <h3>Technical Data</h3>
             <ul>
               <li>Device information and browser type</li>
-              <li>IP address and location (general)</li>
-              <li>Usage analytics and app interactions</li>
+              <li>Push notification subscriptions</li>
+              <li>Usage analytics (page views and feature usage)</li>
             </ul>
           </section>
 
@@ -60,8 +62,9 @@ function PrivacyPage() {
             <ul>
               <li>Provide and improve the Service</li>
               <li>Process payments and manage subscriptions</li>
-              <li>Send service-related notifications (trial ending, payment issues)</li>
+              <li>Send service-related notifications (expiring items, trial ending, payment issues)</li>
               <li>Generate AI-powered recipe recommendations based on your inventory</li>
+              <li>Analyze food items and recipes using AI image recognition</li>
               <li>Provide customer support</li>
               <li>Analyze usage patterns to improve features</li>
               <li>Prevent fraud and enforce our Terms of Service</li>
@@ -73,9 +76,10 @@ function PrivacyPage() {
             <p>We use the following third-party services:</p>
             <ul>
               <li><strong>Stripe:</strong> Payment processing and subscription management</li>
-              <li><strong>Supabase:</strong> Database hosting and user authentication</li>
-              <li><strong>OpenAI/Gemini:</strong> AI-powered food recognition and recipe analysis</li>
+              <li><strong>Supabase:</strong> Database hosting and file storage</li>
+              <li><strong>Google Gemini:</strong> AI-powered food recognition and recipe analysis</li>
               <li><strong>Spoonacular:</strong> Recipe data and nutrition information</li>
+              <li><strong>PostHog:</strong> Usage analytics</li>
             </ul>
             <p>
               These services have their own privacy policies and handle data according to their terms.
@@ -118,7 +122,7 @@ function PrivacyPage() {
           <section className="legal-page__section">
             <h2>8. Cookies and Tracking</h2>
             <p>
-              We use local storage and session storage to maintain your login session and app preferences. We do not use third-party advertising cookies.
+              We use local storage and session storage to maintain your login session and app preferences. We use analytics to understand how users interact with our app and improve the experience.
             </p>
           </section>
 
@@ -149,8 +153,7 @@ function PrivacyPage() {
               If you have questions about this Privacy Policy or wish to exercise your data rights, please contact us at:
             </p>
             <p>
-              <strong>Email:</strong> privacy@trackabite.app<br />
-              <strong>Support:</strong> support@trackabite.app
+              <strong>Email:</strong> hello@trackabite.app
             </p>
           </section>
 
