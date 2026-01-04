@@ -579,9 +579,11 @@ const HomePage = () => {
     let badgeText = null;
     if (recipe.source_type === 'instagram') {
       badgeText = 'Instagram';
+    } else if (recipe.source_type === 'facebook') {
+      badgeText = 'Facebook';
     } else if (recipe.source_type === 'url' ||
                recipe.source_type === 'website' ||
-               (recipe.source_url && !recipe.source_url.includes('instagram'))) {
+               (recipe.source_url && !recipe.source_url.includes('instagram') && !recipe.source_url.includes('facebook'))) {
       badgeText = 'Web Blog';
     } else if (isAiRecipe) {
       badgeText = 'AI';

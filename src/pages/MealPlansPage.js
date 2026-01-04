@@ -1150,9 +1150,12 @@ const MealPlansPage = ({ defaultTab }) => {
             if (recipe.source_type === 'instagram') {
               return <div className="meal-plans-page__saved-recipe-badge"><span>Instagram</span></div>;
             }
+            if (recipe.source_type === 'facebook') {
+              return <div className="meal-plans-page__saved-recipe-badge"><span>Facebook</span></div>;
+            }
             if (recipe.source_type === 'url' ||
                 recipe.source_type === 'website' ||
-                (recipe.source_url && !recipe.source_url.includes('instagram'))) {
+                (recipe.source_url && !recipe.source_url.includes('instagram') && !recipe.source_url.includes('facebook'))) {
               return <div className="meal-plans-page__saved-recipe-badge"><span>Web Blog</span></div>;
             }
             return null;
@@ -1287,10 +1290,11 @@ const MealPlansPage = ({ defaultTab }) => {
     const getBadgeText = () => {
       if (recipe._type === 'ai') return 'AI Generated';
       if (recipe.source_type === 'instagram') return 'Instagram';
-      // Check for web-imported recipes (URL/website source or has source_url that's not Instagram)
+      if (recipe.source_type === 'facebook') return 'Facebook';
+      // Check for web-imported recipes (URL/website source or has source_url that's not Instagram/Facebook)
       if (recipe.source_type === 'url' ||
           recipe.source_type === 'website' ||
-          (recipe.source_url && !recipe.source_url.includes('instagram'))) {
+          (recipe.source_url && !recipe.source_url.includes('instagram') && !recipe.source_url.includes('facebook'))) {
         return 'Web Blog';
       }
       if (recipe._type === 'uploaded' || recipe.import_method) return 'Uploaded';
