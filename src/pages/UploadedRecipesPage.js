@@ -202,8 +202,8 @@ const UploadedRecipesPage = () => {
       <div className="uploaded-recipes-page__main">
         <div className="uploaded-recipes-page__container">
           {/* Header */}
-          <div className="uploaded-recipes-page__header" style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '0.5rem 0 1rem 0', marginTop: '-1rem', marginLeft: '-0.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginBottom: '1rem' }}>
+          <div className="uploaded-recipes-page__header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0 1rem 0', marginTop: '-1rem', marginLeft: '-0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
               <button
                 className="uploaded-recipes-page__back-button"
                 onClick={() => navigate('/meal-plans/recipes')}
@@ -217,17 +217,15 @@ const UploadedRecipesPage = () => {
                 All uploaded recipes
               </h1>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%', justifyContent: 'flex-end' }}>
-              <button
-                className="uploaded-recipes-page__add-button-header"
-                onClick={() => setShowCreationModal(true)}
-              >
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                  <circle cx="16" cy="16" r="14" fill="var(--primary-green)"/>
-                  <path d="M16 10V22M10 16H22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </button>
-            </div>
+            <button
+              className="uploaded-recipes-page__add-button-header"
+              onClick={() => setShowCreationModal(true)}
+            >
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="14" fill="var(--primary-green)"/>
+                <path d="M16 10V22M10 16H22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
           </div>
 
           {/* Content */}

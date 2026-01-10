@@ -3,6 +3,7 @@ import useOnboarding from '../hooks/useOnboarding';
 import OnboardingProgress from './OnboardingProgress';
 import WelcomeScreen from './screens/WelcomeScreen';
 import GoalSelectionScreen from './screens/GoalSelectionScreen';
+import GoalConfirmationScreen from './screens/GoalConfirmationScreen';
 import HouseholdSizeScreen from './screens/HouseholdSizeScreen';
 import WeeklyBudgetScreen from './screens/WeeklyBudgetScreen';
 import DietaryRestrictionsScreen from './screens/DietaryRestrictionsScreen';
@@ -53,6 +54,14 @@ const OnboardingFlow = () => {
         );
       case 3:
         return (
+          <GoalConfirmationScreen
+            data={onboardingData}
+            onNext={goToNextStep}
+            onBack={goToPreviousStep}
+          />
+        );
+      case 4:
+        return (
           <HouseholdSizeScreen
             data={onboardingData}
             updateData={updateData}
@@ -60,7 +69,7 @@ const OnboardingFlow = () => {
             onBack={goToPreviousStep}
           />
         );
-      case 4:
+      case 5:
         return (
           <WeeklyBudgetScreen
             data={onboardingData}
@@ -70,7 +79,7 @@ const OnboardingFlow = () => {
             onSkip={skipStep}
           />
         );
-      case 5:
+      case 6:
         return (
           <DietaryRestrictionsScreen
             data={onboardingData}
@@ -79,7 +88,7 @@ const OnboardingFlow = () => {
             onBack={goToPreviousStep}
           />
         );
-      case 6:
+      case 7:
         return (
           <AllergiesScreen
             data={onboardingData}
@@ -88,7 +97,7 @@ const OnboardingFlow = () => {
             onBack={goToPreviousStep}
           />
         );
-      case 7:
+      case 8:
         return (
           <CookingTimePreferenceScreen
             data={onboardingData}
@@ -97,7 +106,7 @@ const OnboardingFlow = () => {
             onBack={goToPreviousStep}
           />
         );
-      case 8:
+      case 9:
         return (
           <FeatureTourScreen
             data={onboardingData}
@@ -107,18 +116,18 @@ const OnboardingFlow = () => {
             onSkip={skipStep}
           />
         );
-      case 9:
+      case 10:
         return (
-          <PremiumUpsellScreenWhite
+          <PremiumUpsellScreenGreen
             data={onboardingData}
             updateData={updateData}
-            onNext={() => {}} // Not used anymore
+            onNext={goToNextStep}
             onBack={goToPreviousStep}
-            onSkip={() => jumpToStep(13)} // Skip directly to account creation
+            onSkip={() => jumpToStep(14)} // Skip directly to account creation
             jumpToStep={jumpToStep}
           />
         );
-      case 10:
+      case 11:
         return (
           <PaymentScreen
             data={onboardingData}
@@ -128,7 +137,7 @@ const OnboardingFlow = () => {
           />
         );
       // Alternative paywall designs (kept for future reference)
-      case 11:
+      case 12:
         return (
           <PremiumUpsellScreen
             data={onboardingData}
@@ -138,7 +147,7 @@ const OnboardingFlow = () => {
             jumpToStep={jumpToStep}
           />
         );
-      case 12:
+      case 13:
         return (
           <PremiumUpsellScreenGreen
             data={onboardingData}
@@ -148,7 +157,7 @@ const OnboardingFlow = () => {
             jumpToStep={jumpToStep}
           />
         );
-      case 13:
+      case 14:
         return (
           <AccountCreationScreen
             data={onboardingData}
@@ -167,10 +176,10 @@ const OnboardingFlow = () => {
 
   return (
     <div className="onboarding-flow">
-      {currentStep > 1 && currentStep < 9 && (
+      {currentStep > 1 && currentStep < 10 && (
         <OnboardingProgress
           currentStep={currentStep - 1}
-          totalSteps={7}
+          totalSteps={8}
           onBack={goToPreviousStep}
           showBack={currentStep > 2}
         />

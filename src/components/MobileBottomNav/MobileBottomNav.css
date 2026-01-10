@@ -249,8 +249,45 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--primary-green);
+  color: #374151;
   margin-bottom: 8px;
+}
+
+/* Individual background colors for modal options - green variations */
+.modal-option--grocery {
+  background: #D4F5DC; /* Soft mint green */
+}
+
+.modal-option--recipe {
+  background: #E2F7E8; /* Light Trackabite green */
+}
+
+.modal-option--meal {
+  background: #E8F5D6; /* Soft lime/sage green */
+}
+
+.modal-option--grocery:hover {
+  background: #B8EDCA;
+}
+
+.modal-option--recipe:hover {
+  background: #C8F0D4;
+}
+
+.modal-option--meal:hover {
+  background: #D4EDC0;
+}
+
+.modal-option--grocery:active {
+  background: #9CE5B8;
+}
+
+.modal-option--recipe:active {
+  background: #AEE9C0;
+}
+
+.modal-option--meal:active {
+  background: #C0E5AA;
 }
 
 .modal-option-icon svg {

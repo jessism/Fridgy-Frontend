@@ -26,9 +26,6 @@ const OnboardingProgress = ({ currentStep, totalSteps, onBack, showBack = true }
             />
           </div>
         </div>
-        <span className="onboarding-progress__counter">
-          {currentStep}/{totalSteps}
-        </span>
       </div>
     </div>
   );

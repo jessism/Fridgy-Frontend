@@ -8,28 +8,24 @@ const GoalSelectionScreen = ({ data, updateData, onNext, onBack }) => {
   }, []);
   const goals = [
     {
-      id: 'save_money',
-      label: 'Save money'
+      id: 'remember_inventory',
+      label: 'Remember what I already have'
+    },
+    {
+      id: 'organize_recipes',
+      label: 'Organize my recipes'
+    },
+    {
+      id: 'meal_plans',
+      label: 'Create better meal plans'
+    },
+    {
+      id: 'shop_smarter',
+      label: 'Shop smarter'
     },
     {
       id: 'reduce_waste',
-      label: 'Reduce waste'
-    },
-    {
-      id: 'eat_healthy',
-      label: 'Eat healthier'
-    },
-    {
-      id: 'save_time',
-      label: 'Save time'
-    },
-    {
-      id: 'try_recipes',
-      label: 'Try new recipes'
-    },
-    {
-      id: 'organize',
-      label: 'Get organized'
+      label: 'Waste less food'
     }
   ];
 

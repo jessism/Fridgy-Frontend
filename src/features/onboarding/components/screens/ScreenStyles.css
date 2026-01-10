@@ -158,16 +158,18 @@
   background: #e8e8e8;
 }
 
-.onboarding-btn--outline {
-  background: white;
-  color: #6bc93f;
-  border: 2px solid #6bc93f;
+.onboarding-btn--outline,
+.onboarding-btn.onboarding-btn--outline {
+  background: white !important;
+  color: #4fcf61;
+  border: 2px solid #4fcf61 !important;
   position: relative;
 }
 
-.onboarding-btn--outline:hover {
-  background: linear-gradient(135deg, #81e053 0%, #6bc93f 100%);
-  border-color: transparent;
+.onboarding-btn--outline:hover,
+.onboarding-btn.onboarding-btn--outline:hover {
+  background: linear-gradient(135deg, #81e053 0%, #6bc93f 100%) !important;
+  border-color: transparent !important;
   color: white;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(129, 224, 83, 0.3);

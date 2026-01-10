@@ -122,7 +122,7 @@ const MobileBottomNav = () => {
       path: '/batchcamera',
       icon: (
         <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
-          <circle cx="14" cy="14" r="13" fill="#81e053" stroke="none"/>
+          <circle cx="14" cy="14" r="13" fill="#1F2937" stroke="none"/>
           <path d="M14 10V18M10 14H18" stroke="white" strokeWidth="0.8" strokeLinecap="round"/>
         </svg>
       ),
@@ -248,7 +248,7 @@ const MobileBottomNav = () => {
                 {/* Panel 1: Main Menu */}
                 <div className="mobile-bottom-nav__sheet-panel">
                   <div className="modal-options">
-                    <button className="modal-option modal-option-grocery" onClick={handleLogGrocery}>
+                    <button className="modal-option modal-option-grocery modal-option--grocery" onClick={handleLogGrocery}>
                       <div className="modal-option-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                           <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
@@ -259,7 +259,7 @@ const MobileBottomNav = () => {
                       <span className="modal-option-label">Add Grocery</span>
                     </button>
 
-                    <button className="modal-option" onClick={handleAddRecipe}>
+                    <button className="modal-option modal-option--recipe" onClick={handleAddRecipe}>
                       <div className="modal-option-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -271,7 +271,7 @@ const MobileBottomNav = () => {
                       <span className="modal-option-label">Add Recipe</span>
                     </button>
 
-                    <button className="modal-option" onClick={handleLogMeal}>
+                    <button className="modal-option modal-option--meal" onClick={handleLogMeal}>
                       <div className="modal-option-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                           <path d="M11 2v20M11 7h5a4 4 0 0 0 0-5"/>

@@ -39,7 +39,7 @@ const useOnboarding = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const totalSteps = 13;
+  const totalSteps = 14;
 
   useEffect(() => {
     // Always start fresh - clear any existing onboarding data
@@ -101,35 +101,38 @@ const useOnboarding = () => {
         case 2: // Goal selection
           stepData.primary_goal = onboardingData.primaryGoal;
           break;
-        case 3: // Household size
+        case 3: // Goal confirmation
+          // No data to collect - just confirmation screen
+          break;
+        case 4: // Household size
           stepData.household_size = onboardingData.householdSize;
           break;
-        case 4: // Weekly budget
+        case 5: // Weekly budget
           stepData.weekly_budget = onboardingData.weeklyBudget;
           stepData.budget_currency = onboardingData.budgetCurrency;
           break;
-        case 5: // Dietary restrictions
+        case 6: // Dietary restrictions
           stepData.dietary_restrictions = onboardingData.dietaryRestrictions;
           stepData.has_dietary_restrictions = onboardingData.dietaryRestrictions?.length > 0;
           break;
-        case 6: // Allergies
+        case 7: // Allergies
           stepData.allergies = onboardingData.allergies;
           stepData.custom_allergies = onboardingData.customAllergies;
           stepData.has_allergies = onboardingData.allergies?.length > 0 || Boolean(onboardingData.customAllergies);
           break;
-        case 7: // Cooking time preference
+        case 8: // Cooking time preference
           stepData.cooking_time_preference = onboardingData.cookingTimePreference;
           break;
-        case 8: // Feature tour
+        case 9: // Feature tour
           stepData.watched_feature_tour = true;
           break;
-        case 9: // Premium upsell
+        case 10: // Premium upsell
           // Payment choice tracked separately in PremiumUpsellScreenWhite
           break;
-        case 10: // Payment screen
+        case 11: // Payment screen
           // Payment completion tracked separately in PaymentScreen
           break;
-        case 11: // Account creation
+        case 12: // Account creation
           stepData.email = onboardingData.accountData?.email;
           stepData.first_name = onboardingData.accountData?.firstName;
           break;

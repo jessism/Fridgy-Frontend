@@ -16,10 +16,10 @@ function OpenRecipePage() {
   // Get signup prompt message based on action
   const getPromptMessage = () => {
     switch(showSignupPrompt) {
-      case 'shopping': return 'Start Trackabite for free to create smart shopping list.';
-      case 'cook': return 'Start Trackabite for free to log this recipe.';
-      case 'servings': return 'Start Trackabite for free to adjust the serving';
-      default: return 'Start Trackabite for free';
+      case 'shopping': return 'Open Trackabite on your phone to create a smart shopping list.';
+      case 'cook': return 'Open Trackabite on your phone to log this recipe.';
+      case 'servings': return 'Open Trackabite on your phone to adjust servings.';
+      default: return 'Open Trackabite on your phone to continue.';
     }
   };
 

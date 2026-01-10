@@ -11,6 +11,7 @@ import CookingModeModal from './CookingModeModal';
 import { UpgradeModal } from './UpgradeModal';
 import { highlightInstructions } from '../../utils/highlightInstructions';
 import ClockIcon from '../../assets/icons/Clock.png';
+import { usePWADetection } from '../../hooks/usePWADetection';
 
 const RecipeDetailModal = ({
   isOpen,
@@ -61,6 +62,9 @@ const RecipeDetailModal = ({
 
   // Auth hook for user info
   const { user } = useAuth();
+
+  // PWA detection for browser-mode styling
+  const { isPWA } = usePWADetection();
 
   // API base URL for proxy
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -519,6 +523,158 @@ const RecipeDetailModal = ({
     });
   };
 
+  // Parse ingredient string into amount, unit, name
+  const parseIngredientString = (str) => {
+    if (!str || typeof str !== 'string') {
+      return { amount: null, unit: '', name: str || '' };
+    }
+
+    const trimmed = str.trim();
+
+    // Match patterns like: "1 coconut oil", "2 lb chicken", "1/2 cup water", "1 can of coke"
+    // Pattern: optional number/fraction, optional unit, then ingredient name
+    // Comprehensive unit list for recipe ingredients
+    const unitPattern = [
+      // Volume
+      'cups?', 'c',
+      'tablespoons?', 'tbsps?', 'tbsp', 'tbs', 'T',
+      'teaspoons?', 'tsps?', 'tsp', 't',
+      'liters?', 'litres?', 'l',
+      'milliliters?', 'mls?', 'ml',
+      'fluid\\s*ounces?', 'fl\\.?\\s*oz\\.?',
+      'gallons?', 'gal',
+      'quarts?', 'qts?', 'qt',
+      'pints?', 'pts?', 'pt',
+      'drops?',
+      // Weight
+      'pounds?', 'lbs?', 'lb',
+      'ounces?', 'oz',
+      'grams?', 'g',
+      'kilograms?', 'kilos?', 'kgs?', 'kg',
+      'milligrams?', 'mgs?', 'mg',
+      // Count/Packaging
+      'pieces?', 'pcs?', 'pc',
+      'slices?',
+      'cans?',
+      'packages?', 'pkgs?', 'pkg', 'packs?',
+      'boxes?', 'box',
+      'bags?',
+      'bottles?',
+      'jars?',
+      'containers?',
+      'cartons?',
+      // Produce units
+      'bunches?', 'bunch',
+      'bundles?',
+      'heads?',
+      'cloves?',
+      'stalks?',
+      'sprigs?',
+      'leaves?', 'leaf',
+      'ears?',
+      'crowns?',
+      'bulbs?',
+      // Meat/protein units
+      'fillets?', 'filets?',
+      'breasts?',
+      'thighs?',
+      'drumsticks?',
+      'wings?',
+      'loaves?', 'loaf',
+      'racks?',
+      'ribs?',
+      'links?',
+      'patties?', 'pattys?',
+      'strips?',
+      // Baking
+      'sticks?',
+      'bars?',
+      'sheets?',
+      'cubes?',
+      'blocks?',
+      // Portions
+      'servings?',
+      'portions?',
+      'whole',
+      'halves?', 'half',
+      'quarters?',
+      'thirds?',
+      'wedges?',
+      'rounds?',
+      // Small amounts
+      'pinch', 'pinches',
+      'dash', 'dashes',
+      'smidgens?',
+      'handfuls?',
+      'splashes?',
+      'drizzles?',
+      // Size descriptors (when used as units)
+      'small', 'sm',
+      'medium', 'med',
+      'large', 'lg',
+      'extra-large', 'xl'
+    ].join('|');
+
+    const match = trimmed.match(new RegExp(`^([\\d\\/\\.\\s]+)?\\s*(${unitPattern})?\\s*(?:of\\s+)?(.+)?$`, 'i'));
+
+    if (match) {
+      const amountStr = match[1]?.trim();
+      const unit = match[2]?.trim() || '';
+      const name = match[3]?.trim() || '';
+
+      // Parse amount (handle fractions like 1/2)
+      let amount = null;
+      if (amountStr) {
+        if (amountStr.includes('/')) {
+          const parts = amountStr.split('/').map(s => parseFloat(s.trim()));
+          if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1]) && parts[1] !== 0) {
+            amount = parts[0] / parts[1];
+          }
+        } else {
+          amount = parseFloat(amountStr);
+        }
+      }
+
+      return { amount: isNaN(amount) ? null : amount, unit, name };
+    }
+
+    // Fallback: treat whole string as name
+    return { amount: null, unit: '', name: trimmed };
+  };
+
+  // Handle updating an ingredient
+  const handleUpdateIngredient = (index, value) => {
+    if (!editedRecipe) return;
+    const newIngredients = [...(editedRecipe.extendedIngredients || [])];
+    const parsed = parseIngredientString(value);
+    newIngredients[index] = {
+      ...newIngredients[index],
+      original: value,
+      amount: parsed.amount,
+      unit: parsed.unit,
+      name: parsed.name
+    };
+    setEditedRecipe({ ...editedRecipe, extendedIngredients: newIngredients });
+  };
+
+  // Handle adding an ingredient
+  const handleAddIngredient = () => {
+    if (!editedRecipe) return;
+    const currentIngredients = editedRecipe.extendedIngredients || [];
+    const newIngredient = { id: Date.now(), original: '', amount: null, unit: '', name: '' };
+    setEditedRecipe({
+      ...editedRecipe,
+      extendedIngredients: [...currentIngredients, newIngredient]
+    });
+  };
+
+  // Handle removing an ingredient
+  const handleRemoveIngredient = (index) => {
+    if (!editedRecipe) return;
+    const newIngredients = (editedRecipe.extendedIngredients || []).filter((_, i) => i !== index);
+    setEditedRecipe({ ...editedRecipe, extendedIngredients: newIngredients });
+  };
+
   const renderIngredients = () => {
     if (!recipe?.extendedIngredients || recipe.extendedIngredients.length === 0) {
       return <p className="no-ingredients">No ingredients available</p>;
@@ -540,7 +696,7 @@ const RecipeDetailModal = ({
                 {formatAmount(scaledAmount)}
               </span>
               <span className="ingredient-unit">{ingredient.unit || ''}</span>
-              <span className="ingredient-name">{ingredient.name}</span>
+              <span className="ingredient-name">{ingredient.name || ingredient.original || ''}</span>
             </div>
           );
         })}
@@ -803,7 +959,7 @@ const RecipeDetailModal = ({
       <div className="recipe-modal-overlay" onClick={handleOverlayClick}>
         <div className="recipe-modal">
           {/* Header with close/cancel and more options/save buttons */}
-          <div className="recipe-modal-header">
+          <div className={`recipe-modal-header${!isPWA ? ' recipe-modal-header--browser' : ''}`}>
             <button
               className="recipe-modal-close"
               onClick={isEditMode ? handleCancelEdit : onClose}
@@ -886,18 +1042,34 @@ const RecipeDetailModal = ({
 
                 {/* Recipe Title Below Image */}
                 {isEditMode ? (
-                  <input
-                    type="text"
-                    className="recipe-edit-title"
-                    value={editedRecipe?.title || ''}
-                    onChange={(e) => setEditedRecipe({ ...editedRecipe, title: e.target.value })}
-                    placeholder="Recipe title"
-                  />
+                  <div className="recipe-edit-header-section">
+                    <div className="recipe-edit-field">
+                      <label className="recipe-edit-label">Recipe Name</label>
+                      <input
+                        type="text"
+                        className="recipe-edit-title-input"
+                        value={editedRecipe?.title || ''}
+                        onChange={(e) => setEditedRecipe({ ...editedRecipe, title: e.target.value })}
+                        placeholder="Enter recipe name"
+                      />
+                    </div>
+                    <div className="recipe-edit-field">
+                      <label className="recipe-edit-label">Description</label>
+                      <textarea
+                        className="recipe-edit-description"
+                        value={editedRecipe?.summary || ''}
+                        onChange={(e) => setEditedRecipe({ ...editedRecipe, summary: e.target.value })}
+                        placeholder="A short description of the recipe..."
+                        rows={3}
+                      />
+                    </div>
+                  </div>
                 ) : (
                   <h1 className="recipe-main-title">{recipe.title}</h1>
                 )}
 
                 {/* Description and Info Text Below Image */}
+                {!isEditMode && (
                 <div className="recipe-meta-info">
                   <div className="recipe-description">
                     <p>{getDescription()}</p>
@@ -960,6 +1132,7 @@ const RecipeDetailModal = ({
                     </div>
                   </div>
                 </div>
+                )}
 
                 {/* Tabbed Interface */}
                 <div className="recipe-tabs-container">
@@ -989,85 +1162,143 @@ const RecipeDetailModal = ({
                   <div className="recipe-tab-content">
                     {activeTab === 'ingredients' && (
                       <div>
-                        <div className="recipe-detail-modal__ingredients-header">
-                          <h2 className="section-title">Ingredients</h2>
-                          <div className="recipe-detail-modal__servings-inline">
-                            <button
-                              type="button"
-                              className="recipe-detail-modal__serving-btn"
-                              onClick={() => handleServingChange(false)}
-                              disabled={isPremium && selectedServings <= 1}
-                              aria-label="Decrease servings"
-                            >
-                              -
-                            </button>
-                            <span className="recipe-detail-modal__serving-value">
-                              {selectedServings} {selectedServings === 1 ? 'Serving' : 'Servings'}
-                            </span>
-                            <button
-                              type="button"
-                              className="recipe-detail-modal__serving-btn"
-                              onClick={() => handleServingChange(true)}
-                              aria-label="Increase servings"
-                            >
-                              +
+                        {isEditMode ? (
+                          <div className="recipe-edit-ingredients">
+                            <div className="recipe-edit-section-header">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                              </svg>
+                              <span>Edit Ingredients</span>
+                            </div>
+                            {(editedRecipe?.extendedIngredients || []).map((ing, index) => (
+                              <div key={ing.id || index} className="recipe-edit-ingredient">
+                                <input
+                                  type="text"
+                                  className="recipe-edit-ingredient-input"
+                                  value={ing.original || `${ing.amount || ''} ${ing.unit || ''} ${ing.name || ''}`.trim()}
+                                  onChange={(e) => handleUpdateIngredient(index, e.target.value)}
+                                  placeholder="e.g., 2 cups flour"
+                                />
+                                <button
+                                  className="recipe-edit-remove-btn"
+                                  onClick={() => handleRemoveIngredient(index)}
+                                  aria-label="Remove ingredient"
+                                >
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                  </svg>
+                                </button>
+                              </div>
+                            ))}
+                            <button className="recipe-edit-add-btn" onClick={handleAddIngredient}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                              </svg>
+                              Add Ingredient
                             </button>
                           </div>
-                        </div>
-                        <div className="ingredients-container">
-                          {renderIngredients()}
-                        </div>
+                        ) : (
+                          <>
+                            <div className="recipe-detail-modal__ingredients-header">
+                              <h2 className="section-title">Ingredients</h2>
+                              <div className="recipe-detail-modal__servings-inline">
+                                <button
+                                  type="button"
+                                  className="recipe-detail-modal__serving-btn"
+                                  onClick={() => handleServingChange(false)}
+                                  disabled={isPremium && selectedServings <= 1}
+                                  aria-label="Decrease servings"
+                                >
+                                  -
+                                </button>
+                                <span className="recipe-detail-modal__serving-value">
+                                  {selectedServings} {selectedServings === 1 ? 'Serving' : 'Servings'}
+                                </span>
+                                <button
+                                  type="button"
+                                  className="recipe-detail-modal__serving-btn"
+                                  onClick={() => handleServingChange(true)}
+                                  aria-label="Increase servings"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+                            <div className="ingredients-container">
+                              {renderIngredients()}
+                            </div>
+                          </>
+                        )}
                       </div>
                     )}
                     {activeTab === 'method' && (
                       <div>
-                        <div className="cooking-mode__instructions-header">
-                          <h2 className="section-title">Instructions</h2>
-                          {!isEditMode && getInstructionSteps().length > 0 && (
-                            <button
-                              className="cooking-mode__play-button"
-                              onClick={() => setShowCookingMode(true)}
-                              title="Start Cooking Mode"
-                              aria-label="Start step-by-step cooking mode"
-                            >
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M8 5v14l11-7z"/>
+                        {isEditMode ? (
+                          <div className="recipe-edit-method">
+                            <div className="recipe-edit-section-header">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                               </svg>
-                            </button>
-                          )}
-                        </div>
-                        <div className="instructions-container">
-                          {isEditMode ? (
-                            <div className="recipe-edit-instructions">
-                              {(editedRecipe?.analyzedInstructions?.[0]?.steps || []).map((step, index) => (
-                                <div key={index} className="recipe-edit-step">
-                                  <span className="step-number">{index + 1}</span>
+                              <span>Edit Steps</span>
+                            </div>
+                            {(editedRecipe?.analyzedInstructions?.[0]?.steps || []).map((step, index) => (
+                              <div key={index} className="recipe-edit-step-row">
+                                <div className="recipe-edit-step-card">
+                                  <div className="recipe-edit-step-number">{index + 1}</div>
                                   <textarea
-                                    className="recipe-edit-step-textarea"
+                                    className="recipe-edit-step-input"
                                     value={step.step || ''}
                                     onChange={(e) => handleUpdateStep(index, e.target.value)}
-                                    placeholder={`Step ${index + 1}`}
+                                    placeholder={`Describe step ${index + 1}...`}
+                                    rows={2}
                                   />
-                                  <button
-                                    className="recipe-edit-step-remove"
-                                    onClick={() => handleRemoveStep(index)}
-                                    aria-label="Remove step"
-                                  >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                      <line x1="18" y1="6" x2="6" y2="18"/>
-                                      <line x1="6" y1="6" x2="18" y2="18"/>
-                                    </svg>
-                                  </button>
                                 </div>
-                              ))}
-                              <button className="recipe-add-step-btn" onClick={handleAddStep}>
-                                + Add Step
-                              </button>
+                                <button
+                                  className="recipe-edit-remove-btn"
+                                  onClick={() => handleRemoveStep(index)}
+                                  aria-label="Remove step"
+                                >
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                  </svg>
+                                </button>
+                              </div>
+                            ))}
+                            <button className="recipe-edit-add-btn" onClick={handleAddStep}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                              </svg>
+                              Add Step
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="cooking-mode__instructions-header">
+                              <h2 className="section-title">Instructions</h2>
+                              {getInstructionSteps().length > 0 && (
+                                <button
+                                  className="cooking-mode__play-button"
+                                  onClick={() => setShowCookingMode(true)}
+                                  title="Start Cooking Mode"
+                                  aria-label="Start step-by-step cooking mode"
+                                >
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M8 5v14l11-7z"/>
+                                  </svg>
+                                </button>
+                              )}
                             </div>
-                          ) : (
-                            renderInstructions()
-                          )}
-                        </div>
+                            <div className="instructions-container">
+                              {renderInstructions()}
+                            </div>
+                          </>
+                        )}
                       </div>
                     )}
                     {activeTab === 'nutrition' && (

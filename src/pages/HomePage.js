@@ -478,6 +478,45 @@ const HomePage = () => {
     }
   };
 
+  // Handle recipe deletion from homepage
+  const handleDeleteRecipe = async (recipeId) => {
+    const recipe = recentRecipes.find(r => r.id === recipeId);
+
+    // Only call API for saved recipes (not AI-generated)
+    if (recipe?._source === 'saved') {
+      try {
+        const token = localStorage.getItem('fridgy_token');
+        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+        const response = await fetch(`${API_BASE_URL}/saved-recipes/${recipeId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+          console.error('[HomePage] Failed to delete recipe:', response.status);
+          return;
+        }
+      } catch (error) {
+        console.error('[HomePage] Error deleting recipe:', error);
+        return;
+      }
+    }
+
+    // Remove from local state (works for both saved and AI recipes)
+    setRecentRecipes(prev => prev.filter(r => r.id !== recipeId));
+    setIsRecipeModalOpen(false);
+    setSelectedRecipe(null);
+  };
+
+  // Handle recipe update from homepage
+  const handleUpdateRecipe = (updatedRecipe) => {
+    setRecentRecipes(prev =>
+      prev.map(r => r.id === updatedRecipe.id ? { ...r, ...updatedRecipe } : r)
+    );
+    setSelectedRecipe(updatedRecipe);
+  };
+
   // Function to navigate to a page
   const navigateToPage = (path) => {
     navigate(path);
@@ -695,7 +734,6 @@ const HomePage = () => {
         <div className="container">
           <div className="section-header">
             <h2 className="section-title">Popular Now</h2>
-            <p className="section-description">Impress your loved ones this Christmas.</p>
           </div>
           <div className="home-page__recently-added-slider">
             {POPULAR_RECIPES.map(recipe => renderRecentRecipeCard(recipe))}
@@ -1788,6 +1826,8 @@ const HomePage = () => {
           setSelectedRecipe(null);
         }}
         recipe={selectedRecipe}
+        onDelete={handleDeleteRecipe}
+        onUpdate={handleUpdateRecipe}
       />
     </div>
   );

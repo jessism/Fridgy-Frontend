@@ -40,6 +40,7 @@ import { MealCameraInterface, MealIngredientSelector } from './features/mealscan
 import OnboardingFlow from './features/onboarding/components/OnboardingFlow';
 import ShortcutSetupPage from './pages/ShortcutSetupPage';
 import LinkMessengerPage from './pages/LinkMessengerPage';
+import LinkInstagramDMPage from './pages/LinkInstagramDMPage';
 import OpenRecipePage from './pages/OpenRecipePage';
 import ShoppingListDetailPage from './pages/ShoppingListDetailPage';
 import CookbookDetailPage from './pages/CookbookDetailPage';
@@ -266,6 +267,9 @@ function App() {
           } />
           <Route path="/link-messenger" element={
             <LinkMessengerPage />
+          } />
+          <Route path="/link-instagram-dm" element={
+            <LinkInstagramDMPage />
           } />
           {/* Redirect old /recipes/:id URLs to /open-recipe/:id (Messenger backward compatibility) */}
           <Route path="/recipes/:id" element={<RecipeRedirect />} />

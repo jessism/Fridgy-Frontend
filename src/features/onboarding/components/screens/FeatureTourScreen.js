@@ -23,6 +23,12 @@ const FeatureTourScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
       preview: '📱 → 📸 → ✅'
     },
     {
+      icon: '🔗',
+      title: 'Save Recipes From Anywhere',
+      description: 'Found a recipe on Instagram, TikTok, or a website? Just paste the link and we\'ll save it to your collection automatically.',
+      preview: '🔗 → 📱 → 📖'
+    },
+    {
       icon: '🤖',
       title: 'AI-Powered Recipe Suggestions',
       description: 'Get personalized recipes based on what\'s in your fridge and your dietary preferences',
@@ -101,8 +107,8 @@ const FeatureTourScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
           alignItems: 'center',
           justifyContent: 'center'
         }}>
-          {currentFeature === 0 || currentFeature === 1 ? (
-            // Video for "Snap Your Groceries" and "AI-Powered Recipe Suggestions" features
+          {currentFeature === 0 || currentFeature === 1 || currentFeature === 2 ? (
+            // Video for "Snap Your Groceries", "Save Recipes From Anywhere", and "AI-Powered Recipe Suggestions" features
             <>
               <h2 style={{
                 fontSize: '22px',
@@ -159,18 +165,27 @@ const FeatureTourScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
                     style={{
                       width: '100%',
                       height: '100%',
-                      objectFit: 'cover'
+                      objectFit: currentFeature === 1 ? 'contain' : 'cover',
+                      backgroundColor: currentFeature === 1 ? '#fff' : '#000'
                     }}
                     onError={(e) => {
                       // If video fails to load, show placeholder
-                      e.target.style.display = 'none';
-                      if (e.target.nextSibling) {
-                        e.target.nextSibling.style.display = 'flex';
+                      const video = e.target.tagName === 'VIDEO' ? e.target : e.target.closest('video');
+                      if (video) {
+                        video.style.display = 'none';
+                        const fallback = video.nextElementSibling;
+                        if (fallback) {
+                          fallback.style.display = 'flex';
+                        }
                       }
                     }}
                   >
                     <source
-                      src={currentFeature === 0 ? "/videos/snap-groceries-demo.mp4" : "/videos/ai-recipes-demo-noframe.mp4"}
+                      src={currentFeature === 0
+                        ? "/videos/snap-groceries-demo.mp4"
+                        : currentFeature === 1
+                          ? "/videos/save-recipes-demo.mp4"
+                          : "/videos/ai-recipes-demo-noframe.mp4"}
                       type="video/mp4"
                     />
                       Your browser does not support the video tag.
@@ -209,7 +224,9 @@ const FeatureTourScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
                             <code style={{ fontSize: '11px', backgroundColor: '#f0f0f0', padding: '2px 4px', borderRadius: '3px' }}>
                               {currentFeature === 0
                                 ? 'Frontend/public/videos/snap-groceries-demo.mp4'
-                                : 'Frontend/public/videos/ai-recipes-demo-noframe.mp4'}
+                                : currentFeature === 1
+                                  ? 'Frontend/public/videos/save-recipes-demo.mp4'
+                                  : 'Frontend/public/videos/ai-recipes-demo-noframe.mp4'}
                             </code>
                           </li>
                           <li>Refresh the page</li>
@@ -229,7 +246,7 @@ const FeatureTourScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
                 {feature.description}
               </p>
             </>
-          ) : currentFeature === 2 ? (
+          ) : currentFeature === 3 ? (
             // Track Your Savings - show full screenshot without green background
             <>
               <h2 style={{
@@ -318,9 +335,13 @@ const FeatureTourScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
                   }}
                   onError={(e) => {
                     // Fallback to emoji if video doesn't load
-                    e.target.style.display = 'none';
-                    if (e.target.nextSibling) {
-                      e.target.nextSibling.style.display = 'block';
+                    const video = e.target.tagName === 'VIDEO' ? e.target : e.target.closest('video');
+                    if (video) {
+                      video.style.display = 'none';
+                      const fallback = video.nextElementSibling;
+                      if (fallback) {
+                        fallback.style.display = 'block';
+                      }
                     }
                   }}
                 >

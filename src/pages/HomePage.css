@@ -370,10 +370,7 @@
   font-family: var(--header-font);
   font-size: 2rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #4fcf61 0%, #81e053 50%, #6bc93f 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--black, #222222);
   margin: 0 0 0.25rem 0;
   text-align: left;
   line-height: 1.1;
@@ -2863,6 +2860,11 @@ h2.section-title::after {
   z-index: 10;
 }
 
+/* Browser-mode top padding (when NOT in PWA/standalone mode) */
+.recipe-modal-header--browser {
+  padding-top: 2.5rem; /* Extra space for browser address bar */
+}
+
 .recipe-modal-close {
   background: transparent;
   border: none;
@@ -3556,6 +3558,11 @@ h2.section-title::after {
 
   .recipe-modal-header {
     padding: 0.75rem 1rem 0.5rem 0.5rem; /* Reduced left padding for mobile */
+  }
+
+  /* Browser-mode extra padding for mobile browsers */
+  .recipe-modal-header--browser {
+    padding-top: 3rem; /* More space on mobile browsers */
   }
 
   /* Footer styles removed - buttons now in top action area */
@@ -4975,26 +4982,21 @@ h2.section-title::after {
   color: #666;
 }
 
+/* Edit mode header buttons */
 .recipe-modal-save {
-  position: absolute;
-  top: 12px;
-  right: 12px;
   background: var(--primary-green);
   color: white;
   border: none;
-  padding: 8px 20px;
-  border-radius: 20px;
+  padding: 8px 24px;
+  border-radius: 8px;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   cursor: pointer;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: all 0.2s ease;
 }
 
 .recipe-modal-save:hover:not(:disabled) {
   background: var(--primary-green-dark);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .recipe-modal-save:disabled {
@@ -5003,9 +5005,19 @@ h2.section-title::after {
 }
 
 .recipe-modal-cancel-text {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #666;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #888;
+  transition: color 0.2s;
+}
+
+.recipe-modal-close:hover .recipe-modal-cancel-text {
+  color: #333;
+}
+
+/* Edit mode header styling */
+.recipe-modal-header:has(.recipe-modal-cancel-text) {
+  padding: 16px 20px;
 }
 
 .recipe-edit-title {
@@ -5096,4 +5108,225 @@ h2.section-title::after {
   background: #eee;
   border-color: var(--primary-green);
   color: var(--primary-green);
+}
+
+/* ===== RECIPE EDIT MODE - REDESIGNED UI ===== */
+
+/* Edit header section with title and description */
+.recipe-edit-header-section {
+  padding: 0 16px 16px;
+}
+
+/* Edit field containers */
+.recipe-edit-field {
+  margin-bottom: 16px;
+}
+
+/* Edit field labels */
+.recipe-edit-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+/* Title input - larger, prominent */
+.recipe-edit-title-input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background: white;
+  color: #333;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.recipe-edit-title-input:focus {
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(79, 207, 97, 0.15);
+  outline: none;
+}
+
+/* Description textarea */
+.recipe-edit-description {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background: white;
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+  line-height: 1.5;
+  color: #333;
+  box-sizing: border-box;
+}
+
+.recipe-edit-description:focus {
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(79, 207, 97, 0.15);
+  outline: none;
+}
+
+/* Edit sections (ingredients, method) */
+.recipe-edit-ingredients,
+.recipe-edit-method {
+  padding: 0;
+}
+
+/* Section headers with pencil icon */
+.recipe-edit-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  margin-bottom: 16px;
+  border-bottom: 2px solid var(--primary-green);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--primary-green);
+}
+
+.recipe-edit-section-header svg {
+  flex-shrink: 0;
+}
+
+/* Ingredient row */
+.recipe-edit-ingredient {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.recipe-edit-ingredient-input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  background: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.recipe-edit-ingredient-input:focus {
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(79, 207, 97, 0.15);
+  outline: none;
+}
+
+/* Step row - wrapper for card + X button */
+.recipe-edit-step-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* Step card */
+.recipe-edit-step-card {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.recipe-edit-step-number {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  background: var(--primary-green);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.recipe-edit-step-input {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: none;
+  line-height: 1.5;
+  min-height: 48px;
+}
+
+.recipe-edit-step-input:focus {
+  outline: none;
+}
+
+.recipe-edit-step-card:focus-within {
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(79, 207, 97, 0.15);
+}
+
+/* Remove button (X) - minimal style */
+.recipe-edit-remove-btn {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  border: none;
+  background: transparent;
+  color: #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, background 0.2s;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.recipe-edit-remove-btn:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  opacity: 1;
+}
+
+/* Add button */
+.recipe-edit-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  border: 2px dashed #d0d0d0;
+  border-radius: 12px;
+  background: transparent;
+  color: #666;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 4px;
+}
+
+.recipe-edit-add-btn:hover {
+  border-color: var(--primary-green);
+  color: var(--primary-green);
+  background: rgba(79, 207, 97, 0.05);
+}
+
+.recipe-edit-add-btn svg {
+  flex-shrink: 0;
 }

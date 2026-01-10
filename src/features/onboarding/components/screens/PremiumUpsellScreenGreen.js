@@ -1,16 +1,27 @@
 import React from 'react';
+import { usePrice } from '../../../../contexts/PriceContext';
 import './ScreenStyles.css';
-import Logo from '../../../../assets/images/Logo.png';
 
 const PremiumUpsellScreenGreen = ({ data, onNext, onBack, onSkip, jumpToStep }) => {
+  const { formattedWithInterval } = usePrice();
+
   const premiumFeatures = [
-    'AI-powered food recognition from photos',
-    'Smart expiration date tracking',
-    'Personalized recipe recommendations', 
     'Inventory management & notifications',
+    'Personalized recipe recommendations',
     'Meal planning based on your fridge',
+    'Smart expiration date tracking',
     'Reduce food waste & save money'
   ];
+
+  const handleStartTrial = () => {
+    // Go to payment screen (step 11)
+    jumpToStep(11);
+  };
+
+  const handleSkipToFree = () => {
+    // Skip to account creation for free tier
+    jumpToStep(14);
+  };
 
   return (
     <div className="onboarding-screen" style={{
@@ -26,8 +37,8 @@ const PremiumUpsellScreenGreen = ({ data, onNext, onBack, onSkip, jumpToStep }) 
       padding: '40px 20px'
     }}>
       
-      <button 
-        onClick={onSkip}
+      <button
+        onClick={handleSkipToFree}
         style={{
           position: 'absolute',
           top: '16px',
@@ -131,29 +142,28 @@ const PremiumUpsellScreenGreen = ({ data, onNext, onBack, onSkip, jumpToStep }) 
           ))}
         </div>
         
+        {/* No Payment Due Now */}
         <div style={{
-          textAlign: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
           marginBottom: '16px'
         }}>
-          <div style={{ 
-            fontSize: '16px', 
-            color: 'white',
-            marginBottom: '4px',
-            opacity: '0.9'
-          }}>
-            Try 7 days free, then $2.99/month
-          </div>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M6 10L9 13L14 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span style={{ fontSize: '15px', color: 'white', fontWeight: '500' }}>No Payment Due Now</span>
         </div>
-        
-        
+
         <div style={{
           display: 'flex',
           flexDirection: 'column',
           gap: '0',
           alignItems: 'center'
         }}>
-          <button 
-            onClick={onNext}
+          <button
+            onClick={handleStartTrial}
             style={{
               width: '100%',
               padding: '16px 32px',
@@ -165,7 +175,7 @@ const PremiumUpsellScreenGreen = ({ data, onNext, onBack, onSkip, jumpToStep }) 
               borderRadius: '12px',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
-              marginBottom: '8px'
+              marginBottom: '12px'
             }}
             onMouseOver={(e) => {
               e.target.style.background = 'rgba(255, 255, 255, 0.9)';
@@ -176,18 +186,20 @@ const PremiumUpsellScreenGreen = ({ data, onNext, onBack, onSkip, jumpToStep }) 
               e.target.style.transform = 'translateY(0)';
             }}
           >
-            Start Free Trial
+            Start 7-Day Free Trial
           </button>
         </div>
-        
+
         <p style={{
           fontSize: '14px',
           color: 'white',
-          marginTop: '8px',
+          marginTop: '4px',
           textAlign: 'center',
-          opacity: '0.7'
+          opacity: '0.85',
+          lineHeight: '1.4'
         }}>
-          Cancel anytime
+          7 days free, then {formattedWithInterval}.<br />
+          Cancel anytime. No commitments.
         </p>
         </div>
       </div>

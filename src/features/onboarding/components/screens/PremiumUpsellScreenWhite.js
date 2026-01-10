@@ -27,7 +27,7 @@ const PremiumUpsellScreenWhite = ({ data, onNext, onBack, onSkip, jumpToStep, up
       updateData({ wantsTrial: true });
     }
     localStorage.setItem('fridgy_wants_trial', 'true');
-    jumpToStep(10); // Go to payment screen
+    jumpToStep(11); // Go to payment screen
   };
 
   const handleContinueFree = () => {
