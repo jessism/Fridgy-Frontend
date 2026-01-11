@@ -65,6 +65,23 @@ const getUserData = () => {
   return userStr ? JSON.parse(userStr) : null;
 };
 
+// Helper to detect network/connectivity errors
+const isNetworkError = (error) => {
+  const networkErrorMessages = [
+    'Load failed',
+    'Failed to fetch',
+    'NetworkError',
+    'Network request failed',
+    'net::ERR_',
+    'TypeError: Failed to fetch',
+    'The Internet connection appears to be offline',
+    'Network Error'
+  ];
+
+  const errorMessage = error?.message || String(error);
+  return networkErrorMessages.some(msg => errorMessage.includes(msg));
+};
+
 // API request helper
 const apiRequest = async (endpoint, options = {}, retryWithRefresh = true) => {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -79,8 +96,25 @@ const apiRequest = async (endpoint, options = {}, retryWithRefresh = true) => {
     ...options,
   };
 
-  const response = await fetch(url, config);
-  const data = await response.json();
+  let response;
+  try {
+    response = await fetch(url, config);
+  } catch (error) {
+    if (isNetworkError(error)) {
+      throw new Error('Connection lost. Please check your internet and try again.');
+    }
+    throw error;
+  }
+
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    if (isNetworkError(error)) {
+      throw new Error('Connection lost. Please check your internet and try again.');
+    }
+    throw new Error('Unable to process server response. Please try again.');
+  }
 
   if (!response.ok) {
     // If token expired and we have a refresh token, try to refresh

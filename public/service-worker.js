@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-globals */
 
 // Cache name versioning
-const CACHE_NAME = 'trackabite-v9'; // v9: Fix notification click navigation when app is in background (iOS)
+const CACHE_NAME = 'trackabite-v10'; // v10: Fix "response is null" error when offline - proper fallback responses
 const urlsToCache = [
   // Removed '/' to prevent caching landing page - fixes auth redirect issue
   '/static/css/main.css',
@@ -76,13 +76,27 @@ self.addEventListener('fetch', event => {
 
   // NEVER cache auth endpoints - always go to network
   if (event.request.url.includes('/api/auth/')) {
-    event.respondWith(fetch(event.request));
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        return new Response(
+          JSON.stringify({ error: 'Connection lost. Please check your internet and try again.' }),
+          { status: 503, headers: { 'Content-Type': 'application/json' } }
+        );
+      })
+    );
     return;
   }
 
   // Skip other API requests from cache
   if (event.request.url.includes('/api/')) {
-    event.respondWith(fetch(event.request));
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        return new Response(
+          JSON.stringify({ error: 'Connection lost. Please check your internet and try again.' }),
+          { status: 503, headers: { 'Content-Type': 'application/json' } }
+        );
+      })
+    );
     return;
   }
 
@@ -92,7 +106,16 @@ self.addEventListener('fetch', event => {
       fetch(event.request)
         .catch(() => {
           // Only use cache when offline
-          return caches.match(event.request);
+          return caches.match(event.request).then(cachedResponse => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            // Return offline page when nothing cached (prevents "response is null" error)
+            return new Response(
+              '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Offline - Trackabite</title></head><body style="font-family:system-ui,-apple-system,sans-serif;text-align:center;padding:50px 20px;background:#f5f5f5"><div style="max-width:400px;margin:0 auto;background:white;padding:40px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.1)"><h1 style="margin:0 0 16px;font-size:24px">You\'re offline</h1><p style="color:#666;margin:0 0 24px">Please check your internet connection and try again.</p><button onclick="location.reload()" style="background:#4fcf61;color:white;border:none;padding:12px 24px;border-radius:8px;font-size:16px;cursor:pointer">Retry</button></div></body></html>',
+              { status: 503, headers: { 'Content-Type': 'text/html' } }
+            );
+          });
         })
     );
     return;
