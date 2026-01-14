@@ -5,7 +5,10 @@ import ShareListModal from '../components/modals/ShareListModal';
 import RecipeCarousel from '../components/RecipeCarousel';
 import RecipeDetailModal from '../components/modals/RecipeDetailModal';
 import { ChevronLeft, Users, Check, Trash2, RefreshCw } from 'lucide-react';
+import { getIngredientIconUrl } from '../assets/icons/ingredients';
 import '../components/ShoppingListSection.css';
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const ShoppingListDetailPage = () => {
   const { listId } = useParams();
@@ -42,6 +45,7 @@ const ShoppingListDetailPage = () => {
     return localStorage.getItem('shopping_organize_by_aisle') === 'true';
   });
   const [selectedRecipeForPreview, setSelectedRecipeForPreview] = useState(null);
+  const [recipeLoading, setRecipeLoading] = useState(false);
 
   // Toggle handler for organize by aisle
   const handleToggleOrganizeByAisle = () => {
@@ -50,9 +54,31 @@ const ShoppingListDetailPage = () => {
     localStorage.setItem('shopping_organize_by_aisle', String(newValue));
   };
 
-  // Handler for recipe carousel click - data is already in source_recipes
-  const handleRecipeClick = (recipe) => {
-    setSelectedRecipeForPreview(recipe);
+  // Handler for recipe carousel click - fetch full recipe data
+  const handleRecipeClick = async (recipe) => {
+    setRecipeLoading(true);
+    setSelectedRecipeForPreview(recipe); // Show modal immediately with minimal data
+
+    try {
+      const token = localStorage.getItem('fridgy_token');
+      const response = await fetch(`${API_BASE_URL}/saved-recipes/${recipe.id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const fullRecipe = await response.json();
+        setSelectedRecipeForPreview(fullRecipe);
+      }
+      // If fetch fails, keep showing minimal data (already set above)
+    } catch (error) {
+      console.error('Failed to fetch full recipe:', error);
+      // Keep showing minimal data on error
+    } finally {
+      setRecipeLoading(false);
+    }
   };
 
   // Aisle configuration
@@ -728,74 +754,85 @@ const ShoppingListDetailPage = () => {
   };
 
   // Render a single item (used by both flat and grouped views)
-  const renderItem = (item) => (
-    <div key={item.id} className={`shopping-list-section__item-minimal ${item.is_checked ? 'shopping-list-section__item-minimal--checked' : ''}`}>
-      <span
-        className={`shopping-list-section__item-circle ${item.is_checked ? 'shopping-list-section__item-circle--checked' : ''} ${togglingItemId === item.id ? 'shopping-list-section__item-circle--loading' : ''}`}
-        onPointerDown={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          handleToggleItem(selectedList.id, item.id);
-        }}
-        style={{ opacity: togglingItemId === item.id ? 0.5 : 1 }}
-      >
-      </span>
-      <div className="shopping-list-section__item-info">
-        {editingItemId === item.id ? (
-          <>
-            <input
-              ref={editItemNameInputRef}
-              type="text"
-              value={tempItemName}
-              onChange={(e) => setTempItemName(e.target.value)}
-              onKeyDown={handleItemNameKeyPress}
-              onBlur={handleSaveItemEdit}
-              className="shopping-list-section__item-name-input"
-              disabled={updatingItemId === item.id}
-            />
-            <input
-              ref={editItemQuantityInputRef}
-              type="text"
-              value={tempItemQuantity}
-              onChange={(e) => setTempItemQuantity(e.target.value)}
-              onKeyDown={handleItemQuantityKeyPress}
-              onBlur={handleSaveItemEdit}
-              className="shopping-list-section__item-amount-input"
-              placeholder="1"
-              disabled={updatingItemId === item.id}
-            />
-          </>
-        ) : (
-          <>
-            <div
-              className="shopping-list-section__item-name-line shopping-list-section__item-name-line--editable"
-              onClick={() => !item.is_checked && handleStartEditItem(item, 'name')}
-            >
-              {item.name}
-            </div>
-            <div
-              className="shopping-list-section__item-amount-line shopping-list-section__item-amount-line--editable"
-              onClick={() => !item.is_checked && handleStartEditItem(item, 'quantity')}
-            >
-              {item.quantity ? `${item.quantity} ${item.unit || ''}` : 'Add quantity'}
-            </div>
-          </>
-        )}
-      </div>
-      {selectedList.shopping_list_members && selectedList.shopping_list_members.length > 1 && item.is_checked && item.checked_by_name && (
-        <div className="shopping-list-section__checked-by">
-          ✓ by {getCheckedByText(item)}
+  const renderItem = (item) => {
+    const iconUrl = getIngredientIconUrl(item.name);
+
+    return (
+      <div key={item.id} className={`shopping-list-section__item-minimal ${item.is_checked ? 'shopping-list-section__item-minimal--checked' : ''}`}>
+        <div className="shopping-list-section__item-icon">
+          {iconUrl ? (
+            <img src={iconUrl} alt="" className="shopping-list-section__item-icon-img" />
+          ) : (
+            <span className="shopping-list-section__item-icon-fallback">🥘</span>
+          )}
         </div>
-      )}
-      <button
-        onClick={() => handleDeleteItem(selectedList.id, item.id)}
-        className="shopping-list-section__item-delete-btn"
-        aria-label="Remove item"
-      >
-        ×
-      </button>
-    </div>
-  );
+        <div className="shopping-list-section__item-info">
+          {editingItemId === item.id ? (
+            <>
+              <input
+                ref={editItemNameInputRef}
+                type="text"
+                value={tempItemName}
+                onChange={(e) => setTempItemName(e.target.value)}
+                onKeyDown={handleItemNameKeyPress}
+                onBlur={handleSaveItemEdit}
+                className="shopping-list-section__item-name-input"
+                disabled={updatingItemId === item.id}
+              />
+              <input
+                ref={editItemQuantityInputRef}
+                type="text"
+                value={tempItemQuantity}
+                onChange={(e) => setTempItemQuantity(e.target.value)}
+                onKeyDown={handleItemQuantityKeyPress}
+                onBlur={handleSaveItemEdit}
+                className="shopping-list-section__item-amount-input"
+                placeholder="1"
+                disabled={updatingItemId === item.id}
+              />
+            </>
+          ) : (
+            <>
+              <div
+                className="shopping-list-section__item-name-line shopping-list-section__item-name-line--editable"
+                onClick={() => !item.is_checked && handleStartEditItem(item, 'name')}
+              >
+                {item.name ? item.name.charAt(0).toUpperCase() + item.name.slice(1) : ''}
+              </div>
+              <div
+                className="shopping-list-section__item-amount-line shopping-list-section__item-amount-line--editable"
+                onClick={() => !item.is_checked && handleStartEditItem(item, 'quantity')}
+              >
+                {item.quantity ? `${item.quantity} ${item.unit || ''}` : 'Add quantity'}
+              </div>
+            </>
+          )}
+        </div>
+        {selectedList.shopping_list_members && selectedList.shopping_list_members.length > 1 && item.is_checked && item.checked_by_name && (
+          <div className="shopping-list-section__checked-by">
+            ✓ by {getCheckedByText(item)}
+          </div>
+        )}
+        <span
+          className={`shopping-list-section__item-circle ${item.is_checked ? 'shopping-list-section__item-circle--checked' : ''} ${togglingItemId === item.id ? 'shopping-list-section__item-circle--loading' : ''}`}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleToggleItem(selectedList.id, item.id);
+          }}
+          style={{ opacity: togglingItemId === item.id ? 0.5 : 1 }}
+        >
+        </span>
+        <button
+          onClick={() => handleDeleteItem(selectedList.id, item.id)}
+          className="shopping-list-section__item-delete-btn"
+          aria-label="Remove item"
+        >
+          ×
+        </button>
+      </div>
+    );
+  };
 
   // AisleGroup component for grouped view - simplified, always expanded
   const AisleGroup = ({ aisle, items: aisleItems }) => {
@@ -919,14 +956,13 @@ const ShoppingListDetailPage = () => {
 
           {/* Add item form */}
           <div className="shopping-list-section__item-minimal shopping-list-section__item-input">
-            <span className="shopping-list-section__item-circle"></span>
             <div className="shopping-list-section__item-info">
               <input
                 ref={itemNameInputRef}
                 type="text"
                 onKeyPress={handleItemKeyPress}
                 className="shopping-list-section__item-name-input"
-                placeholder=""
+                placeholder="Item"
                 autoFocus
               />
               <input
@@ -934,9 +970,10 @@ const ShoppingListDetailPage = () => {
                 type="text"
                 onKeyPress={handleAmountKeyPress}
                 className="shopping-list-section__item-amount-input"
-                placeholder=""
+                placeholder="Amount"
               />
             </div>
+            <span className="shopping-list-section__item-circle"></span>
           </div>
 
           {/* Items list below the input */}
@@ -1088,7 +1125,7 @@ const ShoppingListDetailPage = () => {
         isOpen={!!selectedRecipeForPreview}
         onClose={() => setSelectedRecipeForPreview(null)}
         recipe={selectedRecipeForPreview}
-        isLoading={false}
+        isLoading={recipeLoading}
       />
     </div>
   );

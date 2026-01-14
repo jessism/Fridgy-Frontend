@@ -285,9 +285,9 @@ const MobileBottomNav = () => {
 
                 {/* Panel 2: Recipe Options (Import / Upload) */}
                 <div className="mobile-bottom-nav__sheet-panel">
-                  <div className="mobile-bottom-nav__sheet-options">
-                    <button className="mobile-bottom-nav__sheet-option" onClick={handleImportRecipe}>
-                      <div className="mobile-bottom-nav__sheet-option-icon">
+                  <div className="modal-options mobile-bottom-nav__sheet-options--two-col">
+                    <button className="modal-option modal-option--import" onClick={handleImportRecipe}>
+                      <div className="modal-option-icon">
                         {/* Globe/Link icon for import from web */}
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                           <circle cx="12" cy="12" r="10"/>
@@ -295,11 +295,11 @@ const MobileBottomNav = () => {
                           <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
                         </svg>
                       </div>
-                      <span className="mobile-bottom-nav__sheet-option-label">Import from the internet</span>
+                      <span className="modal-option-label">Import from internet</span>
                     </button>
 
-                    <button className="mobile-bottom-nav__sheet-option" onClick={handleUploadRecipe}>
-                      <div className="mobile-bottom-nav__sheet-option-icon">
+                    <button className="modal-option modal-option--upload" onClick={handleUploadRecipe}>
+                      <div className="modal-option-icon">
                         {/* Upload arrow icon */}
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -307,7 +307,7 @@ const MobileBottomNav = () => {
                           <line x1="12" y1="3" x2="12" y2="15"/>
                         </svg>
                       </div>
-                      <span className="mobile-bottom-nav__sheet-option-label">Upload Recipe</span>
+                      <span className="modal-option-label">Upload Recipe</span>
                     </button>
                   </div>
                 </div>
@@ -315,26 +315,26 @@ const MobileBottomNav = () => {
                 {/* Panel 3: Upload Options (Scan / Manual) */}
                 <div className="mobile-bottom-nav__sheet-panel">
                   <div className="mobile-bottom-nav__sheet-options">
-                    <button className="mobile-bottom-nav__sheet-option" onClick={handleScanRecipe}>
-                      <div className="mobile-bottom-nav__sheet-option-icon">
+                    <button className="modal-option modal-option--scan" onClick={handleScanRecipe}>
+                      <div className="modal-option-icon">
                         {/* Camera icon */}
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
                           <circle cx="12" cy="13" r="4"/>
                         </svg>
                       </div>
-                      <span className="mobile-bottom-nav__sheet-option-label">Scan with camera</span>
+                      <span className="modal-option-label">Scan with camera</span>
                     </button>
 
-                    <button className="mobile-bottom-nav__sheet-option" onClick={handleManualEntry}>
-                      <div className="mobile-bottom-nav__sheet-option-icon">
+                    <button className="modal-option modal-option--manual" onClick={handleManualEntry}>
+                      <div className="modal-option-icon">
                         {/* Pencil icon */}
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M12 20h9"/>
                           <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
                         </svg>
                       </div>
-                      <span className="mobile-bottom-nav__sheet-option-label">Manual Entry</span>
+                      <span className="modal-option-label">Manual Entry</span>
                     </button>
                   </div>
                 </div>

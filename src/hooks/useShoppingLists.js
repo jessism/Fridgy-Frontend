@@ -191,6 +191,36 @@ const useShoppingLists = () => {
     }
   };
 
+  // Add multiple items to shopping list with aggregation
+  const addItemsBatch = async (listId, items) => {
+    try {
+      const token = getAuthToken();
+      if (!token) throw new Error('Not authenticated');
+
+      console.log(`[useShoppingLists] Adding ${items.length} items in batch to list ${listId}`);
+
+      const response = await fetch(`${API_BASE_URL}/shopping-lists/${listId}/items/batch`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ items })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add items');
+      }
+
+      const data = await response.json();
+      console.log(`[useShoppingLists] Batch complete: ${data.summary.inserted_count} inserted, ${data.summary.updated_count} aggregated`);
+      return data;
+    } catch (err) {
+      console.error('Error adding items in batch:', err);
+      throw err;
+    }
+  };
+
   // Update item in shopping list
   const updateItem = async (listId, itemId, updates) => {
     try {
@@ -469,6 +499,7 @@ const useShoppingLists = () => {
     updateList,
     deleteList,
     addItem,
+    addItemsBatch,
     updateItem,
     toggleItem,
     deleteItem,

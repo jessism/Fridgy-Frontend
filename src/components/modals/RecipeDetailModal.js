@@ -11,7 +11,9 @@ import CookingModeModal from './CookingModeModal';
 import { UpgradeModal } from './UpgradeModal';
 import { highlightInstructions } from '../../utils/highlightInstructions';
 import ClockIcon from '../../assets/icons/Clock.png';
+import FridgyLogo from '../../assets/images/Logo.png';
 import { usePWADetection } from '../../hooks/usePWADetection';
+import { getIngredientIconUrl } from '../../assets/icons/ingredients';
 
 const RecipeDetailModal = ({
   isOpen,
@@ -47,7 +49,7 @@ const RecipeDetailModal = ({
   const [selectedIngredientsForList, setSelectedIngredientsForList] = useState(null);
 
   // Shopping lists hook
-  const { lists: shoppingLists, createList, addItem: addToShoppingList, addRecipeToList } = useShoppingLists();
+  const { lists: shoppingLists, createList, addItem: addToShoppingList, addItemsBatch, addRecipeToList } = useShoppingLists();
 
   // Subscription hook for premium gating
   const { isPremium, startCheckout } = useSubscription();
@@ -216,22 +218,16 @@ const RecipeDetailModal = ({
         selectedServings
       );
 
-      // Combine amount and unit into quantity string
-      let quantity = '';
-      if (scaledAmount && scaledAmount > 0) {
-        quantity = formatAmount(scaledAmount);
-        if (ingredient.unit) {
-          quantity += ` ${ingredient.unit}`;
-        }
-      } else if (ingredient.unit) {
-        quantity = ingredient.unit;
-      } else {
-        quantity = '1';
-      }
+      // Keep quantity and unit SEPARATE for proper aggregation
+      // Use raw decimal (1.5), not formatted Unicode fraction (1½) for parseFloat to work
+      const quantity = (scaledAmount && scaledAmount > 0)
+        ? String(scaledAmount)
+        : '1';
 
       return {
         name: ingredient.name || 'Unknown ingredient',
-        quantity: quantity.trim(),
+        quantity: quantity,
+        unit: ingredient.unit || '',
         category: 'Other'
       };
     });
@@ -316,10 +312,8 @@ const RecipeDetailModal = ({
 
   const handleAddToExistingList = async (listId, listName) => {
     try {
-      // Add all ingredients to the existing list
-      for (const ingredient of selectedIngredientsForList) {
-        await addToShoppingList(listId, ingredient);
-      }
+      // Add all ingredients to the existing list in batch (with aggregation)
+      await addItemsBatch(listId, selectedIngredientsForList);
 
       // Add recipe metadata for carousel display
       if (recipe) {
@@ -690,13 +684,51 @@ const RecipeDetailModal = ({
             originalServings,
             selectedServings
           );
+          const ingredientName = ingredient.name || ingredient.original || '';
+          const iconUrl = getIngredientIconUrl(ingredientName);
+
+          // Abbreviate common units
+          const abbreviateUnit = (unit) => {
+            if (!unit) return '';
+            const abbrevs = {
+              'tablespoon': 'tbsp',
+              'tablespoons': 'tbsp',
+              'teaspoon': 'tsp',
+              'teaspoons': 'tsp',
+              'ounce': 'oz',
+              'ounces': 'oz',
+              'pound': 'lb',
+              'pounds': 'lbs',
+              'kilogram': 'kg',
+              'kilograms': 'kg',
+              'gram': 'g',
+              'grams': 'g',
+              'milliliter': 'ml',
+              'milliliters': 'ml',
+              'liter': 'L',
+              'liters': 'L',
+            };
+            const lower = unit.toLowerCase();
+            return abbrevs[lower] || unit;
+          };
+
+          const measurement = `${formatAmount(scaledAmount)} ${abbreviateUnit(ingredient.unit)}`.trim();
+
           return (
             <div key={index} className="ingredient-item">
-              <span className="ingredient-amount">
-                {formatAmount(scaledAmount)}
-              </span>
-              <span className="ingredient-unit">{ingredient.unit || ''}</span>
-              <span className="ingredient-name">{ingredient.name || ingredient.original || ''}</span>
+              <div className="ingredient-icon">
+                {iconUrl ? (
+                  <img
+                    src={iconUrl}
+                    alt=""
+                    className="ingredient-icon__img"
+                  />
+                ) : (
+                  <span className="ingredient-icon__fallback">🥘</span>
+                )}
+              </div>
+              <span className="ingredient-measurement">{measurement}</span>
+              <span className="ingredient-name">{ingredientName}</span>
             </div>
           );
         })}
@@ -1002,8 +1034,7 @@ const RecipeDetailModal = ({
           <div className="recipe-modal-content">
             {isLoading ? (
               <div className="recipe-loading">
-                <div className="loading-spinner"></div>
-                <p>Loading recipe details...</p>
+                <img src={FridgyLogo} alt="Loading" className="recipe-loading__logo" />
               </div>
             ) : recipe ? (
               <div className="recipe-simple-layout">

@@ -290,6 +290,31 @@
   background: #C0E5AA;
 }
 
+/* Recipe sub-panel options - bright lime */
+.modal-option--import {
+  background: #C8F5A8;
+}
+
+.modal-option--import:hover {
+  background: #B4ED8C;
+}
+
+.modal-option--import:active {
+  background: #A0E570;
+}
+
+.modal-option--upload {
+  background: #D4FAB8;
+}
+
+.modal-option--upload:hover {
+  background: #C0F29C;
+}
+
+.modal-option--upload:active {
+  background: #ACEA80;
+}
+
 .modal-option-icon svg {
   width: 100%;
   height: 100%;
@@ -377,6 +402,11 @@
   gap: 16px;
 }
 
+/* 2-column override for modal-options in sheet panels */
+.mobile-bottom-nav__sheet-options--two-col {
+  grid-template-columns: 1fr 1fr;
+}
+
 /* Option card styling - compact version */
 .mobile-bottom-nav__sheet-option {
   background: #F9FAFB;
@@ -436,4 +466,29 @@
   .mobile-bottom-nav__sheet-slider {
     transition: none;
   }
+}
+
+/* Upload sub-panel options - yellow-green */
+.modal-option--scan {
+  background: #E5F5A0;
+}
+
+.modal-option--scan:hover {
+  background: #D8ED88;
+}
+
+.modal-option--scan:active {
+  background: #CBE570;
+}
+
+.modal-option--manual {
+  background: #F0FAB8;
+}
+
+.modal-option--manual:hover {
+  background: #E4F2A0;
+}
+
+.modal-option--manual:active {
+  background: #D8EA88;
 }

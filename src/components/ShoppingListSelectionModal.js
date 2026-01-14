@@ -14,6 +14,8 @@ const ShoppingListSelectionModal = ({
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [isAddingToList, setIsAddingToList] = useState(false);
+  const [addingListId, setAddingListId] = useState(null);
 
   // Generate a smart default name from recipe title
   const getDefaultListName = () => {
@@ -52,11 +54,17 @@ const ShoppingListSelectionModal = ({
   };
 
   const handleAddToList = async (listId, listName) => {
+    if (isAddingToList) return; // Prevent double-clicks
+
+    setIsAddingToList(true);
+    setAddingListId(listId);
     try {
       await onAddToExistingList(listId, listName);
-      onClose();
+      // onClose will be called by parent after navigation
     } catch (error) {
       console.error('Failed to add item to list:', error);
+      setIsAddingToList(false);
+      setAddingListId(null);
     }
   };
 
@@ -107,30 +115,42 @@ const ShoppingListSelectionModal = ({
                 Existing Lists
               </h4>
               <div className="shopping-list-selection-modal__lists">
-                {shoppingLists.map((list) => (
-                  <button
-                    key={list.id}
-                    className="shopping-list-selection-modal__list-card"
-                    onClick={() => handleAddToList(list.id, list.name)}
-                  >
-                    <div className="shopping-list-selection-modal__list-info">
-                      <div className="shopping-list-selection-modal__list-name">
-                        {list.name}
+                {shoppingLists.map((list) => {
+                  const isThisListLoading = isAddingToList && addingListId === list.id;
+                  return (
+                    <button
+                      key={list.id}
+                      className={`shopping-list-selection-modal__list-card ${isThisListLoading ? 'shopping-list-selection-modal__list-card--loading' : ''}`}
+                      onClick={() => handleAddToList(list.id, list.name)}
+                      disabled={isAddingToList}
+                    >
+                      <div className="shopping-list-selection-modal__list-info">
+                        <div className="shopping-list-selection-modal__list-name">
+                          {list.name}
+                        </div>
+                        <div className="shopping-list-selection-modal__list-meta">
+                          {isThisListLoading ? (
+                            <span style={{ color: '#4fcf61' }}>Adding ingredients...</span>
+                          ) : (
+                            <>
+                              {list.total_items || 0} {(list.total_items || 0) === 1 ? 'item' : 'items'}
+                              {list.member_count > 1 && (
+                                <span className="shopping-list-selection-modal__shared-badge">
+                                  • Shared with {list.member_count - 1} others
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </div>
                       </div>
-                      <div className="shopping-list-selection-modal__list-meta">
-                        {list.total_items || 0} {(list.total_items || 0) === 1 ? 'item' : 'items'}
-                        {list.member_count > 1 && (
-                          <span className="shopping-list-selection-modal__shared-badge">
-                            • Shared with {list.member_count - 1} others
-                          </span>
-                        )}
+                      <div className="shopping-list-selection-modal__list-arrow">
+                        {isThisListLoading ? (
+                          <span className="shopping-list-selection-modal__spinner"></span>
+                        ) : '→'}
                       </div>
-                    </div>
-                    <div className="shopping-list-selection-modal__list-arrow">
-                      →
-                    </div>
-                  </button>
-                ))}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
