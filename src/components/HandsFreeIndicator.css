@@ -1,0 +1,224 @@
+/* HandsFreeIndicator.css - Scoped styles using BEM naming */
+
+/* ===========================
+   Toggle Button
+   =========================== */
+
+.hands-free-indicator__toggle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  transition: all 0.2s ease;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.hands-free-indicator__toggle:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.hands-free-indicator__toggle:active {
+  transform: scale(0.95);
+}
+
+/* Enabled state - green background */
+.hands-free-indicator__toggle.hands-free-indicator--enabled,
+.hands-free-indicator__toggle.hands-free-indicator--listening,
+.hands-free-indicator__toggle.hands-free-indicator--speaking {
+  background: var(--primary-green, #4fcf61);
+  color: white;
+}
+
+.hands-free-indicator__toggle.hands-free-indicator--enabled:hover,
+.hands-free-indicator__toggle.hands-free-indicator--listening:hover,
+.hands-free-indicator__toggle.hands-free-indicator--speaking:hover {
+  background: #45b857;
+  color: white;
+}
+
+/* Icon animation */
+.hands-free-indicator__icon {
+  transition: transform 0.2s ease;
+}
+
+.hands-free-indicator--listening .hands-free-indicator__icon,
+.hands-free-indicator--speaking .hands-free-indicator__icon {
+  animation: hands-free-indicator__icon-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes hands-free-indicator__icon-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Sound wave animation for speaking */
+.hands-free-indicator__sound-wave {
+  opacity: 0.7;
+  animation: hands-free-indicator__wave 1s ease-in-out infinite;
+}
+
+.hands-free-indicator__sound-wave--outer {
+  animation-delay: 0.2s;
+}
+
+@keyframes hands-free-indicator__wave {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Pulse ring animation */
+.hands-free-indicator__pulse-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--primary-green, #4fcf61);
+  animation: hands-free-indicator__pulse 2s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes hands-free-indicator__pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+/* ===========================
+   Bottom Hint Bar
+   =========================== */
+
+.hands-free-indicator__hint-bar {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 0.75rem 1.25rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  animation: hands-free-indicator__hint-fade-in 0.3s ease-out;
+  z-index: 10;
+  max-width: calc(100% - 2rem);
+}
+
+.hands-free-indicator__hint-bar--error {
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+}
+
+@keyframes hands-free-indicator__hint-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Status row */
+.hands-free-indicator__status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Listening indicator dot */
+.hands-free-indicator__listening-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary-green, #4fcf61);
+  animation: hands-free-indicator__dot-pulse 1s ease-in-out infinite;
+}
+
+@keyframes hands-free-indicator__dot-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+}
+
+.hands-free-indicator__status-text {
+  font-family: var(--header-font, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.hands-free-indicator__hint-bar--error .hands-free-indicator__status-text {
+  color: #dc2626;
+}
+
+/* Hint text for commands */
+.hands-free-indicator__hint-text {
+  font-family: var(--header-font, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* ===========================
+   Responsive Adjustments
+   =========================== */
+
+@media (max-width: 480px) {
+  .hands-free-indicator__toggle {
+    width: 40px;
+    height: 40px;
+  }
+
+  .hands-free-indicator__toggle svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .hands-free-indicator__hint-bar {
+    bottom: 90px;
+    padding: 0.625rem 1rem;
+  }
+
+  .hands-free-indicator__status-text {
+    font-size: 0.8rem;
+  }
+
+  .hands-free-indicator__hint-text {
+    font-size: 0.7rem;
+  }
+}
+
+/* Tablet and larger */
+@media (min-width: 768px) {
+  .hands-free-indicator__hint-bar {
+    bottom: 120px;
+  }
+}

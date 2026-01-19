@@ -80,6 +80,12 @@
   padding-top: max(1rem, env(safe-area-inset-top));
 }
 
+.cooking-mode__header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .cooking-mode__close-button {
   width: 44px;
   height: 44px;
@@ -122,6 +128,35 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Timers row - multiple timers displayed side by side */
+.cooking-mode__timers-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0.75rem 1rem 0;
+  animation: cooking-mode__timer-slide-in 0.3s ease-out;
+}
+
+@keyframes cooking-mode__timer-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* On small screens, stack timers if needed */
+@media (max-width: 400px) {
+  .cooking-mode__timers-row {
+    gap: 8px;
+  }
 }
 
 /* Main content area */

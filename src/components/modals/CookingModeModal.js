@@ -1,15 +1,21 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import './CookingModeModal.css';
 import { highlightInstructions } from '../../utils/highlightInstructions';
+import useHandsFree from '../../hooks/useHandsFree';
+import useTimers from '../../hooks/useTimers';
+import HandsFreeIndicator from '../HandsFreeIndicator';
+import TimerDisplay from '../TimerDisplay';
 
 const CookingModeModal = ({ isOpen, onClose, steps, recipeName, ingredients }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
+  const prevStepRef = useRef(currentStep);
 
   // Reset to first step when modal opens
   useEffect(() => {
     if (isOpen) {
       setCurrentStep(0);
+      prevStepRef.current = 0;
     }
   }, [isOpen]);
 
@@ -52,6 +58,162 @@ const CookingModeModal = ({ isOpen, onClose, steps, recipeName, ingredients }) =
       setCurrentStep(prev => prev - 1);
     }
   }, [currentStep]);
+
+  // Get clean step text for TTS (remove markdown, "Step X:" prefix, etc.)
+  const getCleanStepText = useCallback((stepIndex) => {
+    if (!steps || !steps[stepIndex]) return '';
+    const text = steps[stepIndex];
+    return text
+      .replace(/^Step\s*\d+\s*[:.]\s*/i, '') // Remove "Step X:" prefix
+      .replace(/\*\*/g, '') // Remove markdown bold
+      .replace(/\*/g, '')   // Remove markdown italic
+      .trim();
+  }, [steps]);
+
+  // Ref to store speak function to avoid circular dependency
+  const speakRef = useRef(null);
+
+  // Multiple timers hook for voice-activated cooking timers
+  const timersHook = useTimers({
+    onComplete: (timerName) => {
+      // Announce timer completion via TTS with timer name
+      if (speakRef.current) {
+        speakRef.current(`${timerName} timer complete!`);
+      }
+    }
+  });
+
+  // Refs for timer functions to avoid dependency issues in useCallback
+  const timersRef = useRef(timersHook);
+  useEffect(() => {
+    timersRef.current = timersHook;
+  }, [timersHook]);
+
+  // Timer voice command handlers - use refs to avoid recreation
+  const handleTimerSet = useCallback(({ value, unit, name }) => {
+    const ms = unit === 'minutes' ? value * 60 * 1000 : value * 1000;
+    timersRef.current.addTimer(name, ms);
+    // Announce timer start with name
+    if (speakRef.current) {
+      const announcement = name
+        ? `${name} timer set for ${value} ${unit}`
+        : `Timer set for ${value} ${unit}`;
+      speakRef.current(announcement);
+    }
+    console.log('[CookingMode] Timer set:', name || 'unnamed', value, unit);
+  }, []);
+
+  const handleTimerPause = useCallback((name) => {
+    if (name) {
+      timersRef.current.pauseTimer(name);
+      if (speakRef.current) {
+        speakRef.current(`${name} timer paused`);
+      }
+    } else {
+      // Pause all if no name specified
+      timersRef.current.pauseAll();
+      if (speakRef.current) {
+        speakRef.current('All timers paused');
+      }
+    }
+  }, []);
+
+  const handleTimerResume = useCallback((name) => {
+    if (name) {
+      timersRef.current.resumeTimer(name);
+      if (speakRef.current) {
+        speakRef.current(`${name} timer resumed`);
+      }
+    } else {
+      // Resume all if no name specified
+      timersRef.current.resumeAll();
+      if (speakRef.current) {
+        speakRef.current('All timers resumed');
+      }
+    }
+  }, []);
+
+  const handleTimerCancel = useCallback((name) => {
+    if (name) {
+      timersRef.current.removeTimer(name);
+      if (speakRef.current) {
+        speakRef.current(`${name} timer cancelled`);
+      }
+    } else {
+      // Clear all if no name specified
+      timersRef.current.clearAll();
+      if (speakRef.current) {
+        speakRef.current('All timers cancelled');
+      }
+    }
+  }, []);
+
+  // Repeat current step callback for hands-free
+  const handleRepeat = useCallback(() => {
+    if (speakRef.current && steps && steps[currentStep]) {
+      speakRef.current(getCleanStepText(currentStep));
+    }
+  }, [currentStep, steps, getCleanStepText]);
+
+  // Hands-free mode hook
+  const handsFree = useHandsFree({
+    onNext: goToNextStep,
+    onPrevious: goToPreviousStep,
+    onRepeat: handleRepeat,
+    onTimerSet: handleTimerSet,
+    onTimerPause: handleTimerPause,
+    onTimerResume: handleTimerResume,
+    onTimerCancel: handleTimerCancel,
+    isActive: isOpen
+  });
+
+  // Update speakRef when handsFree changes
+  useEffect(() => {
+    speakRef.current = handsFree.speak;
+  }, [handsFree.speak]);
+
+  // Auto-read step when it changes and hands-free is enabled
+  useEffect(() => {
+    if (!handsFree.isEnabled || !isOpen || !steps) return;
+
+    // Only read if step actually changed (not on initial render)
+    if (currentStep !== prevStepRef.current) {
+      prevStepRef.current = currentStep;
+
+      // Small delay for smooth transition
+      const timer = setTimeout(() => {
+        const stepText = getCleanStepText(currentStep);
+        if (stepText) {
+          handsFree.speak(stepText);
+        }
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [currentStep, handsFree.isEnabled, handsFree.speak, isOpen, steps, getCleanStepText]);
+
+  // Read first step when hands-free is enabled
+  useEffect(() => {
+    if (handsFree.isEnabled && isOpen && steps && steps[currentStep]) {
+      // Small delay to let the UI settle
+      const timer = setTimeout(() => {
+        handsFree.speak(getCleanStepText(currentStep));
+      }, 300);
+
+      return () => clearTimeout(timer);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [handsFree.isEnabled]); // Only trigger when hands-free is toggled on
+
+  // Stop TTS and timers when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      handsFree.stopSpeaking();
+      handsFree.disable();
+      timersHook.clearAll();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -121,13 +283,46 @@ const CookingModeModal = ({ isOpen, onClose, steps, recipeName, ingredients }) =
             <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
-        <div className="cooking-mode__step-indicator">
-          Step {currentStep + 1} of {steps.length}
+        <div className="cooking-mode__header-right">
+          <div className="cooking-mode__step-indicator">
+            Step {currentStep + 1} of {steps.length}
+          </div>
+          {/* Hands-free toggle button */}
+          {handsFree.isSupported && (
+            <HandsFreeIndicator
+              isEnabled={handsFree.isEnabled}
+              isListening={handsFree.isListening}
+              isSpeaking={handsFree.isSpeaking}
+              lastCommand={handsFree.lastCommand}
+              isSpeechRecognitionSupported={handsFree.isSpeechRecognitionSupported}
+              onToggle={handsFree.toggleHandsFree}
+              error={handsFree.error}
+            />
+          )}
         </div>
       </div>
 
       {/* Recipe name (subtle) */}
       <div className="cooking-mode__recipe-name">{recipeName}</div>
+
+      {/* Voice-activated timer displays - positioned below recipe name */}
+      {timersHook.hasTimers && (
+        <div className="cooking-mode__timers-row">
+          {timersHook.timers.map(timer => (
+            <TimerDisplay
+              key={timer.id}
+              name={timer.name}
+              displayTime={timer.displayTime}
+              isRunning={timer.isRunning}
+              isPaused={timer.isPaused}
+              isComplete={timer.isComplete}
+              onPause={() => timersHook.pauseTimer(timer.id)}
+              onResume={() => timersHook.resumeTimer(timer.id)}
+              onDismiss={() => timersHook.dismissTimer(timer.id)}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Main step content */}
       <div className="cooking-mode__content">
