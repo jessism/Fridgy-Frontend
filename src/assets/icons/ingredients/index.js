@@ -21,6 +21,7 @@ import Cauliflower from './Cauliflower.png';
 import Celery from './Celery.png';
 import Cheese from './Cheese.png';
 import Cheese_Cheddar from './Cheese_Cheddar.png';
+import Chia_Seeds from './Chia seeds.png';
 import Cheese_Mozzarella from './Cheese_Mozzarella.png';
 import Cheese_Parmesan from './Cheese_Parmesan.png';
 import chicken from './chicken.png';
@@ -54,6 +55,7 @@ import Lemon from './Lemon.png';
 import Lentils from './Lentils.png';
 import Lettuce from './Lettuce.png';
 import Lime from './Lime.png';
+import Mango from './Mango.png';
 import matcha_latte from './matcha_latte.png';
 import Mayo from './Mayo.png';
 import milk from './milk.png';
@@ -109,6 +111,8 @@ const INGREDIENT_ICONS = {
   'grape': grapes,
   'lemon': Lemon,
   'lime': Lime,
+  'mango': Mango,
+  'mangoes': Mango,
   'orange': Orange,
   'peach': Peach,
   'pineapple': Pinapple,
@@ -204,6 +208,8 @@ const INGREDIENT_ICONS = {
   'pasta': Spaghetti,
   'black beans': Black_Beans,
   'beans': Black_Beans,
+  'chia seeds': Chia_Seeds,
+  'chia': Chia_Seeds,
   'seaweed': Dry_Seaweed,
   'nori': Dry_Seaweed,
   'dry seaweed': Dry_Seaweed,
