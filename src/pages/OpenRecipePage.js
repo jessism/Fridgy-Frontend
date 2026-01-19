@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './OpenRecipePage.css';
+import { getIngredientIconUrl } from '../assets/icons/ingredients';
+import { highlightInstructions } from '../utils/highlightInstructions';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -165,27 +167,41 @@ function OpenRecipePage() {
     }
     return (
       <div className="open-recipe-page__ingredients-list">
-        {recipe.extendedIngredients.map((ingredient, index) => (
-          <div key={index} className="open-recipe-page__ingredient-item">
-            <span className="open-recipe-page__ingredient-amount">
-              {formatAmount(ingredient.amount)}
-            </span>
-            <span className="open-recipe-page__ingredient-unit">{ingredient.unit || ''}</span>
-            <span className="open-recipe-page__ingredient-name">{ingredient.name}</span>
-          </div>
-        ))}
+        {recipe.extendedIngredients.map((ingredient, index) => {
+          const iconUrl = getIngredientIconUrl(ingredient.name);
+          return (
+            <div key={index} className="open-recipe-page__ingredient-item">
+              <div className="open-recipe-page__ingredient-icon">
+                {iconUrl ? (
+                  <img src={iconUrl} alt="" className="open-recipe-page__ingredient-icon-img" />
+                ) : (
+                  <span className="open-recipe-page__ingredient-icon-fallback">🥘</span>
+                )}
+              </div>
+              <span className="open-recipe-page__ingredient-amount">
+                {formatAmount(ingredient.amount)}
+              </span>
+              <span className="open-recipe-page__ingredient-unit">{ingredient.unit || ''}</span>
+              <span className="open-recipe-page__ingredient-name">{ingredient.name}</span>
+            </div>
+          );
+        })}
       </div>
     );
   };
 
   // Render instructions
   const renderInstructions = () => {
+    const ingredients = recipe?.extendedIngredients || [];
+
     // Format 1: analyzedInstructions
     if (recipe?.analyzedInstructions?.[0]?.steps?.length > 0) {
       return recipe.analyzedInstructions[0].steps.map((step, index) => (
         <div key={index} className="open-recipe-page__instruction-step">
           <span className="open-recipe-page__step-number">{step.number || index + 1}</span>
-          <span className="open-recipe-page__step-text">{step.step}</span>
+          <span className="open-recipe-page__step-text">
+            {highlightInstructions(step.step, ingredients)}
+          </span>
         </div>
       ));
     }
@@ -194,7 +210,9 @@ function OpenRecipePage() {
       return recipe.instructionSteps.map((step, index) => (
         <div key={index} className="open-recipe-page__instruction-step">
           <span className="open-recipe-page__step-number">{index + 1}</span>
-          <span className="open-recipe-page__step-text">{step}</span>
+          <span className="open-recipe-page__step-text">
+            {highlightInstructions(step, ingredients)}
+          </span>
         </div>
       ));
     }
@@ -208,7 +226,9 @@ function OpenRecipePage() {
         return steps.map((step, index) => (
           <div key={index} className="open-recipe-page__instruction-step">
             <span className="open-recipe-page__step-number">{index + 1}</span>
-            <span className="open-recipe-page__step-text">{step.trim()}</span>
+            <span className="open-recipe-page__step-text">
+              {highlightInstructions(step.trim(), ingredients)}
+            </span>
           </div>
         ));
       }
@@ -218,7 +238,9 @@ function OpenRecipePage() {
       return recipe.instructions.map((step, index) => (
         <div key={index} className="open-recipe-page__instruction-step">
           <span className="open-recipe-page__step-number">{index + 1}</span>
-          <span className="open-recipe-page__step-text">{step}</span>
+          <span className="open-recipe-page__step-text">
+            {highlightInstructions(step, ingredients)}
+          </span>
         </div>
       ));
     }
