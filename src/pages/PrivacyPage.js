@@ -11,7 +11,7 @@ function PrivacyPage() {
     <div className="legal-page">
       <div className="legal-page__container">
         <h1 className="legal-page__title">Privacy Policy</h1>
-        <p className="legal-page__updated">Last Updated: January 3, 2026</p>
+        <p className="legal-page__updated">Last Updated: January 24, 2026</p>
 
         <div className="legal-page__content">
           <section className="legal-page__section">
@@ -158,7 +158,20 @@ function PrivacyPage() {
           </section>
 
           <section className="legal-page__section">
-            <h2>13. GDPR & CCPA Compliance</h2>
+            <h2>13. Government and Legal Data Requests</h2>
+            <p>
+              We have the following policies in place regarding requests from government authorities or law enforcement for user data:
+            </p>
+            <ul>
+              <li><strong>Legal Review:</strong> All requests from public authorities or government agencies for user personal data will be reviewed for legal validity before any response. We verify that requests come from legitimate authorities and are legally valid.</li>
+              <li><strong>Data Minimization:</strong> When legally required to respond to a valid request, we will only disclose the minimum information necessary to comply with the specific request. No additional data beyond what is legally required will be shared.</li>
+              <li><strong>Challenging Unlawful Requests:</strong> Requests that appear to be unlawful, overly broad, or inappropriate will be challenged or rejected. Legal counsel will be consulted when necessary.</li>
+              <li><strong>Documentation:</strong> All data requests from public authorities are documented, including the date and source of request, nature of data requested, response provided, and legal reasoning.</li>
+            </ul>
+          </section>
+
+          <section className="legal-page__section">
+            <h2>14. GDPR & CCPA Compliance</h2>
             <p>
               If you are a resident of the European Union or California, you have additional rights under GDPR and CCPA respectively. Please contact us to exercise these rights.
             </p>
