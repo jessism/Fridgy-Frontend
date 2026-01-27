@@ -490,7 +490,11 @@ const InventoryPage = ({ defaultTab }) => {
 
       // If a specific category is selected (from URL), show only that category
       if (selectedCategory) {
-        return grouped[selectedCategory] ? { [selectedCategory]: grouped[selectedCategory] } : {};
+        // Case-insensitive matching to handle any casing differences
+        const matchedCategory = Object.keys(grouped).find(
+          cat => cat.toLowerCase() === selectedCategory.toLowerCase()
+        );
+        return matchedCategory ? { [matchedCategory]: grouped[matchedCategory] } : {};
       }
 
       // Sort categories alphabetically
@@ -786,8 +790,8 @@ const InventoryPage = ({ defaultTab }) => {
             </div>
           )}
 
-          {/* No Results State */}
-          {!loading && !error && inventoryItems.length > 0 && filteredItems.length === 0 && (
+          {/* No Results State - shows when search returns nothing OR when selected category has no items */}
+          {!loading && !error && inventoryItems.length > 0 && (filteredItems.length === 0 || (selectedCategory && Object.keys(groupedItems).length === 0)) && (
             <div style={{
               background: 'white',
               borderRadius: '12px',
@@ -795,8 +799,12 @@ const InventoryPage = ({ defaultTab }) => {
               padding: '3rem',
               textAlign: 'center'
             }}>
-              <h3 style={{ color: '#666', marginBottom: '1rem' }}>No items match your filter</h3>
-              <p style={{ color: '#999', marginBottom: '2rem' }}>Try selecting a different filter or add more items to your inventory.</p>
+              <h3 style={{ color: '#666', marginBottom: '1rem' }}>
+                {selectedCategory ? `No ${selectedCategory} items in your fridge` : 'No items match your filter'}
+              </h3>
+              <p style={{ color: '#999', marginBottom: '2rem' }}>
+                {selectedCategory ? 'Add some items to this category or view all items.' : 'Try selecting a different filter or add more items to your inventory.'}
+              </p>
               {/* Only show "Show All Items" button if there are items that would show when filter is set to 'all' */}
               {activeFilter !== 'all' && inventoryItems.filter(item =>
                 !searchTerm.trim() || item.itemName.toLowerCase().includes(searchTerm.toLowerCase().trim())
@@ -823,7 +831,7 @@ const InventoryPage = ({ defaultTab }) => {
           )}
 
           {/* Inventory Table - Desktop */}
-          {!loading && !error && inventoryItems.length > 0 && filteredItems.length > 0 && (
+          {!loading && !error && inventoryItems.length > 0 && filteredItems.length > 0 && !(selectedCategory && Object.keys(groupedItems).length === 0) && (
             <div className="inventory-page__table-container" style={{
               background: 'white',
               borderRadius: '12px',
@@ -1200,7 +1208,7 @@ const InventoryPage = ({ defaultTab }) => {
           )}
 
           {/* Inventory Cards - Mobile */}
-          {!loading && !error && inventoryItems.length > 0 && filteredItems.length > 0 && (
+          {!loading && !error && inventoryItems.length > 0 && filteredItems.length > 0 && !(selectedCategory && Object.keys(groupedItems).length === 0) && (
             <div className="inventory-page__mobile-cards">
               {(activeFilter === 'by-category' || activeFilter === 'by-expiration') ? (
                 // Grouped view
