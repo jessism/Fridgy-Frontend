@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AppNavBar } from '../components/Navbar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import { ChevronLeft, X, Calendar, Check, ShoppingCart } from 'lucide-react';
@@ -19,6 +19,7 @@ import SnackIcon from '../assets/icons/Snack.png';
 
 const MealPlanPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     dailyMeals,
     weekCounts,
@@ -53,6 +54,11 @@ const MealPlanPage = () => {
   const [showMonthCalendar, setShowMonthCalendar] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(new Date());
   const [showGroceryListModal, setShowGroceryListModal] = useState(false);
+
+  // Assignment mode state (when coming from HomePage with selected recipes)
+  const [recipesToAssign, setRecipesToAssign] = useState([]);
+  const [isAssignmentMode, setIsAssignmentMode] = useState(false);
+  const [selectedRecipeForAssignment, setSelectedRecipeForAssignment] = useState(null);
 
   // Swipe gesture state
   const [touchStart, setTouchStart] = useState(null);
@@ -106,6 +112,55 @@ const MealPlanPage = () => {
     const endDate = weekDates[6].fullDate;
     fetchWeekCounts(startDate, endDate);
   }, [currentWeekOffset, fetchWeekCounts, getCurrentWeekDates]);
+
+  // Check for recipes passed from HomePage for assignment
+  useEffect(() => {
+    if (location.state?.recipesToAdd?.length > 0) {
+      setRecipesToAssign(location.state.recipesToAdd);
+      setIsAssignmentMode(true);
+      // Clear the navigation state to prevent re-triggering on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
+  // Assignment mode handlers - Tap to select, tap slot to assign
+  const handleRecipeTap = (recipe) => {
+    if (selectedRecipeForAssignment?.id === recipe.id) {
+      setSelectedRecipeForAssignment(null); // Deselect if same
+    } else {
+      setSelectedRecipeForAssignment(recipe);
+    }
+  };
+
+  const handleSlotTapToAssign = async (mealType) => {
+    if (!selectedRecipeForAssignment) return;
+
+    try {
+      setActionLoading(mealType);
+      await addRecipeToSlot(selectedDate, mealType, selectedRecipeForAssignment, 'saved');
+      // Remove from recipes to assign
+      setRecipesToAssign(prev => prev.filter(r => r.id !== selectedRecipeForAssignment.id));
+      // Refresh meals
+      fetchDailyMeals(selectedDate);
+      // Refresh week counts
+      const weekDates = getCurrentWeekDates();
+      fetchWeekCounts(weekDates[0].fullDate, weekDates[6].fullDate);
+    } catch (error) {
+      console.error('Failed to assign recipe:', error);
+    } finally {
+      setActionLoading(null);
+      setSelectedRecipeForAssignment(null);
+    }
+  };
+
+  const handleRemoveFromAssignment = (recipeId) => {
+    setRecipesToAssign(prev => prev.filter(r => r.id !== recipeId));
+  };
+
+  const handleExitAssignmentMode = () => {
+    setIsAssignmentMode(false);
+    setRecipesToAssign([]);
+  };
 
   // Handlers
   const handleBackClick = () => {
@@ -477,7 +532,11 @@ const MealPlanPage = () => {
     const mealTime = plan?.scheduled_time || getDefaultTimeForMeal(mealType);
 
     return (
-      <div className={`meal-plan-page__slot-card ${isCompleted ? 'meal-plan-page__slot-card--completed' : ''}`}>
+      <div
+        className={`meal-plan-page__slot-card ${isCompleted ? 'meal-plan-page__slot-card--completed' : ''} ${isAssignmentMode && selectedRecipeForAssignment ? 'meal-plan-page__slot-card--tap-target' : ''}`}
+        onClick={isAssignmentMode && selectedRecipeForAssignment && !hasRecipe ? () => handleSlotTapToAssign(mealType) : undefined}
+        style={isAssignmentMode && selectedRecipeForAssignment && !hasRecipe ? { cursor: 'pointer' } : {}}
+      >
         <div className="meal-plan-page__slot-header">
           {!hasRecipe && (
             <div className="meal-plan-page__slot-icon">
@@ -699,6 +758,36 @@ const MealPlanPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Assignment Bar - Sticky at bottom when in assignment mode */}
+      {isAssignmentMode && recipesToAssign.length > 0 && (
+        <div className="meal-plan-page__assignment-bar">
+          <div className="meal-plan-page__assignment-header">
+            <span>{selectedRecipeForAssignment ? 'Tap a meal slot to assign' : 'Tap a recipe to select'}</span>
+            <button onClick={handleExitAssignmentMode}>Done</button>
+          </div>
+          <div className="meal-plan-page__assignment-recipes">
+            {recipesToAssign.map(recipe => (
+              <div
+                key={recipe.id}
+                className={`meal-plan-page__assignment-recipe ${selectedRecipeForAssignment?.id === recipe.id ? 'meal-plan-page__assignment-recipe--selected' : ''}`}
+                onClick={() => handleRecipeTap(recipe)}
+              >
+                <img src={recipe.image} alt={recipe.title} />
+                <button
+                  className="meal-plan-page__assignment-remove"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveFromAssignment(recipe.id);
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <MobileBottomNav />
 

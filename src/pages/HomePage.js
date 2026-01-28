@@ -19,6 +19,7 @@ import { isIOS } from '../utils/welcomeFlowHelpers';
 import { detectRecipeImport } from '../utils/recipeImportDetection';
 import { checkNotificationPermission, requestNotificationPermission } from '../utils/shortcutDetection';
 import useInventory from '../hooks/useInventory';
+import useMealPlan from '../hooks/useMealPlan';
 import { usePWADetection } from '../hooks/usePWADetection';
 import PWANotificationPrompt from '../components/PWANotificationPrompt';
 import { useSubscription } from '../hooks/useSubscription';
@@ -56,12 +57,64 @@ const getDaysUntilExpiry = (dateString) => {
   return diffDays;
 };
 
+// Helper function to get the next upcoming meal based on current time
+const getNextMeal = (todayMeals, tomorrowMeals) => {
+  const now = new Date();
+  const currentHour = now.getHours();
+
+  // Default scheduled times if not set
+  const defaultTimes = {
+    breakfast: 8,
+    lunch: 12,
+    snack: 15,
+    dinner: 18
+  };
+
+  // Check today's meals in order
+  const mealOrder = ['breakfast', 'lunch', 'snack', 'dinner'];
+
+  for (const mealType of mealOrder) {
+    const meal = todayMeals?.[mealType];
+    if (meal) {
+      const scheduledHour = meal.scheduled_time
+        ? parseInt(meal.scheduled_time.split(':')[0])
+        : defaultTimes[mealType];
+
+      if (scheduledHour > currentHour) {
+        return { meal, mealType, date: new Date() };
+      }
+    }
+  }
+
+  // All today's meals passed, check tomorrow
+  for (const mealType of mealOrder) {
+    const meal = tomorrowMeals?.[mealType];
+    if (meal) {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      return { meal, mealType, date: tomorrow };
+    }
+  }
+
+  return null; // No upcoming meals
+};
+
+// Helper function to format date as "Sat, Jan 25"
+const formatMealDate = (date) => {
+  return date.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric'
+  });
+};
+
 const HomePage = () => {
   const { user } = useAuth();
   const { items, loading: inventoryLoading } = useInventory();
   const navigate = useNavigate();
   const { isPremium, startCheckout, checkoutSecret, closeCheckout, refresh } = useSubscription();
   const { shouldShowTooltip, nextStep, dismissTour, completeTour, goToStep, STEPS } = useGuidedTourContext();
+  const { fetchDailyMeals } = useMealPlan();
 
   // PWA Detection for first-time notification prompt
   const {
@@ -92,6 +145,15 @@ const HomePage = () => {
   const [recipeImageStates, setRecipeImageStates] = useState({});
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [isRecipeModalOpen, setIsRecipeModalOpen] = useState(false);
+
+  // Meal plan state for "Your Meal Plan" section
+  const [upcomingMeals, setUpcomingMeals] = useState([]);
+  const [currentMealIndex, setCurrentMealIndex] = useState(0);
+  const [mealPlanLoading, setMealPlanLoading] = useState(true);
+  const [widgetSelectedDate, setWidgetSelectedDate] = useState(new Date()); // Selected date in widget calendar
+
+  // Selected recipes for meal plan creation
+  const [selectedRecipesForPlan, setSelectedRecipesForPlan] = useState([]);
 
   // Color palette - Option 2 (Medium Green)
   const colors = {
@@ -391,6 +453,75 @@ const HomePage = () => {
     }
   }, [isPWA, isFirstPWALaunch, shouldShowNotificationPrompt, user, markFirstLaunchComplete, getDebugInfo]);
 
+  // Fetch meal plan data for "Your Meal Plan" section
+  useEffect(() => {
+    const buildMealSlots = (mealsPerDay = []) => {
+      const allSlots = [];
+      const now = new Date();
+      const currentHour = now.getHours();
+      const mealOrder = ['breakfast', 'lunch', 'snack', 'dinner'];
+      const defaultTimes = { breakfast: 8, lunch: 12, snack: 15, dinner: 18 };
+
+      for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+        const date = new Date();
+        date.setDate(date.getDate() + dayIndex);
+        const dayMeals = mealsPerDay[dayIndex] || {};
+
+        mealOrder.forEach(mealType => {
+          const scheduledHour = defaultTimes[mealType];
+
+          // Skip past meal slots for today
+          if (dayIndex === 0 && scheduledHour <= currentHour) {
+            return;
+          }
+
+          const meal = dayMeals?.[mealType];
+          allSlots.push({
+            meal: meal || null,
+            mealType,
+            date: new Date(date)
+          });
+        });
+      }
+
+      return allSlots;
+    };
+
+    const fetchMealPlanData = async () => {
+      // Always create slots, even without user
+      if (!user) {
+        setUpcomingMeals(buildMealSlots());
+        setMealPlanLoading(false);
+        return;
+      }
+
+      try {
+        // Fetch next 7 days of meals
+        const days = [];
+        for (let i = 0; i < 7; i++) {
+          const date = new Date();
+          date.setDate(date.getDate() + i);
+          days.push(date);
+        }
+
+        const mealsPerDay = await Promise.all(
+          days.map(date => fetchDailyMeals(date))
+        );
+
+        setUpcomingMeals(buildMealSlots(mealsPerDay));
+        setCurrentMealIndex(0);
+      } catch (err) {
+        console.error('[HomePage] Error fetching meal plan:', err);
+        // Still create empty slots on error
+        setUpcomingMeals(buildMealSlots());
+      } finally {
+        setMealPlanLoading(false);
+      }
+    };
+
+    fetchMealPlanData();
+  }, [user, fetchDailyMeals]);
+
   // Fetch recently added recipes (from both saved_recipes and ai_generated_recipes)
   useEffect(() => {
     const fetchRecentRecipes = async () => {
@@ -593,6 +724,37 @@ const HomePage = () => {
   const expiredItems = getExpiredItems();
   const earliestItems = getEarliestExpiringItems();
 
+  // Helper functions for recipe selection
+  const toggleRecipeSave = (recipe, e) => {
+    e.stopPropagation(); // Prevent card click
+    setSelectedRecipesForPlan(prev => {
+      const exists = prev.find(r => r.id === recipe.id);
+      if (exists) {
+        return prev.filter(r => r.id !== recipe.id);
+      } else {
+        return [...prev, recipe];
+      }
+    });
+  };
+
+  const isRecipeSaved = (recipeId) => {
+    return selectedRecipesForPlan.some(r => r.id === recipeId);
+  };
+
+  const clearSelectedRecipes = () => {
+    setSelectedRecipesForPlan([]);
+  };
+
+  // Helper to get short source label
+  const getSourceLabel = (recipe) => {
+    if (recipe.source_type === 'instagram') return 'IG';
+    if (recipe.source_type === 'facebook') return 'FB';
+    if (recipe.source_type === 'url' || recipe.source_type === 'website') return 'Web';
+    if (recipe.source_type === 'popular') return 'Popular';
+    if (recipe.source_type === 'ai' || recipe.source_type === 'ai_generated') return 'AI';
+    return '';
+  };
+
   // Render a recent recipe card
   const renderRecentRecipeCard = (recipe) => {
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -651,17 +813,27 @@ const HomePage = () => {
               onError={() => setRecipeImageStates(prev => ({ ...prev, [recipe.id]: 'error' }))}
             />
           )}
-          {badgeText && (
-            <div className="home-page__recent-recipe-badge">
-              <span>{badgeText}</span>
-            </div>
-          )}
+          <button
+            className={`home-page__save-badge ${isRecipeSaved(recipe.id) ? 'home-page__save-badge--saved' : ''}`}
+            onClick={(e) => toggleRecipeSave(recipe, e)}
+            aria-label={isRecipeSaved(recipe.id) ? 'Remove from selection' : 'Save to meal plan'}
+          >
+            {isRecipeSaved(recipe.id) ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+            ) : (
+              <span>SAVE</span>
+            )}
+          </button>
         </div>
         <div className="home-page__recent-recipe-content">
           <h3 className="home-page__recent-recipe-title">{recipe.title}</h3>
-          {recipe.source_author && (
-            <p className="home-page__recent-recipe-author">@{recipe.source_author}</p>
-          )}
+          <p className="home-page__recent-recipe-author">
+            {recipe.source_author && `@${recipe.source_author}`}
+            {recipe.source_author && getSourceLabel(recipe) && ' · '}
+            {getSourceLabel(recipe)}
+          </p>
           <div className="home-page__recent-recipe-meta">
             {recipe.readyInMinutes && (
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -726,6 +898,150 @@ const HomePage = () => {
               <p className="greeting-subtitle">What are you cooking today?</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Your Meal Plan Section - Widget Style */}
+      <section className="home-page__your-meal-plan">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">Your Meal Plan</h2>
+          </div>
+          {(() => {
+            // Get meals for selected date
+            const selectedDateMeals = upcomingMeals.filter(m => {
+              if (!m.meal?.recipe_snapshot) return false;
+              const mealDateObj = new Date(m.date);
+              return mealDateObj.toDateString() === widgetSelectedDate.toDateString();
+            });
+
+            const hasMealsOnDate = selectedDateMeals.length > 0;
+
+            // Format selected date header
+            const formatSelectedDateHeader = () => {
+              const today = new Date();
+              const tomorrow = new Date(today);
+              tomorrow.setDate(tomorrow.getDate() + 1);
+
+              if (widgetSelectedDate.toDateString() === today.toDateString()) {
+                return 'Today';
+              } else if (widgetSelectedDate.toDateString() === tomorrow.toDateString()) {
+                return 'Tomorrow';
+              } else {
+                return widgetSelectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+              }
+            };
+
+            return (
+              <div className="home-page__meal-plan-widget">
+                {/* Top row: Week calendar */}
+                <div className="home-page__meal-plan-widget-calendar">
+                  <div className="home-page__meal-plan-widget-days-header">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                      <span key={day} className="home-page__meal-plan-widget-day-label">{day}</span>
+                    ))}
+                  </div>
+                  <div className="home-page__meal-plan-widget-days-row">
+                    {(() => {
+                      const today = new Date();
+                      const startOfWeek = new Date(today);
+                      startOfWeek.setDate(today.getDate() - today.getDay());
+
+                      return Array.from({ length: 7 }, (_, i) => {
+                        const date = new Date(startOfWeek);
+                        date.setDate(startOfWeek.getDate() + i);
+                        const dayNum = date.getDate();
+                        const isToday = date.toDateString() === today.toDateString();
+                        const isSelected = date.toDateString() === widgetSelectedDate.toDateString();
+                        const hasMeal = upcomingMeals.some(m => {
+                          if (!m.meal?.recipe_snapshot) return false;
+                          const mealDateObj = new Date(m.date);
+                          return mealDateObj.toDateString() === date.toDateString();
+                        });
+
+                        return (
+                          <div
+                            key={i}
+                            className="home-page__meal-plan-widget-day-cell"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setWidgetSelectedDate(new Date(date));
+                            }}
+                          >
+                            <span className={`home-page__meal-plan-widget-day-num ${isToday ? 'home-page__meal-plan-widget-day-num--today' : ''} ${isSelected ? 'home-page__meal-plan-widget-day-num--selected' : ''} ${hasMeal ? 'home-page__meal-plan-widget-day-num--has-meal' : ''}`}>
+                              {dayNum}
+                            </span>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                </div>
+
+                {/* Bottom section: Date header and meals list */}
+                <div className="home-page__meal-plan-widget-bottom">
+                  <div className="home-page__meal-plan-widget-header">
+                    <span className="home-page__meal-plan-widget-date-header">{formatSelectedDateHeader()}</span>
+                    <span
+                      className="home-page__meal-plan-widget-view-all"
+                      onClick={() => navigate('/meal-plans')}
+                    >
+                      View all
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </span>
+                  </div>
+
+                  {mealPlanLoading ? (
+                    <div className="home-page__meal-plan-widget-loading">
+                      <div className="home-page__meal-plan-loading" />
+                    </div>
+                  ) : hasMealsOnDate ? (
+                    <div className="home-page__meal-plan-widget-meals">
+                      {selectedDateMeals.map((meal, idx) => (
+                        <div
+                          key={idx}
+                          className="home-page__meal-plan-widget-meal-item"
+                          onClick={() => navigate('/meal-plans')}
+                        >
+                          <div className="home-page__meal-plan-widget-meal-image">
+                            {meal.meal?.recipe_snapshot?.image ? (
+                              <img src={meal.meal.recipe_snapshot.image} alt={meal.meal.recipe_snapshot.title} />
+                            ) : (
+                              <img src={FridgyLogo} alt="Meal" className="home-page__fridgy-fallback" />
+                            )}
+                          </div>
+                          <div className="home-page__meal-plan-widget-meal-info">
+                            <span className="home-page__meal-plan-widget-meal-type">
+                              {meal.mealType?.charAt(0).toUpperCase() + meal.mealType?.slice(1)}
+                            </span>
+                            <span className="home-page__meal-plan-widget-meal-title">
+                              {meal.meal?.recipe_snapshot?.title}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div
+                      className="home-page__meal-plan-widget-empty"
+                      onClick={() => navigate('/meal-plans')}
+                    >
+                      <img src={FridgyLogo} alt="No meals" className="home-page__fridgy-fallback" />
+                      <span className="home-page__meal-plan-widget-empty-text">No meals planned</span>
+                      <span className="home-page__meal-plan-widget-cta">
+                        Add a meal
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                          <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </section>
 
@@ -1443,6 +1759,34 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Floating Meal Plan Selection Banner */}
+      {selectedRecipesForPlan.length > 0 && (
+        <div className="home-page__selection-banner">
+          <button
+            className="home-page__selection-banner-close"
+            onClick={clearSelectedRecipes}
+            aria-label="Clear selection"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+          </button>
+          <div className="home-page__selection-thumbnails">
+            {selectedRecipesForPlan.map(recipe => (
+              <div key={recipe.id} className="home-page__selection-thumb">
+                <img src={recipe.image} alt={recipe.title} />
+              </div>
+            ))}
+          </div>
+          <button
+            className="home-page__selection-cta"
+            onClick={() => navigate('/meal-plan', { state: { recipesToAdd: selectedRecipesForPlan } })}
+          >
+            Create meal plan
+          </button>
+        </div>
+      )}
 
       <MobileBottomNav />
 

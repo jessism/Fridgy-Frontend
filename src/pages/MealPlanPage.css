@@ -859,3 +859,138 @@
     height: 28px;
   }
 }
+
+/* Assignment Bar - Sticky at bottom for drag-and-drop recipe assignment */
+.meal-plan-page__assignment-bar {
+  position: fixed;
+  bottom: 70px; /* Above MobileBottomNav */
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #eee;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  padding: 12px 16px 16px;
+  z-index: 100;
+  border-radius: 16px 16px 0 0;
+}
+
+.meal-plan-page__assignment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.meal-plan-page__assignment-header span {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.meal-plan-page__assignment-header button {
+  background: #4fcf61;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.meal-plan-page__assignment-header button:hover {
+  background: #3db850;
+}
+
+.meal-plan-page__assignment-recipes {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.meal-plan-page__assignment-recipes::-webkit-scrollbar {
+  display: none;
+}
+
+.meal-plan-page__assignment-recipe {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+  cursor: grab;
+  border: 2px solid #4fcf61;
+  transition: transform 0.2s ease;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.meal-plan-page__assignment-recipe:active {
+  cursor: grabbing;
+  transform: scale(1.05);
+}
+
+.meal-plan-page__assignment-recipe img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none; /* Let parent handle drag */
+  -webkit-user-drag: none; /* Prevent image drag on Safari */
+}
+
+.meal-plan-page__assignment-remove {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  background: #ff5252;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.meal-plan-page__assignment-remove:hover {
+  background: #e04545;
+}
+
+/* Drop Target Highlight */
+.meal-plan-page__slot-card--drop-target {
+  border: 2px dashed #4fcf61 !important;
+  background: rgba(79, 207, 97, 0.05) !important;
+}
+
+/* Tap-to-assign: highlight slots when recipe is selected */
+.meal-plan-page__slot-card--tap-target {
+  border: 2px dashed #4fcf61 !important;
+  background: rgba(79, 207, 97, 0.08) !important;
+  animation: pulse-border 1.5s infinite;
+}
+
+@keyframes pulse-border {
+  0%, 100% { border-color: #4fcf61; }
+  50% { border-color: #2da844; }
+}
+
+/* Selected recipe in assignment bar */
+.meal-plan-page__assignment-recipe--selected {
+  border: 3px solid #4fcf61 !important;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.4);
+}
+
+/* Add padding to main content when assignment bar is visible */
+.meal-plan-page--assignment-mode {
+  padding-bottom: 140px;
+}
