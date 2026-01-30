@@ -893,7 +893,8 @@
   overflow: hidden;
 }
 
-.landing-page-v3__feature-wide-image img {
+.landing-page-v3__feature-wide-image img,
+.landing-page-v3__feature-wide-image video {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -1409,11 +1410,7 @@
   }
 
   .landing-page-v3__shop-mascot {
-    display: block;
-    height: 80px;
-    width: auto;
-    object-fit: contain;
-    animation: mascot-blink 4s infinite;
+    display: none;
   }
 
   @keyframes mascot-blink {
@@ -1446,9 +1443,13 @@
   .landing-page-v3__feature-wide-image {
     border-radius: 16px;
     width: 100%;
-    height: 350px;
+    height: auto;
     margin-left: 0;
     margin-right: 0;
+  }
+
+  .landing-page-v3__feature-wide-image video {
+    object-fit: contain;
   }
 
   .landing-page-v3__feature-block-content {

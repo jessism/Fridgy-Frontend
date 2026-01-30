@@ -559,7 +559,13 @@ const MealPlanPage = () => {
           {!hasRecipe && (
             <button
               className="meal-plan-page__add-btn"
-              onClick={() => handleAddRecipe(mealType)}
+              onClick={() => {
+                if (isAssignmentMode && selectedRecipeForAssignment) {
+                  handleSlotTapToAssign(mealType);
+                } else {
+                  handleAddRecipe(mealType);
+                }
+              }}
               disabled={isLoadingThis}
             >
               {isLoadingThis ? '...' : '+ Add'}
@@ -606,7 +612,7 @@ const MealPlanPage = () => {
   };
 
   return (
-    <div className="meal-plan-page">
+    <div className={`meal-plan-page ${isAssignmentMode ? 'meal-plan-page--assignment-mode' : ''}`}>
       <AppNavBar />
 
       <div className="meal-plan-page__main">
@@ -763,7 +769,7 @@ const MealPlanPage = () => {
       {isAssignmentMode && recipesToAssign.length > 0 && (
         <div className="meal-plan-page__assignment-bar">
           <div className="meal-plan-page__assignment-header">
-            <span>{selectedRecipeForAssignment ? 'Tap a meal slot to assign' : 'Tap a recipe to select'}</span>
+            <span>{selectedRecipeForAssignment ? 'Step 2: Tap a meal slot to assign' : 'Step 1: Tap a recipe to select'}</span>
             <button onClick={handleExitAssignmentMode}>Done</button>
           </div>
           <div className="meal-plan-page__assignment-recipes">
@@ -781,7 +787,10 @@ const MealPlanPage = () => {
                     handleRemoveFromAssignment(recipe.id);
                   }}
                 >
-                  ×
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
                 </button>
               </div>
             ))}

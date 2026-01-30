@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import confettiIcon from '../../assets/icons/Confetti.png';
+import confettiIcon from '../../assets/icons/Confetti.gif';
 
 const SuccessModal = ({ 
   isOpen, 

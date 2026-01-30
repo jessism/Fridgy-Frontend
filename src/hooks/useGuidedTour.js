@@ -9,6 +9,7 @@ const STORAGE_KEY = 'trackabite_guided_tour';
 const STEPS = {
   NOT_STARTED: 'not_started',
   WELCOME_SCREEN: 'welcome_screen',         // Step 0: Welcome prompt
+  ADVENTURE_CHOICE: 'adventure_choice',     // Step 1: Choose groceries or recipe path
 
   // 1. Log Groceries Flow
   GROCERIES_INTRO: 'groceries_intro',       // "Let's start by logging your first item"
@@ -56,6 +57,7 @@ const useGuidedTour = () => {
   const [isActive, setIsActive] = useState(false);
   const [tourSource, setTourSource] = useState('full'); // 'individual' or 'full'
   const [demoInventoryItems, setDemoInventoryItems] = useState([]); // Virtual inventory for tour
+  const [chosenAdventure, setChosenAdventure] = useState(null); // 'groceries' or 'recipe'
 
   // Load saved progress on mount
   useEffect(() => {
@@ -74,6 +76,7 @@ const useGuidedTour = () => {
           setIsActive(data.isActive !== false);
           setTourSource(data.tourSource || 'full');
           setDemoInventoryItems(data.demoInventoryItems || []);
+          setChosenAdventure(data.chosenAdventure || null);
         }
       } else {
         console.log('[useGuidedTour] No saved state found');
@@ -92,13 +95,14 @@ const useGuidedTour = () => {
           isActive,
           tourSource,
           demoInventoryItems,
+          chosenAdventure,
           lastUpdated: new Date().toISOString()
         }));
       } catch (error) {
         console.error('[GuidedTour] Error saving state:', error);
       }
     }
-  }, [currentStep, isActive, tourSource, demoInventoryItems]);
+  }, [currentStep, isActive, tourSource, demoInventoryItems, chosenAdventure]);
 
   /**
    * Start the guided tour
@@ -145,6 +149,9 @@ const useGuidedTour = () => {
 
   /**
    * Move to next step
+   * Handles adventure-based branching:
+   * - Groceries path: GROCERIES_INTRO → ... → GO_TO_MEALS → COMPLETED
+   * - Recipe path: SHORTCUT_INTRO → ... → IMPORT_RECIPE_SUCCESS → COMPLETED
    */
   const nextStep = useCallback(() => {
     const stepOrder = Object.values(STEPS);
@@ -153,17 +160,36 @@ const useGuidedTour = () => {
     if (currentIndex < stepOrder.length - 1) {
       let next = stepOrder[currentIndex + 1];
 
+      // Handle adventure-based branching
+      if (chosenAdventure === 'groceries') {
+        // Skip recipe-related steps after groceries flow completes
+        // After GO_TO_MEALS, skip to COMPLETED (end of groceries adventure)
+        if (currentStep === STEPS.GO_TO_MEALS || currentStep === STEPS.VIEWING_INVENTORY) {
+          console.log('[GuidedTour] Groceries adventure complete - jumping to COMPLETED');
+          next = STEPS.COMPLETED;
+        }
+      }
+
+      if (chosenAdventure === 'recipe') {
+        // Skip groceries-related steps - this shouldn't happen as we goToStep directly
+        // But as a safeguard, skip to COMPLETED after recipe flow
+        if (currentStep === STEPS.IMPORT_RECIPE_SUCCESS) {
+          console.log('[GuidedTour] Recipe adventure complete - jumping to COMPLETED');
+          next = STEPS.COMPLETED;
+        }
+      }
+
       // Auto-skip INSTALL_SHORTCUT if not iOS
       if (next === STEPS.INSTALL_SHORTCUT && !isIOS()) {
         console.log('[GuidedTour] Skipping INSTALL_SHORTCUT (not iOS)');
-        const nextIndex = currentIndex + 2;
+        const nextIndex = stepOrder.indexOf(next) + 1;
         next = nextIndex < stepOrder.length ? stepOrder[nextIndex] : STEPS.COMPLETED;
       }
 
       console.log('[GuidedTour] Moving to step:', next);
       setCurrentStep(next);
     }
-  }, [currentStep]);
+  }, [currentStep, chosenAdventure]);
 
   /**
    * Go to specific step
@@ -315,6 +341,7 @@ const useGuidedTour = () => {
     STEPS,
     tourSource,
     demoInventoryItems,
+    chosenAdventure,
 
     // Actions
     startTour,
@@ -324,6 +351,7 @@ const useGuidedTour = () => {
     dismissTour,
     resetTour,
     setTourSource,
+    setChosenAdventure,
 
     // Helpers
     shouldShowTooltip,

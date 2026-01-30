@@ -1743,3 +1743,113 @@
     font-size: 0.95rem;
   }
 }
+
+/* ===== Adventure Choice Modal ===== */
+.guided-tour__adventure-card {
+  background: white;
+  border-radius: 24px;
+  padding: 2.5rem 2rem;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: modal-slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.guided-tour__adventure-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 0.5rem 0;
+}
+
+.guided-tour__adventure-subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 0 0 2rem 0;
+}
+
+.guided-tour__adventure-options {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.guided-tour__adventure-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 16px;
+  padding: 1.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+  max-width: 160px;
+}
+
+.guided-tour__adventure-option:hover {
+  border-color: var(--primary-green, #4fcf61);
+  background: rgba(79, 207, 97, 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 207, 97, 0.2);
+}
+
+.guided-tour__adventure-option:active {
+  transform: translateY(0);
+}
+
+.guided-tour__adventure-icon {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  background: rgba(79, 207, 97, 0.1);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-green, #4fcf61);
+}
+
+.guided-tour__adventure-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.3;
+  text-align: center;
+}
+
+/* Mobile styles for adventure choice */
+@media (max-width: 768px) {
+  .guided-tour__adventure-card {
+    padding: 2rem 1.5rem;
+    max-width: 340px;
+  }
+
+  .guided-tour__adventure-title {
+    font-size: 1.3rem;
+  }
+
+  .guided-tour__adventure-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .guided-tour__adventure-option {
+    padding: 1.25rem 0.75rem;
+    max-width: 140px;
+  }
+
+  .guided-tour__adventure-icon {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+  }
+
+  .guided-tour__adventure-label {
+    font-size: 0.85rem;
+  }
+}

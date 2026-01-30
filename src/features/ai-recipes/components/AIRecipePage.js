@@ -17,7 +17,7 @@ import GuidedTooltip from '../../../components/guided-tour/GuidedTooltip';
 import IntroductionModal from '../../../components/guided-tour/IntroductionModal';
 import InstallPromptModal from '../../../components/guided-tour/InstallPromptModal';
 import IOSInstallModal from '../../../components/IOSInstallModal';
-import confettiImage from '../../../assets/icons/Confetti.png';
+import confettiImage from '../../../assets/icons/Confetti.gif';
 import './AIRecipePage.css';
 
 const AIRecipePage = () => {

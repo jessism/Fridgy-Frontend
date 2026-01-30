@@ -5,9 +5,9 @@ import './GuidedTour.css';
 
 /**
  * WelcomePrompt - Initial welcome screen for guided tour
- * Gives users option to start or skip the tour
+ * Simple welcome message with Next button to proceed to adventure choice
  */
-const WelcomePrompt = ({ onStart, onSkip }) => {
+const WelcomePrompt = ({ onNext }) => {
   return ReactDOM.createPortal(
     <div className="guided-tour__welcome-overlay">
       <div className="guided-tour__welcome-card">
@@ -28,26 +28,15 @@ const WelcomePrompt = ({ onStart, onSkip }) => {
           Let me give you a quick tour of the app and help you get started.
         </p>
 
-        {/* Buttons */}
+        {/* Single Next Button */}
         <div className="guided-tour__welcome-buttons">
           <button
             className="guided-tour__welcome-button guided-tour__welcome-button--primary"
-            onClick={onStart}
+            onClick={onNext}
           >
-            Start Tour
-          </button>
-          <button
-            className="guided-tour__welcome-button guided-tour__welcome-button--secondary"
-            onClick={onSkip}
-          >
-            Skip
+            Next
           </button>
         </div>
-
-        {/* Hint */}
-        <p className="guided-tour__welcome-hint">
-          Takes about 2 minutes
-        </p>
       </div>
     </div>,
     document.body

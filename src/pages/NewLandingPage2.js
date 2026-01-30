@@ -10,7 +10,7 @@ import step2Image from '../assets/product mockup/Homepage_Step2.jpeg';
 import step2Video from '../assets/product mockup/Save recipes.mp4';
 import step3Image from '../assets/product mockup/Homepage_Step3.jpeg';
 import step3Video from '../assets/product mockup/Personalized recipes.mp4';
-import sharedListImage from '../assets/product mockup/Shop together.jpg';
+import shopTogetherVideo from '../assets/images/Trackie_Shop_Together.mp4';
 import mealPlanningVideo from '../assets/product mockup/Meal planning.mp4';
 import reminderVideo from '../assets/product mockup/Reminder.mp4';
 import googleCalendarIcon from '../assets/icons/Google calendar.png';
@@ -421,7 +421,13 @@ const NewLandingPage2 = () => {
             </div>
           </div>
           <div className="landing-page-v3__feature-wide-image">
-            <img src={sharedListImage} alt="Shop smarter together" />
+            <video
+              src={shopTogetherVideo}
+              autoPlay
+              loop
+              muted
+              playsInline
+            />
           </div>
         </div>
 

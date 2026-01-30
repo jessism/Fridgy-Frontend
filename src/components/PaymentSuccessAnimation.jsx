@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import confettiIcon from '../assets/icons/Confetti.png';
+import confettiIcon from '../assets/icons/Confetti.gif';
 import './PaymentSuccessAnimation.css';
 
 /**

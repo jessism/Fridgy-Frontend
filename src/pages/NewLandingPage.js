@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/context/AuthContext';
 import appLogo from '../assets/images/Logo.png';
-import fridgeHeroImage from '../assets/product mockup/Share_List_People.png';
+import shopTogetherVideo from '../assets/images/Trackie_Shop_Together.mp4';
 import foodImage1 from '../assets/images/Landingpage_food_1.jpg';
 import foodImage2 from '../assets/images/Landingpage_food_2.jpg';
 import foodImage3 from '../assets/images/Landingpage_food_3.jpg';
@@ -391,11 +391,14 @@ const NewLandingPage = () => {
 
             </div>
 
-            {/* Feature 1 - Bottom: Hero Image */}
+            {/* Feature 1 - Bottom: Hero Video */}
             <div className="landing-page-v2__feature-1-image">
-              <img
-                src={fridgeHeroImage}
-                alt="Smart fridge with organized food items"
+              <video
+                src={shopTogetherVideo}
+                autoPlay
+                loop
+                muted
+                playsInline
                 className="landing-page-v2__feature-1-hero-img"
               />
             </div>
