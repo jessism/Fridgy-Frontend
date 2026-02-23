@@ -11,7 +11,7 @@ function PrivacyPage() {
     <div className="legal-page">
       <div className="legal-page__container">
         <h1 className="legal-page__title">Privacy Policy</h1>
-        <p className="legal-page__updated">Last Updated: January 24, 2026</p>
+        <p className="legal-page__updated">Last Updated: February 22, 2026</p>
 
         <div className="legal-page__content">
           <section className="legal-page__section">
@@ -54,6 +54,50 @@ function PrivacyPage() {
               <li>Push notification subscriptions</li>
               <li>Usage analytics (page views and feature usage)</li>
             </ul>
+
+            <h3>Photos and Image Data</h3>
+            <ul>
+              <li>Photos of grocery items (when you use the camera feature for automatic item detection)</li>
+              <li>Photos are processed in memory only and deleted immediately after AI analysis</li>
+              <li>We do not store, retain, or archive your photos</li>
+            </ul>
+          </section>
+
+          <section className="legal-page__section">
+            <h2>2.1. Photo Processing in Detail</h2>
+            <p>
+              When you use our grocery inventory feature, you may choose to take or upload photos of grocery items for automatic identification.
+            </p>
+
+            <h3>How We Process Photos</h3>
+            <ul>
+              <li>Photos are sent securely to our servers via HTTPS encryption</li>
+              <li>We use Google Gemini 2.0 Flash AI to analyze photos and identify grocery items</li>
+              <li>Photos are processed <strong>in memory only</strong> and are <strong>never written to disk or stored in a database</strong></li>
+              <li>Photos are <strong>automatically deleted immediately</strong> after AI processing completes (typically within seconds)</li>
+              <li>We do not retain, archive, or use your photos for any other purpose, including AI model training</li>
+            </ul>
+
+            <h3>Third-Party Photo Processing</h3>
+            <p>
+              We use Google's Gemini AI service to process grocery photos. During processing, photo data is sent to Google's servers. Google's privacy policy applies to this data processing. Learn more at: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">https://policies.google.com/privacy</a>
+            </p>
+
+            <h3>Your Consent</h3>
+            <p>
+              Before your first photo capture, we will ask for your explicit consent to process photos using AI. You can:
+            </p>
+            <ul>
+              <li>Accept photo processing to use the automatic grocery detection feature</li>
+              <li>Decline photo processing (you can still manually add items)</li>
+              <li>Revoke consent at any time by deleting and reinstalling the app</li>
+            </ul>
+
+            <h3>Photo Data Retention</h3>
+            <ul>
+              <li><strong>Photos:</strong> 0 seconds - Deleted immediately after processing</li>
+              <li><strong>Detected grocery items:</strong> Retained in your account until you delete them</li>
+            </ul>
           </section>
 
           <section className="legal-page__section">
@@ -64,7 +108,8 @@ function PrivacyPage() {
               <li>Process payments and manage subscriptions</li>
               <li>Send service-related notifications (expiring items, trial ending, payment issues)</li>
               <li>Generate AI-powered recipe recommendations based on your inventory</li>
-              <li>Analyze food items and recipes using AI image recognition</li>
+              <li>Analyze food items and recipes using AI image recognition (Google Gemini 2.0 Flash)</li>
+              <li>Process grocery photos to automatically detect items (photos are deleted immediately after processing)</li>
               <li>Provide customer support</li>
               <li>Analyze usage patterns to improve features</li>
               <li>Prevent fraud and enforce our Terms of Service</li>
@@ -76,13 +121,14 @@ function PrivacyPage() {
             <p>We use the following third-party services:</p>
             <ul>
               <li><strong>Stripe:</strong> Payment processing and subscription management</li>
+              <li><strong>RevenueCat:</strong> Subscription management for mobile app</li>
               <li><strong>Supabase:</strong> Database hosting and file storage</li>
-              <li><strong>Google Gemini:</strong> AI-powered food recognition and recipe analysis</li>
+              <li><strong>Google Gemini AI (2.0 Flash):</strong> AI-powered grocery photo recognition, food item detection, and recipe analysis. Photos are sent to Google's servers for processing and deleted immediately after analysis.</li>
               <li><strong>Spoonacular:</strong> Recipe data and nutrition information</li>
               <li><strong>PostHog:</strong> Usage analytics</li>
             </ul>
             <p>
-              These services have their own privacy policies and handle data according to their terms.
+              These services have their own privacy policies and handle data according to their terms. For Google Gemini photo processing, see: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google Privacy Policy</a>
             </p>
           </section>
 
@@ -100,10 +146,51 @@ function PrivacyPage() {
           </section>
 
           <section className="legal-page__section">
-            <h2>6. Data Retention</h2>
+            <h2>6. Data Retention and Account Deletion</h2>
             <p>
-              We retain your data for as long as your account is active. If you delete your account, we will delete your personal data within 30 days, except where we are required to retain it for legal compliance.
+              We retain your data for as long as your account is active. You have the right to request deletion of your Trackabite account at any time.
             </p>
+
+            <h3>How to Delete Your Account</h3>
+            <ol>
+              <li>Open the Trackabite app</li>
+              <li>Go to Profile → Delete Account</li>
+              <li>Review the warning about data loss</li>
+              <li>Confirm deletion</li>
+            </ol>
+
+            <h3>30-Day Grace Period</h3>
+            <ul>
+              <li>When you request account deletion, your account will be <strong>scheduled for deletion in 30 days</strong></li>
+              <li>During this 30-day grace period, you can cancel the deletion by logging back into your account</li>
+              <li>Your data remains accessible during the grace period</li>
+            </ul>
+
+            <h3>What Gets Deleted</h3>
+            <p>When your account is permanently deleted after the 30-day grace period, we will delete:</p>
+            <ul>
+              <li>Your account credentials (email, password, name)</li>
+              <li>All saved recipes (imported and created)</li>
+              <li>Meal plans and meal logs</li>
+              <li>Grocery inventory items</li>
+              <li>Shopping lists</li>
+              <li>Cookbooks</li>
+              <li>Subscription information (your subscription will be cancelled)</li>
+              <li>Usage analytics and preferences</li>
+            </ul>
+
+            <h3>Subscription Cancellation</h3>
+            <p>
+              If you have an active subscription, it will be automatically cancelled when your account is deleted. You will not be charged after deletion, but you will not receive a refund for any remaining subscription period.
+            </p>
+
+            <h3>Data We May Retain</h3>
+            <p>For legal, security, or business purposes, we may retain:</p>
+            <ul>
+              <li>Transaction records (required for tax and accounting compliance)</li>
+              <li>Aggregated, anonymized analytics data (not linked to your identity)</li>
+              <li>Backup data for up to 90 days (then permanently deleted)</li>
+            </ul>
           </section>
 
           <section className="legal-page__section">
@@ -112,10 +199,13 @@ function PrivacyPage() {
             <ul>
               <li>Access your personal data</li>
               <li>Correct inaccurate data</li>
-              <li>Request deletion of your data</li>
+              <li>Request deletion of your account (with 30-day grace period - see section 6)</li>
+              <li>Delete detected grocery items from your inventory at any time</li>
+              <li>Decline or revoke photo processing consent</li>
               <li>Export your data</li>
               <li>Opt-out of marketing communications</li>
               <li>Withdraw consent at any time</li>
+              <li>Contact us to inquire about photo processing practices</li>
             </ul>
           </section>
 
