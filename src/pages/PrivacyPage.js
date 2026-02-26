@@ -101,6 +101,41 @@ function PrivacyPage() {
           </section>
 
           <section className="legal-page__section">
+            <h2>2.2. User-Generated and Third-Party Content</h2>
+
+            <h3>Recipe Saving</h3>
+            <p>
+              Users can save recipes from external sources (websites, blogs, social media platforms) into their personal Trackabite account. When you save recipes from external sources:
+            </p>
+            <ul>
+              <li>You are responsible for ensuring you have permission to save and use that content</li>
+              <li>Saved recipes are stored for your personal, non-commercial use only</li>
+              <li>We do not claim ownership of any recipes or content you save</li>
+            </ul>
+
+            <h3>Content Sharing</h3>
+            <p>
+              Users can share cookbooks and recipes with other users. When you share content:
+            </p>
+            <ul>
+              <li>You represent that you have the right to share that content</li>
+              <li>You grant other users permission to view the shared recipes for personal use</li>
+              <li>You remain responsible for the content you share</li>
+            </ul>
+
+            <h3>User Photos</h3>
+            <p>
+              Users can upload photos of grocery items for AI-powered inventory tracking. These photos are:
+            </p>
+            <ul>
+              <li>Processed by our AI to detect food items</li>
+              <li>Stored temporarily for processing purposes only</li>
+              <li>Linked to your account and inventory data</li>
+              <li>Not shared with other users without your explicit consent</li>
+            </ul>
+          </section>
+
+          <section className="legal-page__section">
             <h2>3. How We Use Your Information</h2>
             <p>We use your information to:</p>
             <ul>

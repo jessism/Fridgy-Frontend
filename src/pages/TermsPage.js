@@ -14,7 +14,7 @@ function TermsPage() {
     <div className="legal-page">
       <div className="legal-page__container">
         <h1 className="legal-page__title">Terms of Service</h1>
-        <p className="legal-page__updated">Last Updated: October 21, 2025</p>
+        <p className="legal-page__updated">Last Updated: February 25, 2026</p>
 
         <div className="legal-page__content">
           <section className="legal-page__section">
@@ -87,10 +87,47 @@ function TermsPage() {
           </section>
 
           <section className="legal-page__section">
-            <h2>7. User Content</h2>
+            <h2>7. User Content and Intellectual Property Rights</h2>
             <p>
               You retain all rights to the content you upload (recipes, photos, meal logs, etc.). By using the Service, you grant us a license to use, store, and display your content solely for the purpose of providing the Service to you.
             </p>
+
+            <h3>Your Responsibilities for Third-Party Content</h3>
+            <p>
+              When you save recipes from external sources (websites, blogs, social media), you represent and warrant that:
+            </p>
+            <ul>
+              <li>You have the right to save and use that content for personal purposes</li>
+              <li>You will not share copyrighted recipes without proper permission from the copyright holder</li>
+              <li>Your use of saved recipes is for personal, non-commercial meal planning only</li>
+            </ul>
+
+            <h3>Uploaded Content Requirements</h3>
+            <p>
+              Any photos, recipes, or other content you upload to Trackabite:
+            </p>
+            <ul>
+              <li>Must not infringe on any third party's intellectual property rights</li>
+              <li>Must not contain illegal, offensive, or inappropriate material</li>
+              <li>May be processed by our AI systems for functionality purposes (e.g., photo recognition, recipe analysis)</li>
+            </ul>
+
+            <h3>Shared Content License</h3>
+            <p>
+              When you share cookbooks or recipes with other users:
+            </p>
+            <ul>
+              <li>You grant those users a non-exclusive license to view and use the shared recipes for personal purposes</li>
+              <li>You remain solely responsible for ensuring you have the rights to share that content</li>
+              <li>Trackabite is not responsible for user-shared content that infringes on third-party rights</li>
+            </ul>
+
+            <h3>Content Removal and DMCA Compliance</h3>
+            <ul>
+              <li>We reserve the right to remove any user content that violates these terms or infringes on intellectual property rights</li>
+              <li>If you believe your copyrighted work has been infringed, please contact us at hello@trackabite.app with details of the alleged infringement</li>
+              <li>We will investigate all valid DMCA complaints and take appropriate action</li>
+            </ul>
           </section>
 
           <section className="legal-page__section">
