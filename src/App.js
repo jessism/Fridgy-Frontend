@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import './App.css';
 import { AuthProvider } from './features/auth/context/AuthContext';
 import { GuidedTourProvider } from './contexts/GuidedTourContext';
@@ -7,6 +7,7 @@ import { PriceProvider } from './contexts/PriceContext';
 import AuthGuard from './features/auth/components/AuthGuard';
 import NewLandingPage from './pages/NewLandingPage';
 import NewLandingPage2 from './pages/NewLandingPage2';
+import NewLandingPage3 from './pages/NewLandingPage3';
 import SignUpPage from './pages/SignUpPage';
 import SignInPage from './pages/SignInPage';
 import HomePage from './pages/HomePage';
@@ -59,6 +60,11 @@ import AboutPage from './pages/AboutPage';
 import FeaturesPage from './pages/FeaturesPage';
 import PublicSupportPage from './pages/PublicSupportPage';
 import BlogPage from './pages/BlogPage';
+import BlogAdmin from './pages/BlogAdmin';
+import ContentUploadPage from './pages/ContentUploadPage';
+import BlogRecipeEditor from './pages/BlogRecipeEditor';
+import BlogRecipePage from './pages/BlogRecipePage';
+import { HelmetProvider } from 'react-helmet-async';
 
 // Navigation listener component to handle service worker messages
 function NavigationListener() {
@@ -96,6 +102,7 @@ function RecipeRedirect() {
 function App() {
   return (
     <div className="App">
+      <HelmetProvider>
       <PriceProvider>
         <AuthProvider>
           <GuidedTourProvider>
@@ -103,7 +110,7 @@ function App() {
             <ScrollToTop />
             <NavigationListener />
             <Routes>
-          <Route path="/" element={<NewLandingPage2 />} />
+          <Route path="/" element={<NewLandingPage3 />} />
           <Route path="/onboarding" element={<OnboardingFlow />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/signin" element={<SignInPage />} />
@@ -345,11 +352,42 @@ function App() {
           <Route path="/product/features" element={<FeaturesPage />} />
           <Route path="/product/support" element={<PublicSupportPage />} />
           <Route path="/resources/blog" element={<BlogPage />} />
+          <Route path="/resources/blog/:slug" element={<BlogRecipePage />} />
+
+          {/* Blog Admin (requires auth + admin) */}
+          <Route path="/admin" element={
+            <AuthGuard>
+              <Navigate to="/admin/blog" replace />
+            </AuthGuard>
+          } />
+          <Route path="/admin/blog" element={
+            <AuthGuard>
+              <BlogAdmin />
+            </AuthGuard>
+          } />
+          <Route path="/admin/blog/new" element={
+            <AuthGuard>
+              <BlogRecipeEditor />
+            </AuthGuard>
+          } />
+          <Route path="/admin/blog/edit/:id" element={
+            <AuthGuard>
+              <BlogRecipeEditor />
+            </AuthGuard>
+          } />
+
+          {/* Manual TikTok photo post upload (requires auth + admin) */}
+          <Route path="/content" element={
+            <AuthGuard>
+              <ContentUploadPage />
+            </AuthGuard>
+          } />
           </Routes>
             </Router>
           </GuidedTourProvider>
         </AuthProvider>
       </PriceProvider>
+      </HelmetProvider>
     </div>
   );
 }
