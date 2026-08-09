@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/context/AuthContext';
 import appLogo from '../assets/images/Logo.png';
+import trackieMascot from '../assets/images/Fridgy.png';
 import shopTogetherVideo from '../assets/images/Trackie_Shop_Together.mp4';
 import foodImage1 from '../assets/images/Landingpage_food_1.jpg';
 import foodImage2 from '../assets/images/Landingpage_food_2.jpg';
@@ -126,6 +127,12 @@ const NewLandingPage = () => {
                   >
                     GET STARTED FOR FREE
                   </Button>
+                </div>
+
+                {/* Trackie Mascot - Subtle decoration */}
+                <div className="landing-page-v2__trackie-badge">
+                  <img src={trackieMascot} alt="Trackie" className="landing-page-v2__trackie-img" />
+                  <span>Your kitchen buddy</span>
                 </div>
 
               </div>

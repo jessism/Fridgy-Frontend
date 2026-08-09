@@ -3,8 +3,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: inherit;
-  font-weight: 500;
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 600;
   text-decoration: none;
   border: none;
   cursor: pointer;
@@ -17,7 +17,7 @@
 }
 
 .button:focus {
-  outline: 2px solid rgba(79, 207, 97, 0.5);
+  outline: 2px solid rgba(197, 254, 1, 0.5);
   outline-offset: 2px;
 }
 
@@ -56,70 +56,74 @@
 
 /* BUTTON VARIANTS */
 
-/* Primary - Green gradient background, white text */
+/* Primary - Vibrant lime background, dark olive text */
 .button--primary {
-  background: linear-gradient(135deg, #81e053 0%, #6bc93f 100%);
-  color: white;
+  background: #C5FE01;
+  color: #4c6400;
   font-weight: 700;
-  box-shadow: none;
+  box-shadow: 0 6px 24px rgba(197, 254, 1, 0.3);
+  letter-spacing: 0.5px;
 }
 
 .button--primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #6bc93f 0%, #5eb849 100%);
-  transform: translateY(-2px);
-  box-shadow: none;
+  background: #d4ff33;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 30px rgba(197, 254, 1, 0.4);
 }
 
-/* Secondary - Black background, white text (like your Download App button) */
+/* Secondary - Dark background, white text */
 .button--secondary {
-  background: #222222;
+  background: #2E2F2B;
   color: white;
-  box-shadow: none;
+  box-shadow: 0 4px 16px rgba(26, 46, 5, 0.15);
 }
 
 .button--secondary:hover:not(:disabled) {
-  background: #333;
+  background: #3a3b37;
   transform: translateY(-2px);
-  box-shadow: none;
+  box-shadow: 0 6px 20px rgba(26, 46, 5, 0.2);
 }
 
 /* Outline - Transparent background, border */
 .button--outline {
   background: transparent;
-  color: var(--primary-green);
-  border: 1px solid var(--primary-green);
+  color: #4fcf61;
+  border: 2px solid #4fcf61;
   box-shadow: none;
 }
 
 .button--outline:hover:not(:disabled) {
-  background: var(--primary-green);
+  background: #4fcf61;
   color: white;
   transform: translateY(-2px);
-  box-shadow: none;
+  box-shadow: 0 4px 16px rgba(79, 207, 97, 0.25);
 }
 
 /* Ghost - Transparent background, no border */
 .button--ghost {
   background: transparent;
-  color: #333;
+  color: #2E2F2B;
   box-shadow: none;
 }
 
 .button--ghost:hover:not(:disabled) {
-  background: #f5f5f5;
+  background: rgba(197, 254, 1, 0.15);
   transform: translateY(-2px);
 }
 
-/* Light - White background, dark text */
+/* Light - White/beige background, dark text */
 .button--light {
-  background: white;
-  color: #333;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #2E2F2B;
+  border: 1px solid rgba(79, 207, 97, 0.15);
   box-shadow: none;
 }
 
 .button--light:hover:not(:disabled) {
-  background: #f9f9f9;
+  background: rgba(255, 255, 255, 0.95);
   transform: translateY(-2px);
-  box-shadow: none;
+  border-color: rgba(197, 254, 1, 0.3);
+  box-shadow: 0 4px 16px rgba(26, 46, 5, 0.08);
 }

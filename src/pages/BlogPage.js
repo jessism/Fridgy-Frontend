@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import appLogo from '../assets/images/Logo.png';
-import { blogRecipes } from '../data/blogRecipes';
 import Button from '../components/Button';
 import './BlogPage.css';
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 // Convert title to URL-friendly slug
 const slugify = (text) => {
@@ -25,22 +27,55 @@ const quickFilters = [
 
 const BlogPage = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('');
+  const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Redirect old ?recipe=slug URLs to new path-based URLs
+  useEffect(() => {
+    const recipeSlug = searchParams.get('recipe');
+    if (recipeSlug) {
+      navigate(`/resources/blog/${recipeSlug}`, { replace: true });
+    }
+  }, [searchParams, navigate]);
+
+  // Fetch recipes from API
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/blog/recipes`);
+        const data = await res.json();
+        if (data.success) {
+          setRecipes(data.recipes.map(r => ({
+            ...r,
+            // Parse JSONB fields if needed
+            ingredients: typeof r.ingredients === 'string' ? JSON.parse(r.ingredients) : (r.ingredients || []),
+          })));
+        }
+      } catch (err) {
+        console.error('Failed to fetch blog recipes:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecipes();
+  }, []);
 
   // Filter recipes based on search query
-  const filteredRecipes = blogRecipes.filter((recipe) => {
+  const filteredRecipes = recipes.filter((recipe) => {
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();
-    // Split query into words for multi-term matching (used by quick filters)
     const queryTerms = query.split(' ').filter(term => term.length > 0);
     const titleLower = recipe.title.toLowerCase();
-    const ingredientsLower = recipe.ingredients.map(ing => ing.toLowerCase());
-    const prepTimeLower = recipe.prepTime.toLowerCase();
+    const ingredientsLower = (recipe.ingredients || []).map(ing =>
+      typeof ing === 'string' ? ing.toLowerCase() : ''
+    );
+    const prepTimeLower = (recipe.prep_time || '').toLowerCase();
 
-    // Check if any query term matches title, ingredients, or prep time
     return queryTerms.some(term =>
       titleLower.includes(term) ||
       ingredientsLower.some(ing => ing.includes(term)) ||
@@ -61,41 +96,18 @@ const BlogPage = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Handle URL query parameter on mount and when it changes
-  useEffect(() => {
-    const recipeSlug = searchParams.get('recipe');
-    if (recipeSlug) {
-      const recipe = blogRecipes.find(r => slugify(r.title) === recipeSlug);
-      if (recipe) {
-        setSelectedRecipe(recipe);
-        document.body.style.overflow = 'hidden';
-      }
-    }
-  }, [searchParams]);
-
-  const openRecipeModal = (recipe) => {
-    setSelectedRecipe(recipe);
-    setSearchParams({ recipe: slugify(recipe.title) });
-    document.body.style.overflow = 'hidden';
-  };
-
-  const closeRecipeModal = () => {
-    setSelectedRecipe(null);
-    setSearchParams({});
-    document.body.style.overflow = '';
-  };
-
-  // Close modal on escape key
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') closeRecipeModal();
-    };
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, []);
-
   return (
     <div className="blog-page">
+      <Helmet>
+        <title>Recipe Collection | Trackabite</title>
+        <meta name="description" content="Discover delicious recipes to make with what's in your fridge. Browse our collection of easy, healthy, and flavorful meals." />
+        <link rel="canonical" href="https://www.trackabite.app/resources/blog" />
+        <meta property="og:title" content="Recipe Collection | Trackabite" />
+        <meta property="og:description" content="Discover delicious recipes to make with what's in your fridge." />
+        <meta property="og:url" content="https://www.trackabite.app/resources/blog" />
+        <meta property="og:type" content="website" />
+      </Helmet>
+
       {/* Header */}
       <header className={`blog-page__header ${isScrolled ? 'blog-page__header--scrolled' : ''}`}>
         <div className="blog-page__container">
@@ -155,21 +167,26 @@ const BlogPage = () => {
       {/* Recipe Grid */}
       <section className="blog-page__recipes">
         <div className="blog-page__container">
-          {filteredRecipes.length === 0 ? (
+          {loading ? (
             <div className="blog-page__no-results">
-              <p>No recipes found for "{searchQuery}"</p>
+              <p>Loading recipes...</p>
+            </div>
+          ) : filteredRecipes.length === 0 ? (
+            <div className="blog-page__no-results">
+              <p>No recipes found{searchQuery ? ` for "${searchQuery}"` : ''}</p>
               <p>Try searching for a different recipe or ingredient</p>
             </div>
           ) : (
           <div className="blog-page__grid">
             {filteredRecipes.map((recipe) => (
-              <article
+              <Link
                 key={recipe.id}
+                to={`/resources/blog/${recipe.slug}`}
                 className="blog-page__card"
-                onClick={() => openRecipeModal(recipe)}
+                style={{ textDecoration: 'none', color: 'inherit' }}
               >
                 <div className="blog-page__card-image">
-                  <img src={recipe.image} alt={recipe.title} />
+                  <img src={recipe.image_url} alt={recipe.title} />
                 </div>
                 <div className="blog-page__card-content">
                   <h3 className="blog-page__card-title">{recipe.title}</h3>
@@ -179,7 +196,7 @@ const BlogPage = () => {
                         <circle cx="12" cy="12" r="10" />
                         <polyline points="12,6 12,12 16,14" />
                       </svg>
-                      {recipe.prepTime} + {recipe.cookTime}
+                      {recipe.prep_time} + {recipe.cook_time}
                     </span>
                     <span className="blog-page__card-servings">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -192,71 +209,12 @@ const BlogPage = () => {
                     </span>
                   </div>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
           )}
         </div>
       </section>
-
-      {/* Recipe Modal */}
-      {selectedRecipe && (
-        <div className="blog-page__modal-overlay" onClick={closeRecipeModal}>
-          <div className="blog-page__modal" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="blog-page__modal-close"
-              onClick={closeRecipeModal}
-              aria-label="Close recipe"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="15,18 9,12 15,6" />
-              </svg>
-            </button>
-
-            <div className="blog-page__modal-image">
-              <img src={selectedRecipe.image} alt={selectedRecipe.title} />
-            </div>
-
-            <div className="blog-page__modal-content">
-              <h2 className="blog-page__modal-title">{selectedRecipe.title}</h2>
-              <p className="blog-page__modal-description">{selectedRecipe.description}</p>
-
-              <div className="blog-page__modal-meta">
-                <div className="blog-page__modal-meta-item">
-                  <span className="blog-page__modal-meta-label">Prep Time</span>
-                  <span className="blog-page__modal-meta-value">{selectedRecipe.prepTime}</span>
-                </div>
-                <div className="blog-page__modal-meta-item">
-                  <span className="blog-page__modal-meta-label">Cook Time</span>
-                  <span className="blog-page__modal-meta-value">{selectedRecipe.cookTime}</span>
-                </div>
-                <div className="blog-page__modal-meta-item">
-                  <span className="blog-page__modal-meta-label">Servings</span>
-                  <span className="blog-page__modal-meta-value">{selectedRecipe.servings}</span>
-                </div>
-              </div>
-
-              <div className="blog-page__modal-section">
-                <h3 className="blog-page__modal-section-title">Ingredients</h3>
-                <ul className="blog-page__modal-ingredients">
-                  {selectedRecipe.ingredients.map((ingredient, index) => (
-                    <li key={index}>{ingredient}</li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="blog-page__modal-section">
-                <h3 className="blog-page__modal-section-title">Instructions</h3>
-                <ol className="blog-page__modal-instructions">
-                  {selectedRecipe.instructions.map((step, index) => (
-                    <li key={index}>{step}</li>
-                  ))}
-                </ol>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

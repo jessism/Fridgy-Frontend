@@ -13,11 +13,16 @@ const AuthGuard = ({ children }) => {
     return null;
   }
 
-  // If not authenticated, redirect to landing page
+  // If not authenticated, redirect appropriately
   if (!user) {
     // Store the intended destination for after login
     sessionStorage.setItem('redirectAfterSignin', location.pathname);
-    
+
+    // Admin paths go to sign-in directly
+    if (location.pathname.startsWith('/admin')) {
+      return <Navigate to="/signin" replace />;
+    }
+
     return <Navigate to="/" replace />;
   }
 
