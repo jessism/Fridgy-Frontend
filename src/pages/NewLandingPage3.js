@@ -395,6 +395,21 @@ const NewLandingPage3 = () => {
           // long hold dead-centre (0.27 - 0.70): the phone stays under
           // the headline while the title scrolls up and Step 1's card
           // rises into view, only then does it slide right...
+          // hold the section title on screen alongside the phone for the
+          // same stretch (CSS sticky can't be used — an ancestor's
+          // overflow: clip kills it), so the stage is never empty
+          .to(
+            '.landing-page-v4__steps-title',
+            {
+              y: () => {
+                const st = flightTl.scrollTrigger;
+                return st ? (st.end - st.start) * 0.33 : 0;
+              },
+              ease: 'none',
+              duration: 0.33,
+            },
+            0.49
+          )
           .to(flight, { x: endX, ease: 'power1.inOut', duration: 0.08 }, 0.82)
           // ...then drop straight down into the slot, growing to size and
           // morphing the frame geometry to match the step phone

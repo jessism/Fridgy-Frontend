@@ -687,11 +687,13 @@
 }
 
 /* Desktop: push Step 1 further down so the phone flight has a longer
-   journey before it merges into the step's phone slot */
+   journey before it merges into the step's phone slot. The title sticks
+   through that runway so the phone is never alone on empty space. */
 @media (min-width: 769px) {
   .landing-page-v4__steps-header {
-    padding-bottom: 155vh;
+    padding-bottom: 120vh;
   }
+
 }
 
 .landing-page-v4__steps-title {
