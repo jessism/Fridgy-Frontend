@@ -793,18 +793,19 @@
   object-position: top;
 }
 
-/* Fresh green container variant (brand primary green) */
+/* Mid lime-green container variant — sits between the dark olive and
+   bright lime cards, keeping the whole section in the lime family */
 .landing-page-v4__step-slide-container--fresh {
-  background: var(--accent-green);
+  background: #8FBF00;
 }
 
 .landing-page-v4__step-slide-container--fresh .landing-page-v4__step-number {
-  color: #10592A;
+  color: #3D5200;
 }
 
 .landing-page-v4__step-slide-container--fresh .landing-page-v4__step-heading,
 .landing-page-v4__step-slide-container--fresh .landing-page-v4__step-description {
-  color: #0C3D1C;
+  color: #253300;
 }
 
 /* Dark green container variant */
