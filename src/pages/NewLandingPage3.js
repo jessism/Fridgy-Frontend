@@ -324,7 +324,7 @@ const NewLandingPage3 = () => {
     });
 
     mm.add('(prefers-reduced-motion: no-preference)', () => {
-      gsap.utils.toArray('.landing-page-v4__step-heading').forEach((heading) => {
+      gsap.utils.toArray('.landing-page-v4__steps-title, .landing-page-v4__step-heading').forEach((heading) => {
         SplitText.create(heading, {
           type: 'lines',
           mask: 'lines',
