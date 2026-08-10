@@ -311,6 +311,61 @@ const NewLandingPage3 = () => {
         pinSpacing: false,
       });
 
+      // Shared-element flight: the Inventory phone lifts out of the wheel
+      // centre and lands exactly in Step 1's phone slot as the steps panel
+      // arrives, handing off to the step video
+      const wheelPhoneFrame = document.querySelector(
+        '.landing-page-v4__wheel-phones .landing-page-v4__phone--right .landing-page-v4__phone-frame'
+      );
+      const stepSlide = document.querySelector('.landing-page-v4__step-slide');
+      const stepPhoneFrame = stepSlide && stepSlide.querySelector('.landing-page-v4__step-phone-frame');
+      const flight = document.querySelector('.landing-page-v4__phone-flight');
+      if (wheelPhoneFrame && stepPhoneFrame && flight) {
+        // Wheel phone's on-screen spot while the zone is pinned: the sticky
+        // layer is already stuck at load, so its rect is the flight start.
+        // (Layout size x the 0.8 CSS scale on the pair; rect centre is true.)
+        const startRect = wheelPhoneFrame.getBoundingClientRect();
+        const startW = wheelPhoneFrame.offsetWidth * 0.8;
+        const startH = wheelPhoneFrame.offsetHeight * 0.8;
+        const startX = startRect.left + startRect.width / 2 - startW / 2;
+        const startY = startRect.top + startRect.height / 2 - startH / 2;
+        // Step 1 phone's on-screen spot once its slide is stuck at the top
+        const slideRect = stepSlide.getBoundingClientRect();
+        const endRect = stepPhoneFrame.getBoundingClientRect();
+        const endX = endRect.left;
+        const endY = endRect.top - slideRect.top;
+
+        const flightTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: '.landing-page-v4__steps-section',
+            start: 'top bottom',
+            endTrigger: '.landing-page-v4__step-slide',
+            end: 'top top',
+            scrub: true,
+          },
+        });
+        flightTl
+          .fromTo(flight, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, 0)
+          // the front (Meals) phone bows out as the flight begins
+          .to('.landing-page-v4__wheel-phones', { autoAlpha: 0, duration: 0.08 }, 0.02)
+          .fromTo(
+            flight,
+            { x: startX, y: startY, width: startW, height: startH, rotation: 5 },
+            {
+              x: endX,
+              y: endY,
+              width: endRect.width,
+              height: endRect.height,
+              rotation: 0,
+              ease: 'power1.inOut',
+              duration: 0.95,
+            },
+            0.01
+          )
+          // hand off to the step's own video phone underneath
+          .to(flight, { autoAlpha: 0, duration: 0.04 }, 0.96);
+      }
+
       // Same overscroll between the meal-planning card and the shop card.
       // The pin covers the delay spacer (50vh hold) plus the shop
       // panel's 100vh climb
@@ -522,6 +577,17 @@ const NewLandingPage3 = () => {
 
         {/* Scroll distance for the wheel reveal */}
         <div className="landing-page-v4__wheel-space"></div>
+      </div>
+
+      {/* Flight phone: travels from the wheel centre into Step 1 (desktop) */}
+      <div className="landing-page-v4__phone-flight" aria-hidden="true">
+        <div className="landing-page-v4__phone-flight-frame">
+          <img
+            src={phoneRightImage}
+            alt=""
+            className="landing-page-v4__phone-flight-img"
+          />
+        </div>
       </div>
 
       {/* Steps Section - Sticky Scroll */}

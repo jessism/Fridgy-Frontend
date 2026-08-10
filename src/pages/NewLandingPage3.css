@@ -361,6 +361,42 @@
   }
 }
 
+/* Flight phone: fixed-position stand-in that carries the Inventory
+   phone from the wheel centre down into Step 1's phone slot */
+.landing-page-v4__phone-flight {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0; /* driven by the flight timeline */
+  will-change: transform;
+}
+
+.landing-page-v4__phone-flight-frame {
+  width: 100%;
+  height: 100%;
+  background: #1a1a1a;
+  border-radius: 36px;
+  padding: 9px;
+  overflow: hidden;
+}
+
+.landing-page-v4__phone-flight-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 28px;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .landing-page-v4__phone-flight {
+    display: none;
+  }
+}
+
 /* Provides the scroll distance during which the circle reveals/rotates,
    plus a hold at the end so the finished circle lingers before the next
    section scrolls over it */
