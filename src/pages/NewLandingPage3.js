@@ -358,35 +358,40 @@ const NewLandingPage3 = () => {
             { autoAlpha: 0, duration: 0.12 },
             0.02
           )
-          // place the stand-in exactly over the Inventory phone, then
-          // straighten it (5deg tilt -> upright) while gliding to the
-          // horizontal centre of the screen
+          // place the stand-in exactly over the Inventory phone and
+          // straighten it in place first (5deg tilt -> upright)
           .fromTo(
             flight,
             { x: startX, y: startY, width: startW, height: startH, rotation: 5 },
-            {
-              rotation: 0,
-              x: () => window.innerWidth / 2 - startW() / 2,
-              ease: 'power1.inOut',
-              duration: 0.18,
-            },
-            0.06
+            { rotation: 0, ease: 'power1.inOut', duration: 0.1 },
+            0.05
           )
-          .fromTo(flight, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, 0.07)
+          .fromTo(flight, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, 0.06)
           // ...and hide the real one the moment the stand-in covers it
           .to(
             '.landing-page-v4__wheel-phones .landing-page-v4__phone--right',
             { autoAlpha: 0, duration: 0.01 },
-            0.075
+            0.065
           )
-          // brief hold in the centre (0.24 - 0.36), then slide right
+          // glide to the centre of the screen, descending as it goes
+          .to(
+            flight,
+            {
+              x: () => window.innerWidth / 2 - startW() / 2,
+              y: () => window.innerHeight * 0.52 - startH() / 2,
+              ease: 'power1.inOut',
+              duration: 0.16,
+            },
+            0.16
+          )
+          // long hold in the centre (0.32 - 0.48), then slide right
           // into Step 1's column...
-          .to(flight, { x: endX, ease: 'power1.inOut', duration: 0.18 }, 0.36)
+          .to(flight, { x: endX, ease: 'power1.inOut', duration: 0.14 }, 0.48)
           // ...then drop straight down into the slot, growing to size
           .to(
             flight,
-            { y: endY, width: endW, height: endH, ease: 'power1.inOut', duration: 0.38 },
-            0.58
+            { y: endY, width: endW, height: endH, ease: 'power1.inOut', duration: 0.33 },
+            0.64
           )
           // keep Step 1's slot empty until the flight lands, then hand off
           .fromTo(stepPhoneFrame, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, 0.96)
