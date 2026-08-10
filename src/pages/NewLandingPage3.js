@@ -395,21 +395,6 @@ const NewLandingPage3 = () => {
           // long hold dead-centre (0.27 - 0.70): the phone stays under
           // the headline while the title scrolls up and Step 1's card
           // rises into view, only then does it slide right...
-          // hold the section title on screen alongside the phone for the
-          // same stretch (CSS sticky can't be used — an ancestor's
-          // overflow: clip kills it), so the stage is never empty
-          .to(
-            '.landing-page-v4__steps-title',
-            {
-              y: () => {
-                const st = flightTl.scrollTrigger;
-                return st ? (st.end - st.start) * 0.33 : 0;
-              },
-              ease: 'none',
-              duration: 0.33,
-            },
-            0.49
-          )
           .to(flight, { x: endX, ease: 'power1.inOut', duration: 0.08 }, 0.82)
           // ...then drop straight down into the slot, growing to size and
           // morphing the frame geometry to match the step phone
@@ -431,6 +416,30 @@ const NewLandingPage3 = () => {
           // keep Step 1's slot empty until the flight lands, then hand off
           .fromTo(stepPhoneFrame, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.005 }, 0.985)
           .to(flight, { autoAlpha: 0, duration: 0.01 }, 0.99);
+
+        // Hold the section title near the top of the screen while the
+        // phone poses below it, so the stage is never empty. CSS sticky
+        // can't be used here — an ancestor's overflow: clip kills it.
+        // Triggered off the header (never transformed) so the measured
+        // start point stays stable.
+        const titleTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: '.landing-page-v4__steps-header',
+            start: 'top top+=90',
+            endTrigger: '.landing-page-v4__step-slide',
+            end: 'top top+=350',
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+        });
+        titleTl.to('.landing-page-v4__steps-title', {
+          y: () => {
+            const st = titleTl.scrollTrigger;
+            return st ? st.end - st.start : 0;
+          },
+          ease: 'none',
+          duration: 1,
+        });
       }
 
       // Same overscroll between the meal-planning card and the shop card.

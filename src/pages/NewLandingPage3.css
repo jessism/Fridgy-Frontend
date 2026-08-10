@@ -691,7 +691,7 @@
    through that runway so the phone is never alone on empty space. */
 @media (min-width: 769px) {
   .landing-page-v4__steps-header {
-    padding-bottom: 120vh;
+    padding-bottom: 60vh;
   }
 
 }
