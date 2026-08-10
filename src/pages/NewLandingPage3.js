@@ -321,19 +321,25 @@ const NewLandingPage3 = () => {
       const stepPhoneFrame = stepSlide && stepSlide.querySelector('.landing-page-v4__step-phone-frame');
       const flight = document.querySelector('.landing-page-v4__phone-flight');
       if (wheelPhoneFrame && stepPhoneFrame && flight) {
-        // Wheel phone's on-screen spot while the zone is pinned: the sticky
-        // layer is already stuck at load, so its rect is the flight start.
-        // (Layout size x the 0.8 CSS scale on the pair; rect centre is true.)
-        const startRect = wheelPhoneFrame.getBoundingClientRect();
-        const startW = wheelPhoneFrame.offsetWidth * 0.8;
-        const startH = wheelPhoneFrame.offsetHeight * 0.8;
-        const startX = startRect.left + startRect.width / 2 - startW / 2;
-        const startY = startRect.top + startRect.height / 2 - startH / 2;
-        // Step 1 phone's on-screen spot once its slide is stuck at the top
-        const slideRect = stepSlide.getBoundingClientRect();
-        const endRect = stepPhoneFrame.getBoundingClientRect();
-        const endX = endRect.left;
-        const endY = endRect.top - slideRect.top;
+        // All geometry is measured lazily (and re-measured on refresh) so
+        // the stand-in lands exactly on the live phones even after fonts
+        // and images have shifted the layout
+        const startW = () => wheelPhoneFrame.offsetWidth * 0.8;
+        const startH = () => wheelPhoneFrame.offsetHeight * 0.8;
+        const startX = () => {
+          const r = wheelPhoneFrame.getBoundingClientRect();
+          return r.left + r.width / 2 - startW() / 2;
+        };
+        const startY = () => {
+          const r = wheelPhoneFrame.getBoundingClientRect();
+          return r.top + r.height / 2 - startH() / 2;
+        };
+        const endX = () => stepPhoneFrame.getBoundingClientRect().left;
+        const endY = () =>
+          stepPhoneFrame.getBoundingClientRect().top -
+          stepSlide.getBoundingClientRect().top;
+        const endW = () => stepPhoneFrame.getBoundingClientRect().width;
+        const endH = () => stepPhoneFrame.getBoundingClientRect().height;
 
         const flightTl = gsap.timeline({
           scrollTrigger: {
@@ -342,28 +348,42 @@ const NewLandingPage3 = () => {
             endTrigger: '.landing-page-v4__step-slide',
             end: 'top top',
             scrub: true,
+            invalidateOnRefresh: true,
           },
         });
         flightTl
-          .fromTo(flight, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, 0)
-          // the front (Meals) phone bows out as the flight begins
-          .to('.landing-page-v4__wheel-phones', { autoAlpha: 0, duration: 0.08 }, 0.02)
+          // the front (Meals) phone bows out first
+          .to(
+            '.landing-page-v4__wheel-phones .landing-page-v4__phone--left',
+            { autoAlpha: 0, duration: 0.12 },
+            0.02
+          )
+          // place the stand-in exactly over the Inventory phone and
+          // straighten it in place (5deg tilt -> upright)
           .fromTo(
             flight,
             { x: startX, y: startY, width: startW, height: startH, rotation: 5 },
-            {
-              x: endX,
-              y: endY,
-              width: endRect.width,
-              height: endRect.height,
-              rotation: 0,
-              ease: 'power1.inOut',
-              duration: 0.95,
-            },
-            0.01
+            { rotation: 0, ease: 'power1.inOut', duration: 0.2 },
+            0.06
           )
-          // hand off to the step's own video phone underneath
-          .to(flight, { autoAlpha: 0, duration: 0.04 }, 0.96);
+          .fromTo(flight, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, 0.07)
+          // ...and hide the real one the moment the stand-in covers it
+          .to(
+            '.landing-page-v4__wheel-phones .landing-page-v4__phone--right',
+            { autoAlpha: 0, duration: 0.01 },
+            0.075
+          )
+          // slide horizontally into Step 1's column...
+          .to(flight, { x: endX, ease: 'power1.inOut', duration: 0.24 }, 0.3)
+          // ...then drop straight down into the slot, growing to size
+          .to(
+            flight,
+            { y: endY, width: endW, height: endH, ease: 'power1.inOut', duration: 0.4 },
+            0.56
+          )
+          // keep Step 1's slot empty until the flight lands, then hand off
+          .fromTo(stepPhoneFrame, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, 0.96)
+          .to(flight, { autoAlpha: 0, duration: 0.03 }, 0.97);
       }
 
       // Same overscroll between the meal-planning card and the shop card.
