@@ -293,6 +293,16 @@ const NewLandingPage3 = () => {
     // Pinned panel with overscroll: the steps section pins once fully
     // scrolled, and the meal-planning card slides up over it
     mm.add('(min-width: 769px)', () => {
+      // Pin the wheel zone at its end so the finished circle holds
+      // while the steps panel slides up over it
+      ScrollTrigger.create({
+        trigger: '.landing-page-v4__wheel-zone',
+        start: 'bottom bottom',
+        end: '+=100%',
+        pin: true,
+        pinSpacing: false,
+      });
+
       ScrollTrigger.create({
         trigger: '.landing-page-v4__steps-section',
         start: 'bottom bottom',

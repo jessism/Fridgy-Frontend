@@ -622,8 +622,9 @@
   background: var(--bg-primary);
   position: relative;
   /* Rounded top corners, overlapping the lime wheel zone so the curve
-     shows against the lime background */
-  z-index: 2;
+     shows against the lime background. Above the pinned wheel zone
+     (ScrollTrigger pins get an inline z-index: 5) */
+  z-index: 6;
   margin-top: -48px;
   border-radius: 48px 48px 0 0;
 }
