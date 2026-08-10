@@ -380,34 +380,34 @@ const NewLandingPage3 = () => {
               x: () => window.innerWidth / 2 - startW() / 2,
               y: () => window.innerHeight * 0.52 - startH() / 2,
               ease: 'power1.inOut',
-              duration: 0.14,
+              duration: 0.12,
             },
-            0.18
+            0.15
           )
-          // extended hold in the centre (0.32 - 0.58) so the phone is
-          // still parked mid-screen while the section title reads, then
-          // slide right into Step 1's column...
-          .to(flight, { x: endX, ease: 'power1.inOut', duration: 0.1 }, 0.58)
+          // long hold dead-centre (0.27 - 0.70): the phone stays under
+          // the headline while the title scrolls up and Step 1's card
+          // rises into view, only then does it slide right...
+          .to(flight, { x: endX, ease: 'power1.inOut', duration: 0.08 }, 0.76)
           // ...then drop straight down into the slot, growing to size and
           // morphing the frame geometry to match the step phone
           .to(
             flight,
-            { y: endY, width: endW, height: endH, ease: 'power1.inOut', duration: 0.27 },
-            0.7
+            { y: endY, width: endW, height: endH, ease: 'power1.inOut', duration: 0.14 },
+            0.85
           )
           .to(
             '.landing-page-v4__phone-flight-frame',
-            { padding: 10, borderRadius: 40, ease: 'power1.inOut', duration: 0.27 },
-            0.7
+            { padding: 10, borderRadius: 40, ease: 'power1.inOut', duration: 0.14 },
+            0.85
           )
           .to(
             '.landing-page-v4__phone-flight-img',
-            { borderRadius: 30, ease: 'power1.inOut', duration: 0.27 },
-            0.7
+            { borderRadius: 30, ease: 'power1.inOut', duration: 0.14 },
+            0.85
           )
           // keep Step 1's slot empty until the flight lands, then hand off
-          .fromTo(stepPhoneFrame, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, 0.96)
-          .to(flight, { autoAlpha: 0, duration: 0.03 }, 0.97);
+          .fromTo(stepPhoneFrame, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.005 }, 0.985)
+          .to(flight, { autoAlpha: 0, duration: 0.01 }, 0.99);
       }
 
       // Same overscroll between the meal-planning card and the shop card.
