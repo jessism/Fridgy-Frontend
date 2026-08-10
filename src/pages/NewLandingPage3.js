@@ -324,7 +324,11 @@ const NewLandingPage3 = () => {
     });
 
     mm.add('(prefers-reduced-motion: no-preference)', () => {
-      gsap.utils.toArray('.landing-page-v4__steps-title, .landing-page-v4__step-heading').forEach((heading) => {
+      gsap.utils.toArray('.landing-page-v4__steps-title, .landing-page-v4__step-heading').forEach((heading, i) => {
+        // The section title and Step 1 arrive during the fast panel
+        // slide-over, so their reveals fire at mid-viewport where the
+        // eye actually is; the stacked slides keep the earlier trigger
+        const start = i <= 1 ? 'top 45%' : 'top 80%';
         SplitText.create(heading, {
           type: 'lines',
           mask: 'lines',
@@ -337,7 +341,7 @@ const NewLandingPage3 = () => {
               stagger: 0.12,
               scrollTrigger: {
                 trigger: heading,
-                start: 'top 80%',
+                start,
                 once: true,
               },
             }),
