@@ -793,18 +793,18 @@
   object-position: top;
 }
 
-/* Warm amber container variant */
-.landing-page-v4__step-slide-container--amber {
-  background: #FF9F1C;
+/* Fresh green container variant (brand primary green) */
+.landing-page-v4__step-slide-container--fresh {
+  background: var(--accent-green);
 }
 
-.landing-page-v4__step-slide-container--amber .landing-page-v4__step-number {
-  color: #6B3A00;
+.landing-page-v4__step-slide-container--fresh .landing-page-v4__step-number {
+  color: #10592A;
 }
 
-.landing-page-v4__step-slide-container--amber .landing-page-v4__step-heading,
-.landing-page-v4__step-slide-container--amber .landing-page-v4__step-description {
-  color: #3B2200;
+.landing-page-v4__step-slide-container--fresh .landing-page-v4__step-heading,
+.landing-page-v4__step-slide-container--fresh .landing-page-v4__step-description {
+  color: #0C3D1C;
 }
 
 /* Dark green container variant */

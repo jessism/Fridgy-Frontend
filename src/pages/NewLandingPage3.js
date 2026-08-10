@@ -669,7 +669,7 @@ const NewLandingPage3 = () => {
         <div className="landing-page-v4__steps-sticky-container">
           {/* Step 1 - Sticky Slide */}
           <div className="landing-page-v4__step-slide">
-            <div className="landing-page-v4__step-slide-container landing-page-v4__step-slide-container--amber">
+            <div className="landing-page-v4__step-slide-container landing-page-v4__step-slide-container--fresh">
               <div className="landing-page-v4__step-slide-content">
                 <div className="landing-page-v4__step-content">
                   <span className="landing-page-v4__step-number">Step 1.</span>
