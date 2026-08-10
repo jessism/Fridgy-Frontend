@@ -385,7 +385,8 @@ const NewLandingPage3 = () => {
             flight,
             {
               x: () => window.innerWidth / 2 - startW() / 2,
-              y: () => window.innerHeight * 0.52 - startH() / 2,
+              // sits low enough that its top clears the section headline
+              y: () => window.innerHeight * 0.66 - startH() / 2,
               ease: 'power1.inOut',
               duration: 0.12,
             },
