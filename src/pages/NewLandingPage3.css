@@ -793,18 +793,18 @@
   object-position: top;
 }
 
-/* Dark container variant */
-.landing-page-v4__step-slide-container--dark {
-  background: var(--text-primary);
+/* Warm amber container variant */
+.landing-page-v4__step-slide-container--amber {
+  background: #FF9F1C;
 }
 
-.landing-page-v4__step-slide-container--dark .landing-page-v4__step-number {
-  color: #C5FE01;
+.landing-page-v4__step-slide-container--amber .landing-page-v4__step-number {
+  color: #6B3A00;
 }
 
-.landing-page-v4__step-slide-container--dark .landing-page-v4__step-heading,
-.landing-page-v4__step-slide-container--dark .landing-page-v4__step-description {
-  color: #FFFFFF;
+.landing-page-v4__step-slide-container--amber .landing-page-v4__step-heading,
+.landing-page-v4__step-slide-container--amber .landing-page-v4__step-description {
+  color: #3B2200;
 }
 
 /* Dark green container variant */
