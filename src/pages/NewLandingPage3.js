@@ -358,12 +358,18 @@ const NewLandingPage3 = () => {
             { autoAlpha: 0, duration: 0.12 },
             0.02
           )
-          // place the stand-in exactly over the Inventory phone and
-          // straighten it in place (5deg tilt -> upright)
+          // place the stand-in exactly over the Inventory phone, then
+          // straighten it (5deg tilt -> upright) while gliding to the
+          // horizontal centre of the screen
           .fromTo(
             flight,
             { x: startX, y: startY, width: startW, height: startH, rotation: 5 },
-            { rotation: 0, ease: 'power1.inOut', duration: 0.2 },
+            {
+              rotation: 0,
+              x: () => window.innerWidth / 2 - startW() / 2,
+              ease: 'power1.inOut',
+              duration: 0.18,
+            },
             0.06
           )
           .fromTo(flight, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, 0.07)
@@ -373,13 +379,14 @@ const NewLandingPage3 = () => {
             { autoAlpha: 0, duration: 0.01 },
             0.075
           )
-          // slide horizontally into Step 1's column...
-          .to(flight, { x: endX, ease: 'power1.inOut', duration: 0.24 }, 0.3)
+          // brief hold in the centre (0.24 - 0.36), then slide right
+          // into Step 1's column...
+          .to(flight, { x: endX, ease: 'power1.inOut', duration: 0.18 }, 0.36)
           // ...then drop straight down into the slot, growing to size
           .to(
             flight,
-            { y: endY, width: endW, height: endH, ease: 'power1.inOut', duration: 0.4 },
-            0.56
+            { y: endY, width: endW, height: endH, ease: 'power1.inOut', duration: 0.38 },
+            0.58
           )
           // keep Step 1's slot empty until the flight lands, then hand off
           .fromTo(stepPhoneFrame, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, 0.96)
