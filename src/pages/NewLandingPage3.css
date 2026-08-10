@@ -361,6 +361,19 @@
   }
 }
 
+/* Lime runway before the steps panel: covered by the pinned wheel
+   scene while the phone flight plays out alone */
+.landing-page-v4__steps-delay {
+  height: 60vh;
+  background: #F0FFBA;
+}
+
+@media (max-width: 768px) {
+  .landing-page-v4__steps-delay {
+    display: none;
+  }
+}
+
 /* Flight phone: fixed-position stand-in that carries the Inventory
    phone from the wheel centre down into Step 1's phone slot */
 .landing-page-v4__phone-flight {

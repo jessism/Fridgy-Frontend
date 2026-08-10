@@ -293,12 +293,13 @@ const NewLandingPage3 = () => {
     // Pinned panel with overscroll: the steps section pins once fully
     // scrolled, and the meal-planning card slides up over it
     mm.add('(min-width: 769px)', () => {
-      // Pin the wheel zone at its end so the finished circle holds
-      // while the steps panel slides up over it
+      // Pin the wheel zone at its end so the finished scene holds —
+      // first alone through the lime runway (60vh) while the phone
+      // flight plays, then while the steps panel slides up over it
       ScrollTrigger.create({
         trigger: '.landing-page-v4__wheel-zone',
         start: 'bottom bottom',
-        end: '+=100%',
+        end: '+=160%',
         pin: true,
         pinSpacing: false,
       });
@@ -343,8 +344,10 @@ const NewLandingPage3 = () => {
 
         const flightTl = gsap.timeline({
           scrollTrigger: {
-            trigger: '.landing-page-v4__steps-section',
-            start: 'top bottom',
+            // begins the moment the wheel zone pins, so the early beats
+            // play out alone on the lime runway
+            trigger: '.landing-page-v4__wheel-zone',
+            start: 'bottom bottom',
             endTrigger: '.landing-page-v4__step-slide',
             end: 'top top',
             scrub: true,
@@ -619,6 +622,10 @@ const NewLandingPage3 = () => {
         {/* Scroll distance for the wheel reveal */}
         <div className="landing-page-v4__wheel-space"></div>
       </div>
+
+      {/* Lime runway: the pinned wheel scene holds alone while the phone
+          flight plays out, before the steps panel arrives (desktop) */}
+      <div className="landing-page-v4__steps-delay" aria-hidden="true"></div>
 
       {/* Flight phone: travels from the wheel centre into Step 1 (desktop) */}
       <div className="landing-page-v4__phone-flight" aria-hidden="true">
