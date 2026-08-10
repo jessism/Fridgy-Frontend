@@ -453,12 +453,6 @@ const NewLandingPage3 = () => {
           </a>
         </div>
 
-        {/* Index Number */}
-        <span className="landing-page-v4__index">(01)</span>
-
-        {/* Year */}
-        <span className="landing-page-v4__year">2025</span>
-
         {/* Phones Row - Tagline on left, Phones in center */}
         <div className="landing-page-v4__phones-row">
           {/* Left - Tagline */}

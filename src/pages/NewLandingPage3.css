@@ -883,7 +883,7 @@
 .landing-page-v4__features-section {
   background: var(--bg-surface);
   padding: 0;
-  padding-bottom: 120px;
+  padding-bottom: 0; /* no stripe between testimonial and final CTA */
   position: relative;
   /* Paint above the pinned steps section during the overscroll
      (ScrollTrigger gives pinned elements an inline z-index: 5) */
@@ -1218,6 +1218,7 @@
   background: var(--accent-lime);
   color: var(--on-lime-green);
   border: none;
+  text-decoration: none;
   padding: 16px 32px;
   font-size: 0.875rem;
   font-weight: 700;
@@ -1314,17 +1315,6 @@
   margin-bottom: 0;
   position: relative;
   z-index: 15;
-}
-
-.landing-page-v4__testimonial::after {
-  content: '';
-  position: absolute;
-  bottom: -100px;
-  left: 0;
-  right: 0;
-  height: 100px;
-  background: var(--bg-secondary);
-  z-index: -1;
 }
 
 .landing-page-v4__testimonial-content {
@@ -2134,10 +2124,6 @@
   }
 
   /* Final CTA - Mobile */
-  .landing-page-v4__testimonial::after {
-    display: none;
-  }
-
   .landing-page-v4__final-cta {
     padding: 40px 20px;
     top: 0;
