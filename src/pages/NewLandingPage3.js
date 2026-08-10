@@ -358,21 +358,18 @@ const NewLandingPage3 = () => {
             { autoAlpha: 0, duration: 0.12 },
             0.02
           )
-          // place the stand-in exactly over the Inventory phone and
-          // straighten it in place first (5deg tilt -> upright)
-          .fromTo(
-            flight,
-            { x: startX, y: startY, width: startW, height: startH, rotation: 5 },
-            { rotation: 0, ease: 'power1.inOut', duration: 0.1 },
-            0.05
-          )
-          .fromTo(flight, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, 0.06)
-          // ...and hide the real one the moment the stand-in covers it
+          // atomic swap: the stand-in appears pixel-identical over the
+          // real phone in the same instant the real one hides — only
+          // after that does any motion begin
+          .set(flight, { x: startX, y: startY, width: startW, height: startH, rotation: 5 }, 0.05)
+          .fromTo(flight, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.005 }, 0.05)
           .to(
             '.landing-page-v4__wheel-phones .landing-page-v4__phone--right',
-            { autoAlpha: 0, duration: 0.01 },
-            0.065
+            { autoAlpha: 0, duration: 0.005 },
+            0.05
           )
+          // straighten in place (5deg tilt -> upright)
+          .to(flight, { rotation: 0, ease: 'power1.inOut', duration: 0.09 }, 0.08)
           // glide to the centre of the screen, descending as it goes
           .to(
             flight,
@@ -387,10 +384,21 @@ const NewLandingPage3 = () => {
           // long hold in the centre (0.32 - 0.48), then slide right
           // into Step 1's column...
           .to(flight, { x: endX, ease: 'power1.inOut', duration: 0.14 }, 0.48)
-          // ...then drop straight down into the slot, growing to size
+          // ...then drop straight down into the slot, growing to size and
+          // morphing the frame geometry to match the step phone
           .to(
             flight,
             { y: endY, width: endW, height: endH, ease: 'power1.inOut', duration: 0.33 },
+            0.64
+          )
+          .to(
+            '.landing-page-v4__phone-flight-frame',
+            { padding: 10, borderRadius: 40, ease: 'power1.inOut', duration: 0.33 },
+            0.64
+          )
+          .to(
+            '.landing-page-v4__phone-flight-img',
+            { borderRadius: 30, ease: 'power1.inOut', duration: 0.33 },
             0.64
           )
           // keep Step 1's slot empty until the flight lands, then hand off
