@@ -427,7 +427,9 @@ const NewLandingPage3 = () => {
             trigger: '.landing-page-v4__steps-header',
             start: 'top top+=90',
             endTrigger: '.landing-page-v4__step-slide',
-            end: 'top top+=350',
+            // held until Step 1's card is nearly at the top, so the title
+            // stays put for the whole time the phone is posed below it
+            end: 'top top+=180',
             scrub: true,
             invalidateOnRefresh: true,
           },
