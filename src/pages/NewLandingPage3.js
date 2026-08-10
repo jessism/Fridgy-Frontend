@@ -6,9 +6,21 @@ import { SplitText } from 'gsap/SplitText';
 import { useGSAP } from '@gsap/react';
 import { useAuth } from '../features/auth/context/AuthContext';
 import appLogo from '../assets/images/Logo.png';
-import dishImage1 from '../assets/images/Landingpage_food_1.jpg';
-import dishImage2 from '../assets/images/Landingpage_food_2.jpg';
-import dishImage3 from '../assets/images/Landingpage_food_3.jpg';
+import dishImage1 from '../assets/images/Landing page hero circle/pexels-annevandervalk-18585656.jpg';
+import dishImage2 from '../assets/images/Landing page hero circle/pexels-charlene-2161046612-37409101.jpg';
+import dishImage3 from '../assets/images/Landing page hero circle/pexels-fox-58267-35285814.jpg';
+import dishImage4 from '../assets/images/Landing page hero circle/pexels-gizem-gokce-1072613075-38343253.jpg';
+import dishImage5 from '../assets/images/Landing page hero circle/pexels-joy_-lee-273537-14742312.jpg';
+import dishImage6 from '../assets/images/Landing page hero circle/pexels-laura-oliveira-2156849568-34429481.jpg';
+import dishImage7 from '../assets/images/Landing page hero circle/pexels-max-griss-16866522-37180268.jpg';
+import dishImage8 from '../assets/images/Landing page hero circle/pexels-maxbond-8366627.jpg';
+import dishImage9 from '../assets/images/Landing page hero circle/pexels-nadin-sh-78971847-13749941.jpg';
+import dishImage10 from '../assets/images/Landing page hero circle/pexels-nour-alhoda-2151678059-32535020.jpg';
+import dishImage11 from '../assets/images/Landing page hero circle/pexels-nour-alhoda-2151678059-36718511.jpg';
+import dishImage12 from '../assets/images/Landing page hero circle/pexels-pexels-user-1368186290-25884476.jpg';
+import dishImage13 from '../assets/images/Landing page hero circle/pexels-punam-oishy-415017245-34624025.jpg';
+import dishImage14 from '../assets/images/Landing page hero circle/pexels-richard-l-2150581203-34871730.jpg';
+import dishImage15 from '../assets/images/Landing page hero circle/pexels-thomas-parker-1272388137-38412480.jpg';
 import phoneLeftImage from '../assets/product mockup/Hero_Meals.jpeg';
 import phoneRightImage from '../assets/product mockup/Hero_Inventory.jpeg';
 import step1Video from '../assets/product mockup/Track inventory new.mp4';
@@ -25,7 +37,11 @@ import './NewLandingPage3.css';
 
 gsap.registerPlugin(useGSAP, ScrollTrigger, SplitText);
 
-const DISH_IMAGES = [dishImage1, dishImage2, dishImage3];
+const DISH_IMAGES = [
+  dishImage1, dishImage2, dishImage3, dishImage4, dishImage5,
+  dishImage6, dishImage7, dishImage8, dishImage9, dishImage10,
+  dishImage11, dishImage12, dishImage13, dishImage14, dishImage15,
+];
 const WHEEL_CARD_COUNT = 20;
 
 const NewLandingPage3 = () => {
@@ -253,6 +269,30 @@ const NewLandingPage3 = () => {
     if (loading) return;
 
     const mm = gsap.matchMedia();
+
+    // Pinned panel with overscroll: the steps section pins once fully
+    // scrolled, and the meal-planning card slides up over it
+    mm.add('(min-width: 769px)', () => {
+      ScrollTrigger.create({
+        trigger: '.landing-page-v4__steps-section',
+        start: 'bottom bottom',
+        end: '+=100%',
+        pin: true,
+        pinSpacing: false,
+      });
+
+      // Same overscroll between the meal-planning card and the shop card.
+      // The pin covers the delay spacer (50vh hold) plus the shop
+      // panel's 100vh climb
+      ScrollTrigger.create({
+        trigger: '.landing-page-v4__feature-block', // first block (meal planning)
+        start: 'bottom bottom',
+        end: '+=150%',
+        pin: true,
+        pinSpacing: false,
+      });
+    });
+
     mm.add('(prefers-reduced-motion: no-preference)', () => {
       gsap.utils.toArray('.landing-page-v4__step-heading').forEach((heading) => {
         SplitText.create(heading, {
@@ -599,6 +639,10 @@ const NewLandingPage3 = () => {
         </div>
 
         {/* Shop Smarter Together */}
+        {/* Scroll delay: holds the pinned meal-planning card on screen
+            before the shop panel starts sliding over it (desktop) */}
+        <div className="landing-page-v4__shop-delay" aria-hidden="true"></div>
+
         <div className="landing-page-v4__feature-block landing-page-v4__feature-block--shop">
           <div className="landing-page-v4__feature-block-content landing-page-v4__feature-block-content--reversed">
             <div className="landing-page-v4__feature-text">
@@ -697,7 +741,7 @@ const NewLandingPage3 = () => {
               What <span className="landing-page-v4__testimonial-highlight">Our Users</span> Say
             </h2>
             <p className="landing-page-v4__testimonial-description">
-              Hear from families who transformed their kitchen experience
+              Real kitchens, real wins — from home cooks who made dinner the easy part of the day.
             </p>
           </div>
 

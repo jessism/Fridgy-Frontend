@@ -881,10 +881,13 @@
 
 /* ===== FEATURES SECTION ===== */
 .landing-page-v4__features-section {
-  background: var(--bg-primary);
+  background: var(--bg-surface);
   padding: 0;
   padding-bottom: 120px;
   position: relative;
+  /* Paint above the pinned steps section during the overscroll
+     (ScrollTrigger gives pinned elements an inline z-index: 5) */
+  z-index: 6;
 }
 
 .landing-page-v4__features-section::before {
@@ -916,9 +919,16 @@
   margin-top: 0;
 }
 
-/* Meal-planning block: square bottom corners — the white shop block
-   slides over it with its own rounded top */
+/* Overlap the charcoal shop block despite the sibling margin reset
+   above (that rule's specificity beats the plain --grid class) */
+.landing-page-v4__feature-block + .landing-page-v4__feature-block--grid {
+  margin-top: -40px;
+}
+
+/* Meal-planning block: brand lime background, square bottom corners —
+   the white shop block slides over it with its own rounded top */
 .landing-page-v4__feature-block:first-of-type {
+  background: #F0FFBA;
   border-radius: 40px 40px 0 0;
 }
 
@@ -927,7 +937,9 @@
   flex-direction: column;
   align-items: center;
   max-width: 100%;
-  margin: 0;
+  /* Overlap the charcoal shop section so the rounded top shows against it */
+  margin: -40px 0 0;
+  z-index: 7;
   min-height: auto;
   padding: 60px;
   padding-top: 100px;
@@ -1136,10 +1148,33 @@
 }
 
 .landing-page-v4__feature-block--shop {
-  background: var(--bg-surface);
+  background: var(--text-primary); /* brand black (warm charcoal) */
   border-radius: 40px 40px 0 0;
   margin: -40px 0 0;
-  z-index: 1;
+  /* Above the pinned meal-planning panel (ScrollTrigger pins get an
+     inline z-index: 5) */
+  z-index: 6;
+}
+
+/* Transparent scroll spacer: the pinned meal-planning card stays fully
+   visible while this passes, delaying the shop panel's entrance */
+.landing-page-v4__shop-delay {
+  height: 50vh;
+}
+
+@media (max-width: 768px) {
+  .landing-page-v4__shop-delay {
+    display: none;
+  }
+}
+
+/* Light text on the brand-black shop section */
+.landing-page-v4__feature-block--shop .landing-page-v4__feature-heading {
+  color: #ffffff;
+}
+
+.landing-page-v4__feature-block--shop .landing-page-v4__feature-description {
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .landing-page-v4__feature-block-content {
@@ -1273,7 +1308,7 @@
 .landing-page-v4__testimonial {
   padding: 100px 40px;
   padding-bottom: 100px;
-  background: var(--bg-secondary);
+  background: #F0FFBA; /* brand pale lime, matching hero and meal blocks */
   border-radius: 40px 40px 0 0;
   margin-top: 80px;
   margin-bottom: 0;
@@ -1304,26 +1339,22 @@
 
 .landing-page-v4__testimonial-headline {
   font-size: clamp(36px, 5vw, 56px);
-  font-weight: 800;
+  font-weight: 900;
   font-family: var(--font-headline);
-  color: var(--text-primary);
+  color: var(--accent-dark-olive);
   margin: 0 0 16px 0;
   line-height: 1.1;
   letter-spacing: -1px;
 }
 
 .landing-page-v4__testimonial-highlight {
-  background: linear-gradient(90deg, var(--accent-lime) 0%, var(--accent-green) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
+  font-style: italic; /* same accent treatment as the hero's "WAY" */
 }
 
 .landing-page-v4__testimonial-description {
   font-size: 1.25rem;
   font-family: var(--font-body);
-  color: var(--text-secondary);
+  color: var(--accent-dark-olive);
   margin: 0 auto;
   max-width: 500px;
 }
@@ -1383,7 +1414,7 @@
 .landing-page-v4__testimonial-name {
   font-weight: 700;
   font-family: var(--font-body);
-  color: var(--text-primary);
+  color: var(--accent-dark-olive);
 }
 
 /* Navigation Arrows */
@@ -1433,7 +1464,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: rgba(46, 47, 43, 0.2);
+  background: rgba(76, 100, 0, 0.25); /* dark-olive tint on lime */
   cursor: pointer;
   transition: all 0.3s ease;
 }
