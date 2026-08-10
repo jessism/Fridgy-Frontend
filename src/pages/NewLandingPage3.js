@@ -373,6 +373,13 @@ const NewLandingPage3 = () => {
           )
           // straighten in place (5deg tilt -> upright)
           .to(flight, { rotation: 0, ease: 'power1.inOut', duration: 0.09 }, 0.08)
+          // clear the wheel headline before the steps panel brings its
+          // own title up — only the phone stays on the lime stage
+          .to(
+            '.landing-page-v4__wheel-heading',
+            { autoAlpha: 0, y: -30, ease: 'power1.in', duration: 0.08 },
+            0.17
+          )
           // glide to the centre of the screen, descending as it goes
           .to(
             flight,
@@ -387,23 +394,23 @@ const NewLandingPage3 = () => {
           // long hold dead-centre (0.27 - 0.70): the phone stays under
           // the headline while the title scrolls up and Step 1's card
           // rises into view, only then does it slide right...
-          .to(flight, { x: endX, ease: 'power1.inOut', duration: 0.08 }, 0.76)
+          .to(flight, { x: endX, ease: 'power1.inOut', duration: 0.08 }, 0.82)
           // ...then drop straight down into the slot, growing to size and
           // morphing the frame geometry to match the step phone
           .to(
             flight,
-            { y: endY, width: endW, height: endH, ease: 'power1.inOut', duration: 0.14 },
-            0.85
+            { y: endY, width: endW, height: endH, ease: 'power1.inOut', duration: 0.09 },
+            0.9
           )
           .to(
             '.landing-page-v4__phone-flight-frame',
-            { padding: 10, borderRadius: 40, ease: 'power1.inOut', duration: 0.14 },
-            0.85
+            { padding: 10, borderRadius: 40, ease: 'power1.inOut', duration: 0.09 },
+            0.9
           )
           .to(
             '.landing-page-v4__phone-flight-img',
-            { borderRadius: 30, ease: 'power1.inOut', duration: 0.14 },
-            0.85
+            { borderRadius: 30, ease: 'power1.inOut', duration: 0.09 },
+            0.9
           )
           // keep Step 1's slot empty until the flight lands, then hand off
           .fromTo(stepPhoneFrame, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.005 }, 0.985)
