@@ -151,21 +151,35 @@ const NewLandingPage3 = () => {
         const cardStartScale = mobile ? 0.77 : Math.min(1, 245 / (160 * (heroRadius / radius)));
         const cardEndScale = mobile ? 1 : 0.8;
 
-        // Place the cards around the wheel rim, facing outward
-        cards.forEach((card, i) => {
-          const angle = (360 / cards.length) * i;
-          const rad = (angle * Math.PI) / 180;
-          gsap.set(card, {
-            x: Math.cos(rad) * radius,
-            y: Math.sin(rad) * radius,
-            xPercent: -50,
-            yPercent: -50,
-            rotation: angle + 90,
-            // counteract the rotor's start scale so hero cards stay a
-            // reasonable size; tweened down as the wheel shrinks
-            scale: cardStartScale,
-          });
+        // Wheel drivers: spin (idle drift) and scrubRot (scroll) move the
+        // cards around the rim; morph controls their orientation —
+        // 0 = upright like Ferris-wheel gondolas (hero arc),
+        // 1 = facing outward on the ring (full circle)
+        const wheel = { spin: 0, scrubRot: 0, morph: 0 };
+        const baseAngles = cards.map((_, i) => (360 / cards.length) * i);
+
+        cards.forEach((card) => {
+          // counteract the rotor's start scale so hero cards stay a
+          // reasonable size; tweened down as the wheel shrinks
+          gsap.set(card, { xPercent: -50, yPercent: -50, scale: cardStartScale });
         });
+
+        const positionCards = () => {
+          const total = wheel.spin + wheel.scrubRot;
+          cards.forEach((card, i) => {
+            const angle = baseAngles[i] + total;
+            const rad = (angle * Math.PI) / 180;
+            // shortest-path outward angle so the morph never over-rotates
+            const facing = gsap.utils.wrap(-180, 180, angle + 90);
+            gsap.set(card, {
+              x: Math.cos(rad) * radius,
+              y: Math.sin(rad) * radius,
+              rotation: wheel.morph * facing,
+            });
+          });
+        };
+        positionCards();
+        gsap.ticker.add(positionCards);
 
         // Start the wheel oversized with its centre ABOVE the viewport,
         // so the hero shows the bottom rim of the circle as a hanging
@@ -178,8 +192,8 @@ const NewLandingPage3 = () => {
 
         // Constant idle spin (the "flow" in the hero)
         if (!reduceMotion) {
-          gsap.to('.landing-page-v4__wheel-spinner', {
-            rotation: 360,
+          gsap.to(wheel, {
+            spin: 360,
             duration: 90,
             repeat: -1,
             ease: 'none',
@@ -202,7 +216,9 @@ const NewLandingPage3 = () => {
         // where the completed circle lingers before the next section
         if (!reduceMotion) {
           // Heavier rotation drives the "twist" feel
-          tl.to('.landing-page-v4__wheel-rotor', { rotation: 220, ease: 'none', duration: 1 }, 0);
+          tl.to(wheel, { scrubRot: 220, ease: 'none', duration: 1 }, 0);
+          // Cards twist from upright (hero) to outward-facing (circle)
+          tl.to(wheel, { morph: 1, ease: 'power1.inOut', duration: 0.4 }, 0.2);
           // The centre dives from above the viewport to below the middle
           // while swinging sideways and shrinking — mid-transition the rim
           // sweeps edge-on across the screen (the flip), then you briefly
@@ -227,6 +243,7 @@ const NewLandingPage3 = () => {
             0.15
           );
           tl.to(cards, { scale: cardEndScale, ease: 'none', duration: 0.42 }, 0.15);
+          tl.to(wheel, { morph: 1, ease: 'none', duration: 0.42 }, 0.15);
         }
         tl.fromTo(
           '.landing-page-v4__wheel-title',
@@ -260,6 +277,9 @@ const NewLandingPage3 = () => {
           { opacity: 1, scale: 1, duration: 0.12 },
           0.78
         );
+
+        // matchMedia cleanup: stop the per-frame card positioning
+        return () => gsap.ticker.remove(positionCards);
       }
     );
   }, { scope: wheelZoneRef, dependencies: [loading] });
