@@ -672,6 +672,14 @@
   border-radius: 40px 40px 0 0;
 }
 
+/* Desktop: push Step 1 further down so the phone flight has a longer
+   journey before it merges into the step's phone slot */
+@media (min-width: 769px) {
+  .landing-page-v4__steps-header {
+    padding-bottom: 45vh;
+  }
+}
+
 .landing-page-v4__steps-title {
   font-size: clamp(32px, 5vw, 48px);
   font-weight: 800;
