@@ -417,31 +417,9 @@ const NewLandingPage3 = () => {
           .fromTo(stepPhoneFrame, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.005 }, 0.985)
           .to(flight, { autoAlpha: 0, duration: 0.01 }, 0.99);
 
-        // Hold the section title near the top of the screen while the
-        // phone poses below it, so the stage is never empty. CSS sticky
-        // can't be used here — an ancestor's overflow: clip kills it.
-        // Triggered off the header (never transformed) so the measured
-        // start point stays stable.
-        const titleTl = gsap.timeline({
-          scrollTrigger: {
-            trigger: '.landing-page-v4__steps-header',
-            start: 'top top+=90',
-            endTrigger: '.landing-page-v4__step-slide',
-            // held until Step 1's card is nearly at the top, so the title
-            // stays put for the whole time the phone is posed below it
-            end: 'top top+=180',
-            scrub: true,
-            invalidateOnRefresh: true,
-          },
-        });
-        titleTl.to('.landing-page-v4__steps-title', {
-          y: () => {
-            const st = titleTl.scrollTrigger;
-            return st ? st.end - st.start : 0;
-          },
-          ease: 'none',
-          duration: 1,
-        });
+        // NOTE: the section title is deliberately NOT pinned — it belongs
+        // to the white panel and scrolls with it, while the phone stays
+        // fixed and merges into Step 1 (Wispr Flow-style).
       }
 
       // Same overscroll between the meal-planning card and the shop card.
@@ -457,22 +435,13 @@ const NewLandingPage3 = () => {
     });
 
     mm.add('(prefers-reduced-motion: no-preference)', () => {
-      const isDesktop = window.matchMedia('(min-width: 769px)').matches;
       gsap.utils.toArray('.landing-page-v4__steps-title, .landing-page-v4__step-heading').forEach((heading, i) => {
-        // The section title reveals only once it has reached its resting
-        // spot (the hold below parks it there), so it never appears to
-        // travel up the screen while the phone stays still. Step 1 arrives
-        // during the fast panel slide-over, so it fires at mid-viewport;
-        // the stacked slides keep the later trigger.
-        const isTitle = i === 0;
-        const trigger = isTitle && isDesktop
-          ? '.landing-page-v4__steps-header'
-          : heading;
-        const start = isTitle && isDesktop
-          ? 'top top+=105'
-          : i === 1
-            ? 'top 45%'
-            : 'top 80%';
+        // The title rides up with the panel, so it unmasks as it enters
+        // from the bottom and is fully formed before the phone passes it.
+        // Step 1 arrives during the fast slide-over (mid-viewport); the
+        // stacked slides keep the later trigger.
+        const trigger = heading;
+        const start = i === 0 ? 'top 90%' : i === 1 ? 'top 45%' : 'top 80%';
         SplitText.create(heading, {
           type: 'lines',
           mask: 'lines',
