@@ -377,29 +377,30 @@ const NewLandingPage3 = () => {
               x: () => window.innerWidth / 2 - startW() / 2,
               y: () => window.innerHeight * 0.52 - startH() / 2,
               ease: 'power1.inOut',
-              duration: 0.16,
+              duration: 0.14,
             },
-            0.16
+            0.18
           )
-          // long hold in the centre (0.32 - 0.48), then slide right
-          // into Step 1's column...
-          .to(flight, { x: endX, ease: 'power1.inOut', duration: 0.14 }, 0.48)
+          // extended hold in the centre (0.32 - 0.58) so the phone is
+          // still parked mid-screen while the section title reads, then
+          // slide right into Step 1's column...
+          .to(flight, { x: endX, ease: 'power1.inOut', duration: 0.1 }, 0.58)
           // ...then drop straight down into the slot, growing to size and
           // morphing the frame geometry to match the step phone
           .to(
             flight,
-            { y: endY, width: endW, height: endH, ease: 'power1.inOut', duration: 0.33 },
-            0.64
+            { y: endY, width: endW, height: endH, ease: 'power1.inOut', duration: 0.27 },
+            0.7
           )
           .to(
             '.landing-page-v4__phone-flight-frame',
-            { padding: 10, borderRadius: 40, ease: 'power1.inOut', duration: 0.33 },
-            0.64
+            { padding: 10, borderRadius: 40, ease: 'power1.inOut', duration: 0.27 },
+            0.7
           )
           .to(
             '.landing-page-v4__phone-flight-img',
-            { borderRadius: 30, ease: 'power1.inOut', duration: 0.33 },
-            0.64
+            { borderRadius: 30, ease: 'power1.inOut', duration: 0.27 },
+            0.7
           )
           // keep Step 1's slot empty until the flight lands, then hand off
           .fromTo(stepPhoneFrame, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, 0.96)
