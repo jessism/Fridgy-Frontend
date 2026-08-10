@@ -455,11 +455,22 @@ const NewLandingPage3 = () => {
     });
 
     mm.add('(prefers-reduced-motion: no-preference)', () => {
+      const isDesktop = window.matchMedia('(min-width: 769px)').matches;
       gsap.utils.toArray('.landing-page-v4__steps-title, .landing-page-v4__step-heading').forEach((heading, i) => {
-        // The section title and Step 1 arrive during the fast panel
-        // slide-over, so their reveals fire at mid-viewport where the
-        // eye actually is; the stacked slides keep the earlier trigger
-        const start = i <= 1 ? 'top 45%' : 'top 80%';
+        // The section title reveals only once it has reached its resting
+        // spot (the hold below parks it there), so it never appears to
+        // travel up the screen while the phone stays still. Step 1 arrives
+        // during the fast panel slide-over, so it fires at mid-viewport;
+        // the stacked slides keep the later trigger.
+        const isTitle = i === 0;
+        const trigger = isTitle && isDesktop
+          ? '.landing-page-v4__steps-header'
+          : heading;
+        const start = isTitle && isDesktop
+          ? 'top top+=105'
+          : i === 1
+            ? 'top 45%'
+            : 'top 80%';
         SplitText.create(heading, {
           type: 'lines',
           mask: 'lines',
@@ -471,7 +482,7 @@ const NewLandingPage3 = () => {
               ease: 'power4.out',
               stagger: 0.12,
               scrollTrigger: {
-                trigger: heading,
+                trigger,
                 start,
                 once: true,
               },
