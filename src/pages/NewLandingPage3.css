@@ -211,7 +211,7 @@
 /* ===== Dish wheel (arc in the hero, rotating circle on scroll) ===== */
 .landing-page-v4__wheel-zone {
   position: relative;
-  background: #F0FFBA;
+  background: #FFFFED;
 }
 
 .landing-page-v4__wheel-sticky {
@@ -365,7 +365,7 @@
    scene while the phone flight plays out alone */
 .landing-page-v4__steps-delay {
   height: 60vh;
-  background: #F0FFBA;
+  background: #FFFFED;
 }
 
 @media (max-width: 768px) {
