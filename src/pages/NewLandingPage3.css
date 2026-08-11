@@ -943,7 +943,9 @@
 
 /* ===== FEATURES SECTION ===== */
 .landing-page-v4__features-section {
-  background: var(--bg-surface);
+  /* matches the steps section above, so the meal block's rounded top
+     corners blend instead of exposing a white notch */
+  background: var(--bg-primary);
   padding: 0;
   padding-bottom: 0; /* no stripe between testimonial and final CTA */
   position: relative;
