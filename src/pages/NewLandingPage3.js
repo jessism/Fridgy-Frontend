@@ -42,7 +42,7 @@ const DISH_IMAGES = [
   dishImage6, dishImage7, dishImage8, dishImage9, dishImage10,
   dishImage11, dishImage12, dishImage13, dishImage14, dishImage15,
 ];
-const WHEEL_CARD_COUNT = 20;
+const WHEEL_CARD_COUNT = 36;
 
 const NewLandingPage3 = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -148,8 +148,10 @@ const NewLandingPage3 = () => {
         // The hero arc keeps a fixed large sweep regardless of ring size
         const heroRadius = mobile ? radius * 2 : Math.min(vw * 0.88, 1320);
         // Hero cards ~245px; they settle smaller on the final ring
-        const cardStartScale = mobile ? 0.77 : Math.min(1, 245 / (160 * (heroRadius / radius)));
-        const cardEndScale = mobile ? 1 : 0.8;
+        // hero cards ~165px (small + closely spaced along the arc); they
+        // settle a little smaller still on the final ring
+        const cardStartScale = mobile ? 0.77 : Math.min(1, 165 / (160 * (heroRadius / radius)));
+        const cardEndScale = mobile ? 1 : 0.65;
 
         // Wheel drivers: spin (idle drift) and scrubRot (scroll) move the
         // cards around the rim; morph controls their orientation —
