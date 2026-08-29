@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import './App.css';
 import { AuthProvider } from './features/auth/context/AuthContext';
@@ -65,6 +65,10 @@ import ContentUploadPage from './pages/ContentUploadPage';
 import BlogRecipeEditor from './pages/BlogRecipeEditor';
 import BlogRecipePage from './pages/BlogRecipePage';
 import { HelmetProvider } from 'react-helmet-async';
+
+// Admin analytics is lazy-loaded so public visitors never download Recharts.
+const AnalyticsDashboard = lazy(() => import('./pages/admin/AnalyticsDashboard'));
+const AnalyticsUserDetail = lazy(() => import('./pages/admin/AnalyticsUserDetail'));
 
 // Navigation listener component to handle service worker messages
 function NavigationListener() {
@@ -373,6 +377,18 @@ function App() {
           <Route path="/admin/blog/edit/:id" element={
             <AuthGuard>
               <BlogRecipeEditor />
+            </AuthGuard>
+          } />
+
+          {/* Admin analytics (requires auth + admin) */}
+          <Route path="/admin/analytics" element={
+            <AuthGuard adminOnly>
+              <Suspense fallback={null}><AnalyticsDashboard /></Suspense>
+            </AuthGuard>
+          } />
+          <Route path="/admin/analytics/users/:id" element={
+            <AuthGuard adminOnly>
+              <Suspense fallback={null}><AnalyticsUserDetail /></Suspense>
             </AuthGuard>
           } />
 
