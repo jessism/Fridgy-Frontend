@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useAuth } from '../features/auth/context/AuthContext';
+import { useNavigate, useParams } from 'react-router-dom';
+import { adminFetch } from '../features/admin-analytics/api';
+import { AdminPageHeader } from './admin/ui';
 import './BlogRecipeEditor.css';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-
 const BlogRecipeEditor = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const { id } = useParams(); // undefined for new, id for edit
   const fileInputRef = useRef(null);
@@ -32,24 +30,17 @@ const BlogRecipeEditor = () => {
   const [tagInput, setTagInput] = useState('');
 
   useEffect(() => {
-    if (!user?.isAdmin) {
-      navigate('/');
-      return;
-    }
     if (id) {
       fetchRecipe();
     }
-  }, [user, navigate, id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const fetchRecipe = async () => {
     try {
-      const token = localStorage.getItem('fridgy_token');
-      const res = await fetch(`${API_BASE_URL}/blog/admin/recipes`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (data.success) {
-        const found = data.recipes.find(r => r.id === parseInt(id));
+      const data = await adminFetch('/blog/admin/recipes');
+      {
+        const found = data.recipes.find(r => r.id === parseInt(id, 10));
         if (found) {
           // Parse JSONB fields if they're strings
           const ingredients = typeof found.ingredients === 'string'
@@ -98,33 +89,22 @@ const BlogRecipeEditor = () => {
     setError('');
 
     try {
-      const token = localStorage.getItem('fridgy_token');
       const formData = new FormData();
       formData.append('image', imageFile);
 
-      const res = await fetch(`${API_BASE_URL}/blog/generate`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        setRecipe(prev => ({
-          ...prev,
-          ...data.recipe,
-          ingredients: data.recipe.ingredients || [''],
-          instructions: data.recipe.instructions || [''],
-          tags: data.recipe.tags || []
-        }));
-        setImagePreview(data.recipe.image_url);
-        setImageFile(null); // Image already uploaded by backend
-      } else {
-        setError(data.error || 'Failed to generate recipe');
-      }
+      const data = await adminFetch('/blog/generate', { method: 'POST', formData });
+      setRecipe(prev => ({
+        ...prev,
+        ...data.recipe,
+        ingredients: data.recipe.ingredients || [''],
+        instructions: data.recipe.instructions || [''],
+        tags: data.recipe.tags || []
+      }));
+      setImagePreview(data.recipe.image_url);
+      setImageFile(null); // Image already uploaded by backend
     } catch (err) {
       console.error('Generate error:', err);
-      setError('Failed to generate recipe. Please try again.');
+      setError(err.status ? err.message : 'Failed to generate recipe. Please try again.');
     } finally {
       setGenerating(false);
     }
@@ -140,7 +120,6 @@ const BlogRecipeEditor = () => {
     setError('');
 
     try {
-      const token = localStorage.getItem('fridgy_token');
       const body = {
         ...recipe,
         status,
@@ -148,28 +127,14 @@ const BlogRecipeEditor = () => {
         instructions: recipe.instructions.filter(i => i.trim())
       };
 
-      const url = id
-        ? `${API_BASE_URL}/blog/recipes/${id}`
-        : `${API_BASE_URL}/blog/recipes`;
-
-      const res = await fetch(url, {
+      await adminFetch(id ? `/blog/recipes/${id}` : '/blog/recipes', {
         method: id ? 'PUT' : 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
+        body,
       });
-
-      const data = await res.json();
-      if (data.success) {
-        navigate('/admin/blog');
-      } else {
-        setError(data.error || 'Failed to save recipe');
-      }
+      navigate('/admin/blog');
     } catch (err) {
       console.error('Save error:', err);
-      setError('Failed to save recipe');
+      setError(err.status ? err.message : 'Failed to save recipe');
     } finally {
       setSaving(false);
     }
@@ -210,15 +175,12 @@ const BlogRecipeEditor = () => {
     setRecipe(prev => ({ ...prev, tags: prev.tags.filter(t => t !== tag) }));
   };
 
-  if (!user?.isAdmin) return null;
-
   return (
-    <div className="blog-editor">
-      <div className="blog-editor__header">
-        <Link to="/admin/blog" className="blog-editor__back">&larr; Back to recipes</Link>
-        <h1 className="blog-editor__title">{id ? 'Edit Recipe' : 'New Recipe'}</h1>
-      </div>
-
+    <div className="blog-editor ad-page--narrow">
+      <AdminPageHeader
+        title={id ? 'Edit Recipe' : 'New Recipe'}
+        crumbs={[{ label: 'Blog', to: '/admin/blog' }, { label: id ? 'Edit' : 'New' }]}
+      />
       {error && <div className="blog-editor__error">{error}</div>}
 
       {/* Photo Upload Section */}

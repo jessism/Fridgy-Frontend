@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { usePWADetection } from '../hooks/usePWADetection';
-import { usePushNotificationSetup } from '../hooks/usePushNotificationSetup';
-import { useAuth } from '../features/auth/context/AuthContext';
-import PWANotificationPrompt from '../components/PWANotificationPrompt';
-import './PWATestPage.css';
+import { usePWADetection } from '../../hooks/usePWADetection';
+import { usePushNotificationSetup } from '../../hooks/usePushNotificationSetup';
+import { useAuth } from '../../features/auth/context/AuthContext';
+import PWANotificationPrompt from '../../components/PWANotificationPrompt';
+import { AdminPageHeader } from './ui';
+import './DiagnosticsPage.css';
 
-const PWATestPage = () => {
+const DiagnosticsPage = () => {
   const { token } = useAuth();
   const {
     isPWA,
@@ -47,8 +48,11 @@ const PWATestPage = () => {
 
   return (
     <div className="pwa-test-page">
+      <AdminPageHeader
+        title="Diagnostics"
+        description="PWA detection and push-notification test tooling."
+      />
       <div className="pwa-test-page__container">
-        <h1 className="pwa-test-page__title">PWA Detection & Notification Test</h1>
 
         {/* Current Status Section */}
         <div className="pwa-test-page__section">
@@ -194,4 +198,4 @@ const PWATestPage = () => {
   );
 };
 
-export default PWATestPage;
+export default DiagnosticsPage;

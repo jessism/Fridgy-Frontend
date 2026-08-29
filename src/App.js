@@ -47,7 +47,6 @@ import ShoppingListDetailPage from './pages/ShoppingListDetailPage';
 import CookbookDetailPage from './pages/CookbookDetailPage';
 import JoinShoppingList from './components/JoinShoppingList';
 import JoinCookbook from './components/JoinCookbook';
-import PWATestPage from './pages/PWATestPage';
 import ScrollToTop from './components/ScrollToTop';
 import BillingPage from './pages/BillingPage';
 import SubscriptionPage from './pages/SubscriptionPage';
@@ -60,15 +59,15 @@ import AboutPage from './pages/AboutPage';
 import FeaturesPage from './pages/FeaturesPage';
 import PublicSupportPage from './pages/PublicSupportPage';
 import BlogPage from './pages/BlogPage';
-import BlogAdmin from './pages/BlogAdmin';
-import ContentUploadPage from './pages/ContentUploadPage';
-import BlogRecipeEditor from './pages/BlogRecipeEditor';
 import BlogRecipePage from './pages/BlogRecipePage';
 import { HelmetProvider } from 'react-helmet-async';
 
+// The entire /admin console is one lazy chunk (its route table and every
+// page live inside AdminLayout), so no admin or Recharts code ships in the
+// main bundle that public visitors download.
+const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
+
 // Admin analytics is lazy-loaded so public visitors never download Recharts.
-const AnalyticsDashboard = lazy(() => import('./pages/admin/AnalyticsDashboard'));
-const AnalyticsUserDetail = lazy(() => import('./pages/admin/AnalyticsUserDetail'));
 
 // Navigation listener component to handle service worker messages
 function NavigationListener() {
@@ -321,11 +320,6 @@ function App() {
               <JoinShoppingList />
             </AuthGuard>
           } />
-          <Route path="/pwa-test" element={
-            <AuthGuard>
-              <PWATestPage />
-            </AuthGuard>
-          } />
 
           {/* Billing & Subscription Routes */}
           <Route path="/billing" element={
@@ -358,46 +352,18 @@ function App() {
           <Route path="/resources/blog" element={<BlogPage />} />
           <Route path="/resources/blog/:slug" element={<BlogRecipePage />} />
 
-          {/* Blog Admin (requires auth + admin) */}
-          <Route path="/admin" element={
-            <AuthGuard>
-              <Navigate to="/admin/blog" replace />
-            </AuthGuard>
-          } />
-          <Route path="/admin/blog" element={
-            <AuthGuard>
-              <BlogAdmin />
-            </AuthGuard>
-          } />
-          <Route path="/admin/blog/new" element={
-            <AuthGuard>
-              <BlogRecipeEditor />
-            </AuthGuard>
-          } />
-          <Route path="/admin/blog/edit/:id" element={
-            <AuthGuard>
-              <BlogRecipeEditor />
-            </AuthGuard>
-          } />
-
-          {/* Admin analytics (requires auth + admin) */}
-          <Route path="/admin/analytics" element={
+          {/* Admin console — one guarded, lazily-loaded area.
+              AuthGuard sends signed-out visitors on an /admin path to /signin,
+              and signed-in non-admins to /home. The old standalone /content and
+              /pwa-test routes redirect INTO this area, so they inherit the same
+              guard rather than needing their own. */}
+          <Route path="/admin/*" element={
             <AuthGuard adminOnly>
-              <Suspense fallback={null}><AnalyticsDashboard /></Suspense>
+              <Suspense fallback={null}><AdminLayout /></Suspense>
             </AuthGuard>
           } />
-          <Route path="/admin/analytics/users/:id" element={
-            <AuthGuard adminOnly>
-              <Suspense fallback={null}><AnalyticsUserDetail /></Suspense>
-            </AuthGuard>
-          } />
-
-          {/* Manual TikTok photo post upload (requires auth + admin) */}
-          <Route path="/content" element={
-            <AuthGuard>
-              <ContentUploadPage />
-            </AuthGuard>
-          } />
+          <Route path="/content" element={<Navigate to="/admin/social" replace />} />
+          <Route path="/pwa-test" element={<Navigate to="/admin/diagnostics" replace />} />
           </Routes>
             </Router>
           </GuidedTourProvider>

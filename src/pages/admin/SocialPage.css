@@ -1,7 +1,8 @@
+/* The admin layout owns the page shell (height, canvas, padding); this file
+   keeps only what the uploader itself needs. The 480px cap and the 16px input
+   font are load-bearing: this page is used from a phone to pick photos, and a
+   sub-16px input makes iOS zoom on focus. */
 .content-upload {
-  min-height: 100vh;
-  background: #f8f7f0;
-  padding: 24px 16px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   display: flex;
   justify-content: center;
@@ -12,27 +13,13 @@
   max-width: 480px;
 }
 
-.content-upload__title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #384b00;
-  margin: 8px 0 4px;
-}
-
-.content-upload__subtitle {
-  color: #666;
-  font-size: 0.9rem;
-  margin: 0 0 20px;
-  line-height: 1.4;
-}
-
 .content-upload__picker {
   display: block;
-  border: 2px dashed #d4869e;
+  border: 2px dashed var(--ad-border);
   border-radius: 12px;
   padding: 28px 16px;
   text-align: center;
-  color: #384b00;
+  color: var(--ad-accent-ink);
   font-weight: 600;
   cursor: pointer;
   background: #fff;
@@ -64,7 +51,7 @@
 
 .content-upload__name-input {
   flex: 1;
-  border: 1px solid #e0e0dc;
+  border: 1px solid var(--ad-border);
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 16px; /* prevents iOS zoom-on-focus */
@@ -73,7 +60,7 @@
 
 .content-upload__name-input:focus {
   outline: none;
-  border-color: #384b00;
+  border-color: var(--ad-accent-ink);
 }
 
 .content-upload__hint {
@@ -86,7 +73,7 @@
   width: 100%;
   padding: 14px;
   margin-top: 8px;
-  background: #384b00;
+  background: var(--ad-accent);
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -96,14 +83,14 @@
 }
 
 .content-upload__submit:disabled {
-  background: #b8bdae;
+  background: var(--ad-ink-3);
   cursor: not-allowed;
 }
 
 .content-upload__error {
   margin-top: 14px;
-  background: #fdecec;
-  color: #a33;
+  background: var(--ad-bad-bg);
+  color: var(--ad-bad-ink);
   border-radius: 8px;
   padding: 12px;
   font-size: 0.9rem;
@@ -129,7 +116,7 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: #384b00;
+  background: var(--ad-accent);
   color: #fff;
   font-size: 1.5rem;
   line-height: 48px;
@@ -148,7 +135,7 @@
 }
 
 .content-upload__success a {
-  color: #384b00;
+  color: var(--ad-accent-ink);
   font-weight: 600;
   font-size: 0.9rem;
 }
@@ -159,8 +146,8 @@
   margin-top: 16px;
   padding: 12px;
   background: #fff;
-  color: #384b00;
-  border: 1.5px solid #384b00;
+  color: var(--ad-accent-ink);
+  border: 1.5px solid var(--ad-accent);
   border-radius: 10px;
   font-size: 0.95rem;
   font-weight: 600;

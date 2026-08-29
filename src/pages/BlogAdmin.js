@@ -1,35 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../features/auth/context/AuthContext';
+import { adminFetch } from '../features/admin-analytics/api';
+import { AdminPageHeader } from './admin/ui';
 import './BlogAdmin.css';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-
 const BlogAdmin = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState(null);
 
   useEffect(() => {
-    if (!user?.isAdmin) {
-      navigate('/');
-      return;
-    }
     fetchRecipes();
-  }, [user, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchRecipes = async () => {
     try {
-      const token = localStorage.getItem('fridgy_token');
-      const res = await fetch(`${API_BASE_URL}/blog/admin/recipes`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (data.success) {
-        setRecipes(data.recipes);
-      }
+      const data = await adminFetch('/blog/admin/recipes');
+      setRecipes(data.recipes);
     } catch (err) {
       console.error('Failed to fetch recipes:', err);
     } finally {
@@ -41,15 +30,8 @@ const BlogAdmin = () => {
     if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
 
     try {
-      const token = localStorage.getItem('fridgy_token');
-      const res = await fetch(`${API_BASE_URL}/blog/recipes/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (data.success) {
-        setRecipes(recipes.filter(r => r.id !== id));
-      }
+      await adminFetch(`/blog/recipes/${id}`, { method: 'DELETE' });
+      setRecipes(recipes.filter(r => r.id !== id));
     } catch (err) {
       console.error('Failed to delete recipe:', err);
     }
@@ -57,15 +39,8 @@ const BlogAdmin = () => {
 
   const handlePublish = async (id) => {
     try {
-      const token = localStorage.getItem('fridgy_token');
-      const res = await fetch(`${API_BASE_URL}/blog/recipes/${id}/publish`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (data.success) {
-        setRecipes(recipes.map(r => r.id === id ? data.recipe : r));
-      }
+      const data = await adminFetch(`/blog/recipes/${id}/publish`, { method: 'PUT' });
+      setRecipes(recipes.map(r => r.id === id ? data.recipe : r));
     } catch (err) {
       console.error('Failed to publish recipe:', err);
     }
@@ -81,19 +56,12 @@ const BlogAdmin = () => {
   const published = recipes.filter(r => r.status === 'published');
   const drafts = recipes.filter(r => r.status === 'draft');
 
-  if (!user?.isAdmin) return null;
-
   return (
     <div className="blog-admin">
-      <div className="blog-admin__header">
-        <div className="blog-admin__header-left">
-          <Link to="/home" className="blog-admin__back">&larr; Back</Link>
-          <h1 className="blog-admin__title">Blog Recipes</h1>
-        </div>
-        <Link to="/admin/blog/new" className="blog-admin__new-btn">
-          + New Recipe
-        </Link>
-      </div>
+      <AdminPageHeader
+        title="Blog"
+        actions={<Link to="/admin/blog/new" className="blog-admin__new-btn">+ New Recipe</Link>}
+      />
 
       <div className="blog-admin__stats">
         <div className="blog-admin__stat">

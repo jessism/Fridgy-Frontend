@@ -1,22 +1,13 @@
 /* PWA Test Page Styles */
 
+/* Page shell (height, canvas, padding) belongs to AdminLayout now. */
 .pwa-test-page {
-  min-height: 100vh;
-  padding: 20px;
-  background: #f8f9fa;
+  min-width: 0;
 }
 
 .pwa-test-page__container {
   max-width: 1200px;
   margin: 0 auto;
-}
-
-.pwa-test-page__title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #333;
-  margin-bottom: 30px;
-  text-align: center;
 }
 
 .pwa-test-page__section {
@@ -225,16 +216,7 @@
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
-  .pwa-test-page {
-    padding: 16px;
-  }
-
-  .pwa-test-page__title {
-    font-size: 24px;
-    margin-bottom: 20px;
-  }
-
-  .pwa-test-page__section {
+    .pwa-test-page__section {
     padding: 16px;
     margin-bottom: 16px;
   }

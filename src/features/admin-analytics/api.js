@@ -1,25 +1,75 @@
-// Thin client for /api/admin/analytics (admin-only, backend enforces is_admin).
-// Same token convention as BlogAdmin.js.
+// Client for every /api/admin/* endpoint the console talks to (admin-only;
+// the backend enforces is_admin on each route).
+//
+// This is the single place that knows API_BASE_URL and the token convention.
+// AuthContext.apiRequest is module-private, so the admin pages route through
+// here rather than each rebuilding headers.
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-async function adminGet(path, params = {}) {
+const buildQuery = (params = {}) => {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '')
+  ).toString();
+  return qs ? `?${qs}` : '';
+};
+
+/**
+ * One request helper for the whole admin area.
+ *
+ * path      — absolute under /api, e.g. '/admin/feedback'
+ * params    — query string values (undefined/null/'' dropped)
+ * body      — JSON-serialised; sets Content-Type
+ * formData  — sent as-is; Content-Type is left to the browser so it can add
+ *             the multipart boundary (blog image upload, TikTok photos)
+ *
+ * Returns body.data for { success, data } envelopes, and the whole body for
+ * the older endpoints that don't use one.
+ */
+export async function adminFetch(path, { method = 'GET', params, body, formData } = {}) {
   const token = localStorage.getItem('fridgy_token');
-  const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== '')).toString();
-  const res = await fetch(`${API_BASE_URL}/admin/analytics${path}${qs ? `?${qs}` : ''}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const body = await res.json().catch(() => ({}));
-  if (!res.ok || !body.success) {
-    const err = new Error(body.error || `Request failed (${res.status})`);
+  const headers = { Authorization: `Bearer ${token}` };
+  const init = { method, headers };
+
+  if (formData) {
+    init.body = formData;
+  } else if (body !== undefined) {
+    headers['Content-Type'] = 'application/json';
+    init.body = JSON.stringify(body);
+  }
+
+  const res = await fetch(`${API_BASE_URL}${path}${buildQuery(params)}`, init);
+  const payload = await res.json().catch(() => ({}));
+
+  if (!res.ok || payload.success === false) {
+    const err = new Error(payload.error || `Request failed (${res.status})`);
     err.status = res.status;
+    // Keep the parsed body on the error: some endpoints return useful fields
+    // alongside a failure (e.g. tiktok-upload returns batch_id when the photos
+    // were saved but the pipeline dispatch failed).
+    err.data = payload;
     throw err;
   }
-  return body.data;
+  return payload.data !== undefined ? payload.data : payload;
 }
+
+const adminGet = (path, params = {}) => adminFetch(`/admin/analytics${path}`, { params });
 
 export const fetchOverview = (days) => adminGet('/overview', { days });
 export const fetchUsers = ({ search, sort, dir, page, pageSize }) => adminGet('/users', { search, sort, dir, page, pageSize });
 export const fetchUserDetail = (id) => adminGet(`/users/${encodeURIComponent(id)}`);
+
+// --- feedback ---
+export const FEEDBACK_STATUSES = ['new', 'read', 'resolved'];
+export const fetchFeedback = ({ status, page, pageSize } = {}) =>
+  adminFetch('/admin/feedback', { params: { status, page, pageSize } });
+export const updateFeedback = (id, status) =>
+  adminFetch(`/admin/feedback/${encodeURIComponent(id)}`, { method: 'PATCH', body: { status } });
+
+// --- promo codes ---
+export const fetchPromos = () => adminFetch('/admin/promos');
+export const createPromo = (payload) => adminFetch('/admin/promos', { method: 'POST', body: payload });
+export const updatePromo = (id, payload) =>
+  adminFetch(`/admin/promos/${encodeURIComponent(id)}`, { method: 'PATCH', body: payload });
 
 // Links to the PostHog dashboards that own behavioural analytics (DAU/MAU,
 // retention, feature trends, RevenueCat events). Fill in after creating them

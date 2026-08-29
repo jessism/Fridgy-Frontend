@@ -1,32 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../features/auth/context/AuthContext';
-import './ContentUploadPage.css';
+import { adminFetch } from '../../features/admin-analytics/api';
+import { AdminPageHeader } from './ui';
+import './SocialPage.css';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 const MAX_PHOTOS = 4;
 const MIN_PHOTOS = 2;
 
-const ContentUploadPage = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+const SocialPage = () => {
   const [photos, setPhotos] = useState([]); // [{ file, previewUrl, name }]
   const [status, setStatus] = useState('idle'); // idle | uploading | success | error
   const [result, setResult] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
-    if (!user?.isAdmin) {
-      navigate('/');
-    }
-  }, [user, navigate]);
-
-  useEffect(() => {
     return () => photos.forEach(p => URL.revokeObjectURL(p.previewUrl));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  if (!user?.isAdmin) return null;
 
   const handleFilesSelected = (e) => {
     const files = Array.from(e.target.files || []).slice(0, MAX_PHOTOS);
@@ -58,28 +47,20 @@ const ContentUploadPage = () => {
       photos.forEach(p => formData.append('photos', p.file));
       formData.append('names', JSON.stringify(photos.map(p => p.name.trim())));
 
-      const token = localStorage.getItem('fridgy_token');
-      const res = await fetch(`${API_BASE_URL}/tiktok-upload/submit`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData
-      });
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        setResult(data);
-        setStatus('success');
-      } else if (res.status === 401 || res.status === 403) {
-        setErrorMsg('Session expired or not authorized. Please sign in again.');
-        setStatus('error');
-      } else {
-        setErrorMsg(data.error || `Upload failed (${res.status})`);
-        if (data.batch_id) setResult(data); // dispatch failed but photos are saved
-        setStatus('error');
-      }
+      const data = await adminFetch('/tiktok-upload/submit', { method: 'POST', formData });
+      setResult(data);
+      setStatus('success');
     } catch (err) {
       console.error('Upload failed:', err);
-      setErrorMsg('Upload failed. Check your connection and try again.');
+      if (err.status === 401 || err.status === 403) {
+        setErrorMsg('Session expired or not authorized. Please sign in again.');
+      } else if (err.status) {
+        setErrorMsg(err.message);
+        // Dispatch failed but the photos are saved — keep the batch id visible.
+        if (err.data?.batch_id) setResult(err.data);
+      } else {
+        setErrorMsg('Upload failed. Check your connection and try again.');
+      }
       setStatus('error');
     }
   };
@@ -88,12 +69,11 @@ const ContentUploadPage = () => {
 
   return (
     <div className="content-upload">
+      <AdminPageHeader
+        title="Social Media"
+        description={`Upload ${MIN_PHOTOS}-${MAX_PHOTOS} photos of your dishes. The pipeline writes the recipes, builds the carousel, and sends a draft to your TikTok inbox.`}
+      />
       <div className="content-upload__card">
-        <h1 className="content-upload__title">TikTok Photo Post</h1>
-        <p className="content-upload__subtitle">
-          Upload {MIN_PHOTOS}-{MAX_PHOTOS} photos of your dishes. The pipeline writes the
-          recipes, builds the carousel, and sends a draft to your TikTok inbox.
-        </p>
 
         {status !== 'success' && (
           <>
@@ -169,4 +149,4 @@ const ContentUploadPage = () => {
   );
 };
 
-export default ContentUploadPage;
+export default SocialPage;

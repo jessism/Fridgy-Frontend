@@ -1,0 +1,110 @@
+/*
+ * Admin console shell.
+ *
+ * The WINDOW is the scroll container, deliberately: components/ScrollToTop.js
+ * calls window.scrollTo(0,0) on every pathname change, so moving the scroll
+ * into an inner element would silently stop admin route changes from resetting
+ * scroll position. The sidebar is `position: sticky` rather than `fixed` for
+ * the same reason.
+ */
+.admin-root {
+  display: grid;
+  grid-template-columns: var(--ad-sidebar-w) minmax(0, 1fr);
+  align-items: start;
+  background: var(--ad-canvas);
+  min-height: 100vh;
+}
+
+/* ---------- sidebar ---------- */
+.ad-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  background: var(--ad-surface);
+  border-right: 1px solid var(--ad-border);
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ad-sidebar__brand {
+  display: flex; align-items: center; gap: 8px;
+  font-weight: 700; font-size: 1rem; padding: 6px 10px 14px;
+  color: var(--ad-ink); text-decoration: none;
+}
+.ad-sidebar__group { margin-top: 14px; }
+.ad-sidebar__group-label {
+  font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--ad-ink-3); padding: 0 10px 6px; font-weight: 600;
+}
+.ad-sidebar__item {
+  display: flex; align-items: center; gap: 10px;
+  height: 40px; padding: 0 10px; border-radius: 8px;
+  color: var(--ad-ink-2); text-decoration: none; font-size: 0.9rem;
+}
+.ad-sidebar__item:hover { background: var(--ad-divider); color: var(--ad-ink); }
+.ad-sidebar__item.is-active { background: var(--ad-accent-tint); color: var(--ad-accent-ink); font-weight: 600; }
+.ad-sidebar__spacer { flex: 1 1 auto; min-height: 16px; }
+.ad-sidebar__footer { border-top: 1px solid var(--ad-divider); padding-top: 10px; }
+.ad-sidebar__email {
+  font-size: 0.78rem; color: var(--ad-ink-3); padding: 0 10px 8px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ad-sidebar__action {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  height: 36px; padding: 0 10px; border: 0; border-radius: 8px;
+  background: transparent; color: var(--ad-ink-2); font-size: 0.88rem;
+  cursor: pointer; text-decoration: none; text-align: left;
+}
+.ad-sidebar__action:hover { background: var(--ad-divider); color: var(--ad-ink); }
+
+/* ---------- content ---------- */
+.ad-content {
+  min-width: 0;            /* without this, wide tables push the whole page */
+  padding: 24px 32px;
+}
+
+/* ---------- mobile ---------- */
+.ad-topbar { display: none; }
+
+@media (max-width: 1023px) {
+  .admin-root { grid-template-columns: minmax(0, 1fr); }
+
+  .ad-topbar {
+    display: flex; align-items: center; gap: 12px;
+    position: sticky; top: 0; z-index: 30;
+    background: var(--ad-surface); border-bottom: 1px solid var(--ad-border);
+    padding: 10px 14px;
+  }
+  .ad-topbar__btn {
+    display: grid; place-items: center; width: 36px; height: 36px;
+    border: 1px solid var(--ad-border); border-radius: var(--ad-radius-ctl);
+    background: var(--ad-surface); cursor: pointer; color: var(--ad-ink);
+  }
+  .ad-topbar__title { font-weight: 700; font-size: 0.95rem; }
+
+  .ad-sidebar {
+    position: fixed; top: 0; left: 0; z-index: 50;
+    width: var(--ad-sidebar-w); height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    box-shadow: 0 0 24px rgba(0, 0, 0, 0.12);
+  }
+  .ad-sidebar.is-open { transform: translateX(0); }
+
+  .ad-scrim {
+    position: fixed; inset: 0; z-index: 40;
+    background: rgba(0, 0, 0, 0.35); border: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .ad-content { padding: 16px; }
+}
+
+/* Respect users who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .ad-sidebar { transition: none; }
+  .ad-skeleton { animation: none; }
+}
