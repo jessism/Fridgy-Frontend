@@ -4,13 +4,15 @@
    sub-16px input makes iOS zoom on focus. */
 .content-upload {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  display: flex;
-  justify-content: center;
 }
 
+/* Centred by auto margins rather than a flex row on the parent: the page
+   header is a sibling of this card, and a flex row would sit the two of them
+   side by side. */
 .content-upload__card {
   width: 100%;
   max-width: 480px;
+  margin: 0 auto;
 }
 
 .content-upload__picker {
