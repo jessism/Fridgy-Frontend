@@ -419,14 +419,9 @@
 }
 
 @media (max-width: 768px) {
-  .landing-page-v4__wheel-card {
-    width: 100px;
-    height: 100px;
-    border-radius: 12px;
-  }
-
+  /* Mobile has no wheel, so there is nothing to give scroll distance to */
   .landing-page-v4__wheel-space {
-    height: 130vh;
+    display: none;
   }
 }
 
@@ -1742,6 +1737,8 @@
 
   .landing-page-v4__hero {
     padding: 100px 20px 40px;
+    /* No sticky wheel layer to overlay on mobile, so no negative pull-up */
+    margin-top: 0;
   }
 
   .landing-page-v4__bg-text {

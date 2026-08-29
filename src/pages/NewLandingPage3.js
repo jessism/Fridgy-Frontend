@@ -49,6 +49,7 @@ const NewLandingPage3 = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [highlightVisible, setHighlightVisible] = useState(false);
   const [wayItalicized, setWayItalicized] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const highlightRef = useRef(null);
   const wheelZoneRef = useRef(null);
   const totalTestimonials = 10;
@@ -87,6 +88,16 @@ const NewLandingPage3 = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Track the mobile breakpoint: the dish wheel is desktop-only
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Italicize "WAY" after 2 seconds
@@ -137,6 +148,8 @@ const NewLandingPage3 = () => {
       },
       (context) => {
         const { reduceMotion, mobile } = context.conditions;
+        // Mobile drops the wheel entirely (the sticky layer isn't rendered)
+        if (mobile) return;
         const cards = gsap.utils.toArray('.landing-page-v4__wheel-card');
         if (!cards.length) return;
 
@@ -284,7 +297,7 @@ const NewLandingPage3 = () => {
         return () => gsap.ticker.remove(positionCards);
       }
     );
-  }, { scope: wheelZoneRef, dependencies: [loading] });
+  }, { scope: wheelZoneRef, dependencies: [loading, isMobile] });
 
   // Step headings: masked line reveal (SplitText) as each slide scrolls in
   useGSAP(() => {
@@ -504,65 +517,67 @@ const NewLandingPage3 = () => {
 
       {/* Wheel Zone: the hero + circle-reveal share one sticky dish wheel */}
       <div className="landing-page-v4__wheel-zone" ref={wheelZoneRef}>
-        {/* Sticky wheel layer (stays on screen while the zone scrolls) */}
-        <div className="landing-page-v4__wheel-sticky">
-          <div className="landing-page-v4__wheel-rotor" aria-hidden="true">
-            <div className="landing-page-v4__wheel-spinner">
-              {Array.from({ length: WHEEL_CARD_COUNT }).map((_, i) => (
-                <img
-                  key={i}
-                  src={DISH_IMAGES[i % DISH_IMAGES.length]}
-                  alt=""
-                  className="landing-page-v4__wheel-card"
-                />
-              ))}
+        {/* Sticky wheel layer: desktop only — mobile drops the wheel */}
+        {!isMobile && (
+          <div className="landing-page-v4__wheel-sticky">
+            <div className="landing-page-v4__wheel-rotor" aria-hidden="true">
+              <div className="landing-page-v4__wheel-spinner">
+                {Array.from({ length: WHEEL_CARD_COUNT }).map((_, i) => (
+                  <img
+                    key={i}
+                    src={DISH_IMAGES[i % DISH_IMAGES.length]}
+                    alt=""
+                    className="landing-page-v4__wheel-card"
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-          <div className="landing-page-v4__wheel-title">
-            <h2 className="landing-page-v4__wheel-title-text">
-              Eat well.<br />Waste less.
+            <div className="landing-page-v4__wheel-title">
+              <h2 className="landing-page-v4__wheel-title-text">
+                Eat well.<br />Waste less.
+              </h2>
+            </div>
+            {/* Desktop: feature lines revealed one by one inside the circle
+                as it sweeps through the right side of the screen */}
+            <div className="landing-page-v4__wheel-lines" aria-hidden="true">
+              <p className="landing-page-v4__wheel-line">Keep track of what you have</p>
+              <p className="landing-page-v4__wheel-line">Save recipes from anywhere</p>
+              <p className="landing-page-v4__wheel-line">Create smart shopping lists</p>
+            </div>
+            {/* Desktop: headline + phone mockups in the circle centre */}
+            <h2 className="landing-page-v4__wheel-heading">
+              Experience the Trackabite difference
             </h2>
-          </div>
-          {/* Desktop: feature lines revealed one by one inside the circle
-              as it sweeps through the right side of the screen */}
-          <div className="landing-page-v4__wheel-lines" aria-hidden="true">
-            <p className="landing-page-v4__wheel-line">Keep track of what you have</p>
-            <p className="landing-page-v4__wheel-line">Save recipes from anywhere</p>
-            <p className="landing-page-v4__wheel-line">Create smart shopping lists</p>
-          </div>
-          {/* Desktop: headline + phone mockups in the circle centre */}
-          <h2 className="landing-page-v4__wheel-heading">
-            Experience the Trackabite difference
-          </h2>
-          <div className="landing-page-v4__wheel-phones" aria-hidden="true">
-            <div className="landing-page-v4__phones">
-              <div className="landing-page-v4__phone landing-page-v4__phone--left">
-                <div className="landing-page-v4__phone-frame">
-                  <div className="landing-page-v4__phone-notch"></div>
-                  <div className="landing-page-v4__phone-screen">
-                    <img
-                      src={phoneLeftImage}
-                      alt=""
-                      className="landing-page-v4__phone-img"
-                    />
+            <div className="landing-page-v4__wheel-phones" aria-hidden="true">
+              <div className="landing-page-v4__phones">
+                <div className="landing-page-v4__phone landing-page-v4__phone--left">
+                  <div className="landing-page-v4__phone-frame">
+                    <div className="landing-page-v4__phone-notch"></div>
+                    <div className="landing-page-v4__phone-screen">
+                      <img
+                        src={phoneLeftImage}
+                        alt=""
+                        className="landing-page-v4__phone-img"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="landing-page-v4__phone landing-page-v4__phone--right">
-                <div className="landing-page-v4__phone-frame">
-                  <div className="landing-page-v4__phone-notch"></div>
-                  <div className="landing-page-v4__phone-screen">
-                    <img
-                      src={phoneRightImage}
-                      alt=""
-                      className="landing-page-v4__phone-img"
-                    />
+                <div className="landing-page-v4__phone landing-page-v4__phone--right">
+                  <div className="landing-page-v4__phone-frame">
+                    <div className="landing-page-v4__phone-notch"></div>
+                    <div className="landing-page-v4__phone-screen">
+                      <img
+                        src={phoneRightImage}
+                        alt=""
+                        className="landing-page-v4__phone-img"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
       {/* Hero Section */}
       <section className="landing-page-v4__hero">
