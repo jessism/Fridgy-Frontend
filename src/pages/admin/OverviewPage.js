@@ -1,16 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Users as UsersIcon, UserPlus, Activity, CreditCard, ShoppingCart } from 'lucide-react';
+import { Users as UsersIcon, UserPlus, Activity, CreditCard, Sparkles, Flame } from 'lucide-react';
 import { fetchOverview, POSTHOG_LINKS, FEATURE_LABELS } from '../../features/admin-analytics/api';
 import { AdminPageHeader, AdminCard, StatTile, Badge, ErrorState, Skeleton } from './ui';
 
 const RANGES = [7, 30, 90];
 const SERIES = { mobile: '#2d8a4e', web: '#4f6fd6' }; // validated pair (dataviz skill)
 
+// Exactly the six statuses the API can emit — nothing else can appear.
 const TONE_BY_STATUS = {
-  active: 'good', trialing: 'good',
-  canceling: 'warn', past_due: 'warn',
-  grandfathered: 'info',
+  active: 'good', trialing: 'info', canceling: 'warn', past_due: 'warn',
+  grandfathered: 'info', free: 'muted',
+};
+const STATUS_ORDER = ['active', 'trialing', 'canceling', 'past_due', 'grandfathered', 'free'];
+
+const DISCREPANCY_LABEL = {
+  premium_without_evidence: 'Premium, no live evidence',
+  free_with_evidence: 'Free, but has live subscription',
+  grandfathered_flag_on_free_tier: 'Grandfathered flag on free tier',
+  sandbox_events: 'Sandbox events on real account',
 };
 
 export const SubscriptionBadge = ({ sub }) => {
@@ -18,6 +26,9 @@ export const SubscriptionBadge = ({ sub }) => {
   const suffix = sub?.source && sub.source !== 'grandfathered' ? ` · ${sub.source}` : '';
   return <Badge tone={TONE_BY_STATUS[status] || 'muted'}>{status}{suffix}</Badge>;
 };
+
+const axisTick = { fontSize: 11, fill: '#52514e' };
+const tzLabel = (tz) => (tz === 'America/Vancouver' ? 'Pacific' : tz);
 
 const OverviewPage = () => {
   const [days, setDays] = useState(30);
@@ -36,22 +47,37 @@ const OverviewPage = () => {
   }, [days, reloadKey]);
 
   const t = overview?.totals;
-  const subs = overview?.subscriptions?.counts || {};
-  const paying = (subs.active || 0) + (subs.trialing || 0) + (subs.canceling || 0);
+  const subs = overview?.subscriptions;
+  const counts = subs?.counts || {};
+  const streaks = overview?.streaks;
+  const tz = overview ? tzLabel(overview.timezone) : 'local';
 
   const rangePicker = (
     <div className="ad-segment" role="group" aria-label="Date range">
       {RANGES.map((r) => (
-        <button
-          key={r}
-          type="button"
-          className={days === r ? 'is-active' : undefined}
-          onClick={() => setDays(r)}
-        >
+        <button key={r} type="button" className={days === r ? 'is-active' : undefined} onClick={() => setDays(r)}>
           {r}d
         </button>
       ))}
     </div>
+  );
+
+  const features = (overview?.features || []).filter((f) => f.group !== 'setup');
+  const setup = (overview?.features || []).filter((f) => f.group === 'setup');
+
+  const adoptionRow = (f) => (
+    <tr key={f.feature}>
+      <td>{FEATURE_LABELS[f.feature] || f.feature}</td>
+      <td className="aa-bar-cell">
+        <div className="aa-bar" aria-hidden="true"><div className="aa-bar__fill" style={{ width: `${f.adoptionPct}%` }} /></div>
+        <span className="aa-bar__label">{f.adoptionPct}%</span>
+      </td>
+      <td className="num">{f.adopters}</td>
+      <td className="num">{f.activeInWindow} <span className="ad-muted">({f.activePct}%)</span></td>
+      <td className="num">{f.rows}</td>
+      <td className="num">{f.medianPerAdopter}</td>
+      <td className="num">{f.p90PerAdopter}</td>
+    </tr>
   );
 
   return (
@@ -63,6 +89,11 @@ const OverviewPage = () => {
       />
 
       {error && <ErrorState onRetry={() => setReloadKey((k) => k + 1)}>Couldn’t load overview: {error}</ErrorState>}
+      {overview?.featureErrors?.length > 0 && (
+        <ErrorState>
+          Some adoption rows could not be loaded and are missing from the table: {overview.featureErrors.map((f) => `${f.feature} (${f.error})`).join('; ')}
+        </ErrorState>
+      )}
 
       <section className="ad-tiles">
         <StatTile
@@ -70,28 +101,69 @@ const OverviewPage = () => {
           primary
           label="Real users"
           value={t ? t.realUsers : '…'}
-          hint={t ? `${t.activated} activated (${t.realUsers ? Math.round((100 * t.activated) / t.realUsers) : 0}%)` : ''}
+          hint={t ? `${t.activated} activated (${t.realUsers ? Math.round((100 * t.activated) / t.realUsers) : 0}%)${t.pendingDeletion ? ` · ${t.pendingDeletion} pending deletion` : ''}` : ''}
         />
-        <StatTile icon={UserPlus} label={`New in ${days}d`} value={t ? t.signupsInWindow : '…'} hint={t ? `${t.signups7d} in the last 7d` : ''} />
+        <StatTile
+          icon={UserPlus}
+          label={`New in ${days}d`}
+          value={t ? t.signupsInWindow : '…'}
+          hint={t ? `${t.signups7d} in the last 7 calendar days` : ''}
+        />
         <StatTile
           icon={Activity}
           label="Active 7d"
-          value={t ? (t.lastActiveTracked ? t.active7d : '—') : '…'}
-          hint={t && !t.lastActiveTracked ? 'Apply migration 078 to start tracking' : t ? `${t.active1d} today · ${t.active30d} in 30d` : ''}
+          value={t ? t.active7d : '…'}
+          hint={t ? `${t.active1d} today · ${t.active30d} in 30d` : ''}
         />
-        <StatTile icon={CreditCard} label="Paying" value={overview ? paying : '…'} hint={overview ? `${subs.grandfathered || 0} grandfathered · ${subs.free || 0} free` : ''} />
-        <StatTile icon={ShoppingCart} label={`Purchases in ${days}d`} value={overview ? overview.subscriptions.newPurchasesInWindow : '…'} hint={overview ? `${overview.subscriptions.expirationsInWindow} expirations` : ''} />
+        <StatTile
+          icon={CreditCard}
+          label="Paying"
+          value={subs ? subs.paying : '…'}
+          hint={subs ? `${counts.trialing || 0} trialing · ${counts.grandfathered || 0} grandfathered · ${counts.free || 0} free` : ''}
+        />
+        <StatTile
+          icon={Sparkles}
+          label={`Paid starts in ${days}d`}
+          value={subs ? subs.paidStarts : '…'}
+          hint={subs ? `${subs.trialsStarted} trials started · lapsed: ${subs.lapsed.trial} trial, ${subs.lapsed.paid} paid` : ''}
+        />
       </section>
 
+      {subs?.discrepancies?.length > 0 && (
+        <div className="aa-section">
+          <AdminCard
+            title="Needs attention"
+            sub={subs.discrepancies.length}
+            className="aa-card--attention"
+            hint="Where the live evidence (Stripe row, RevenueCat production event) disagrees with users.tier — the tier the app actually enforces. The tiles above follow users.tier; these rows are the exceptions."
+          >
+            <div className="ad-table-wrap">
+              <table className="ad-table">
+                <thead><tr><th>Issue</th><th>User</th><th>Detail</th></tr></thead>
+                <tbody>
+                  {subs.discrepancies.map((d, i) => (
+                    <tr key={`${d.userId}-${d.type}-${i}`}>
+                      <td><Badge tone="warn">{DISCREPANCY_LABEL[d.type] || d.type}</Badge></td>
+                      <td><a href={`/admin/users/${d.userId}`}>{d.email}</a></td>
+                      <td className="ad-feedback__msg">{d.detail}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </AdminCard>
+        </div>
+      )}
+
       <section className="aa__grid">
-        <AdminCard title="Signups per day">
+        <AdminCard title={`Signups per day (${tz})`}>
           {overview ? (
             <div className="aa-chart">
               <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={overview.signupSeries} margin={{ top: 8, right: 8, left: -16, bottom: 0 }} barCategoryGap="30%">
                   <CartesianGrid vertical={false} stroke="#e7e7e4" />
-                  <XAxis dataKey="date" tickFormatter={(d) => d.slice(5)} tick={{ fontSize: 11, fill: '#52514e' }} axisLine={false} tickLine={false} minTickGap={24} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#52514e' }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="date" tickFormatter={(d) => d.slice(5)} tick={axisTick} axisLine={false} tickLine={false} minTickGap={24} />
+                  <YAxis allowDecimals={false} tick={axisTick} axisLine={false} tickLine={false} />
                   <Tooltip cursor={{ fill: 'rgba(0,0,0,0.04)' }} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Bar dataKey="mobile" name="Mobile" stackId="a" fill={SERIES.mobile} stroke="#fcfcfb" strokeWidth={2} />
@@ -99,7 +171,8 @@ const OverviewPage = () => {
                 </BarChart>
               </ResponsiveContainer>
               <div className="aa-chart__foot">
-                {Object.entries(overview.signupsByPlatform).map(([k, v]) => <span key={k}>{k}: <strong>{v}</strong></span>)}
+                <span>In window — mobile: <strong>{overview.signupsByPlatform.mobile}</strong> · web: <strong>{overview.signupsByPlatform.web}</strong>{overview.signupsByPlatform.other ? <> · other: <strong>{overview.signupsByPlatform.other}</strong></> : null}</span>
+                <span className="ad-muted">All time — mobile {overview.signupsByPlatformAllTime.mobile} · web {overview.signupsByPlatformAllTime.web}</span>
               </div>
             </div>
           ) : <Skeleton height={240} />}
@@ -107,12 +180,12 @@ const OverviewPage = () => {
 
         <AdminCard
           title="Subscriptions"
-          hint="From RevenueCat webhook events + Stripe subscriptions. “grandfathered” is lifetime-free, not revenue."
+          hint="Buckets follow users.tier (what the app enforces). Stripe and RevenueCat production events refine premium into active / trialing / canceling / past due. “grandfathered” is lifetime-free, not revenue."
         >
           {overview ? (
             <ul className="aa-list">
-              {Object.entries(subs).sort((a, b) => b[1] - a[1]).map(([k, v]) => (
-                <li key={k}><SubscriptionBadge sub={{ status: k }} /><span className="aa-list__num">{v}</span></li>
+              {STATUS_ORDER.filter((k) => counts[k] > 0).map((k) => (
+                <li key={k}><SubscriptionBadge sub={{ status: k }} /><span className="aa-list__num">{counts[k]}</span></li>
               ))}
             </ul>
           ) : <Skeleton />}
@@ -121,41 +194,76 @@ const OverviewPage = () => {
 
       <div className="aa-section">
         <AdminCard
+          title="Streaks"
+          sub={streaks ? `${streaks.summary.usersWithHistory} of ${t.realUsers} users have a streak history` : undefined}
+          hint={streaks ? `One log row per user per local day, so a user counts at most once per day. Streaks launched ${streaks.launchedOn} — earlier days are empty, not zero engagement. Avg ${streaks.summary.avgActiveDays} active days per streak user (median ${streaks.summary.medianActiveDays}).` : undefined}
+        >
+          {streaks ? (
+            <>
+              <div className="ad-tiles aa-streak-tiles">
+                <StatTile icon={Flame} label="On a streak now" value={streaks.summary.onStreakNow} hint={streaks.summary.onStreakNow ? `avg ${streaks.summary.avgCurrentStreak} days` : ''} />
+                <StatTile label="Longest ever" value={`${streaks.summary.longestEver}d`} hint="best single streak" />
+                <StatTile label="Avg longest" value={`${streaks.summary.avgLongestStreak}d`} hint="per user with history" />
+                <StatTile label="In grace" value={streaks.summary.inGrace} hint="lost a streak, can still restore" />
+                <StatTile label="Freezes used" value={streaks.summary.freezesUsed} hint="all time" />
+              </div>
+              <h3 className="aa-card__subtitle">Streak-active users per day ({tz})</h3>
+              <ResponsiveContainer width="100%" height={160}>
+                <BarChart data={streaks.dailyActive} margin={{ top: 8, right: 8, left: -16, bottom: 0 }} barCategoryGap="30%">
+                  <CartesianGrid vertical={false} stroke="#e7e7e4" />
+                  <XAxis dataKey="date" tickFormatter={(d) => d.slice(5)} tick={axisTick} axisLine={false} tickLine={false} minTickGap={24} />
+                  <YAxis allowDecimals={false} tick={axisTick} axisLine={false} tickLine={false} />
+                  <Tooltip cursor={{ fill: 'rgba(0,0,0,0.04)' }} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
+                  <Bar dataKey="users" name="Users" fill={SERIES.web} stroke="#fcfcfb" strokeWidth={2} radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+              <div className="aa-chart__foot">
+                <span>Longest streak — {streaks.distribution.map((b) => <span key={b.label} className="aa-chip">{b.label}d <strong>{b.users}</strong></span>)}</span>
+                <span>Milestones — {streaks.milestones.length ? streaks.milestones.map((m) => `${m.milestone}-day × ${m.users}`).join(' · ') : 'none yet'}</span>
+                <span className="ad-muted">Days logged — {Object.entries(streaks.statusMix).map(([k, v]) => `${k} ${v}`).join(' · ')}</span>
+              </div>
+            </>
+          ) : <Skeleton />}
+        </AdminCard>
+      </div>
+
+      <div className="aa-section">
+        <AdminCard
           title="Feature adoption"
-          sub={`share of real users who used each feature at least once · active in ${days}d`}
-          hint="Counted from database rows, so browse-only surfaces (cooking mode, voice cooking, screen views) don’t appear here — see PostHog “feature_used” for those."
+          sub={`share of all real users who did each thing at least once · active in the last ${days} days`}
+          hint="Counted from database rows a user chose to create (failed imports excluded). Browse-only surfaces (cooking mode, voice cooking, screen views) don’t appear here — see PostHog “feature_used”. Setup rows are excluded from “Activated”."
         >
           {overview ? (
             <div className="ad-table-wrap">
               <table className="ad-table">
                 <thead>
                   <tr>
-                    <th>Feature</th><th>Adoption</th><th className="num">Users</th>
+                    <th>Feature</th><th>Of all users</th><th className="num">Users</th>
                     <th className="num">Active {days}d</th><th className="num">Rows</th>
                     <th className="num">Median / user</th><th className="num">p90</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {overview.features.map((f) => (
-                    <tr key={f.feature}>
-                      <td>{FEATURE_LABELS[f.feature] || f.feature}</td>
-                      <td className="aa-bar-cell">
-                        <div className="aa-bar" aria-hidden="true"><div className="aa-bar__fill" style={{ width: `${f.adoptionPct}%` }} /></div>
-                        <span className="aa-bar__label">{f.adoptionPct}%</span>
-                      </td>
-                      <td className="num">{f.adopters}</td>
-                      <td className="num">{f.activeInWindow} <span className="ad-muted">({f.activePct}%)</span></td>
-                      <td className="num">{f.rows}</td>
-                      <td className="num">{f.medianPerAdopter}</td>
-                      <td className="num">{f.p90PerAdopter}</td>
-                    </tr>
-                  ))}
+                  {features.map(adoptionRow)}
+                  {setup.length > 0 && (
+                    <tr className="aa-group-row"><td colSpan={7}>Setup</td></tr>
+                  )}
+                  {setup.map(adoptionRow)}
                 </tbody>
               </table>
             </div>
           ) : <Skeleton />}
         </AdminCard>
       </div>
+
+      {overview?.assumptions?.length > 0 && (
+        <details className="aa-assumptions">
+          <summary>How these numbers are counted</summary>
+          <ul>
+            {overview.assumptions.map((a, i) => <li key={i}>{a}</li>)}
+          </ul>
+        </details>
+      )}
 
       <section className="aa__posthog">
         {POSTHOG_LINKS.map((l) => (

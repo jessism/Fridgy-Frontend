@@ -65,3 +65,16 @@
 .ad-field .ad-input, .ad-field .ad-select { min-width: 0; width: 100%; font-size: 16px; }
 .ad-field--full { grid-column: 1 / -1; }
 .ad-modal__actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+/* ---------- overview: attention card, streaks, adoption groups, assumptions ---------- */
+.aa-card--attention { border-color: var(--ad-warn-ink); background: var(--ad-warn-bg); }
+.aa-card--attention .ad-table th { background: transparent; }
+.aa-attention-note { color: var(--ad-warn-ink); }
+.aa-streak-tiles { margin-bottom: 8px; }
+.aa-streak-tiles .ad-tile { box-shadow: none; background: var(--ad-canvas); }
+.aa-group-row td { padding-top: 14px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ad-ink-3); border-bottom: 1px solid var(--ad-border); }
+.aa-row--sandbox td { color: var(--ad-ink-3); }
+.aa-assumptions { margin: 0 0 20px; font-size: 0.85rem; color: var(--ad-ink-2); }
+.aa-assumptions summary { cursor: pointer; font-weight: 600; color: var(--ad-ink); }
+.aa-assumptions ul { margin: 8px 0 0; padding-left: 20px; }
+.aa-assumptions li { margin: 4px 0; }

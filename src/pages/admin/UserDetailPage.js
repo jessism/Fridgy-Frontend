@@ -55,8 +55,13 @@ const UserDetailPage = () => {
             </AdminCard>
 
             <AdminCard title="Subscription">
+              <Row k="Enforced tier" v={data.subscription.tier} />
               <Row k="State" v={`${data.subscription.status}${data.subscription.source ? ` (${data.subscription.source})` : ''}`} />
+              <Row k="Live evidence" v={data.evidence ? `${data.evidence.source} · ${data.evidence.status}${data.evidence.expiresAt ? ` · until ${formatDate(data.evidence.expiresAt)}` : ''}` : 'none'} />
               <Row k="Product" v={data.subscription.productId} />
+              {data.discrepancies?.length > 0 && data.discrepancies.map((d) => (
+                <p key={d.type} className="ad-card__hint aa-attention-note">{d.detail}</p>
+              ))}
               {data.stripeSubscription && (
                 <>
                   <Row k="Stripe status" v={data.stripeSubscription.status} />
@@ -97,16 +102,19 @@ const UserDetailPage = () => {
           </section>
 
           <div className="aa-section">
-            <AdminCard title="RevenueCat events" sub={data.revenueCatEvents.length}>
+            <AdminCard title="RevenueCat events" sub={data.revenueCatEvents.length} hint="Sandbox rows are shown for context but never count toward any number.">
               {data.revenueCatEvents.length ? (
                 <div className="ad-table-wrap">
                   <table className="ad-table">
-                    <thead><tr><th>When</th><th>Event</th><th>Product</th><th>Processed</th></tr></thead>
+                    <thead><tr><th>When</th><th>Event</th><th>Period</th><th>Env</th><th>Expires</th><th>Product</th><th>Processed</th></tr></thead>
                     <tbody>
                       {data.revenueCatEvents.map((e, i) => (
-                        <tr key={i}>
+                        <tr key={i} className={e.environment === 'SANDBOX' ? 'aa-row--sandbox' : undefined}>
                           <td>{formatDateTime(e.created_at)}</td>
                           <td>{e.event_type}</td>
+                          <td>{e.period_type || '—'}</td>
+                          <td>{e.environment === 'SANDBOX' ? <span className="ad-badge ad-badge--warn">sandbox</span> : (e.environment || '—')}</td>
+                          <td>{e.expires_at ? formatDate(e.expires_at) : '—'}</td>
                           <td>{e.product_id || '—'}</td>
                           <td>{e.processed ? 'yes' : e.error_message || 'no'}</td>
                         </tr>
