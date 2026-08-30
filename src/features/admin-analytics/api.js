@@ -91,7 +91,7 @@ export const timeAgo = (iso) => {
   return `${Math.round(s / 86400)}d ago`;
 };
 export const FEATURE_LABELS = {
-  inventory: 'Inventory', meal_log: 'Meal log', recipe_import: 'Recipe import', saved_recipes: 'Saved recipes',
+  inventory: 'Inventory', meal_log: 'Meal log', recipe_import: 'Recipe import (Instagram / web)', saved_recipes: 'Recipe library',
   ai_recipes: 'AI recipes', shopping_list: 'Shopping list items', shopping_list_owner: 'Shopping lists created',
   meal_plan: 'Meal plans', cookbook: 'Cookbooks', inventory_usage: 'Inventory usage', streaks: 'Streaks',
   guided_tour: 'Guided tour', push_notifications: 'Push enabled',
