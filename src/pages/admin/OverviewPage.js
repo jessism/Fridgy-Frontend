@@ -31,7 +31,7 @@ const axisTick = { fontSize: 11, fill: '#52514e' };
 
 // How each tile is calculated. Mirrors services/adminAnalyticsService.js.
 const DEF = {
-  realUsers: 'Every account except: email containing "test", the internal addresses listed above, admins, and the system user. "Activated" = did at least one thing in the Feature adoption table (Setup rows excluded).',
+  realUsers: null, // built from the API's exclusion rule below
   newIn: (d) => `Accounts created in the last ${d} calendar days (Pacific), including today. Same buckets as the Signups chart, so this is exactly the sum of the bars.`,
   active7d: 'Real users seen in the last 7×24h. "Seen" is the later of users.last_active_at (any authenticated API call; tracked since 2026-08-29) and the user\'s latest feature write, so activity from before tracking still counts.',
   paying: 'Users whose users.tier is premium AND who have live evidence with status active, canceling or past_due — a Stripe row, or an unexpired RevenueCat PRODUCTION event. Trialing is shown separately. Grandfathered is lifetime-free, not revenue.',
@@ -65,6 +65,9 @@ const OverviewPage = () => {
   const counts = subs?.counts || {};
   const streaks = overview?.streaks;
   const tz = overview ? tzLabel(overview.timezone) : 'local';
+  const realUsersInfo = overview
+    ? `${overview.exclusions.rule} Currently excluded by name: ${overview.exclusions.emails.join(', ')}; reserved domains: ${overview.exclusions.domains.join(', ')}. "Activated" = did at least one thing in the Feature adoption table (Setup rows excluded).`
+    : null;
 
   const rangePicker = (
     <div className="ad-segment" role="group" aria-label="Date range">
@@ -99,7 +102,7 @@ const OverviewPage = () => {
       <AdminPageHeader
         title="Overview"
         actions={rangePicker}
-        description={`Real users only — accounts with “test” in the email, ${overview?.excludedEmails?.join(', ') || 'internal addresses'}, admins and the system user are excluded. Behavioural analytics (DAU/MAU, retention, feature trends) live in PostHog — links below.`}
+        description={`Real users only — ${overview ? `${overview.exclusions.emails.length} internal addresses` : 'internal addresses'}, anything containing “test”, reserved domains, admins and the system user are excluded (hover the “i” on Real users for the full rule). Behavioural analytics (DAU/MAU, retention, feature trends) live in PostHog — links below.`}
       />
 
       {error && <ErrorState onRetry={() => setReloadKey((k) => k + 1)}>Couldn’t load overview: {error}</ErrorState>}
@@ -114,7 +117,7 @@ const OverviewPage = () => {
           icon={UsersIcon}
           primary
           label="Real users"
-          info={DEF.realUsers}
+          info={realUsersInfo}
           value={t ? t.realUsers : '…'}
           hint={t ? `${t.activated} activated (${t.realUsers ? Math.round((100 * t.activated) / t.realUsers) : 0}%)${t.pendingDeletion ? ` · ${t.pendingDeletion} pending deletion` : ''}` : ''}
         />
