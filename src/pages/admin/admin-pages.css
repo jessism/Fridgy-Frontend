@@ -67,7 +67,7 @@
 .ad-modal__actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
 
 /* ---------- overview: attention card, streaks, adoption groups, assumptions ---------- */
-.aa-card--attention { border-color: var(--ad-warn-ink); background: var(--ad-warn-bg); }
+.aa-card--attention { border-left: 4px solid var(--ad-warn-ink); }
 .aa-card--attention .ad-table th { background: transparent; }
 .aa-attention-note { color: var(--ad-warn-ink); }
 .aa-streak-tiles { margin-bottom: 8px; }

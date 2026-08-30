@@ -129,32 +129,6 @@ const OverviewPage = () => {
         />
       </section>
 
-      {subs?.discrepancies?.length > 0 && (
-        <div className="aa-section">
-          <AdminCard
-            title="Needs attention"
-            sub={subs.discrepancies.length}
-            className="aa-card--attention"
-            hint="Where the live evidence (Stripe row, RevenueCat production event) disagrees with users.tier — the tier the app actually enforces. The tiles above follow users.tier; these rows are the exceptions."
-          >
-            <div className="ad-table-wrap">
-              <table className="ad-table">
-                <thead><tr><th>Issue</th><th>User</th><th>Detail</th></tr></thead>
-                <tbody>
-                  {subs.discrepancies.map((d, i) => (
-                    <tr key={`${d.userId}-${d.type}-${i}`}>
-                      <td><Badge tone="warn">{DISCREPANCY_LABEL[d.type] || d.type}</Badge></td>
-                      <td><a href={`/admin/users/${d.userId}`}>{d.email}</a></td>
-                      <td className="ad-feedback__msg">{d.detail}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </AdminCard>
-        </div>
-      )}
-
       <section className="aa__grid">
         <AdminCard title={`Signups per day (${tz})`}>
           {overview ? (
@@ -263,6 +237,32 @@ const OverviewPage = () => {
             {overview.assumptions.map((a, i) => <li key={i}>{a}</li>)}
           </ul>
         </details>
+      )}
+
+      {subs?.discrepancies?.length > 0 && (
+        <div className="aa-section">
+          <AdminCard
+            title="Needs attention"
+            sub={subs.discrepancies.length}
+            className="aa-card--attention"
+            hint="Where the live evidence (Stripe row, RevenueCat production event) disagrees with users.tier — the tier the app actually enforces. The tiles above follow users.tier; these rows are the exceptions, listed here so they don’t get in the way of the numbers."
+          >
+            <div className="ad-table-wrap">
+              <table className="ad-table">
+                <thead><tr><th>Issue</th><th>User</th><th>Detail</th></tr></thead>
+                <tbody>
+                  {subs.discrepancies.map((d, i) => (
+                    <tr key={`${d.userId}-${d.type}-${i}`}>
+                      <td><Badge tone="warn">{DISCREPANCY_LABEL[d.type] || d.type}</Badge></td>
+                      <td><a href={`/admin/users/${d.userId}`}>{d.email}</a></td>
+                      <td className="ad-feedback__msg">{d.detail}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </AdminCard>
+        </div>
       )}
 
       <section className="aa__posthog">
