@@ -82,9 +82,11 @@ const OverviewPage = () => {
   const features = (overview?.features || []).filter((f) => f.group !== 'setup');
   const setup = (overview?.features || []).filter((f) => f.group === 'setup');
 
-  // A feature may carry a breakdown of *how* it was used (e.g. how recipes
-  // reached the library). Rendered as indented sub-rows so it reads as one
-  // behaviour with detail, not as several competing features.
+  // A feature may carry a breakdown of where its rows came from (e.g. which
+  // platform each saved recipe was imported from). Rendered as indented
+  // sub-rows so it reads as one behaviour with detail, not as several
+  // competing features. A person can appear in more than one bucket, so the
+  // sub-row user counts can sum to more than the parent's.
   const adoptionRow = (f) => [
     <tr key={f.feature}>
       <td>{FEATURE_LABELS[f.feature] || f.feature}<InfoTip text={f.definition} /></td>
@@ -99,9 +101,12 @@ const OverviewPage = () => {
       <td className="num">{f.p90PerAdopter}</td>
     </tr>,
     ...(f.breakdown || []).map((b) => (
-      <tr key={`${f.feature}-${b.key}`} className="aa-subrow">
+      <tr key={`${f.feature}-${b.key}`} className={`aa-subrow${b.users === 0 ? ' aa-subrow--empty' : ''}`}>
         <td><span className="aa-subrow__label">{b.label}</span></td>
-        <td className="ad-muted">how it arrived</td>
+        <td className="aa-bar-cell">
+          <div className="aa-bar aa-bar--sub" aria-hidden="true"><div className="aa-bar__fill" style={{ width: `${b.pct}%` }} /></div>
+          <span className="aa-bar__label">{b.pct}%</span>
+        </td>
         <td className="num">{b.users}</td>
         <td className="num">—</td>
         <td className="num">{b.rows}</td>

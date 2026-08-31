@@ -83,3 +83,8 @@
 .aa-subrow td { border-bottom: 1px solid var(--ad-divider); color: var(--ad-ink-2); font-size: 0.84rem; }
 .aa-subrow__label { padding-left: 18px; position: relative; }
 .aa-subrow__label::before { content: '\21B3'; position: absolute; left: 2px; color: var(--ad-ink-3); }
+.aa-bar--sub { width: 120px; height: 6px; }
+.aa-bar--sub .aa-bar__fill { background: var(--ad-ink-3); }
+.aa-subrow .aa-bar__label { font-weight: 500; font-size: 0.8rem; color: var(--ad-ink-2); }
+.aa-subrow--empty td { color: var(--ad-ink-3); }
+.aa-subrow--empty .aa-bar { opacity: 0.5; }
