@@ -82,7 +82,10 @@ const OverviewPage = () => {
   const features = (overview?.features || []).filter((f) => f.group !== 'setup');
   const setup = (overview?.features || []).filter((f) => f.group === 'setup');
 
-  const adoptionRow = (f) => (
+  // A feature may carry a breakdown of *how* it was used (e.g. how recipes
+  // reached the library). Rendered as indented sub-rows so it reads as one
+  // behaviour with detail, not as several competing features.
+  const adoptionRow = (f) => [
     <tr key={f.feature}>
       <td>{FEATURE_LABELS[f.feature] || f.feature}<InfoTip text={f.definition} /></td>
       <td className="aa-bar-cell">
@@ -94,8 +97,19 @@ const OverviewPage = () => {
       <td className="num">{f.rows}</td>
       <td className="num">{f.medianPerAdopter}</td>
       <td className="num">{f.p90PerAdopter}</td>
-    </tr>
-  );
+    </tr>,
+    ...(f.breakdown || []).map((b) => (
+      <tr key={`${f.feature}-${b.key}`} className="aa-subrow">
+        <td><span className="aa-subrow__label">{b.label}</span></td>
+        <td className="ad-muted">how it arrived</td>
+        <td className="num">{b.users}</td>
+        <td className="num">—</td>
+        <td className="num">{b.rows}</td>
+        <td className="num">—</td>
+        <td className="num">—</td>
+      </tr>
+    )),
+  ];
 
   return (
     <div className="aa">
@@ -240,11 +254,11 @@ const OverviewPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {features.map(adoptionRow)}
+                  {features.flatMap(adoptionRow)}
                   {setup.length > 0 && (
                     <tr className="aa-group-row"><td colSpan={7}>Setup</td></tr>
                   )}
-                  {setup.map(adoptionRow)}
+                  {setup.flatMap(adoptionRow)}
                 </tbody>
               </table>
             </div>
