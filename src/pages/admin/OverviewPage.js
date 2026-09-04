@@ -7,17 +7,20 @@ import { AdminPageHeader, AdminCard, StatTile, Badge, ErrorState, Skeleton, Info
 const RANGES = [7, 30, 90];
 const SERIES = { mobile: '#2d8a4e', web: '#4f6fd6' }; // validated pair (dataviz skill)
 
-// Exactly the six statuses the API can emit — nothing else can appear.
+// Exactly the seven statuses the API can emit — nothing else can appear.
+// Only "paying" is revenue: the others are premium the app gives away, is
+// waiting on, or has stopped being paid for.
 const TONE_BY_STATUS = {
-  active: 'good', trialing: 'info', canceling: 'warn', past_due: 'warn',
-  grandfathered: 'info', free: 'muted',
+  paying: 'good', trialing: 'info', canceling: 'warn', past_due: 'warn',
+  comped: 'warn', grandfathered: 'info', free: 'muted',
 };
-const STATUS_ORDER = ['active', 'trialing', 'canceling', 'past_due', 'grandfathered', 'free'];
+const STATUS_ORDER = ['paying', 'trialing', 'canceling', 'past_due', 'comped', 'grandfathered', 'free'];
 
 const DISCREPANCY_LABEL = {
   premium_without_evidence: 'Premium, no live evidence',
   free_with_evidence: 'Free, but has live subscription',
   grandfathered_flag_on_free_tier: 'Grandfathered flag on free tier',
+  premium_live_but_never_paid: 'Live subscription, no payment above $0',
   sandbox_events: 'Sandbox events on real account',
 };
 
@@ -34,7 +37,7 @@ const DEF = {
   realUsers: null, // built from the API's exclusion rule below
   newIn: (d) => `Accounts created in the last ${d} calendar days (Pacific), including today. Same buckets as the Signups chart, so this is exactly the sum of the bars.`,
   active7d: 'Real users seen in the last 7×24h. "Seen" is the later of users.last_active_at (any authenticated API call; tracked since 2026-08-29) and the user\'s latest feature write, so activity from before tracking still counts.',
-  paying: 'Users whose users.tier is premium AND who have live evidence with status active, canceling or past_due — a Stripe row, or an unexpired RevenueCat PRODUCTION event. Trialing is shown separately. Grandfathered is lifetime-free, not revenue.',
+  paying: 'Real users who have actually paid AND are still subscribed right now. "Paid" = a RevenueCat PRODUCTION event with price above $0, or a Stripe invoice.payment_succeeded with amount_paid above 0 — sandbox purchases, $0 trial invoices and 100%-off promos all fail that test. "Still" = an unexpired RevenueCat production entitlement or a live Stripe row. Trialing (never paid), canceling and past due (not paying now), comped (premium with no money behind it) and grandfathered (lifetime-free) are each counted separately and none of them are revenue.',
   paidStarts: (d) => `In the last ${d} days, production events for real users only: RevenueCat INITIAL_PURCHASE with period_type NORMAL, plus a RENEWAL that follows a TRIAL (the trial converting), plus Stripe subscriptions created. Trials = INITIAL_PURCHASE with period_type TRIAL. Lapsed = EXPIRATION events split by period_type, plus Stripe cancellations.`,
   onStreak: 'user_streaks.current_streak > 0 right now. Avg = mean current_streak over those users.',
   longestEver: 'Highest longest_streak across all real users with a streak row.',
@@ -195,7 +198,7 @@ const OverviewPage = () => {
 
         <AdminCard
           title="Subscriptions"
-          hint="Buckets follow users.tier (what the app enforces). Stripe and RevenueCat production events refine premium into active / trialing / canceling / past due. “grandfathered” is lifetime-free, not revenue."
+          hint="“paying” means both halves: a payment above $0 actually landed (RevenueCat production price, or a paid Stripe invoice) and the subscription is still live. Trialing has not paid yet; canceling and past due are not paying now; “comped” is premium the app grants with no money behind it; “grandfathered” is lifetime-free. Only the first row is revenue."
         >
           {overview ? (
             <ul className="aa-list">
