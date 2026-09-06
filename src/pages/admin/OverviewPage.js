@@ -12,9 +12,9 @@ const SERIES = { mobile: '#2d8a4e', web: '#4f6fd6' }; // validated pair (dataviz
 // waiting on, or has stopped being paid for.
 const TONE_BY_STATUS = {
   paying: 'good', trialing: 'info', canceling: 'warn', past_due: 'warn',
-  comped: 'warn', grandfathered: 'info', free: 'muted',
+  comped: 'warn', grandfathered: 'info', churned: 'warn', trial_expired: 'muted', free: 'muted',
 };
-const STATUS_ORDER = ['paying', 'trialing', 'canceling', 'past_due', 'comped', 'grandfathered', 'free'];
+const STATUS_ORDER = ['paying', 'trialing', 'canceling', 'past_due', 'comped', 'grandfathered', 'churned', 'trial_expired', 'free'];
 
 const DISCREPANCY_LABEL = {
   premium_without_evidence: 'Premium, no live evidence',
@@ -22,6 +22,7 @@ const DISCREPANCY_LABEL = {
   grandfathered_flag_on_free_tier: 'Grandfathered flag on free tier',
   premium_live_but_never_paid: 'Live subscription, no payment above $0',
   sandbox_events: 'Sandbox events on real account',
+  usage_counter_drift: 'Recipe quota counter below actual saves',
 };
 
 export const SubscriptionBadge = ({ sub }) => {
@@ -198,7 +199,7 @@ const OverviewPage = () => {
 
         <AdminCard
           title="Subscriptions"
-          hint="“paying” means both halves: a payment above $0 actually landed (RevenueCat production price, or a paid Stripe invoice) and the subscription is still live. Trialing has not paid yet; canceling and past due are not paying now; “comped” is premium the app grants with no money behind it; “grandfathered” is lifetime-free. Only the first row is revenue."
+          hint="“paying” means both halves: a payment above $0 actually landed (RevenueCat production price, or a paid Stripe invoice) and the subscription is still live. Trialing has not paid yet; canceling and past due are not paying now; “comped” is premium the app grants with no money behind it; “grandfathered” is lifetime-free. Only the first row is revenue. The free rows are split by history: “churned” paid once and left, “trial_expired” ran a $0 trial that lapsed (they were premium for those days, so heavy usage in that window is legitimate), “free” never had an entitlement."
         >
           {overview ? (
             <ul className="aa-list">
@@ -289,7 +290,7 @@ const OverviewPage = () => {
             title="Needs attention"
             sub={subs.discrepancies.length}
             className="aa-card--attention"
-            hint="Where the live evidence (Stripe row, RevenueCat production event) disagrees with users.tier — the tier the app actually enforces. The tiles above follow users.tier; these rows are the exceptions, listed here so they don’t get in the way of the numbers."
+            hint="Where the live evidence (Stripe row, RevenueCat production event) disagrees with users.tier — the tier the app actually enforces — plus any free account whose weekly recipe counter is below the recipes it actually saved (a lost increment, which would quietly under-enforce the cap). The tiles above follow users.tier; these rows are the exceptions, listed here so they don’t get in the way of the numbers."
           >
             <div className="ad-table-wrap">
               <table className="ad-table">
