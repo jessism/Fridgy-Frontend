@@ -21,8 +21,18 @@
       "destination": "https://api.trackabite.app/api/blog/sitemap"
     },
     {
+      "source": "/r/:slug",
+      "destination": "/api/share?slug=:slug"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "functions": {
+    "api/share.js": {
+      "includeFiles": "build/index.html",
+      "maxDuration": 10
+    }
+  }
 }

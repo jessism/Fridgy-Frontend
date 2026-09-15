@@ -285,6 +285,8 @@ function App() {
           <Route path="/recipes/:id" element={<RecipeRedirect />} />
           {/* Redirect to saved recipes with auto-open recipe detail modal */}
           <Route path="/open-recipe/:id" element={<RecipeRedirect />} />
+          {/* Public shared recipe (/r/<slug>): api/share.js serves this shell with OG tags injected */}
+          <Route path="/r/:slug" element={<OpenRecipePage />} />
           <Route path="/analytics/inventory" element={
             <AuthGuard>
               <InventoryUsagePage />

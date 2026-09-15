@@ -733,9 +733,17 @@
 /* Action Buttons - Black pill style */
 .open-recipe-page__action-buttons {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.75rem;
   margin-top: 1.5rem;
   justify-content: center;
+}
+
+/* Share pages: "Shared by {first name}" under the source attribution */
+.open-recipe-page__shared-by {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
 }
 
 .open-recipe-page__action-btn {
@@ -752,7 +760,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  flex: 1;
+  flex: 1 1 140px;
   max-width: 180px;
 }
 
@@ -910,12 +918,15 @@
 @media (max-width: 480px) {
   .open-recipe-page__action-buttons {
     flex-direction: row;
+    flex-wrap: wrap;
     gap: 0.5rem;
   }
 
+  /* Two per row; a third (share pages) wraps to a full-width row */
   .open-recipe-page__action-btn {
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
+    flex: 1 1 calc(50% - 0.25rem);
     max-width: none;
   }
 

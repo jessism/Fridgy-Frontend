@@ -1,17 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import './OpenRecipePage.css';
 import { getIngredientIconUrl } from '../assets/icons/ingredients';
 import { highlightInstructions } from '../utils/highlightInstructions';
+import { getStepTexts, buildShareMeta, SITE_ORIGIN } from '../utils/recipeSteps';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
+// "Get a free Trackabite account" popup buttons. Order = priority. /download is
+// a Vercel redirect to the App Store, not a React route, so it needs a full
+// navigation; swap the two entries to put web signup first.
+const OVERLAY_BUTTONS = [
+  { label: 'Get the free app', href: '/download', variant: 'primary', spa: false },
+  { label: 'Or sign up on the web', href: '/onboarding', variant: 'secondary', spa: true },
+];
+
+// api/share.js injects <script id="__shared_recipe__" type="application/json">
+// so a /r/<slug> visit renders without a second fetch. Guard on the slug: the
+// SPA reuses this component across client-side navigations.
+function readBootstrap(slug) {
+  if (typeof document === 'undefined') return null;
+  const el = document.getElementById('__shared_recipe__');
+  if (!el) return null;
+  try {
+    const payload = JSON.parse(el.textContent);
+    return payload && payload.slug === slug ? payload : null;
+  } catch {
+    return null;
+  }
+}
+
+const bootstrapError = (boot) => {
+  if (!boot) return null;
+  if (boot.status === 410) return 'gone';
+  if (boot.status === 200) return null;
+  return 'not_found';
+};
+
 function OpenRecipePage() {
-  const { id } = useParams();
+  const { id, slug } = useParams();
+  // /r/<slug> (shared by a user) vs /open-recipe/<id> (bot links, public-source rows)
+  const isShare = Boolean(slug);
   const navigate = useNavigate();
-  const [recipe, setRecipe] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const initialBoot = useMemo(() => (isShare ? readBootstrap(slug) : null), [isShare, slug]);
+  const [recipe, setRecipe] = useState(initialBoot?.status === 200 ? initialBoot.recipe : null);
+  const [shareMeta, setShareMeta] = useState(initialBoot?.status === 200 ? initialBoot.meta : null);
+  const [loading, setLoading] = useState(!initialBoot);
+  // null | 'not_found' | 'gone' | 'network'
+  const [error, setError] = useState(bootstrapError(initialBoot));
+  const [retryKey, setRetryKey] = useState(0);
   const [activeTab, setActiveTab] = useState('ingredients');
   const [showSignupPrompt, setShowSignupPrompt] = useState(null);
 
@@ -19,35 +57,76 @@ function OpenRecipePage() {
   const getPromptMessage = () => {
     switch(showSignupPrompt) {
       case 'shopping': return 'Open Trackabite on your phone to create a smart shopping list.';
-      case 'cook': return 'Open this recipe in Trackabite to edit it.';
+      case 'cook': return isShare
+        ? 'Open this recipe in Trackabite to cook it step by step.'
+        : 'Open this recipe in Trackabite to edit it.';
+      case 'save': return 'Save this recipe to your own collection in Trackabite.';
       case 'servings': return 'Open Trackabite on your phone to adjust servings.';
       default: return 'Open Trackabite on your phone to continue.';
     }
   };
 
-  // Fetch recipe from public endpoint (no auth needed)
+  // Load the recipe: bootstrap payload when the server injected one, else the
+  // public endpoint (no auth needed).
   useEffect(() => {
-    async function fetchRecipe() {
-      try {
-        setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/saved-recipes/${id}/public`);
+    let cancelled = false;
 
+    async function fetchRecipe() {
+      setError(null);
+
+      if (isShare) {
+        const boot = readBootstrap(slug);
+        if (boot) {
+          if (boot.status === 200) {
+            setRecipe(boot.recipe);
+            setShareMeta(boot.meta);
+          } else {
+            setRecipe(null);
+            setError(bootstrapError(boot));
+          }
+          setLoading(false);
+          return;
+        }
+      }
+
+      setLoading(true);
+      const url = isShare
+        ? `${API_BASE_URL}/saved-recipes/share/${encodeURIComponent(slug)}`
+        : `${API_BASE_URL}/saved-recipes/${id}/public`;
+
+      try {
+        const response = await fetch(url);
+        if (cancelled) return;
+
+        if (response.status === 410) {
+          setRecipe(null);
+          setError('gone');
+          return;
+        }
         if (!response.ok) {
-          throw new Error('Recipe not found');
+          setRecipe(null);
+          setError('not_found');
+          return;
         }
 
         const data = await response.json();
+        if (cancelled) return;
         setRecipe(data);
+        if (isShare) setShareMeta(buildShareMeta(data, slug, SITE_ORIGIN));
       } catch (err) {
         console.error('[OpenRecipe] Error fetching recipe:', err);
-        setError('Recipe not found');
+        if (!cancelled) {
+          setRecipe(null);
+          setError('network');
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     fetchRecipe();
-  }, [id]);
+    return () => { cancelled = true; };
+  }, [id, slug, isShare, retryKey]);
 
   // Helper function to check if URL needs proxying
   const needsProxy = (url) => {
@@ -194,13 +273,15 @@ function OpenRecipePage() {
   const renderInstructions = () => {
     const ingredients = recipe?.extendedIngredients || [];
 
-    // Format 1: analyzedInstructions
-    if (recipe?.analyzedInstructions?.[0]?.steps?.length > 0) {
-      return recipe.analyzedInstructions[0].steps.map((step, index) => (
+    // Format 1: analyzedInstructions — every block, not just [0]; importers
+    // and the AI writer both produce multi-block arrays.
+    const stepTexts = getStepTexts(recipe);
+    if (stepTexts.length > 0) {
+      return stepTexts.map((text, index) => (
         <div key={index} className="open-recipe-page__instruction-step">
-          <span className="open-recipe-page__step-number">{step.number || index + 1}</span>
+          <span className="open-recipe-page__step-number">{index + 1}</span>
           <span className="open-recipe-page__step-text">
-            {highlightInstructions(step.step, ingredients)}
+            {highlightInstructions(text, ingredients)}
           </span>
         </div>
       ));
@@ -385,11 +466,22 @@ function OpenRecipePage() {
 
   // Error state
   if (error || !recipe) {
+    const errorCopy = error === 'gone'
+      ? { title: 'This recipe is no longer shared', body: 'The owner turned off sharing for this recipe.' }
+      : error === 'network'
+        ? { title: "Couldn't load this recipe", body: 'Check your connection and try again.' }
+        : { title: 'Recipe not found', body: 'This recipe may have been deleted or is no longer available.' };
     return (
       <div className="open-recipe-page">
+        <Helmet>
+          <meta name="robots" content="noindex" />
+        </Helmet>
         <div className="open-recipe-page__error">
-          <h2>Recipe not found</h2>
-          <p>This recipe may have been deleted or is no longer available.</p>
+          <h2>{errorCopy.title}</h2>
+          <p>{errorCopy.body}</p>
+          {error === 'network' && (
+            <button onClick={() => setRetryKey((k) => k + 1)}>Try again</button>
+          )}
           <button onClick={() => navigate('/')}>Go to Trackabite</button>
         </div>
       </div>
@@ -398,6 +490,34 @@ function OpenRecipePage() {
 
   return (
     <div className="open-recipe-page">
+      {/* Share pages: the same tags api/share.js injected (values come from its
+          bootstrap, so helmet-async keeps the server nodes instead of
+          duplicating them). No JSON-LD here — the server-injected block has no
+          data-rh and must stay unmanaged. */}
+      {isShare && shareMeta && (
+        <Helmet>
+          <title>{shareMeta.docTitle}</title>
+          <meta name="description" content={shareMeta.description} />
+          <meta name="robots" content="noindex" />
+          <meta property="og:type" content="article" />
+          <meta property="og:site_name" content="Trackabite" />
+          <meta property="og:title" content={shareMeta.title} />
+          <meta property="og:description" content={shareMeta.description} />
+          <meta property="og:url" content={shareMeta.url} />
+          <meta property="og:image" content={shareMeta.image} />
+          {shareMeta.imageWidth && shareMeta.imageHeight && (
+            <meta property="og:image:width" content={String(shareMeta.imageWidth)} />
+          )}
+          {shareMeta.imageWidth && shareMeta.imageHeight && (
+            <meta property="og:image:height" content={String(shareMeta.imageHeight)} />
+          )}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={shareMeta.title} />
+          <meta name="twitter:description" content={shareMeta.description} />
+          <meta name="twitter:image" content={shareMeta.image} />
+          <link rel="canonical" href={shareMeta.url} />
+        </Helmet>
+      )}
       {/* Modal-style container */}
       <div className="open-recipe-page__modal">
         {/* Header */}
@@ -454,6 +574,11 @@ function OpenRecipePage() {
                   )}
                 </div>
               )}
+              {isShare && recipe.owner?.displayName && (
+                <div className="open-recipe-page__shared-by">
+                  Shared by {recipe.owner.displayName}
+                </div>
+              )}
 
               {/* Time and attributes */}
               <div className="open-recipe-page__info-text">
@@ -488,12 +613,29 @@ function OpenRecipePage() {
                   className="open-recipe-page__action-btn"
                   onClick={() => setShowSignupPrompt('cook')}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                  </svg>
-                  Edit recipe
+                  {isShare ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polygon points="6 3 20 12 6 21 6 3"/>
+                    </svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                  )}
+                  {isShare ? 'Start cooking' : 'Edit recipe'}
                 </button>
+                {isShare && (
+                  <button
+                    className="open-recipe-page__action-btn"
+                    onClick={() => setShowSignupPrompt('save')}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Save to my recipes
+                  </button>
+                )}
               </div>
             </div>
 
@@ -604,12 +746,15 @@ function OpenRecipePage() {
               <img src="/logo192.png" alt="Trackabite" />
             </div>
             <p className="open-recipe-page__popup-message">{getPromptMessage()}</p>
-            <button
-              className="open-recipe-page__popup-btn-primary"
-              onClick={() => navigate('/onboarding')}
-            >
-              Get Started Free
-            </button>
+            {OVERLAY_BUTTONS.map((btn) => (
+              <button
+                key={btn.href}
+                className={`open-recipe-page__popup-btn-${btn.variant}`}
+                onClick={() => (btn.spa ? navigate(btn.href) : window.location.assign(btn.href))}
+              >
+                {btn.label}
+              </button>
+            ))}
           </div>
         </div>
       )}
