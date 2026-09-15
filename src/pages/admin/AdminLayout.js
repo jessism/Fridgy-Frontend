@@ -13,6 +13,7 @@ import OverviewPage from './OverviewPage';
 import UsersPage from './UsersPage';
 import UserDetailPage from './UserDetailPage';
 import SocialPage from './SocialPage';
+import InfluencersPage from './InfluencersPage';
 import PromoCodesPage from './PromoCodesPage';
 import FeedbackPage from './FeedbackPage';
 import DiagnosticsPage from './DiagnosticsPage';
@@ -89,6 +90,7 @@ const AdminLayout = () => {
           <Route index element={<OverviewPage />} />
           <Route path="users" element={<UsersPage />} />
           <Route path="users/:id" element={<UserDetailPage />} />
+          <Route path="influencers" element={<InfluencersPage />} />
           <Route path="social" element={<SocialPage />} />
           <Route path="blog" element={<BlogAdmin />} />
           <Route path="blog/new" element={<BlogRecipeEditor />} />

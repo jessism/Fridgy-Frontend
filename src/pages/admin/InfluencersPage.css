@@ -1,0 +1,58 @@
+/* Influencer outreach page (see InfluencersPage.js). Builds on admin-tokens.css. */
+
+.io-funnel { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.io-chip {
+  border: 1px solid var(--ad-border); background: var(--ad-surface); border-radius: 999px;
+  padding: 6px 12px; font-size: 0.85rem; cursor: pointer; color: var(--ad-ink-2);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.io-chip strong { color: var(--ad-ink); font-variant-numeric: tabular-nums; }
+.io-chip.is-active { background: var(--ad-accent); border-color: var(--ad-accent); color: #fff; }
+.io-chip.is-active strong { color: #fff; }
+.io-chip--small { font-size: 0.78rem; padding: 4px 10px; }
+
+.io-today { margin-bottom: 20px; }
+.io-section { margin-top: 16px; }
+.io-section__title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ad-ink-2); margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+.io-note { font-size: 0.85rem; color: var(--ad-ink-2); margin: 0 0 8px; }
+.io-warn { background: var(--ad-warn-bg); color: var(--ad-warn-ink); border-radius: var(--ad-radius-ctl); padding: 8px 12px; font-size: 0.85rem; margin-bottom: 10px; }
+
+.io-creator { border: 1px solid var(--ad-border); border-radius: var(--ad-radius-card); padding: 12px 14px; margin-bottom: 10px; background: var(--ad-canvas); }
+.io-creator__head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.io-creator__name { font-weight: 700; }
+.io-creator__meta { color: var(--ad-ink-3); font-size: 0.8rem; margin-left: 6px; }
+.io-link { color: var(--ad-accent-ink); text-decoration: none; font-weight: 600; }
+.io-link:hover { text-decoration: underline; }
+
+.io-post { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: start; padding: 8px 0; border-top: 1px solid var(--ad-divider); font-size: 0.85rem; }
+.io-post__idx { color: var(--ad-ink-3); font-variant-numeric: tabular-nums; padding-top: 2px; }
+.io-post__caption { color: var(--ad-ink-3); font-size: 0.78rem; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60ch; }
+.io-post__comment { margin-top: 4px; background: var(--ad-surface); border: 1px solid var(--ad-border); border-radius: var(--ad-radius-ctl); padding: 6px 8px; }
+.io-post__ticks { display: flex; gap: 8px; align-items: center; white-space: nowrap; }
+.io-post__ticks label { font-size: 0.78rem; color: var(--ad-ink-2); display: inline-flex; gap: 4px; align-items: center; }
+
+.io-dm { border-top: 1px solid var(--ad-divider); padding: 10px 0; }
+.io-dm__body { white-space: pre-wrap; background: var(--ad-surface); border: 1px solid var(--ad-border); border-radius: var(--ad-radius-ctl); padding: 8px 10px; font-size: 0.85rem; margin: 6px 0; max-height: 220px; overflow: auto; }
+.io-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.io-btn--sm { padding: 5px 10px; font-size: 0.8rem; }
+.io-btn--danger { color: var(--ad-bad-ink); }
+.io-copied { font-size: 0.78rem; color: var(--ad-good-ink); }
+
+.io-modal { width: min(780px, 100%); }
+.io-kv { display: grid; grid-template-columns: 140px 1fr; gap: 6px 12px; font-size: 0.86rem; margin: 8px 0 12px; }
+.io-kv dt { color: var(--ad-ink-2); }
+.io-kv dd { margin: 0; word-break: break-word; }
+.io-textarea { width: 100%; min-height: 140px; font: inherit; font-size: 14px; border: 1px solid #d9dde2; border-radius: var(--ad-radius-ctl); padding: 8px 10px; resize: vertical; }
+.io-timeline { list-style: none; padding: 0; margin: 6px 0 0; font-size: 0.84rem; }
+.io-timeline li { padding: 5px 0 5px 16px; border-left: 2px solid var(--ad-border); position: relative; }
+.io-timeline li::before { content: ''; position: absolute; left: -5px; top: 10px; width: 8px; height: 8px; border-radius: 50%; background: var(--ad-ink-3); }
+.io-timeline li.is-done::before { background: var(--ad-accent); }
+.io-timeline__when { color: var(--ad-ink-3); margin-left: 6px; font-size: 0.78rem; }
+.io-error { color: var(--ad-bad-ink); font-size: 0.8rem; }
+.io-tools { display: flex; gap: 6px; flex-wrap: wrap; }
+
+@media (max-width: 640px) {
+  .io-post { grid-template-columns: auto 1fr; }
+  .io-post__ticks { grid-column: 2; }
+  .io-kv { grid-template-columns: 1fr; }
+}

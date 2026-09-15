@@ -71,6 +71,20 @@ export const createPromo = (payload) => adminFetch('/admin/promos', { method: 'P
 export const updatePromo = (id, payload) =>
   adminFetch(`/admin/promos/${encodeURIComponent(id)}`, { method: 'PATCH', body: payload });
 
+// --- influencer outreach ---
+const infl = (path = '', opts) => adminFetch(`/admin/influencers${path}`, opts);
+export const fetchInfluencerToday = () => infl('/today');
+export const fetchInfluencers = (status) => infl('', { params: { status } });
+export const fetchInfluencer = (id) => infl(`/${encodeURIComponent(id)}`);
+export const updateInfluencer = (id, payload) => infl(`/${encodeURIComponent(id)}`, { method: 'PATCH', body: payload });
+export const influencerWarmupDone = (id) => infl(`/${encodeURIComponent(id)}/warmup-done`, { method: 'POST', body: {} });
+export const batchWarmupDone = (batchId) => infl(`/batches/${encodeURIComponent(batchId)}/warmup-done`, { method: 'POST', body: {} });
+export const influencerDmSent = (id) => infl(`/${encodeURIComponent(id)}/dm-sent`, { method: 'POST', body: {} });
+export const updateInfluencerPost = (id, postId, payload) =>
+  infl(`/${encodeURIComponent(id)}/posts/${encodeURIComponent(postId)}`, { method: 'POST', body: payload });
+export const retryInfluencerTouch = (touchId) => infl(`/touches/${encodeURIComponent(touchId)}/retry`, { method: 'POST', body: {} });
+export const runInfluencerJob = (job) => infl(`/jobs/${encodeURIComponent(job)}`, { method: 'POST', body: {} });
+
 // Links to the PostHog dashboards that own behavioural analytics (DAU/MAU,
 // retention, feature trends, RevenueCat events). Fill in after creating them
 // in PostHog; until then they open the project home.
