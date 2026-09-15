@@ -22,6 +22,16 @@ const SITE_ORIGIN = (process.env.SHARE_SITE_ORIGIN || SITE_ORIGIN_DEFAULT).repla
 const SLUG_RE = /^[a-z0-9-]{1,96}$/;
 const TIMEOUT_MS = 3000;
 
+// Short and with no stale-while-revalidate on purpose. Facebook, iMessage and
+// WhatsApp each scrape within seconds of a link being sent, so a minute is
+// enough to collapse that burst into one API call — while "Stop sharing" has
+// to mean the page really stops being served, which a long window (or a stale
+// window on top of it) would quietly break.
+const CACHE_OK = 'public, s-maxage=60';
+// Never cache a miss: an unknown slug becomes a real page the moment someone
+// shares, and unsharing then re-sharing brings the same slug back.
+const CACHE_MISS = 'no-store';
+
 // One shell per function instance == per deployment, so cached HTML can never
 // reference bundles from a different build.
 let shellCache = null;
@@ -155,11 +165,8 @@ module.exports = async (req, res) => {
     }));
   }
 
-  // Facebook, iMessage and WhatsApp each scrape separately; after the first
-  // miss the CDN answers the rest.
-  res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=86400');
-
   if (result.status !== 200) {
+    res.setHeader('Cache-Control', CACHE_MISS);
     res.statusCode = result.status;
     return res.end(injectHead(shell, {
       title: result.status === 410 ? 'This recipe is no longer shared | Trackabite' : 'Recipe not found | Trackabite',
@@ -199,6 +206,7 @@ module.exports = async (req, res) => {
     bootstrapTag({ slug, status: 200, recipe, meta }),
   ];
 
+  res.setHeader('Cache-Control', CACHE_OK);
   res.statusCode = 200;
   return res.end(injectHead(shell, { title: meta.docTitle, description: meta.description, metas, links, scripts }));
 };
