@@ -754,7 +754,7 @@ function OpenRecipePage() {
             {/* CTA Section */}
             <div className="open-recipe-page__cta">
               <p className="open-recipe-page__cta-title">
-                Save recipes from anywhere and plan your week
+                Never lose a good recipe again
               </p>
               {/* Same source of truth as the popup, so the two never drift */}
               {OVERLAY_BUTTONS.map((btn) => (
