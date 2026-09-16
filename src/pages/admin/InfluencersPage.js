@@ -47,6 +47,37 @@ const HandleLink = ({ inf }) => (
   <a className="io-link" href={inf.profile_url} target="_blank" rel="noreferrer">@{inf.handle}</a>
 );
 
+const PLATFORM_LABEL = { instagram: 'IG', tiktok: 'TikTok', youtube: 'YouTube' };
+
+/**
+ * The creator's own profile plus any other platform discovery found in their bio
+ * or link-in-bio. `source: 'apify'` means the account was looked up and its
+ * follower count confirmed; `'link'` is an unverified handle scraped from text,
+ * so it is muted — a guess should not look like a fact.
+ */
+const PlatformLinks = ({ inf }) => (
+  <span className="io-plat" onClick={(e) => e.stopPropagation()}>
+    <a className="io-link" href={inf.profile_url} target="_blank" rel="noreferrer">{PLATFORM_LABEL[inf.platform] || inf.platform}</a>
+    {(inf.other_platforms || []).map((p) => {
+      const verified = p.source === 'apify' || p.followers != null;
+      return (
+        <a
+          key={`${p.platform}-${p.handle}`}
+          className={`io-link${verified ? '' : ' io-plat--unverified'}`}
+          href={p.url}
+          target="_blank"
+          rel="noreferrer"
+          title={verified
+            ? `@${p.handle}${p.followers != null ? ` · ${p.followers.toLocaleString()} followers` : ''}`
+            : `@${p.handle} · found in bio, not verified`}
+        >
+          {PLATFORM_LABEL[p.platform] || p.platform}
+        </a>
+      );
+    })}
+  </span>
+);
+
 /* ---------- Today: warm-up cards ---------- */
 
 const WarmupCard = ({ inf, onDone, onTick, busy }) => {
@@ -57,6 +88,7 @@ const WarmupCard = ({ inf, onDone, onTick, busy }) => {
         <div>
           <HandleLink inf={inf} />
           <span className="io-creator__meta">{inf.followers?.toLocaleString()} followers · score {inf.score} · {money(inf.recommended_fee)}</span>
+          {(inf.other_platforms || []).length > 0 && <> <PlatformLinks inf={inf} /></>}
         </div>
         <div className="io-actions">
           <a className="ad-btn io-btn--sm" href={inf.profile_url} target="_blank" rel="noreferrer">Open profile (follow)</a>
@@ -111,9 +143,61 @@ const DmTask = ({ touch, onSent, busy }) => {
   );
 };
 
+/* ---------- Reject with a reason ---------- */
+
+const REJECT_CHIPS = [
+  'Not food or cooking content',
+  'Business or restaurant account',
+  'Wrong audience',
+  'Too sponsored / promotional',
+  'Promotes a competing app',
+  'Low-quality content',
+  'Inactive',
+];
+
+/**
+ * The reason is not bookkeeping: discovery feeds recent reasons back into the
+ * scoring prompt, so writing one here stops the same type of creator appearing
+ * next run. Skipping is still one click, so a fast pass through the list is
+ * never blocked.
+ */
+const RejectModal = ({ creator, onCancel, onReject, busy }) => {
+  const [reason, setReason] = useState('');
+  const addChip = (chip) => setReason((r) => (r.trim() ? `${r.trim()}; ${chip.toLowerCase()}` : chip));
+
+  return (
+    <div className="ad-modal-scrim" role="dialog" aria-modal="true" aria-label="Reject creator">
+      <div className="ad-modal">
+        <h2 className="ad-modal__title">Reject @{creator.handle}</h2>
+        <p className="io-note">Why isn&apos;t this a fit? Gemini reads recent reasons when scoring the next batch, so similar creators stop showing up.</p>
+        <div className="io-chips">
+          {REJECT_CHIPS.map((c) => (
+            <button type="button" key={c} className="io-chip io-chip--small" onClick={() => addChip(c)}>{c}</button>
+          ))}
+        </div>
+        <textarea
+          className="io-textarea"
+          style={{ minHeight: 90 }}
+          value={reason}
+          autoFocus
+          placeholder="e.g. dietitian clinic account, not a home cook"
+          onChange={(e) => setReason(e.target.value)}
+        />
+        <div className="ad-modal__actions" style={{ justifyContent: 'space-between' }}>
+          <button type="button" className="ad-btn" disabled={busy} onClick={onCancel}>Cancel</button>
+          <div className="io-actions">
+            <button type="button" className="ad-btn" disabled={busy} onClick={() => onReject('')}>Reject without reason</button>
+            <button type="button" className="ad-btn ad-btn--primary" disabled={busy || !reason.trim()} onClick={() => onReject(reason.trim())}>Reject with reason</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /* ---------- Creator detail modal ---------- */
 
-const DetailModal = ({ id, onClose, onChanged }) => {
+const DetailModal = ({ id, onClose, onChanged, onRequestReject }) => {
   const [inf, setInf] = useState(null);
   const [error, setError] = useState(null);
   const [form, setForm] = useState(null);
@@ -122,7 +206,7 @@ const DetailModal = ({ id, onClose, onChanged }) => {
   const load = useCallback(() => {
     fetchInfluencer(id).then((d) => {
       setInf(d);
-      setForm({ draft_dm: d.draft_dm || '', draft_email_subject: d.draft_email_subject || '', draft_email: d.draft_email || '', notes: d.notes || '', agreed_fee: d.agreed_fee ?? '', email: d.email || '' });
+      setForm({ draft_dm: d.draft_dm || '', draft_email_subject: d.draft_email_subject || '', draft_email: d.draft_email || '', notes: d.notes || '', agreed_fee: d.agreed_fee ?? '', email: d.email || '', rejection_reason: d.rejection_reason || '' });
     }).catch((e) => setError(e.message));
   }, [id]);
   useEffect(() => { load(); }, [load]);
@@ -166,7 +250,12 @@ const DetailModal = ({ id, onClose, onChanged }) => {
               <dt>Followers</dt><dd>{inf.followers?.toLocaleString()} · engagement {inf.engagement_rate ?? '—'}%</dd>
               <dt>Other platforms</dt>
               <dd>{(inf.other_platforms || []).length ? inf.other_platforms.map((p) => (
-                <span key={p.platform}><a className="io-link" href={p.url} target="_blank" rel="noreferrer">{p.platform}</a>{p.followers != null ? ` (${p.followers.toLocaleString()})` : ' (unverified)'} </span>
+                <span key={p.platform}>
+                  <a className={`io-link${p.source === 'apify' || p.followers != null ? '' : ' io-plat--unverified'}`} href={p.url} target="_blank" rel="noreferrer">
+                    {PLATFORM_LABEL[p.platform] || p.platform} @{p.handle}
+                  </a>
+                  {p.followers != null ? ` (${p.followers.toLocaleString()} followers)` : ' (found in bio, not verified)'}{' '}
+                </span>
               )) : 'none found'}</dd>
               <dt>Category</dt><dd>{inf.category || '—'} · score {inf.score}</dd>
               <dt>Why</dt><dd>{inf.why}</dd>
@@ -185,13 +274,19 @@ const DetailModal = ({ id, onClose, onChanged }) => {
               <div className="ad-field ad-field--full"><label htmlFor="io-subj">Email subject</label><input id="io-subj" className="ad-input" value={form.draft_email_subject} onChange={(e) => setForm({ ...form, draft_email_subject: e.target.value })} /></div>
               <div className="ad-field ad-field--full"><label htmlFor="io-em">Email draft</label><textarea id="io-em" className="io-textarea" value={form.draft_email} onChange={(e) => setForm({ ...form, draft_email: e.target.value })} /></div>
               <div className="ad-field ad-field--full"><label htmlFor="io-notes">Notes</label><textarea id="io-notes" className="io-textarea" style={{ minHeight: 60 }} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></div>
+              {inf.status === 'rejected' && (
+                <div className="ad-field ad-field--full">
+                  <label htmlFor="io-rej">Rejection reason <span className="ad-muted">(read back when scoring the next batch)</span></label>
+                  <textarea id="io-rej" className="io-textarea" style={{ minHeight: 60 }} value={form.rejection_reason} onChange={(e) => setForm({ ...form, rejection_reason: e.target.value })} />
+                </div>
+              )}
             </div>
 
             <div className="ad-modal__actions" style={{ justifyContent: 'space-between' }}>
               <div className="io-tools">
                 {['pending_approval', 'hold'].includes(inf.status) && <button type="button" className="ad-btn ad-btn--primary" disabled={saving} onClick={() => setStatus('warmup_needed')}>Approve → warm-up</button>}
                 {inf.status === 'pending_approval' && <button type="button" className="ad-btn" disabled={saving} onClick={() => setStatus('hold')}>Hold</button>}
-                {['pending_approval', 'hold', 'warmup_needed'].includes(inf.status) && <button type="button" className="ad-btn io-btn--danger" disabled={saving} onClick={() => setStatus('rejected')}>Reject</button>}
+                {['pending_approval', 'hold', 'warmup_needed'].includes(inf.status) && <button type="button" className="ad-btn io-btn--danger" disabled={saving} onClick={() => onRequestReject(inf)}>Reject</button>}
                 {inf.status === 'warmup_needed' && <button type="button" className="ad-btn ad-btn--primary" disabled={saving} onClick={() => act(() => influencerWarmupDone(id))}>Done warming up</button>}
                 {['dm_needed', 'followup_needed'].includes(inf.status) && <button type="button" className="ad-btn ad-btn--primary" disabled={saving} onClick={() => act(() => influencerDmSent(id))}>DM sent</button>}
                 {['dm_needed', 'contacted', 'followup_needed'].includes(inf.status) && <button type="button" className="ad-btn" disabled={saving} onClick={() => setStatus('replied', { reply_channel: 'dm' })}>Mark replied</button>}
@@ -246,6 +341,7 @@ const InfluencersPage = () => {
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
   const [selected, setSelected] = useState(null);
+  const [rejecting, setRejecting] = useState(null);
   const [jobMsg, setJobMsg] = useState(null);
 
   const loadToday = useCallback(() => fetchInfluencerToday().then(setToday).catch((e) => setError(e.message)), []);
@@ -278,7 +374,7 @@ const InfluencersPage = () => {
     { key: 'followers', header: 'Followers', align: 'num', render: (r) => r.followers?.toLocaleString() ?? '—' },
     { key: 'score', header: 'Score', align: 'num' },
     { key: 'fee', header: 'Fee', align: 'num', render: (r) => (r.agreed_fee != null ? `$${r.agreed_fee} (agreed)` : money(r.recommended_fee)) },
-    { key: 'platforms', header: 'Platforms', render: (r) => [r.platform, ...(r.other_platforms || []).map((p) => p.platform)].join(' + ') },
+    { key: 'platforms', header: 'Platforms', render: (r) => <PlatformLinks inf={r} /> },
     { key: 'status', header: 'Status', render: (r) => <Badge tone={TONE[r.status]}>{STATUS_LABEL[r.status]}</Badge> },
     { key: 'next', header: 'Next', render: (r) => (r.next_touch_at ? formatDate(r.next_touch_at) : r.replied_at ? `replied ${formatDate(r.replied_at)}` : formatDate(r.discovered_at)) },
     {
@@ -288,7 +384,7 @@ const InfluencersPage = () => {
           {r.status === 'pending_approval' && <>
             <button type="button" className="ad-btn ad-btn--primary io-btn--sm" disabled={busy} onClick={() => run(() => updateInfluencer(r.id, { status: 'warmup_needed' }))}>Approve</button>
             <button type="button" className="ad-btn io-btn--sm" disabled={busy} onClick={() => run(() => updateInfluencer(r.id, { status: 'hold' }))}>Hold</button>
-            <button type="button" className="ad-btn io-btn--sm io-btn--danger" disabled={busy} onClick={() => run(() => updateInfluencer(r.id, { status: 'rejected' }))}>Reject</button>
+            <button type="button" className="ad-btn io-btn--sm io-btn--danger" disabled={busy} onClick={() => setRejecting(r)}>Reject</button>
           </>}
           {['dm_needed', 'contacted', 'followup_needed'].includes(r.status) && <button type="button" className="ad-btn io-btn--sm" disabled={busy} onClick={() => run(() => updateInfluencer(r.id, { status: 'replied', reply_channel: 'dm' }))}>Mark replied</button>}
         </div>
@@ -296,7 +392,22 @@ const InfluencersPage = () => {
     },
   ];
 
+  // The reason column only earns its width on the rejected list.
+  if (filter === 'rejected') {
+    columns.splice(columns.length - 1, 0, {
+      key: 'rejection_reason',
+      header: 'Reason',
+      render: (r) => (r.rejection_reason ? <span className="io-reason">{r.rejection_reason}</span> : <span className="ad-muted">—</span>),
+    });
+  }
+
   const runJob = (job) => run(async () => { const out = await runInfluencerJob(job); setJobMsg(`${job}: ${JSON.stringify(out)}`); });
+
+  const confirmReject = (reason) => run(async () => {
+    await updateInfluencer(rejecting.id, { status: 'rejected', rejection_reason: reason });
+    setRejecting(null);
+    setSelected(null);
+  });
 
   return (
     <div className="aa">
@@ -406,7 +517,8 @@ const InfluencersPage = () => {
         {rows && rows.length > 0 && <DataTable columns={columns} rows={rows} onRowClick={(r) => setSelected(r.id)} />}
       </AdminCard>
 
-      {selected && <DetailModal id={selected} onClose={() => setSelected(null)} onChanged={reload} />}
+      {selected && <DetailModal id={selected} onClose={() => setSelected(null)} onChanged={reload} onRequestReject={setRejecting} />}
+      {rejecting && <RejectModal creator={rejecting} busy={busy} onCancel={() => setRejecting(null)} onReject={confirmReject} />}
     </div>
   );
 };

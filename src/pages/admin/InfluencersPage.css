@@ -24,6 +24,14 @@
 .io-link { color: var(--ad-accent-ink); text-decoration: none; font-weight: 600; }
 .io-link:hover { text-decoration: underline; }
 
+/* platform links: own profile + anything found on other platforms */
+.io-plat { display: inline-flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.io-plat--unverified { color: var(--ad-ink-3); font-weight: 500; text-decoration: underline dotted; text-underline-offset: 2px; }
+
+.io-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.io-chips .io-chip { cursor: pointer; }
+.io-reason { display: inline-block; max-width: 38ch; color: var(--ad-ink-2); font-size: 0.82rem; }
+
 .io-post { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: start; padding: 8px 0; border-top: 1px solid var(--ad-divider); font-size: 0.85rem; }
 .io-post__idx { color: var(--ad-ink-3); font-variant-numeric: tabular-nums; padding-top: 2px; }
 .io-post__caption { color: var(--ad-ink-3); font-size: 0.78rem; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60ch; }
