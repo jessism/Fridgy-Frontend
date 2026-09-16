@@ -734,21 +734,18 @@ html.open-recipe-html body {
 .open-recipe-page__cta-btn-secondary {
   width: 100%;
   max-width: 320px;
-  padding: 10px 24px 4px;
+  padding: 8px 24px 2px;
   background: transparent;
-  color: var(--ta-text-2);
+  color: var(--ta-text-muted);
   border: none;
   font-family: var(--ta-body);
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
 }
 
 .open-recipe-page__cta-btn-secondary:hover {
-  color: var(--ta-text);
+  color: var(--ta-text-2);
 }
 
 /* Loading and error ------------------------------------------------------- */
@@ -890,12 +887,15 @@ html.open-recipe-html body {
 
 .open-recipe-page__popup-message {
   font-family: var(--ta-display);
-  font-size: 20px;
+  font-size: clamp(23px, 6.4vw, 26px);
   font-weight: 800;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.7px;
   color: var(--ta-text);
-  margin: 0 0 8px;
-  line-height: 1.25;
+  margin: 0 0 10px;
+  line-height: 1.15;
+  /* Splits a two-line headline at a phrase rather than inside "step-by-step".
+     Ignored by browsers that don't support it, which just wrap as before. */
+  text-wrap: balance;
 }
 
 .open-recipe-page__popup-body {
@@ -941,21 +941,18 @@ html.open-recipe-html body {
 
 .open-recipe-page__popup-btn-secondary {
   width: 100%;
-  padding: 10px 24px 4px;
+  padding: 8px 24px 2px;
   background: transparent;
-  color: var(--ta-text-2);
+  color: var(--ta-text-muted);
   border: none;
   font-family: var(--ta-body);
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
 }
 
 .open-recipe-page__popup-btn-secondary:hover {
-  color: var(--ta-text);
+  color: var(--ta-text-2);
 }
 
 /* Responsive -------------------------------------------------------------- */
