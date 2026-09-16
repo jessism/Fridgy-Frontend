@@ -693,20 +693,24 @@ html.open-recipe-html body {
 /* Bottom call to action --------------------------------------------------- */
 
 .open-recipe-page__cta {
-  padding: 24px 8px 8px;
+  padding: 32px 8px 16px;
   text-align: center;
   background: transparent;
   border-top: 1px solid var(--ta-divider);
   margin-top: 32px;
 }
 
-.open-recipe-page__cta p {
+/* Deliberately NOT `.open-recipe-page__cta p`: that swept up the small grey
+   note under the button as well and rendered it as a second headline. */
+.open-recipe-page__cta-title {
   font-family: var(--ta-display);
-  font-size: 18px;
+  font-size: clamp(25px, 7vw, 28px);
   font-weight: 800;
-  letter-spacing: -0.4px;
+  letter-spacing: -0.7px;
   color: var(--ta-text);
-  margin: 0 0 16px;
+  margin: 0 0 20px;
+  line-height: 1.15;
+  text-wrap: balance;
 }
 
 .open-recipe-page__cta-btn {

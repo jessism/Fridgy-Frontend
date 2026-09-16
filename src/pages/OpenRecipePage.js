@@ -753,7 +753,9 @@ function OpenRecipePage() {
 
             {/* CTA Section */}
             <div className="open-recipe-page__cta">
-              <p>Save recipes from anywhere and plan your week</p>
+              <p className="open-recipe-page__cta-title">
+                Save recipes from anywhere and plan your week
+              </p>
               {/* Same source of truth as the popup, so the two never drift */}
               {OVERLAY_BUTTONS.map((btn) => (
                 <React.Fragment key={btn.href}>
