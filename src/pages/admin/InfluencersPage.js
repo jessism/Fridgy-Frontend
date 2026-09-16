@@ -380,6 +380,7 @@ const InfluencersPage = () => {
   const [busy, setBusy] = useState(false);
   const [selected, setSelected] = useState(null);
   const [rejecting, setRejecting] = useState(null);
+  const [showWarmup, setShowWarmup] = useState(false);
   const [jobMsg, setJobMsg] = useState(null);
 
   const loadToday = useCallback(() => fetchInfluencerToday().then(setToday).catch((e) => setError(e.message)), []);
@@ -395,10 +396,23 @@ const InfluencersPage = () => {
 
   const counts = today?.counts || {};
   const batch = today?.batch;
-  const warmups = (batch?.creators || []).filter((c) => c.status === 'warmup_needed');
   const approvedInBatch = (batch?.creators || []).length;
   const dmTasks = today?.dmTasks || [];
   const cfg = today?.config || {};
+  const pending = counts.pending_approval || 0;
+
+  // One warm-up group per open batch. More than one appears when a batch from an
+  // earlier session is still being warmed up.
+  const warmupGroups = (today?.batches || [])
+    .map((b) => ({ ...b, warmups: (b.creators || []).filter((c) => c.status === 'warmup_needed') }))
+    .filter((g) => g.warmups.length > 0);
+
+  // Tonight's batch stays shut until the whole review queue is triaged, so
+  // approving doesn't drop warm-up work in front of you mid-review. Batches from
+  // an earlier session were already reviewed, so they are never gated.
+  const gatedGroups = warmupGroups.filter((g) => g.opened_today && pending > 0 && !showWarmup);
+  const visibleGroups = warmupGroups.filter((g) => !gatedGroups.includes(g));
+  const gatedCount = gatedGroups.reduce((n, g) => n + g.warmups.length, 0);
 
   const inProgress = ['warmup_needed', 'dm_needed', 'contacted', 'followup_needed'].reduce((n, s) => n + (counts[s] || 0), 0);
   const replyRate = useMemo(() => {
@@ -501,21 +515,37 @@ const InfluencersPage = () => {
         {!today && <Skeleton />}
         {today && (
           <>
-            {warmups.length > 0 && (
+            {pending > 0 && (
               <div className="io-section">
+                <h3 className="io-section__title">Review ({pending} left)</h3>
+                <p className="io-note">
+                  Approve, hold or reject all {pending} before tonight&apos;s warm-up opens
+                  {approvedInBatch > 0 ? ` — ${approvedInBatch} approved so far` : ''}.
+                </p>
+                <div className="io-actions">
+                  {filter !== 'pending_approval' && <button type="button" className="ad-btn ad-btn--primary io-btn--sm" onClick={() => setFilter('pending_approval')}>Review them</button>}
+                  {gatedCount > 0 && <button type="button" className="ad-btn io-btn--sm" onClick={() => setShowWarmup(true)}>Show warm-up anyway ({gatedCount})</button>}
+                </div>
+              </div>
+            )}
+
+            {visibleGroups.map((g, i) => (
+              <div className="io-section" key={g.id}>
                 <h3 className="io-section__title">
-                  Warm-up ({warmups.length})
-                  <button type="button" className="ad-btn ad-btn--primary io-btn--sm" disabled={busy} onClick={() => run(() => batchWarmupDone(batch.id))}>Done warming up for all {warmups.length}</button>
+                  {g.opened_today
+                    ? `Warm-up · approved tonight (${g.warmups.length})`
+                    : `Warm-up · batch #${g.id} from ${formatDate(g.opened_at)} (${g.warmups.length})`}
+                  <button type="button" className="ad-btn ad-btn--primary io-btn--sm" disabled={busy} onClick={() => run(() => batchWarmupDone(g.id))}>Done warming up for all {g.warmups.length}</button>
                 </h3>
-                <p className="io-note">Follow, like the {cfg.warmupLikes} posts, comment on {cfg.warmupComments} across the two sessions. “Done warming up” sends the email and queues the DM.</p>
-                {warmups.map((c) => (
+                {i === 0 && <p className="io-note">Follow, like the {cfg.warmupLikes} posts, comment on {cfg.warmupComments} across the two sessions. “Done warming up” sends the email and queues the DM.</p>}
+                {g.warmups.map((c) => (
                   <WarmupCard key={c.id} inf={c} busy={busy}
                     onDone={(inf) => run(() => influencerWarmupDone(inf.id))}
                     onTick={tickPost}
                     onTickAll={tickAllPosts} />
                 ))}
               </div>
-            )}
+            ))}
 
             {dmTasks.length > 0 && (
               <div className="io-section">
@@ -548,14 +578,11 @@ const InfluencersPage = () => {
               </div>
             )}
 
-            <div className="io-section">
-              <h3 className="io-section__title">Next batch</h3>
-              <p className="io-note">
-                {counts.pending_approval || 0} creators pending approval.{' '}
-                {filter !== 'pending_approval' && <button type="button" className="ad-btn io-btn--sm" onClick={() => setFilter('pending_approval')}>Review them</button>}
-                {warmups.length === 0 && dmTasks.length === 0 && (counts.pending_approval || 0) === 0 && ' Nothing to do tonight.'}
-              </p>
-            </div>
+            {pending === 0 && warmupGroups.length === 0 && dmTasks.length === 0 && (
+              <div className="io-section">
+                <p className="io-note">Nothing to do tonight. The next discovery run will refill the review queue.</p>
+              </div>
+            )}
           </>
         )}
       </AdminCard>
