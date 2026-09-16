@@ -27,7 +27,10 @@ const TIMEOUT_MS = 3000;
 // enough to collapse that burst into one API call — while "Stop sharing" has
 // to mean the page really stops being served, which a long window (or a stale
 // window on top of it) would quietly break.
-const CACHE_OK = 'public, s-maxage=60';
+// max-age=0 + must-revalidate is for the browser; s-maxage is for the CDN.
+// Without a browser directive, `public` alone invites heuristic caching and a
+// reader keeps seeing yesterday's page long after it changed.
+const CACHE_OK = 'public, max-age=0, must-revalidate, s-maxage=60';
 // Never cache a miss: an unknown slug becomes a real page the moment someone
 // shares, and unsharing then re-sharing brings the same slug back.
 const CACHE_MISS = 'no-store';

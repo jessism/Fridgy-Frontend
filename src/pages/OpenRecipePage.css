@@ -739,7 +739,7 @@ html.open-recipe-html body {
   color: var(--ta-text-muted);
   border: none;
   font-family: var(--ta-body);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
 }
@@ -887,7 +887,7 @@ html.open-recipe-html body {
 
 .open-recipe-page__popup-message {
   font-family: var(--ta-display);
-  font-size: clamp(23px, 6.4vw, 26px);
+  font-size: clamp(25px, 7vw, 28px);
   font-weight: 800;
   letter-spacing: -0.7px;
   color: var(--ta-text);
@@ -946,7 +946,7 @@ html.open-recipe-html body {
   color: var(--ta-text-muted);
   border: none;
   font-family: var(--ta-body);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
 }
