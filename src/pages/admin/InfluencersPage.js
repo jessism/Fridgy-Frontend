@@ -80,8 +80,50 @@ const PlatformLinks = ({ inf }) => (
 
 /* ---------- Today: warm-up cards ---------- */
 
-const WarmupCard = ({ inf, onDone, onTick, busy }) => {
-  const posts = [...(inf.influencer_posts || [])].sort((a, b) => (b.posted_at || '').localeCompare(a.posted_at || ''));
+/** Caption's first words make a far more useful link than a repeated "Open post". */
+const postLabel = (p, n) => {
+  const caption = (p.caption || '').replace(/\s+/g, ' ').trim();
+  return caption ? `${caption.slice(0, 70)}${caption.length > 70 ? '…' : ''}` : `Post ${n}`;
+};
+
+/**
+ * `liked_at` doubles as the "engaged" marker: the per-post ticks are a personal
+ * scratchpad (nothing in the backend, scheduler or sheet mirror reads them), so
+ * one checkbox is enough and both columns move together.
+ */
+const isEngaged = (p) => Boolean(p.liked_at);
+
+const WarmupCard = ({ inf, onDone, onTick, onTickAll, busy }) => {
+  const posts = [...(inf.influencer_posts || [])]
+    .sort((a, b) => (b.posted_at || '').localeCompare(a.posted_at || ''))
+    .map((p, i) => ({ ...p, n: i + 1 }));
+  const allEngaged = posts.length > 0 && posts.every(isEngaged);
+
+  const columns = [
+    { key: 'n', header: '#' },
+    {
+      key: 'post',
+      header: 'Post',
+      render: (p) => (
+        <a className="io-post-link" href={p.post_url} target="_blank" rel="noreferrer" title={p.caption || undefined}>
+          {postLabel(p, p.n)}
+        </a>
+      ),
+    },
+    {
+      key: 'engaged',
+      header: 'Engaged?',
+      render: (p) => (
+        <input
+          type="checkbox"
+          aria-label={`Engaged with post ${p.n}`}
+          checked={isEngaged(p)}
+          onChange={(e) => onTick(inf.id, p.id, e.target.checked)}
+        />
+      ),
+    },
+  ];
+
   return (
     <div className="io-creator">
       <div className="io-creator__head">
@@ -92,29 +134,17 @@ const WarmupCard = ({ inf, onDone, onTick, busy }) => {
         </div>
         <div className="io-actions">
           <a className="ad-btn io-btn--sm" href={inf.profile_url} target="_blank" rel="noreferrer">Open profile (follow)</a>
+          {posts.length > 0 && (
+            <button type="button" className="ad-btn io-btn--sm" disabled={busy || allEngaged} onClick={() => onTickAll(inf, posts)}>
+              {allEngaged ? 'All engaged' : 'Mark all engaged'}
+            </button>
+          )}
           <button type="button" className="ad-btn ad-btn--primary io-btn--sm" disabled={busy} onClick={() => onDone(inf)}>Done warming up</button>
         </div>
       </div>
-      {posts.length === 0 && <p className="io-note">No posts captured for this creator; like and comment from their profile.</p>}
-      {posts.map((p, i) => (
-        <div className="io-post" key={p.id}>
-          <div className="io-post__idx">{i + 1}</div>
-          <div>
-            <a className="io-link" href={p.post_url} target="_blank" rel="noreferrer">Open post</a>
-            {p.caption && <div className="io-post__caption">{p.caption}</div>}
-            {p.comment_draft && (
-              <div className="io-post__comment">
-                {p.comment_draft}
-                <div className="io-actions" style={{ marginTop: 6 }}><CopyButton text={p.comment_draft} label="Copy comment" /></div>
-              </div>
-            )}
-          </div>
-          <div className="io-post__ticks">
-            <label><input type="checkbox" checked={Boolean(p.liked_at)} onChange={(e) => onTick(inf.id, p.id, { liked: e.target.checked })} /> liked</label>
-            <label><input type="checkbox" checked={Boolean(p.commented_at)} onChange={(e) => onTick(inf.id, p.id, { commented: e.target.checked })} /> commented</label>
-          </div>
-        </div>
-      ))}
+      {posts.length === 0
+        ? <p className="io-note">No posts captured for this creator; like and comment from their profile.</p>
+        : <DataTable className="io-posts" columns={columns} rows={posts} />}
     </div>
   );
 };
@@ -310,18 +340,26 @@ const DetailModal = ({ id, onClose, onChanged, onRequestReject }) => {
 
             {(inf.influencer_posts || []).length > 0 && (
               <div className="io-section">
-                <h3 className="io-section__title">Recent posts &amp; comment drafts</h3>
-                {inf.influencer_posts.map((p, i) => (
-                  <div className="io-post" key={p.id}>
-                    <div className="io-post__idx">{i + 1}</div>
-                    <div>
-                      <a className="io-link" href={p.post_url} target="_blank" rel="noreferrer">Open post</a> <span className="ad-muted">{p.posted_at ? formatDate(p.posted_at) : ''}</span>
-                      {p.caption && <div className="io-post__caption">{p.caption}</div>}
-                      {p.comment_draft && <div className="io-post__comment">{p.comment_draft}</div>}
-                    </div>
-                    <div className="io-post__ticks"><span className="ad-muted">{p.liked_at ? '♥ ' : ''}{p.commented_at ? '💬' : ''}</span></div>
-                  </div>
-                ))}
+                <h3 className="io-section__title">Recent posts</h3>
+                <DataTable
+                  className="io-posts"
+                  columns={[
+                    { key: 'n', header: '#' },
+                    {
+                      key: 'post',
+                      header: 'Post',
+                      render: (p) => (
+                        <a className="io-post-link" href={p.post_url} target="_blank" rel="noreferrer" title={p.caption || undefined}>
+                          {postLabel(p, p.n)}
+                        </a>
+                      ),
+                    },
+                    { key: 'posted_at', header: 'Posted', render: (p) => (p.posted_at ? formatDate(p.posted_at) : '—') },
+                    { key: 'comment_draft', header: 'Comment draft', render: (p) => <span className="ad-muted">{p.comment_draft || '—'}</span> },
+                    { key: 'engaged', header: 'Engaged?', render: (p) => (isEngaged(p) ? '✓' : '') },
+                  ]}
+                  rows={inf.influencer_posts.map((p, i) => ({ ...p, n: i + 1 }))}
+                />
               </div>
             )}
           </>
@@ -403,6 +441,16 @@ const InfluencersPage = () => {
 
   const runJob = (job) => run(async () => { const out = await runInfluencerJob(job); setJobMsg(`${job}: ${JSON.stringify(out)}`); });
 
+  // One tick per post; both timestamps move together (see isEngaged).
+  const tickPost = (id, postId, engaged) =>
+    updateInfluencerPost(id, postId, { liked: engaged, commented: engaged })
+      .then(loadToday)
+      .catch((e) => setError(e.message));
+
+  const tickAllPosts = (inf, posts) => run(() => Promise.all(
+    posts.filter((p) => !p.liked_at).map((p) => updateInfluencerPost(inf.id, p.id, { liked: true, commented: true })),
+  ));
+
   const confirmReject = (reason) => run(async () => {
     await updateInfluencer(rejecting.id, { status: 'rejected', rejection_reason: reason });
     setRejecting(null);
@@ -463,7 +511,8 @@ const InfluencersPage = () => {
                 {warmups.map((c) => (
                   <WarmupCard key={c.id} inf={c} busy={busy}
                     onDone={(inf) => run(() => influencerWarmupDone(inf.id))}
-                    onTick={(id, postId, payload) => updateInfluencerPost(id, postId, payload).then(loadToday).catch((e) => setError(e.message))} />
+                    onTick={tickPost}
+                    onTickAll={tickAllPosts} />
                 ))}
               </div>
             )}

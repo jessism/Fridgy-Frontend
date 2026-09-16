@@ -32,12 +32,13 @@
 .io-chips .io-chip { cursor: pointer; }
 .io-reason { display: inline-block; max-width: 38ch; color: var(--ad-ink-2); font-size: 0.82rem; }
 
-.io-post { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: start; padding: 8px 0; border-top: 1px solid var(--ad-divider); font-size: 0.85rem; }
-.io-post__idx { color: var(--ad-ink-3); font-variant-numeric: tabular-nums; padding-top: 2px; }
-.io-post__caption { color: var(--ad-ink-3); font-size: 0.78rem; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60ch; }
-.io-post__comment { margin-top: 4px; background: var(--ad-surface); border: 1px solid var(--ad-border); border-radius: var(--ad-radius-ctl); padding: 6px 8px; }
-.io-post__ticks { display: flex; gap: 8px; align-items: center; white-space: nowrap; }
-.io-post__ticks label { font-size: 0.78rem; color: var(--ad-ink-2); display: inline-flex; gap: 4px; align-items: center; }
+/* warm-up post table: # | Post | Engaged? (detail modal adds date + draft) */
+.io-posts { background: var(--ad-surface); border-radius: var(--ad-radius-ctl); }
+.io-posts th { background: transparent; }
+.io-posts th:first-child, .io-posts td:first-child { width: 28px; color: var(--ad-ink-3); font-variant-numeric: tabular-nums; }
+.io-posts th:last-child, .io-posts td:last-child { width: 78px; text-align: center; }
+.io-post-link { color: var(--ad-accent-ink); text-decoration: none; display: inline-block; max-width: 56ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+.io-post-link:hover { text-decoration: underline; }
 
 .io-dm { border-top: 1px solid var(--ad-divider); padding: 10px 0; }
 .io-dm__body { white-space: pre-wrap; background: var(--ad-surface); border: 1px solid var(--ad-border); border-radius: var(--ad-radius-ctl); padding: 8px 10px; font-size: 0.85rem; margin: 6px 0; max-height: 220px; overflow: auto; }
@@ -60,7 +61,6 @@
 .io-tools { display: flex; gap: 6px; flex-wrap: wrap; }
 
 @media (max-width: 640px) {
-  .io-post { grid-template-columns: auto 1fr; }
-  .io-post__ticks { grid-column: 2; }
+  .io-post-link { max-width: 30ch; }
   .io-kv { grid-template-columns: 1fr; }
 }
