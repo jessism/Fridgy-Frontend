@@ -232,8 +232,13 @@
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease, transform 0.15s ease;
-  flex: 1 1 140px;
+  /* Two to a row at any width, so a third wraps to its own full-width row
+     instead of squeezing its label onto two lines. The app pairs them the
+     same way. */
+  flex: 1 1 calc(50% - 6px);
+  min-width: 0;
   max-width: none;
+  white-space: nowrap;
 }
 
 .open-recipe-page__action-btn:hover {
@@ -949,11 +954,9 @@
     min-width: 62px;
   }
 
-  /* Two pills per row; a third wraps to a full-width row of its own */
   .open-recipe-page__action-btn {
     padding: 13px 12px;
     font-size: 14px;
-    flex: 1 1 calc(50% - 6px);
   }
 
   .open-recipe-page__signup-popup {
