@@ -12,7 +12,13 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api
 // a Vercel redirect to the App Store, not a React route, so it needs a full
 // navigation; swap the two entries to put web signup first.
 const OVERLAY_BUTTONS = [
-  { label: 'Get the free app', href: '/download', variant: 'primary', spa: false },
+  {
+    label: 'Get the free app',
+    href: '/download',
+    variant: 'primary',
+    spa: false,
+    note: "(Yes, it's 100% free)",
+  },
   { label: 'Or sign up on the web', href: '/onboarding', variant: 'secondary', spa: true },
 ];
 
@@ -53,16 +59,41 @@ function OpenRecipePage() {
   const [activeTab, setActiveTab] = useState('ingredients');
   const [showSignupPrompt, setShowSignupPrompt] = useState(null);
 
-  // Get signup prompt message based on action
-  const getPromptMessage = () => {
-    switch(showSignupPrompt) {
-      case 'shopping': return 'Open Trackabite on your phone to create a smart shopping list.';
-      case 'cook': return isShare
-        ? 'Open this recipe in Trackabite to cook it step by step.'
-        : 'Open this recipe in Trackabite to edit it.';
-      case 'save': return 'Save this recipe to your own collection in Trackabite.';
-      case 'servings': return 'Open Trackabite on your phone to adjust servings.';
-      default: return 'Open Trackabite on your phone to continue.';
+  // Copy for the account popup: a headline naming what the reader gets, then a
+  // line saying what the app does. Named recipes read warmer than "this recipe".
+  const getPromptCopy = () => {
+    const named = recipe?.title ? `this ${recipe.title} recipe` : 'this recipe';
+    switch (showSignupPrompt) {
+      case 'shopping':
+        return {
+          headline: 'Create free shopping list',
+          body: `Open Trackabite on your phone to create a smart shopping list for ${named}.`,
+        };
+      case 'cook':
+        return isShare
+          ? {
+              headline: 'Enjoy hands-free, step-by-step cooking',
+              body: 'Open Trackabite on your phone to follow easy step-by-step instructions and cook hands-free.',
+            }
+          : {
+              headline: 'Edit this recipe your way',
+              body: 'Open Trackabite on your phone to change the ingredients, steps and photo.',
+            };
+      case 'save':
+        return {
+          headline: 'Keep this recipe in your cookbook',
+          body: `Open Trackabite on your phone to save ${named} to your collection and cook it any time.`,
+        };
+      case 'servings':
+        return {
+          headline: 'Cook for as many as you like',
+          body: 'Open Trackabite on your phone to change the servings and watch every ingredient adjust with it.',
+        };
+      default:
+        return {
+          headline: 'Get the free Trackabite app',
+          body: 'Open Trackabite on your phone to continue.',
+        };
     }
   };
 
@@ -724,17 +755,19 @@ function OpenRecipePage() {
               <p>Save recipes from anywhere and plan your week</p>
               {/* Same source of truth as the popup, so the two never drift */}
               {OVERLAY_BUTTONS.map((btn) => (
-                <button
-                  key={btn.href}
-                  className={
-                    btn.variant === 'primary'
-                      ? 'open-recipe-page__cta-btn'
-                      : 'open-recipe-page__cta-btn-secondary'
-                  }
-                  onClick={() => (btn.spa ? navigate(btn.href) : window.location.assign(btn.href))}
-                >
-                  {btn.label}
-                </button>
+                <React.Fragment key={btn.href}>
+                  <button
+                    className={
+                      btn.variant === 'primary'
+                        ? 'open-recipe-page__cta-btn'
+                        : 'open-recipe-page__cta-btn-secondary'
+                    }
+                    onClick={() => (btn.spa ? navigate(btn.href) : window.location.assign(btn.href))}
+                  >
+                    {btn.label}
+                  </button>
+                  {btn.note && <p className="open-recipe-page__free-note">{btn.note}</p>}
+                </React.Fragment>
               ))}
             </div>
           </div>
@@ -757,15 +790,18 @@ function OpenRecipePage() {
             <div className="open-recipe-page__popup-icon">
               <img src="/logo192.png" alt="Trackabite" />
             </div>
-            <p className="open-recipe-page__popup-message">{getPromptMessage()}</p>
+            <p className="open-recipe-page__popup-message">{getPromptCopy().headline}</p>
+            <p className="open-recipe-page__popup-body">{getPromptCopy().body}</p>
             {OVERLAY_BUTTONS.map((btn) => (
-              <button
-                key={btn.href}
-                className={`open-recipe-page__popup-btn-${btn.variant}`}
-                onClick={() => (btn.spa ? navigate(btn.href) : window.location.assign(btn.href))}
-              >
-                {btn.label}
-              </button>
+              <React.Fragment key={btn.href}>
+                <button
+                  className={`open-recipe-page__popup-btn-${btn.variant}`}
+                  onClick={() => (btn.spa ? navigate(btn.href) : window.location.assign(btn.href))}
+                >
+                  {btn.label}
+                </button>
+                {btn.note && <p className="open-recipe-page__free-note">{btn.note}</p>}
+              </React.Fragment>
             ))}
           </div>
         </div>

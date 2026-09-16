@@ -723,7 +723,7 @@ html.open-recipe-html body {
   letter-spacing: 0.5px;
   text-transform: uppercase;
   cursor: pointer;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   transition: filter 0.2s ease;
 }
 
@@ -734,14 +734,17 @@ html.open-recipe-html body {
 .open-recipe-page__cta-btn-secondary {
   width: 100%;
   max-width: 320px;
-  padding: 10px 24px;
+  padding: 10px 24px 4px;
   background: transparent;
-  color: var(--ta-text-muted);
+  color: var(--ta-text-2);
   border: none;
   font-family: var(--ta-body);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
 }
 
 .open-recipe-page__cta-btn-secondary:hover {
@@ -891,8 +894,26 @@ html.open-recipe-html body {
   font-weight: 800;
   letter-spacing: -0.5px;
   color: var(--ta-text);
-  margin: 0 0 24px;
+  margin: 0 0 8px;
   line-height: 1.25;
+}
+
+.open-recipe-page__popup-body {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--ta-text-2);
+  margin: 0 0 24px;
+}
+
+/* "(Yes, it's 100% free)" — quiet reassurance directly under the lime button,
+   in both the popup and the prompt at the foot of the page. */
+.open-recipe-page__free-note {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ta-text-muted);
+  margin: 0 0 14px;
+  text-align: center;
 }
 
 /* Lime pill, the app's primary action */
@@ -909,7 +930,7 @@ html.open-recipe-html body {
   letter-spacing: 0.5px;
   text-transform: uppercase;
   cursor: pointer;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   box-shadow: 0 4px 8px rgba(76, 100, 0, 0.2);
   transition: filter 0.2s ease;
 }
@@ -920,14 +941,17 @@ html.open-recipe-html body {
 
 .open-recipe-page__popup-btn-secondary {
   width: 100%;
-  padding: 12px 24px;
+  padding: 10px 24px 4px;
   background: transparent;
-  color: var(--ta-text-muted);
+  color: var(--ta-text-2);
   border: none;
   font-family: var(--ta-body);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
 }
 
 .open-recipe-page__popup-btn-secondary:hover {
