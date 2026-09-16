@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import './OpenRecipePage.css';
 import { getIngredientIconUrl } from '../assets/icons/ingredients';
 import { highlightInstructions } from '../utils/highlightInstructions';
+import trackie from '../assets/images/Logo.png';
 import { getStepTexts, buildShareMeta, SITE_ORIGIN } from '../utils/recipeSteps';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -564,7 +565,7 @@ function OpenRecipePage() {
         {/* Header */}
         <div className="open-recipe-page__header">
           <Link to="/" className="open-recipe-page__logo" aria-label="Go to the Trackabite home page">
-            <img src="/logo192.png" alt="" />
+            <img src={trackie} alt="" />
             <span>Trackabite</span>
           </Link>
         </div>
@@ -788,7 +789,7 @@ function OpenRecipePage() {
               </svg>
             </button>
             <div className="open-recipe-page__popup-icon">
-              <img src="/logo192.png" alt="Trackabite" />
+              <img src={trackie} alt="" />
             </div>
             <p className="open-recipe-page__popup-message">{getPromptCopy().headline}</p>
             <p className="open-recipe-page__popup-body">{getPromptCopy().body}</p>
