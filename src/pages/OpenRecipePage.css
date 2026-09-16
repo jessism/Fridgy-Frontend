@@ -1,8 +1,42 @@
-/* OpenRecipePage - Matches RecipeDetailModal styling exactly */
+/* OpenRecipePage — matches the app's recipe screen (Lime theme).
+ *
+ * Values mirror `trackabite-mobile/constants/themes/default.ts` and the
+ * `createStyles` block in `app/(tabs)/recipe/[id].tsx`. When the app's recipe
+ * screen changes, change this file with it. Manrope is the body face and
+ * Epilogue the display face, same as the app and the marketing site.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 .open-recipe-page {
+  /* Lime theme tokens */
+  --ta-primary: #4fcf61;
+  --ta-primary-dark: #3db850;
+  --ta-accent: #c5fe01;
+  --ta-on-accent: #384b00;
+  --ta-accent-deep: #4c6400;
+
+  --ta-bg: #f8f7f0;
+  --ta-bg-2: #f2f1ea;
+  --ta-surface: #ffffff;
+  --ta-divider: #e9e9e1;
+  --ta-border: #ddddd5;
+
+  --ta-text: #2e2f2b;
+  --ta-text-2: #5b5c57;
+  --ta-text-muted: #777772;
+
+  --ta-body: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ta-display: 'Epilogue', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* The app is a phone; keeping one narrow column makes the web page read as
+     the same screen instead of a stretched desktop version of it. */
+  --ta-column: 520px;
+
   min-height: 100vh;
-  background: white;
+  background: var(--ta-bg);
+  font-family: var(--ta-body);
+  color: var(--ta-text);
+  -webkit-font-smoothing: antialiased;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -10,17 +44,17 @@
   overflow-y: auto;
 }
 
-/* Full screen container */
 .open-recipe-page__modal {
-  background: white;
-  max-width: 1000px;
+  background: transparent;
+  max-width: var(--ta-column);
   width: 100%;
   margin: 0 auto;
 }
 
-/* Header */
+/* Header ------------------------------------------------------------------ */
+
 .open-recipe-page__header {
-  padding: 0.75rem 1rem 0.5rem 1rem;
+  padding: 12px 16px 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -42,37 +76,36 @@
 }
 
 .open-recipe-page__logo span {
+  font-family: var(--ta-display);
   font-size: 18px;
-  font-weight: 600;
-  color: #1a1a1a;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--ta-text);
 }
 
-/* Content */
+/* Content ----------------------------------------------------------------- */
+
 .open-recipe-page__content {
-  padding: 1rem 2rem 2rem 2rem;
-  padding-bottom: 60px;
+  padding: 0 16px 60px;
 }
 
-/* Layout */
 .open-recipe-page__layout {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
   position: relative;
-  padding-top: 0;
   align-items: stretch;
 }
 
-/* Recipe Image - Square, centered */
+/* Hero image — square, full column width, same as the app */
 .open-recipe-page__image-container {
-  width: 90%;
-  max-width: 500px;
-  height: auto;
+  width: 100%;
+  max-width: none;
   aspect-ratio: 1;
-  margin: 0 auto 1rem;
+  margin: 0 0 16px;
   overflow: hidden;
   position: relative;
-  border-radius: 12px;
+  border-radius: 16px;
+  background: var(--ta-bg-2);
 }
 
 .open-recipe-page__main-image {
@@ -82,335 +115,439 @@
   display: block;
 }
 
-/* Recipe Title */
+/* Title and meta ---------------------------------------------------------- */
+
 .open-recipe-page__title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #1f2937;
-  line-height: 1.2;
-  margin: 0 auto 0.5rem;
+  font-family: var(--ta-display);
+  font-size: clamp(28px, 8vw, 36px);
+  font-weight: 900;
+  color: var(--ta-text);
+  line-height: 1.06;
+  letter-spacing: -1.5px;
+  margin: 0 0 16px;
   text-align: left;
-  width: 90%;
-  max-width: 500px;
+  width: 100%;
+  max-width: none;
 }
 
-/* Meta Info Section */
 .open-recipe-page__meta-info {
   text-align: left;
   padding: 0;
-  width: 90%;
-  max-width: 500px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
 }
 
 .open-recipe-page__description {
-  margin-bottom: 1rem;
+  margin-bottom: 8px;
 }
 
 .open-recipe-page__description p {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: #64748b;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--ta-text-2);
   margin: 0;
   text-align: left;
 }
 
-/* Source Attribution */
+/* Source attribution — the app's deep olive, not the button green */
 .open-recipe-page__attribution {
-  margin: 1rem 0;
+  margin: 12px 0 0;
   padding: 0;
   text-align: left;
 }
 
 .open-recipe-page__attribution-link {
-  color: #4fcf61;
+  color: var(--ta-accent-deep);
   text-decoration: none;
-  font-size: 0.95rem;
+  font-size: 13px;
   font-weight: 600;
+  letter-spacing: 0.3px;
   display: inline-block;
-  padding: 0.5rem 0;
+  padding: 4px 0;
 }
 
 .open-recipe-page__attribution-link:hover {
   text-decoration: underline;
-  color: #3da84a;
 }
 
-/* Info Text (time, attributes) */
+.open-recipe-page__shared-by {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ta-text-muted);
+  margin-top: 2px;
+}
+
 .open-recipe-page__info-text {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 1rem;
+  gap: 12px;
+  margin-top: 16px;
   justify-content: flex-start;
   align-items: center;
-  color: #6b7280;
-  font-size: 0.9rem;
-  font-weight: 400;
+  color: var(--ta-text-2);
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .open-recipe-page__info-item {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 4px;
 }
 
 .open-recipe-page__info-item svg {
-  color: #9ca3af;
+  color: var(--ta-text-muted);
 }
 
 .open-recipe-page__info-item span {
   text-transform: capitalize;
-  color: #6b7280;
+  color: var(--ta-text-2);
 }
 
-/* Tabs Container */
+/* Action buttons — the app's dark pills ----------------------------------- */
+
+.open-recipe-page__action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+  margin-bottom: 4px;
+  justify-content: stretch;
+}
+
+.open-recipe-page__action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 16px;
+  background: var(--ta-text);
+  color: #ffffff;
+  border: none;
+  border-radius: 24px;
+  font-family: var(--ta-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+  flex: 1 1 140px;
+  max-width: none;
+}
+
+.open-recipe-page__action-btn:hover {
+  background: #1d1e1b;
+}
+
+.open-recipe-page__action-btn:active {
+  transform: scale(0.98);
+}
+
+.open-recipe-page__action-btn svg {
+  flex-shrink: 0;
+}
+
+/* Tabs — underline, lime indicator, same as the app ----------------------- */
+
 .open-recipe-page__tabs-container {
-  margin-top: 2rem;
+  margin-top: 24px;
 }
 
-/* Tab Navigation - Pill style */
 .open-recipe-page__tabs {
   display: flex;
-  background: #f3f4f6;
-  border-radius: 12px;
-  padding: 4px;
-  gap: 4px;
-  margin-bottom: 1.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--ta-border);
+  border-radius: 0;
+  padding: 0 8px;
+  gap: 0;
+  margin-bottom: 16px;
 }
 
 .open-recipe-page__tab {
   flex: 1;
-  padding: 10px 16px;
+  padding: 12px 8px;
   background: transparent;
   border: none;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #6b7280;
+  border-bottom: 4px solid transparent;
+  margin-bottom: -1px;
+  border-radius: 0;
+  font-family: var(--ta-display);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--ta-text-muted);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease, border-color 0.2s ease;
 }
 
 .open-recipe-page__tab.active {
-  background: white;
-  color: #111827;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: transparent;
+  box-shadow: none;
+  color: var(--ta-text);
+  border-bottom-color: var(--ta-accent);
 }
 
 .open-recipe-page__tab:hover:not(.active) {
-  color: #374151;
+  color: var(--ta-text-2);
 }
 
-/* Tab Content */
+/* The app has no card behind the tab body */
 .open-recipe-page__tab-content {
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 1.5rem;
-  padding-bottom: 40px;
-  min-height: 300px;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  min-height: 200px;
 }
 
-/* Section Header */
+/* Section headers --------------------------------------------------------- */
+
 .open-recipe-page__section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0;
+  margin-bottom: 16px;
+  padding: 0 8px;
 }
 
 .open-recipe-page__section-title {
-  font-size: 1.125rem;
-  font-weight: 550;
-  color: #1f2937;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
+  font-family: var(--ta-display);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--ta-text);
+  margin: 0 0 16px;
+  padding: 0 8px;
 }
 
 .open-recipe-page__section-header .open-recipe-page__section-title {
   margin-bottom: 0;
+  padding: 0;
 }
 
 .open-recipe-page__servings {
-  font-size: 0.9rem;
+  font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: var(--ta-text);
   white-space: nowrap;
 }
 
-/* Ingredients List */
+/* Servings stepper — circular outline buttons, as in the app */
+.open-recipe-page__servings-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.open-recipe-page__serving-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--ta-text-muted);
+  background: transparent;
+  color: var(--ta-text);
+  font-family: var(--ta-body);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.open-recipe-page__serving-btn:hover {
+  background: var(--ta-bg-2);
+}
+
+.open-recipe-page__serving-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ta-text);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Ingredients ------------------------------------------------------------- */
+
 .open-recipe-page__ingredients-list {
   display: flex;
   flex-direction: column;
-  background: white;
-  border-radius: 12px;
+  background: transparent;
+  border-radius: 0;
 }
 
 .open-recipe-page__ingredient-item {
   display: flex;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
+  gap: 12px;
+  padding: 12px 4px;
   align-items: center;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--ta-divider);
 }
 
 .open-recipe-page__ingredient-item:last-child {
   border-bottom: none;
 }
 
-/* Ingredient Icon */
 .open-recipe-page__ingredient-icon {
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f1f5f9;
+  background: var(--ta-border);
   border-radius: 50%;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .open-recipe-page__ingredient-icon-img {
-  width: 65%;
-  height: 65%;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
 }
 
 .open-recipe-page__ingredient-icon-fallback {
-  font-size: 1.2rem;
+  font-size: 20px;
   line-height: 1;
 }
 
-.open-recipe-page__ingredient-amount {
-  font-weight: 700;
-  color: #4fcf61;
-  font-size: 0.9rem;
-  min-width: 2.5rem;
-  text-align: right;
-}
-
-.open-recipe-page__ingredient-unit {
-  font-size: 0.8rem;
-  color: #64748b;
-  min-width: 2rem;
-}
-
+/* Name on the left in extrabold, measurement right-aligned and muted —
+   the app's arrangement, not amount-first. */
 .open-recipe-page__ingredient-name {
-  font-size: 0.9rem;
-  color: #1f2937;
-  font-weight: 600;
-  text-transform: capitalize;
   flex: 1;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ta-text);
+  text-transform: none;
 }
 
-/* Instructions */
+.open-recipe-page__ingredient-measure {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ta-text-muted);
+  min-width: 70px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Instructions ------------------------------------------------------------ */
+
 .open-recipe-page__instructions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 8px;
   overflow-y: visible;
 }
 
+/* Flat rows, no cards or shadows — matches the app */
 .open-recipe-page__instruction-step {
-  margin-bottom: 1rem;
-  padding: 1rem;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
   display: flex;
   align-items: flex-start;
   gap: 12px;
-}
-
-.open-recipe-page__instruction-step:last-child {
-  margin-bottom: 0;
 }
 
 .open-recipe-page__step-number {
   width: 28px;
   height: 28px;
   min-width: 28px;
-  background: #4fcf61;
-  color: white;
+  background: var(--ta-accent);
+  color: #000000;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   flex-shrink: 0;
 }
 
 .open-recipe-page__step-text {
-  color: #444444;
-  line-height: 1.6;
-  font-size: 0.9rem;
+  color: var(--ta-text-2);
+  line-height: 22px;
+  font-size: 15px;
+  font-weight: 500;
   flex: 1;
 }
 
-/* Bold highlighting for ingredients/measurements in instructions */
 .open-recipe-page__step-text strong {
-  font-weight: 700;
-  color: #222222;
+  font-weight: 800;
+  color: var(--ta-text);
 }
 
-/* No Content State */
 .open-recipe-page__no-content {
   text-align: center;
-  color: #94a3b8;
-  font-style: italic;
-  padding: 2rem;
+  color: var(--ta-text-muted);
+  font-size: 14px;
+  padding: 32px 0;
 }
 
-/* Nutrition Info */
+/* Nutrition --------------------------------------------------------------- */
+
 .open-recipe-page__nutrition-info {
-  padding: 1.5rem;
-  max-height: 450px;
-  overflow-y: auto;
+  padding: 0 8px;
+  max-height: none;
+  overflow-y: visible;
 }
 
 .open-recipe-page__nutrition-estimate {
-  font-size: 0.8rem;
-  color: #999;
-  margin: 0 0 0.5rem 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ta-text-muted);
+  margin: 0 0 12px;
 }
 
-/* Caloric Container - Side by Side */
 .open-recipe-page__caloric-container {
   display: flex;
-  align-items: flex-start;
-  gap: 2rem;
-  margin-bottom: 1.5rem;
-  padding: 1.5rem;
-  background: #f9fafb;
-  border-radius: 8px;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--ta-bg-2);
+  border: 1px solid var(--ta-divider);
+  border-radius: 16px;
 }
 
+/* No divider rule and never stacked — the app keeps these side by side */
 .open-recipe-page__calories-section {
-  min-width: 100px;
+  min-width: 84px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  text-align: left;
-  padding-right: 1rem;
-  border-right: 1px solid #e5e7eb;
+  text-align: center;
+  padding-right: 16px;
+  flex-shrink: 0;
 }
 
 .open-recipe-page__calories-number {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #1f2937;
+  font-family: var(--ta-display);
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--ta-text);
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.5px;
 }
 
 .open-recipe-page__calories-label {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin-top: 0.25rem;
-  text-transform: lowercase;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--ta-text-muted);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-/* Caloric Breakdown */
 .open-recipe-page__breakdown {
   flex: 1;
   padding: 0;
@@ -418,179 +555,200 @@
   margin-bottom: 0;
 }
 
+/* The app shows the macro rows with no heading above them */
 .open-recipe-page__breakdown-title {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #374151;
-  margin: 0 0 1rem 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  display: none;
 }
 
 .open-recipe-page__breakdown-bars {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 8px;
 }
 
 .open-recipe-page__breakdown-item {
-  display: grid;
-  grid-template-columns: 60px 80px 40px;
+  display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 8px;
 }
 
 .open-recipe-page__breakdown-label {
-  font-size: 0.813rem;
-  color: #4b5563;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ta-text-2);
+  width: 48px;
+  flex-shrink: 0;
   text-align: left;
 }
 
 .open-recipe-page__breakdown-bar-container {
-  background: #e5e7eb;
-  height: 20px;
-  border-radius: 10px;
+  flex: 1;
+  width: auto;
+  background: var(--ta-bg-2);
+  height: 14px;
+  border-radius: 7px;
   overflow: hidden;
   position: relative;
-  width: 80px;
 }
 
 .open-recipe-page__breakdown-bar {
   height: 100%;
-  border-radius: 10px;
+  border-radius: 7px;
   transition: width 0.5s ease;
 }
 
+/* Same three gradients the app uses */
 .open-recipe-page__breakdown-bar--protein {
-  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  background: linear-gradient(90deg, #4285f4, #93b4f8);
 }
 
 .open-recipe-page__breakdown-bar--carbs {
-  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  background: linear-gradient(90deg, #fbbc04, #fdd663);
 }
 
 .open-recipe-page__breakdown-bar--fat {
-  background: linear-gradient(90deg, #ef4444, #f87171);
+  background: linear-gradient(90deg, #ea4335, #f28b82);
 }
 
 .open-recipe-page__breakdown-percent {
-  font-size: 0.813rem;
-  font-weight: 500;
-  color: #374151;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ta-text-2);
+  width: 32px;
+  flex-shrink: 0;
+  text-align: right;
 }
 
-/* Nutrition Header */
 .open-recipe-page__nutrition-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 12px;
 }
 
 .open-recipe-page__nutrition-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #1f2937;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ta-text-2);
   margin: 0;
 }
 
-/* Nutrition Table */
 .open-recipe-page__nutrition-table {
   width: 100%;
-  margin-bottom: 2rem;
+  margin-bottom: 24px;
+  background: var(--ta-bg-2);
+  border: 1px solid var(--ta-divider);
+  border-radius: 16px;
+  padding: 0 16px;
+  overflow: hidden;
 }
 
 .open-recipe-page__nutrition-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--ta-divider);
 }
 
 .open-recipe-page__nutrition-row:first-child {
-  border-top: 1px solid #e5e7eb;
+  border-top: none;
+}
+
+.open-recipe-page__nutrition-row:last-child {
+  border-bottom: none;
 }
 
 .open-recipe-page__nutrition-label {
-  font-size: 0.95rem;
-  color: #374151;
-  font-weight: 400;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--ta-text);
 }
 
 .open-recipe-page__nutrition-value {
-  font-size: 0.95rem;
-  color: #1f2937;
+  font-size: 15px;
   font-weight: 500;
+  color: var(--ta-text-2);
   text-align: right;
 }
 
-/* CTA Section */
+/* Bottom call to action --------------------------------------------------- */
+
 .open-recipe-page__cta {
-  padding: 24px 16px 32px;
+  padding: 24px 8px 8px;
   text-align: center;
-  background: linear-gradient(180deg, transparent 0%, #f0fdf0 100%);
-  border-top: 1px solid #eee;
-  margin-top: 2rem;
+  background: transparent;
+  border-top: 1px solid var(--ta-divider);
+  margin-top: 32px;
 }
 
 .open-recipe-page__cta p {
-  font-size: 16px;
-  color: #555;
+  font-family: var(--ta-display);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--ta-text);
   margin: 0 0 16px;
 }
 
 .open-recipe-page__cta-btn {
   width: 100%;
-  max-width: 300px;
+  max-width: 320px;
   padding: 16px 24px;
-  background: #4fcf61;
-  color: white;
+  background: var(--ta-accent);
+  color: var(--ta-on-accent);
   border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: 24px;
+  font-family: var(--ta-body);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   cursor: pointer;
   margin-bottom: 12px;
-  transition: background 0.2s ease;
+  transition: filter 0.2s ease;
 }
 
 .open-recipe-page__cta-btn:hover {
-  background: #3db850;
+  filter: brightness(0.95);
 }
 
 .open-recipe-page__cta-btn-secondary {
   width: 100%;
-  max-width: 300px;
-  padding: 12px 24px;
+  max-width: 320px;
+  padding: 10px 24px;
   background: transparent;
-  color: #4fcf61;
+  color: var(--ta-text-muted);
   border: none;
+  font-family: var(--ta-body);
   font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
 }
 
 .open-recipe-page__cta-btn-secondary:hover {
-  text-decoration: underline;
+  color: var(--ta-text);
 }
 
-/* Loading State */
+/* Loading and error ------------------------------------------------------- */
+
 .open-recipe-page__loading {
   text-align: center;
-  padding: 4rem;
+  padding: 64px 24px;
   width: 100%;
 }
 
 .open-recipe-page__loading p {
-  color: #666;
+  color: var(--ta-text-muted);
+  font-size: 14px;
   margin: 0;
 }
 
 .open-recipe-page__spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid #f1f5f9;
-  border-top: 4px solid #4fcf61;
+  width: 44px;
+  height: 44px;
+  border: 4px solid var(--ta-divider);
+  border-top: 4px solid var(--ta-primary);
   border-radius: 50%;
   animation: openRecipeSpin 1s linear infinite;
-  margin: 0 auto 1.5rem;
+  margin: 0 auto 20px;
 }
 
 @keyframes openRecipeSpin {
@@ -599,236 +757,68 @@
   }
 }
 
-/* Error State */
 .open-recipe-page__error {
   text-align: center;
-  padding: 4rem;
+  padding: 64px 24px;
   width: 100%;
 }
 
 .open-recipe-page__error h2 {
-  font-size: 20px;
-  color: #dc2626;
+  font-family: var(--ta-display);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--ta-text);
   margin: 0 0 8px;
 }
 
 .open-recipe-page__error p {
-  color: #666;
+  color: var(--ta-text-2);
+  font-size: 15px;
+  line-height: 22px;
   margin: 0 0 24px;
 }
 
 .open-recipe-page__error button {
-  padding: 12px 24px;
-  background: #4fcf61;
-  color: white;
+  padding: 14px 28px;
+  background: var(--ta-text);
+  color: #ffffff;
   border: none;
-  border-radius: 10px;
+  border-radius: 24px;
+  font-family: var(--ta-body);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  margin: 0 4px;
 }
 
-/* Mobile Responsive */
-@media (max-width: 768px) {
-  .open-recipe-page {
-    padding: 0;
-  }
-
-  .open-recipe-page__modal {
-    max-height: none;
-  }
-
-  .open-recipe-page__content {
-    padding: 1rem;
-    padding-bottom: 60px;
-  }
-
-  .open-recipe-page__image-container {
-    width: 95%;
-    max-width: none;
-    height: auto;
-    aspect-ratio: 1;
-    margin: 0 auto 1rem;
-  }
-
-  .open-recipe-page__title {
-    font-size: 1.8rem;
-    text-align: left;
-    width: 95%;
-    max-width: none;
-  }
-
-  .open-recipe-page__meta-info {
-    padding: 0;
-    width: 95%;
-    max-width: none;
-  }
-
-  .open-recipe-page__description p {
-    font-size: 0.9rem;
-  }
-
-  .open-recipe-page__tabs-container {
-    margin-top: 1.5rem;
-  }
-
-  .open-recipe-page__tab {
-    font-size: 0.85rem;
-    padding: 8px 12px;
-  }
-
-  .open-recipe-page__tab-content {
-    padding: 1rem;
-    padding-bottom: 40px;
-  }
-
-  .open-recipe-page__caloric-container {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .open-recipe-page__calories-section {
-    border-right: none;
-    border-bottom: 1px solid #e5e7eb;
-    padding-right: 0;
-    padding-bottom: 1rem;
-    width: 100%;
-  }
-
-  .open-recipe-page__breakdown {
-    width: 100%;
-  }
+.open-recipe-page__error button:hover {
+  background: #1d1e1b;
 }
 
-@media (max-width: 480px) {
-  .open-recipe-page__title {
-    font-size: 1.5rem;
-  }
+/* Account popup — modelled on the app's upsell sheet ---------------------- */
 
-  .open-recipe-page__ingredient-item {
-    padding: 0.625rem 0.75rem;
-    gap: 0.5rem;
-  }
-
-  .open-recipe-page__ingredient-icon {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-  }
-
-  .open-recipe-page__instruction-step {
-    padding: 0.75rem;
-  }
-
-  .open-recipe-page__breakdown-item {
-    grid-template-columns: 50px 60px 35px;
-    gap: 0.5rem;
-  }
-
-  .open-recipe-page__breakdown-bar-container {
-    width: 60px;
-  }
-}
-
-/* Action Buttons - Black pill style */
-.open-recipe-page__action-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-  justify-content: center;
-}
-
-/* Share pages: "Shared by {first name}" under the source attribution */
-.open-recipe-page__shared-by {
-  font-size: 0.85rem;
-  color: #6b7280;
-  margin-top: 0.25rem;
-}
-
-.open-recipe-page__action-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.5rem;
-  background: #000000;
-  color: white;
-  border: none;
-  border-radius: 50px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  flex: 1 1 140px;
-  max-width: 180px;
-}
-
-.open-recipe-page__action-btn:hover {
-  background: #1f2937;
-  transform: scale(1.02);
-}
-
-.open-recipe-page__action-btn svg {
-  flex-shrink: 0;
-}
-
-/* Servings Control */
-.open-recipe-page__servings-control {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.open-recipe-page__serving-btn {
-  background: transparent;
-  border: none;
-  color: #374151;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  line-height: 1;
-  transition: color 0.2s ease;
-}
-
-.open-recipe-page__serving-btn:hover {
-  color: #111827;
-}
-
-.open-recipe-page__serving-value {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #374151;
-  text-align: center;
-  white-space: nowrap;
-}
-
-/* Signup Prompt Popup */
 .open-recipe-page__signup-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  inset: 0;
+  background-color: rgba(46, 47, 43, 0.55);
   backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  padding: 1rem;
+  padding: 16px;
 }
 
 .open-recipe-page__signup-popup {
-  background: white;
-  border-radius: 20px;
-  padding: 2rem;
-  max-width: 340px;
+  background: var(--ta-surface);
+  border-radius: 24px;
+  padding: 32px 24px 24px;
+  max-width: 380px;
   width: 100%;
   text-align: center;
   position: relative;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(46, 47, 43, 0.25);
   animation: popupSlideIn 0.3s ease;
 }
 
@@ -849,7 +839,7 @@
   right: 12px;
   background: transparent;
   border: none;
-  color: #9ca3af;
+  color: var(--ta-text-muted);
   cursor: pointer;
   padding: 4px;
   display: flex;
@@ -860,78 +850,119 @@
 }
 
 .open-recipe-page__popup-close:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--ta-bg-2);
+  color: var(--ta-text);
 }
 
 .open-recipe-page__popup-icon {
-  margin-bottom: 1rem;
+  margin-bottom: 16px;
 }
 
 .open-recipe-page__popup-icon img {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
 }
 
 .open-recipe-page__popup-message {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 1.5rem;
-  line-height: 1.4;
+  font-family: var(--ta-display);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--ta-text);
+  margin: 0 0 24px;
+  line-height: 1.25;
 }
 
+/* Lime pill, the app's primary action */
 .open-recipe-page__popup-btn-primary {
   width: 100%;
-  padding: 14px 24px;
-  background: #4fcf61;
-  color: white;
+  padding: 18px 24px;
+  background: var(--ta-accent);
+  color: var(--ta-on-accent);
   border: none;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: 24px;
+  font-family: var(--ta-body);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   cursor: pointer;
-  margin-bottom: 0.75rem;
-  transition: background 0.2s ease;
+  margin-bottom: 8px;
+  box-shadow: 0 4px 8px rgba(76, 100, 0, 0.2);
+  transition: filter 0.2s ease;
 }
 
 .open-recipe-page__popup-btn-primary:hover {
-  background: #3db850;
+  filter: brightness(0.95);
 }
 
 .open-recipe-page__popup-btn-secondary {
   width: 100%;
-  padding: 10px 24px;
+  padding: 12px 24px;
   background: transparent;
-  color: #6b7280;
+  color: var(--ta-text-muted);
   border: none;
-  font-size: 0.9rem;
+  font-family: var(--ta-body);
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
 }
 
 .open-recipe-page__popup-btn-secondary:hover {
-  color: #374151;
+  color: var(--ta-text);
 }
 
-/* Mobile adjustments for action buttons */
-@media (max-width: 480px) {
-  .open-recipe-page__action-buttons {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+/* Responsive -------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .open-recipe-page__content {
+    padding: 0 16px 60px;
   }
 
-  /* Two per row; a third (share pages) wraps to a full-width row */
+  .open-recipe-page__tabs-container {
+    margin-top: 20px;
+  }
+
+  .open-recipe-page__breakdown {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .open-recipe-page__ingredient-item {
+    gap: 10px;
+  }
+
+  .open-recipe-page__ingredient-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+  }
+
+  .open-recipe-page__ingredient-icon-img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .open-recipe-page__ingredient-measure {
+    min-width: 62px;
+  }
+
+  /* Two pills per row; a third wraps to a full-width row of its own */
   .open-recipe-page__action-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
-    flex: 1 1 calc(50% - 0.25rem);
-    max-width: none;
+    padding: 13px 12px;
+    font-size: 14px;
+    flex: 1 1 calc(50% - 6px);
   }
 
   .open-recipe-page__signup-popup {
-    padding: 1.5rem;
-    margin: 0 0.5rem;
+    padding: 28px 20px 20px;
+    margin: 0 4px;
+  }
+
+  .open-recipe-page__tab {
+    font-size: 13px;
+    letter-spacing: 0.3px;
   }
 }

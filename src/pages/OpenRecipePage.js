@@ -212,9 +212,11 @@ function OpenRecipePage() {
                !sentence.includes('price');
       });
     if (sentences.length > 0) {
-      let firstSentence = sentences[0].trim();
+      const firstSentence = sentences[0].trim();
+      // A truncated sentence ends in an ellipsis and nothing else; appending a
+      // full stop as well is what produced "coconu...." on shared pages.
       if (firstSentence.length > 100) {
-        firstSentence = firstSentence.substring(0, 97) + '...';
+        return firstSentence.substring(0, 97) + '\u2026';
       }
       return firstSentence + '.';
     }
@@ -257,11 +259,12 @@ function OpenRecipePage() {
                   <span className="open-recipe-page__ingredient-icon-fallback">🥘</span>
                 )}
               </div>
-              <span className="open-recipe-page__ingredient-amount">
-                {formatAmount(ingredient.amount)}
-              </span>
-              <span className="open-recipe-page__ingredient-unit">{ingredient.unit || ''}</span>
+              {/* Name first, measurement right-aligned and muted — the app's
+                  arrangement, rather than leading with the amount. */}
               <span className="open-recipe-page__ingredient-name">{ingredient.name}</span>
+              <span className="open-recipe-page__ingredient-measure">
+                {[formatAmount(ingredient.amount), ingredient.unit].filter(Boolean).join(' ')}
+              </span>
             </div>
           );
         })}
@@ -711,19 +714,21 @@ function OpenRecipePage() {
 
             {/* CTA Section */}
             <div className="open-recipe-page__cta">
-              <p>Want to save recipes from anywhere and plan your meals?</p>
-              <button
-                className="open-recipe-page__cta-btn"
-                onClick={() => navigate('/onboarding')}
-              >
-                Get Started Free
-              </button>
-              <button
-                className="open-recipe-page__cta-btn-secondary"
-                onClick={() => navigate('/signin')}
-              >
-                Already have an account? Create meal plan and smart shopping list from this recipe by opening it in app
-              </button>
+              <p>Save recipes from anywhere and plan your week</p>
+              {/* Same source of truth as the popup, so the two never drift */}
+              {OVERLAY_BUTTONS.map((btn) => (
+                <button
+                  key={btn.href}
+                  className={
+                    btn.variant === 'primary'
+                      ? 'open-recipe-page__cta-btn'
+                      : 'open-recipe-page__cta-btn-secondary'
+                  }
+                  onClick={() => (btn.spa ? navigate(btn.href) : window.location.assign(btn.href))}
+                >
+                  {btn.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
