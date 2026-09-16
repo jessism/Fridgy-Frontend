@@ -44,6 +44,15 @@
   overflow-y: auto;
 }
 
+/* Overscroll canvas. Mirrors --ta-bg, but has to be declared on <html>: the
+   token lives on .open-recipe-page and never reaches the canvas, so
+   rubber-band scrolling would otherwise expose white. The class is added and
+   removed by the component, so no other page is affected. */
+html.open-recipe-html,
+html.open-recipe-html body {
+  background-color: #f8f7f0;
+}
+
 .open-recipe-page__modal {
   background: transparent;
   max-width: var(--ta-column);
@@ -54,7 +63,7 @@
 /* Header ------------------------------------------------------------------ */
 
 .open-recipe-page__header {
-  padding: 12px 16px 8px;
+  padding: 14px 16px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -64,9 +73,16 @@
 }
 
 .open-recipe-page__logo {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
+  text-decoration: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.open-recipe-page__logo:hover span {
+  color: var(--ta-accent-deep);
 }
 
 .open-recipe-page__logo img {

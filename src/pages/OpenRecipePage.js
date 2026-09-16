@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import './OpenRecipePage.css';
 import { getIngredientIconUrl } from '../assets/icons/ingredients';
@@ -127,6 +127,13 @@ function OpenRecipePage() {
     fetchRecipe();
     return () => { cancelled = true; };
   }, [id, slug, isShare, retryKey]);
+
+  // The page's warm ground has to reach the document canvas as well, or
+  // rubber-band scrolling past the top or bottom on iOS shows white behind it.
+  useEffect(() => {
+    document.documentElement.classList.add('open-recipe-html');
+    return () => document.documentElement.classList.remove('open-recipe-html');
+  }, []);
 
   // Helper function to check if URL needs proxying
   const needsProxy = (url) => {
@@ -525,10 +532,10 @@ function OpenRecipePage() {
       <div className="open-recipe-page__modal">
         {/* Header */}
         <div className="open-recipe-page__header">
-          <div className="open-recipe-page__logo">
-            <img src="/logo192.png" alt="Trackabite" />
+          <Link to="/" className="open-recipe-page__logo" aria-label="Go to the Trackabite home page">
+            <img src="/logo192.png" alt="" />
             <span>Trackabite</span>
-          </div>
+          </Link>
         </div>
 
         {/* Content */}
