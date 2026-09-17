@@ -1,0 +1,67 @@
+.ob-btn {
+  width: 100%;
+  min-height: 56px;
+  padding: var(--ob-s-4);
+  border-radius: var(--ob-r-full);
+  border: none;
+  font-family: var(--ob-font-body);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.ob-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.ob-btn:not(:disabled):active {
+  opacity: 0.95;
+  transform: scale(0.98);
+}
+
+.ob-btn:focus-visible {
+  outline: 2px solid var(--ob-accent-deep);
+  outline-offset: 3px;
+}
+
+.ob-btn--primary {
+  background: var(--ob-accent);
+  color: var(--ob-on-accent);
+  box-shadow: var(--ob-shadow-accent);
+}
+
+.ob-btn--secondary {
+  background: var(--ob-bg);
+  color: var(--ob-text);
+  border: 2px solid var(--ob-border);
+}
+
+.ob-btn--ghost {
+  background: transparent;
+  color: var(--ob-text);
+}
+
+.ob-btn__spinner {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: obSpin 0.7s linear infinite;
+}
+
+@keyframes obSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ob-btn { transition: none; }
+  .ob-btn__spinner { animation-duration: 1.6s; }
+}

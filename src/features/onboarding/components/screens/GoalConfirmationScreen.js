@@ -1,64 +1,45 @@
 import React, { useEffect } from 'react';
-import { trackOnboardingStepViewed } from '../../../../utils/onboardingTracking';
-import './ScreenStyles.css';
+import { CheckCircle2 } from 'lucide-react';
+import { OnboardingLayout, OnboardingButton, OnboardingVideo } from '../shared';
+import {
+  GOAL_CONFIRMATION_MESSAGES,
+  VIDEOS,
+  STEPS,
+} from '../../constants/onboardingConstants';
+import './GoalConfirmationScreen.css';
 
-const goalMessages = {
-  remember_inventory: {
-    message: "Trackabite keeps track of what's in your fridge and pantry, so you always know what you already have — no more guessing or duplicate buys."
-  },
-  organize_recipes: {
-    message: "Trackabite lets you save, organize, and edit all your recipes in one place — easy to find whenever you need them."
-  },
-  meal_plans: {
-    message: "Trackabite helps you plan meals around what you already have, so your week feels more organized with less effort."
-  },
-  shop_smarter: {
-    message: "Trackabite builds smarter grocery lists based on what you need — so shopping is faster and more intentional."
-  },
-  reduce_waste: {
-    message: "Trackabite reminds you before food goes bad and helps you use it in time — so less food (and money) goes to waste."
-  }
-};
+const GoalConfirmationScreen = ({ data, onNext, onBack, progress, jumpToStep }) => {
+  const copy = GOAL_CONFIRMATION_MESSAGES[data.primaryGoal];
 
-const GoalConfirmationScreen = ({ data, onNext, onBack }) => {
+  // Reachable by a manual jump or a stale draft; send them back to pick one.
   useEffect(() => {
-    trackOnboardingStepViewed(3);
-  }, []);
+    if (!copy && jumpToStep) jumpToStep(STEPS.GOAL);
+  }, [copy, jumpToStep]);
 
-  const goalData = goalMessages[data.primaryGoal] || goalMessages.remember_inventory;
+  if (!copy) return null;
 
   return (
-    <div className="onboarding-screen">
-      <div className="onboarding-screen__content" style={{ justifyContent: 'center', textAlign: 'center' }}>
-        <h1 className="onboarding-screen__title" style={{
-          fontSize: '1.75rem',
-          fontWeight: '600',
-          marginBottom: '24px',
-          color: '#1f2937'
-        }}>
-          You're in the right place
-        </h1>
-
-        <p className="onboarding-screen__subtitle" style={{
-          fontSize: '1.05rem',
-          lineHeight: '1.7',
-          color: '#6b7280',
-          maxWidth: '320px',
-          margin: '0 auto'
-        }}>
-          {goalData.message}
-        </p>
-
-        <div className="onboarding-screen__actions" style={{ marginTop: '48px' }}>
-          <button
-            className="onboarding-btn onboarding-btn--primary onboarding-btn--large"
-            onClick={onNext}
-          >
-            Next
-          </button>
+    <OnboardingLayout showBack onBack={onBack} progress={progress}>
+      <div className="ob-confirm">
+        <div className="ob-confirm__badge">
+          <CheckCircle2 size={24} aria-hidden="true" />
+          <span>{'This is exactly what\nTrackabite is built for.'}</span>
         </div>
+
+        <OnboardingVideo
+          src={VIDEOS.reaffirm}
+          className="ob-confirm__mascot"
+          round
+        />
+
+        <h1 className="ob-h1--display ob-confirm__title">{copy.title}</h1>
+        <p className="ob-sub">{copy.message}</p>
       </div>
-    </div>
+
+      <div className="ob-footer">
+        <OnboardingButton onClick={onNext}>Let's do this!</OnboardingButton>
+      </div>
+    </OnboardingLayout>
   );
 };
 

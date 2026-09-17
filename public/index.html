@@ -39,6 +39,19 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>Trackabite - Smart Food Inventory Tracker</title>
+
+    <!--
+      Onboarding fonts, loaded here rather than only via the @import in
+      typography.css: CRA injects that stylesheet with JS, so the @import
+      fires late and the 48px Epilogue headline on the first onboarding
+      screen visibly flashes in Poppins first.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Epilogue:wght@700;800;900&display=swap"
+    />
     <style>
       /* Initial loading screen - shown before React hydrates */
       #initial-loading-screen {

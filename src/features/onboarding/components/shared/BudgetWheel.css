@@ -1,0 +1,86 @@
+/* Snap wheel picker. Geometry must stay in sync with
+   BUDGET_ITEM_HEIGHT / BUDGET_VISIBLE_ITEMS in onboardingConstants.js. */
+
+.ob-wheel {
+  position: relative;
+  height: 250px;
+  width: 100%;
+}
+
+.ob-wheel__scroller {
+  height: 100%;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+}
+
+.ob-wheel__scroller::-webkit-scrollbar { display: none; }
+
+.ob-wheel__scroller:focus-visible {
+  outline: 2px solid var(--ob-accent-deep);
+  outline-offset: 4px;
+  border-radius: var(--ob-r-lg);
+}
+
+/* Half the visible rows above and below, so row 0 can sit centred. */
+.ob-wheel__spacer { height: 100px; }
+
+.ob-wheel__item {
+  height: 50px;
+  scroll-snap-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--ob-font-body);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--ob-text-2);
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  transition: font-size 0.12s ease, color 0.12s ease;
+}
+
+.ob-wheel__item--active {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ob-accent-deep);
+}
+
+/* The selection band sits behind the rows and never eats a tap. */
+.ob-wheel__band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100px;
+  height: 50px;
+  border-radius: var(--ob-r-lg);
+  background: var(--ob-accent-a19);
+  pointer-events: none;
+}
+
+/* Fade the ends so the list reads as a wheel rather than a cropped list. */
+.ob-wheel__mask {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 100px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ob-wheel__mask--top {
+  top: 0;
+  background: linear-gradient(to bottom, var(--ob-surface) 15%, transparent);
+}
+
+.ob-wheel__mask--bottom {
+  bottom: 0;
+  background: linear-gradient(to top, var(--ob-surface) 15%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ob-wheel__item { transition: none; }
+  .ob-wheel__scroller { scroll-behavior: auto; }
+}

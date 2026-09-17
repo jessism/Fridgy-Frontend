@@ -1,0 +1,25 @@
+.ob-phone {
+  width: min(180px, 46vw);
+  aspect-ratio: 9 / 19.5;
+  padding: 8px;
+  border-radius: 32px;
+  background: rgba(180, 180, 180, 0.35);
+  flex: 0 0 auto;
+}
+
+.ob-phone__screen {
+  width: 100%;
+  height: 100%;
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--ob-bg-2);
+}
+
+.ob-phone__video {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+@media (max-height: 700px) {
+  .ob-phone { width: min(150px, 38vw); }
+}

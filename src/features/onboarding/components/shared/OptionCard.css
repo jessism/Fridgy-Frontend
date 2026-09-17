@@ -1,0 +1,62 @@
+.ob-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.ob-card {
+  position: relative;
+  min-height: 100px;
+  padding: var(--ob-s-3);
+  border: none;
+  border-radius: var(--ob-r-lg);
+  background: var(--ob-bg-2);
+  color: var(--ob-text);
+  font-family: var(--ob-font-body);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.ob-card__icon { color: var(--ob-text-2); }
+
+.ob-card__label {
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.ob-card__check {
+  position: absolute;
+  top: var(--ob-s-2);
+  right: var(--ob-s-2);
+  color: var(--ob-on-accent);
+}
+
+.ob-card--selected {
+  background: var(--ob-accent);
+  color: var(--ob-on-accent);
+}
+
+.ob-card--selected .ob-card__icon { color: var(--ob-on-accent); }
+.ob-card--selected .ob-card__label { font-weight: 700; }
+
+.ob-card:not(.ob-card--selected):active { transform: scale(0.98); }
+
+.ob-card:focus-visible {
+  outline: 2px solid var(--ob-accent-deep);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .ob-card:not(.ob-card--selected):hover { background: var(--ob-divider); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ob-card { transition: none; }
+}

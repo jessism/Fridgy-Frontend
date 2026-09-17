@@ -1,43 +1,33 @@
-import React, { useEffect } from 'react';
-import fridgyLogo from '../../../../assets/images/Logo.png';
-import { trackOnboardingStepViewed } from '../../../../utils/onboardingTracking';
-import './ScreenStyles.css';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { OnboardingLayout, OnboardingButton, OnboardingVideo } from '../shared';
+import { VIDEOS } from '../../constants/onboardingConstants';
+import './WelcomeScreen.css';
 
-const WelcomeScreen = ({ onNext, onExit }) => {
-  useEffect(() => {
-    trackOnboardingStepViewed(1);
-  }, []);
+const WelcomeScreen = ({ onNext }) => {
+  const navigate = useNavigate();
+
   return (
-    <div className="onboarding-screen onboarding-screen--welcome">
-      <div className="onboarding-screen__content">
-        <div className="welcome-logo">
-          <img src={fridgyLogo} alt="Fridgy Logo" className="welcome-logo__image" />
-        </div>
-        
-        <h1 className="onboarding-screen__title">
-          Welcome to Trackabite!
+    <OnboardingLayout>
+      <div className="ob-welcome">
+        <OnboardingVideo
+          src={VIDEOS.wave}
+          className="ob-welcome__mascot"
+          round
+        />
+        <h1 className="ob-h1--display ob-welcome__title">
+          Welcome to Trackabite
         </h1>
-        
-        <p className="onboarding-screen__subtitle">
-          Eat better, waste less, and start saving more—all from your fridge.
-        </p>
-        
-        <div className="onboarding-screen__actions">
-          <button 
-            className="onboarding-btn onboarding-btn--primary onboarding-btn--large"
-            onClick={onNext}
-          >
-            Let's Get Started
-          </button>
-          <button 
-            className="onboarding-btn onboarding-btn--outline onboarding-btn--large"
-            onClick={() => window.location.href = '/signin'}
-          >
-            I already have an account
-          </button>
-        </div>
+        <p className="ob-sub">Eat smarter. Feel better.</p>
       </div>
-    </div>
+
+      <div className="ob-footer">
+        <OnboardingButton onClick={onNext}>Get Started</OnboardingButton>
+        <OnboardingButton variant="ghost" onClick={() => navigate('/signin')}>
+          I have an account
+        </OnboardingButton>
+      </div>
+    </OnboardingLayout>
   );
 };
 

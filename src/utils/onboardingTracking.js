@@ -6,23 +6,19 @@
  */
 
 import posthog from 'posthog-js';
+import { STEP_ORDER } from '../features/onboarding/constants/onboardingConstants';
 
 /**
- * Step name mapping for consistent event tracking
+ * Step name mapping for consistent event tracking.
+ *
+ * Derived from STEP_ORDER rather than retyped: the previous hand-written
+ * map was missing goal_confirmation, so every step from 3 on was reported
+ * under the wrong name.
  */
-const STEP_NAMES = {
-  1: 'welcome',
-  2: 'goal_selection',
-  3: 'household_size',
-  4: 'weekly_budget',
-  5: 'dietary_restrictions',
-  6: 'allergies',
-  7: 'cooking_time_preference',
-  8: 'feature_tour',
-  9: 'premium_upsell',
-  10: 'payment',
-  11: 'account_creation'
-};
+const STEP_NAMES = STEP_ORDER.reduce(
+  (acc, name, i) => ({ ...acc, [i + 1]: name }),
+  {}
+);
 
 /**
  * Check if PostHog is initialized and ready

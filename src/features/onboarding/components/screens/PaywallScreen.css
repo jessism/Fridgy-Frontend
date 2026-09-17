@@ -1,0 +1,173 @@
+.ob-paywall__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--ob-s-4);
+}
+
+.ob-paywall__mascot {
+  width: 130px !important;
+  height: 130px !important;
+}
+
+.ob-paywall__title {
+  text-align: center;
+  margin: 0;
+}
+
+.ob-paywall__accent {
+  color: var(--ob-accent-deep);
+  font-weight: 900;
+}
+
+.ob-paywall__features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ob-s-3);
+  text-align: left;
+}
+
+.ob-paywall__features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-family: var(--ob-font-body);
+}
+
+.ob-paywall__features strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ob-text);
+  line-height: 20px;
+}
+
+.ob-paywall__feature-desc {
+  display: block;
+  font-size: 14px;
+  color: var(--ob-text-2);
+  line-height: 20px;
+}
+
+.ob-paywall__check {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--ob-r-full);
+  background: var(--ob-accent);
+  color: var(--ob-on-accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ob-paywall__card {
+  width: 85%;
+  padding: var(--ob-s-3);
+  border-radius: var(--ob-r-xl);
+  background: var(--ob-bg-2);
+  border: 1px solid var(--ob-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ob-s-2);
+}
+
+.ob-paywall__plan {
+  font-family: var(--ob-font-body);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  opacity: 0.6;
+}
+
+.ob-paywall__price {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.ob-paywall__amount {
+  font-family: var(--ob-font-display);
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--ob-headline);
+}
+
+.ob-paywall__interval {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ob-text-2);
+}
+
+.ob-paywall__badge {
+  padding: 4px 12px;
+  border-radius: var(--ob-r-full);
+  background: var(--ob-accent);
+  color: var(--ob-on-accent);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.ob-paywall__footer { gap: var(--ob-s-2); }
+
+.ob-paywall__fineprint,
+.ob-paywall__legal {
+  text-align: center;
+  margin: 0;
+}
+
+.ob-paywall__legal a {
+  color: var(--ob-text-muted);
+  text-decoration: underline;
+}
+
+/*
+ * The app scales this screen by min(screenHeight/980, 1) so it fits every
+ * iPhone. The web equivalent: squeeze progressively on short viewports so
+ * the CTA stays above the fold rather than below it.
+ */
+@media (max-height: 800px) {
+  .ob-paywall__body { gap: var(--ob-s-3); }
+  .ob-paywall__mascot {
+    width: 96px !important;
+    height: 96px !important;
+  }
+}
+
+@media (max-height: 720px) {
+  .ob-paywall__body { gap: var(--ob-s-2); }
+
+  .ob-paywall__mascot {
+    width: 64px !important;
+    height: 64px !important;
+  }
+
+  .ob-paywall__title { font-size: clamp(26px, 8vw, 32px); }
+
+  .ob-paywall__features { gap: 10px; }
+  .ob-paywall__features strong { font-size: 14px; line-height: 18px; }
+  .ob-paywall__feature-desc { font-size: 13px; line-height: 17px; }
+
+  .ob-paywall__check {
+    width: 22px;
+    height: 22px;
+  }
+
+  .ob-paywall__card {
+    width: 100%;
+    padding: 10px;
+    gap: 2px;
+  }
+
+  .ob-paywall__amount { font-size: 26px; }
+
+  .ob-paywall__footer { padding-top: var(--ob-s-2); }
+}

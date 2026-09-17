@@ -1,70 +1,61 @@
-import React, { useEffect } from 'react';
-import { trackOnboardingStepViewed } from '../../../../utils/onboardingTracking';
-import './ScreenStyles.css';
+import React from 'react';
+import { OnboardingLayout, OnboardingButton, BudgetWheel } from '../shared';
+import {
+  CURRENCY_OPTIONS,
+  CURRENCY_SYMBOLS,
+  BUDGET_DEFAULT,
+} from '../../constants/onboardingConstants';
+import './WeeklyBudgetScreen.css';
 
-const WeeklyBudgetScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
-  useEffect(() => {
-    trackOnboardingStepViewed(4);
-  }, []);
-  const handleBudgetChange = (e) => {
-    const value = parseInt(e.target.value, 10);
-    updateData({ weeklyBudget: value });
-  };
-
-  const handleCurrencyChange = (e) => {
-    updateData({ budgetCurrency: e.target.value });
-  };
+const WeeklyBudgetScreen = ({ data, updateData, onNext, onBack, progress }) => {
+  const budget = data.weeklyBudget ?? BUDGET_DEFAULT;
+  const symbol = CURRENCY_SYMBOLS[data.budgetCurrency] || '$';
+  const perPerson = Math.round(budget / Math.max(1, data.householdSize));
 
   return (
-    <div className="onboarding-screen">
-      <div className="onboarding-screen__content">
-        <h1 className="onboarding-screen__title">
-          What's your average weekly spend?
-        </h1>
-
-        <p className="onboarding-screen__subtitle">
-          We'll help you stay within budget with smart suggestions
+    <OnboardingLayout showBack onBack={onBack} progress={progress}>
+      <div className="ob-header-block">
+        <h1 className="ob-h1">What's your weekly grocery budget?</h1>
+        <p className="ob-sub">
+          This helps us suggest recipes and meal plans that fit your budget
         </p>
-
-        <div className="input-group">
-          <div className="budget-slider">
-            <div className="budget-slider__header">
-              <span className="budget-slider__label">Weekly spend</span>
-              <span className="budget-slider__value">
-                ${data.weeklyBudget || 50}
-              </span>
-            </div>
-            <div className="budget-slider__container">
-              <input
-                type="range"
-                min="20"
-                max="500"
-                step="10"
-                value={data.weeklyBudget || 50}
-                onChange={handleBudgetChange}
-                className="budget-slider__input"
-                style={{
-                  background: `linear-gradient(to right, var(--primary-green, #81e053) 0%, var(--primary-green, #81e053) ${((data.weeklyBudget || 50) - 20) / (500 - 20) * 100}%, #e0e0e0 ${((data.weeklyBudget || 50) - 20) / (500 - 20) * 100}%, #e0e0e0 100%)`
-                }}
-              />
-            </div>
-            <div className="budget-slider__labels">
-              <span>$20</span>
-              <span>$500+</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="onboarding-screen__actions">
-          <button
-            className="onboarding-btn onboarding-btn--primary onboarding-btn--large"
-            onClick={onNext}
-          >
-            Continue
-          </button>
-        </div>
       </div>
-    </div>
+
+      <div className="ob-budget">
+        <div className="ob-budget__currencies" role="group" aria-label="Currency">
+          {CURRENCY_OPTIONS.map(({ id, label }) => (
+            <button
+              key={id}
+              type="button"
+              aria-pressed={data.budgetCurrency === id}
+              className={`ob-budget__chip ${
+                data.budgetCurrency === id ? 'ob-budget__chip--selected' : ''
+              }`.trim()}
+              onClick={() => updateData({ budgetCurrency: id })}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <BudgetWheel
+          value={budget}
+          symbol={symbol}
+          onChange={(weeklyBudget) => updateData({ weeklyBudget })}
+        />
+
+        {data.householdSize > 1 && (
+          <p className="ob-footnote ob-budget__per-person">
+            About {symbol}
+            {perPerson} per person
+          </p>
+        )}
+      </div>
+
+      <div className="ob-footer">
+        <OnboardingButton onClick={onNext}>Continue</OnboardingButton>
+      </div>
+    </OnboardingLayout>
   );
 };
 

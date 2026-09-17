@@ -1,78 +1,69 @@
-import React, { useEffect } from 'react';
-import { trackOnboardingStepViewed } from '../../../../utils/onboardingTracking';
-import './ScreenStyles.css';
+import React from 'react';
+import { OnboardingLayout, OnboardingButton, OptionPill, PillWrap } from '../shared';
+import { ALLERGY_OPTIONS, NONE_ID } from '../../constants/onboardingConstants';
+import { toggleWithNone } from '../../utils/selection';
+import './AllergiesScreen.css';
 
-const AllergiesScreen = ({ data, updateData, onNext, onBack, onSkip }) => {
-  useEffect(() => {
-    trackOnboardingStepViewed(6);
-  }, []);
-  const allergyOptions = [
-    { id: 'peanuts', label: 'Peanuts' },
-    { id: 'tree-nuts', label: 'Tree Nuts' },
-    { id: 'milk', label: 'Milk' },
-    { id: 'eggs', label: 'Eggs' },
-    { id: 'wheat', label: 'Wheat' },
-    { id: 'soy', label: 'Soy' },
-    { id: 'fish', label: 'Fish' },
-    { id: 'shellfish', label: 'Shellfish' },
-    { id: 'sesame', label: 'Sesame' }
-  ];
+const AllergiesScreen = ({ data, updateData, onNext, onBack, progress }) => {
+  const onCustomChange = (customAllergies) => {
+    // Typing a real allergy contradicts "None", so drop it.
+    const hasText = customAllergies.trim().length > 0;
+    const allergies =
+      hasText && data.allergies?.includes(NONE_ID)
+        ? data.allergies.filter((x) => x !== NONE_ID)
+        : data.allergies;
 
-  const toggleAllergy = (id) => {
-    const current = data.allergies || [];
-    const updated = current.includes(id)
-      ? current.filter(item => item !== id)
-      : [...current, id];
-    updateData({ allergies: updated });
-  };
-
-  const handleCustomAllergiesChange = (e) => {
-    updateData({ customAllergies: e.target.value });
+    updateData({ customAllergies, allergies });
   };
 
   return (
-    <div className="onboarding-screen">
-      <div className="onboarding-screen__content">
-        <h1 className="onboarding-screen__title">
-          Any allergies we should know about?
-        </h1>
-        
-        <p className="onboarding-screen__subtitle">
-          We'll keep your recipes safe and allergen-free
+    <OnboardingLayout showBack onBack={onBack} progress={progress}>
+      <div className="ob-header-block">
+        <h1 className="ob-h1">Any food allergies?</h1>
+        <p className="ob-sub">
+          We'll make sure to exclude recipes with these ingredients
         </p>
-        
-        <div className="pill-group">
-          {allergyOptions.map((option) => (
-            <div
-              key={option.id}
-              className={`pill-item ${data.allergies?.includes(option.id) ? 'pill-item--selected' : ''}`}
-              onClick={() => toggleAllergy(option.id)}
-            >
-              {option.label}
-            </div>
-          ))}
-        </div>
-        
-        <div className="input-group">
-          <input
-            type="text"
-            className="input-group__input"
-            placeholder="Other allergies (comma-separated)"
-            value={data.customAllergies || ''}
-            onChange={handleCustomAllergiesChange}
-          />
-        </div>
-        
-        <div className="onboarding-screen__actions">
-          <button 
-            className="onboarding-btn onboarding-btn--primary onboarding-btn--large"
-            onClick={onNext}
-          >
-            Continue
-          </button>
-        </div>
       </div>
-    </div>
+
+      <PillWrap>
+        {ALLERGY_OPTIONS.map(({ id, label }) => (
+          <OptionPill
+            key={id}
+            label={label}
+            selected={data.allergies?.includes(id)}
+            onToggle={() =>
+              updateData({ allergies: toggleWithNone(data.allergies, id) })
+            }
+          />
+        ))}
+      </PillWrap>
+
+      <div className="ob-allergies__custom">
+        <label className="ob-allergies__label" htmlFor="ob-other-allergies">
+          Other allergies:
+        </label>
+        <textarea
+          id="ob-other-allergies"
+          className="ob-allergies__input"
+          placeholder="e.g., Mustard, Celery, Lupin"
+          value={data.customAllergies || ''}
+          onChange={(e) => onCustomChange(e.target.value)}
+          rows={3}
+        />
+      </div>
+
+      <div className="ob-footer">
+        {/* A custom allergy alone is a valid answer: typing one clears
+            "None", which would otherwise leave the list empty and trap
+            the user on this step. */}
+        <OnboardingButton
+          onClick={onNext}
+          disabled={!data.allergies?.length && !data.customAllergies?.trim()}
+        >
+          Continue
+        </OnboardingButton>
+      </div>
+    </OnboardingLayout>
   );
 };
 

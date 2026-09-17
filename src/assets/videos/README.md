@@ -16,7 +16,12 @@ To add your video to the onboarding flow:
    - You can also add `.webm` format for better compression
    - Add multiple sources in the video element for fallback
 
-## Video Configuration in FeatureTourScreen.js
+## Video Configuration
+
+Onboarding videos now render through
+`src/features/onboarding/components/shared/OnboardingVideo.js`, which owns the
+autoplay contract in one place (FeatureTourScreen.js was removed when the
+carousel was split into four dedicated feature screens).
 
 The video is configured with the following attributes:
 - `autoPlay` - Starts playing automatically
@@ -28,9 +33,12 @@ The video is configured with the following attributes:
 
 If your video has a different name:
 
-1. Update the import statement in `FeatureTourScreen.js`:
+1. Update the path in `FEATURE_SLIDES` / `VIDEOS` in
+   `src/features/onboarding/constants/onboardingConstants.js`. Onboarding
+   clips are served from `public/videos/onboarding/`, so they are referenced
+   by URL rather than imported:
 ```javascript
-import snapGroceriesVideo from '../../../../assets/videos/your-video-name.mp4';
+video: '/videos/onboarding/your-video-name.mp4',
 ```
 
 2. Update the video source:

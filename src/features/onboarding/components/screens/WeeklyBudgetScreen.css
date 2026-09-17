@@ -1,0 +1,47 @@
+.ob-budget {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ob-s-4);
+}
+
+.ob-budget__currencies {
+  display: flex;
+  gap: var(--ob-s-2);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ob-budget__chip {
+  padding: 8px var(--ob-s-3);
+  border-radius: 20px;
+  border: 1px solid var(--ob-border);
+  background: var(--ob-bg-2);
+  color: var(--ob-text);
+  font-family: var(--ob-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.ob-budget__chip--selected {
+  background: var(--ob-accent);
+  border-color: var(--ob-accent);
+  color: var(--ob-on-accent);
+}
+
+.ob-budget__chip:focus-visible {
+  outline: 2px solid var(--ob-accent-deep);
+  outline-offset: 2px;
+}
+
+.ob-budget__per-person {
+  text-align: center;
+  margin: 0;
+}
+
+@media (hover: hover) {
+  .ob-budget__chip:not(.ob-budget__chip--selected):hover {
+    background: var(--ob-divider);
+  }
+}

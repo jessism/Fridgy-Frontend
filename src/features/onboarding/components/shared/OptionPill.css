@@ -1,0 +1,41 @@
+.ob-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ob-s-2);
+}
+
+.ob-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px var(--ob-s-3);
+  border-radius: 20px;
+  border: 1px solid var(--ob-border);
+  background: var(--ob-bg-2);
+  color: var(--ob-text);
+  font-family: var(--ob-font-body);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.ob-pill--selected {
+  background: var(--ob-accent);
+  border-color: var(--ob-accent);
+  color: var(--ob-on-accent);
+  font-weight: 700;
+}
+
+.ob-pill:focus-visible {
+  outline: 2px solid var(--ob-accent-deep);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .ob-pill:not(.ob-pill--selected):hover { background: var(--ob-divider); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ob-pill { transition: none; }
+}

@@ -1,0 +1,27 @@
+.ob-howithelps {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ob-howithelps__frame {
+  width: min(300px, 72vw);
+  height: min(300px, 72vw);
+  overflow: hidden;
+  border-radius: var(--ob-r-xl);
+}
+
+.ob-howithelps__video {
+  width: 115% !important;
+  height: 115% !important;
+  margin: -7.5%;
+  object-fit: contain;
+}
+
+@media (max-height: 700px) {
+  .ob-howithelps__frame {
+    width: min(210px, 52vw);
+    height: min(210px, 52vw);
+  }
+}

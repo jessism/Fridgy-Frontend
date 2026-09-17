@@ -1,67 +1,29 @@
-import React, { useEffect } from 'react';
-import { trackOnboardingStepViewed } from '../../../../utils/onboardingTracking';
-import './ScreenStyles.css';
+import React from 'react';
+import { OnboardingLayout, OnboardingButton, NumberStepper } from '../shared';
+import { HOUSEHOLD_MIN, HOUSEHOLD_MAX } from '../../constants/onboardingConstants';
 
-const HouseholdSizeScreen = ({ data, updateData, onNext, onBack }) => {
-  useEffect(() => {
-    trackOnboardingStepViewed(3);
-  }, []);
-  const handleHouseholdIncrease = () => {
-    if (data.householdSize < 10) {
-      updateData({ householdSize: data.householdSize + 1 });
-    }
-  };
-
-  const handleHouseholdDecrease = () => {
-    if (data.householdSize > 1) {
-      updateData({ householdSize: data.householdSize - 1 });
-    }
-  };
-
-  return (
-    <div className="onboarding-screen">
-      <div className="onboarding-screen__content">
-        <h1 className="onboarding-screen__title">
-          How many people are in your household?
-        </h1>
-
-        <p className="onboarding-screen__subtitle">
-          This helps us suggest the right portions
-        </p>
-
-        <div className="input-group">
-          <div className="number-selector">
-            <button
-              type="button"
-              className="number-selector__btn"
-              onClick={handleHouseholdDecrease}
-              disabled={data.householdSize <= 1}
-            >
-              -
-            </button>
-            <span className="number-selector__value">{data.householdSize}</span>
-            <button
-              type="button"
-              className="number-selector__btn"
-              onClick={handleHouseholdIncrease}
-              disabled={data.householdSize >= 10}
-            >
-              +
-            </button>
-          </div>
-        </div>
-
-        <div className="onboarding-screen__actions">
-          <button
-            className="onboarding-btn onboarding-btn--primary onboarding-btn--large"
-            onClick={onNext}
-          >
-            Continue
-          </button>
-        </div>
-      </div>
+const HouseholdSizeScreen = ({ data, updateData, onNext, onBack, progress }) => (
+  <OnboardingLayout showBack onBack={onBack} progress={progress}>
+    <div className="ob-header-block">
+      <h1 className="ob-h1">How many people are in your household?</h1>
+      <p className="ob-sub">
+        This helps us calculate portions and budget recommendations
+      </p>
     </div>
-  );
-};
+
+    <div className="ob-body-center">
+      <NumberStepper
+        value={data.householdSize}
+        onChange={(householdSize) => updateData({ householdSize })}
+        min={HOUSEHOLD_MIN}
+        max={HOUSEHOLD_MAX}
+      />
+    </div>
+
+    <div className="ob-footer">
+      <OnboardingButton onClick={onNext}>Continue</OnboardingButton>
+    </div>
+  </OnboardingLayout>
+);
 
 export default HouseholdSizeScreen;

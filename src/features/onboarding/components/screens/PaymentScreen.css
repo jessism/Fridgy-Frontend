@@ -1,0 +1,80 @@
+/*
+ * Chrome for the Stripe step. The Stripe logic in PaymentScreen.js is left
+ * alone; this only repaints the wrapper/button classes it already uses so
+ * the card form matches the rest of the flow, and lets the old 754-line
+ * ScreenStyles.css be deleted.
+ */
+
+.onboarding-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--ob-page-bg);
+  color: var(--ob-text);
+  font-family: var(--ob-font-body);
+  display: flex;
+  justify-content: center;
+}
+
+.onboarding-screen__content {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  padding: var(--ob-s-4);
+  padding-bottom: max(var(--ob-s-4), env(safe-area-inset-bottom));
+}
+
+.onboarding-screen__actions {
+  margin-top: auto;
+  padding-top: var(--ob-s-4);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.onboarding-btn {
+  width: 100%;
+  min-height: 56px;
+  padding: var(--ob-s-4);
+  border-radius: var(--ob-r-full);
+  border: none;
+  font-family: var(--ob-font-body);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.onboarding-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.onboarding-btn:not(:disabled):active {
+  opacity: 0.95;
+  transform: scale(0.98);
+}
+
+.onboarding-btn--primary {
+  background: var(--ob-accent);
+  color: var(--ob-on-accent);
+  box-shadow: var(--ob-shadow-accent);
+}
+
+.onboarding-btn--secondary {
+  background: var(--ob-bg);
+  color: var(--ob-text);
+  border: 2px solid var(--ob-border);
+}
+
+/* --large is a no-op now: every CTA is already full width and 56px tall. */
+.onboarding-btn--large { font-size: 16px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-btn { transition: none; }
+}

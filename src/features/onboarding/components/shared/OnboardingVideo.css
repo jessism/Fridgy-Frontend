@@ -1,0 +1,12 @@
+.ob-video {
+  display: block;
+  max-width: 100%;
+  background: transparent;
+}
+
+/* Shown when the file is missing or the codec is refused — a soft tinted
+   block reads as intentional, an empty black rectangle does not. */
+.ob-video--fallback {
+  background: var(--ob-accent-soft);
+  border-radius: var(--ob-r-xl);
+}

@@ -42,6 +42,8 @@ const DietaryPreferencesPage = () => {
     { id: 'kosher', label: 'Kosher' },
     { id: 'gluten-free', label: 'Gluten-Free' },
     { id: 'dairy-free', label: 'Dairy-Free' },
+    { id: 'keto', label: 'Keto' },
+    { id: 'paleo', label: 'Paleo' },
     { id: 'nut-free', label: 'Nut-Free' },
     { id: 'egg-free', label: 'Egg-Free' }
   ];
@@ -52,7 +54,10 @@ const DietaryPreferencesPage = () => {
     { id: 'soy', label: 'Soy' },
     { id: 'sesame', label: 'Sesame' },
     { id: 'wheat', label: 'Wheat' },
-    { id: 'tree-nuts', label: 'Tree Nuts' }
+    { id: 'tree-nuts', label: 'Tree Nuts' },
+    { id: 'milk', label: 'Milk' },
+    { id: 'eggs', label: 'Eggs' },
+    { id: 'fish', label: 'Fish' }
   ];
 
   const cuisineOptions = [

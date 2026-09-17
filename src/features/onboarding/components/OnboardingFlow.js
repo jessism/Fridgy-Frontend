@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import useOnboarding from '../hooks/useOnboarding';
-import OnboardingProgress from './OnboardingProgress';
+import { STEPS, getProgress } from '../constants/onboardingConstants';
+import { trackOnboardingStepViewed } from '../../../utils/onboardingTracking';
+import { OnboardingVideoPreloader } from './shared';
+
 import WelcomeScreen from './screens/WelcomeScreen';
 import GoalSelectionScreen from './screens/GoalSelectionScreen';
 import GoalConfirmationScreen from './screens/GoalConfirmationScreen';
@@ -9,161 +12,100 @@ import WeeklyBudgetScreen from './screens/WeeklyBudgetScreen';
 import DietaryRestrictionsScreen from './screens/DietaryRestrictionsScreen';
 import AllergiesScreen from './screens/AllergiesScreen';
 import CookingTimePreferenceScreen from './screens/CookingTimePreferenceScreen';
-import FeatureTourScreen from './screens/FeatureTourScreen';
-import PremiumUpsellScreen from './screens/PremiumUpsellScreen';
-import PremiumUpsellScreenWhite from './screens/PremiumUpsellScreenWhite';
-import PremiumUpsellScreenGreen from './screens/PremiumUpsellScreenGreen';
+import ReassuranceScreen from './screens/ReassuranceScreen';
+import HowItHelpsScreen from './screens/HowItHelpsScreen';
+import FeatureScreen from './screens/FeatureScreen';
+import PushNotificationsScreen from './screens/PushNotificationsScreen';
+import ReadyRoutineScreen from './screens/ReadyRoutineScreen';
+import PaywallScreen from './screens/PaywallScreen';
 import PaymentScreen from './screens/PaymentScreen';
 import AccountCreationScreen from './screens/AccountCreationScreen';
+
 import './OnboardingFlow.css';
 
 const OnboardingFlow = () => {
   const {
     currentStep,
-    totalSteps,
     onboardingData,
     loading,
     error,
     updateData,
     goToNextStep,
     goToPreviousStep,
-    skipStep,
     completeOnboarding,
-    exitOnboarding,
     setError,
-    jumpToStep
+    jumpToStep,
   } = useOnboarding();
+
+  // Tracked once, here. Screens used to each fire their own with a hardcoded
+  // number, which is how the reported step numbers drifted from the flow.
+  useEffect(() => {
+    trackOnboardingStepViewed(currentStep);
+  }, [currentStep]);
+
+  // Every question screen takes the same shape.
+  const stepProps = {
+    data: onboardingData,
+    updateData,
+    onNext: goToNextStep,
+    onBack: goToPreviousStep,
+    progress: getProgress(currentStep),
+  };
 
   const renderScreen = () => {
     switch (currentStep) {
-      case 1:
-        return (
-          <WelcomeScreen
-            onNext={goToNextStep}
-            onExit={exitOnboarding}
-          />
-        );
-      case 2:
-        return (
-          <GoalSelectionScreen
-            data={onboardingData}
-            updateData={updateData}
-            onNext={goToNextStep}
-            onBack={goToPreviousStep}
-          />
-        );
-      case 3:
-        return (
-          <GoalConfirmationScreen
-            data={onboardingData}
-            onNext={goToNextStep}
-            onBack={goToPreviousStep}
-          />
-        );
-      case 4:
-        return (
-          <HouseholdSizeScreen
-            data={onboardingData}
-            updateData={updateData}
-            onNext={goToNextStep}
-            onBack={goToPreviousStep}
-          />
-        );
-      case 5:
-        return (
-          <WeeklyBudgetScreen
-            data={onboardingData}
-            updateData={updateData}
-            onNext={goToNextStep}
-            onBack={goToPreviousStep}
-            onSkip={skipStep}
-          />
-        );
-      case 6:
-        return (
-          <DietaryRestrictionsScreen
-            data={onboardingData}
-            updateData={updateData}
-            onNext={goToNextStep}
-            onBack={goToPreviousStep}
-          />
-        );
-      case 7:
-        return (
-          <AllergiesScreen
-            data={onboardingData}
-            updateData={updateData}
-            onNext={goToNextStep}
-            onBack={goToPreviousStep}
-          />
-        );
-      case 8:
-        return (
-          <CookingTimePreferenceScreen
-            data={onboardingData}
-            updateData={updateData}
-            onNext={goToNextStep}
-            onBack={goToPreviousStep}
-          />
-        );
-      case 9:
-        return (
-          <FeatureTourScreen
-            data={onboardingData}
-            updateData={updateData}
-            onNext={goToNextStep}
-            onBack={goToPreviousStep}
-            onSkip={skipStep}
-          />
-        );
-      case 10:
-        return (
-          <PremiumUpsellScreenGreen
-            data={onboardingData}
-            updateData={updateData}
-            onNext={goToNextStep}
-            onBack={goToPreviousStep}
-            onSkip={() => jumpToStep(14)} // Skip directly to account creation
-            jumpToStep={jumpToStep}
-          />
-        );
-      case 11:
+      case STEPS.WELCOME:
+        return <WelcomeScreen onNext={goToNextStep} />;
+      case STEPS.GOAL:
+        return <GoalSelectionScreen {...stepProps} showBack={false} />;
+      case STEPS.GOAL_CONFIRM:
+        return <GoalConfirmationScreen {...stepProps} jumpToStep={jumpToStep} />;
+      case STEPS.HOUSEHOLD:
+        return <HouseholdSizeScreen {...stepProps} />;
+      case STEPS.BUDGET:
+        return <WeeklyBudgetScreen {...stepProps} />;
+      case STEPS.DIETARY:
+        return <DietaryRestrictionsScreen {...stepProps} />;
+      case STEPS.ALLERGIES:
+        return <AllergiesScreen {...stepProps} />;
+      case STEPS.COOKING_TIME:
+        return <CookingTimePreferenceScreen {...stepProps} />;
+      case STEPS.REASSURANCE:
+        return <ReassuranceScreen {...stepProps} />;
+      case STEPS.HOW_IT_HELPS:
+        return <HowItHelpsScreen {...stepProps} />;
+      case STEPS.FEATURE_INVENTORY:
+        return <FeatureScreen {...stepProps} featureId="inventory" />;
+      case STEPS.FEATURE_RECIPES:
+        return <FeatureScreen {...stepProps} featureId="recipes" />;
+      case STEPS.FEATURE_MEAL_PLANNING:
+        return <FeatureScreen {...stepProps} featureId="meal-planning" />;
+      case STEPS.FEATURE_SHOPPING:
+        return <FeatureScreen {...stepProps} featureId="shopping" />;
+      case STEPS.PUSH_NOTIFICATIONS:
+        return <PushNotificationsScreen {...stepProps} />;
+      case STEPS.READY_ROUTINE:
+        return <ReadyRoutineScreen {...stepProps} />;
+      case STEPS.PAYWALL:
+        return <PaywallScreen data={onboardingData} jumpToStep={jumpToStep} />;
+      case STEPS.PAYMENT:
         return (
           <PaymentScreen
             data={onboardingData}
             updateData={updateData}
             jumpToStep={jumpToStep}
-            onBack={goToPreviousStep}
+            onBack={() => jumpToStep(STEPS.PAYWALL)}
           />
         );
-      // Alternative paywall designs (kept for future reference)
-      case 12:
-        return (
-          <PremiumUpsellScreen
-            data={onboardingData}
-            onNext={goToNextStep}
-            onBack={goToPreviousStep}
-            onSkip={skipStep}
-            jumpToStep={jumpToStep}
-          />
-        );
-      case 13:
-        return (
-          <PremiumUpsellScreenGreen
-            data={onboardingData}
-            onNext={goToNextStep}
-            onBack={goToPreviousStep}
-            onSkip={skipStep}
-            jumpToStep={jumpToStep}
-          />
-        );
-      case 14:
+      case STEPS.CREATE_ACCOUNT:
         return (
           <AccountCreationScreen
             data={onboardingData}
             updateData={updateData}
             onComplete={completeOnboarding}
-            onBack={goToPreviousStep}
+            // Never back into step 18: re-entering a live Stripe intent is
+            // how duplicate subscriptions get created.
+            onBack={() => jumpToStep(STEPS.PAYWALL)}
             loading={loading}
             error={error}
             setError={setError}
@@ -176,18 +118,10 @@ const OnboardingFlow = () => {
 
   return (
     <div className="onboarding-flow">
-      {currentStep > 1 && currentStep < 10 && (
-        <OnboardingProgress
-          currentStep={currentStep - 1}
-          totalSteps={8}
-          onBack={goToPreviousStep}
-          showBack={currentStep > 2}
-        />
-      )}
-      <div className="onboarding-flow__content">
-        <div className="onboarding-flow__screen-container">
-          {renderScreen()}
-        </div>
+      {/* Warm the 1-3.4MB feature clips before steps 11-14 need them. */}
+      <OnboardingVideoPreloader active={currentStep >= STEPS.REASSURANCE} />
+      <div key={currentStep} className="onboarding-flow__screen-container">
+        {renderScreen()}
       </div>
     </div>
   );

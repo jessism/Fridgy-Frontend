@@ -1,0 +1,24 @@
+.ob-welcome {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--ob-s-4);
+}
+
+.ob-welcome__mascot {
+  width: min(200px, 52vw) !important;
+  height: min(200px, 52vw) !important;
+}
+
+.ob-welcome__title { text-align: center; }
+
+@media (max-height: 700px) {
+  .ob-welcome { gap: var(--ob-s-3); }
+  .ob-welcome__mascot {
+    width: min(150px, 40vw) !important;
+    height: min(150px, 40vw) !important;
+  }
+}

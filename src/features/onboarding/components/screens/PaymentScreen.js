@@ -3,7 +3,9 @@ import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-
 import { loadStripe } from '@stripe/stripe-js';
 import { PaymentSuccessAnimation } from '../../../../components/PaymentSuccessAnimation';
 import { usePrice } from '../../../../contexts/PriceContext';
-import './ScreenStyles.css';
+import { STEPS } from '../../constants/onboardingConstants';
+import '../../styles/onboarding-theme.css';
+import './PaymentScreen.css';
 
 // Initialize Stripe outside component
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
@@ -148,7 +150,7 @@ const PaymentForm = ({
   };
 
   return (
-    <div className="onboarding-screen onboarding-screen--payment">
+    <div className="ob-root onboarding-screen onboarding-screen--payment">
       <div className="onboarding-screen__content" style={{ position: 'relative', paddingTop: '0' }}>
         <button
           onClick={onBack}
@@ -646,8 +648,9 @@ const PaymentScreen = ({ data, updateData, jumpToStep, onBack }) => {
   };
 
   const handleBack = () => {
-    // Skip payment and go to account creation
-    jumpToStep(13);
+    // Back out of the card form to the paywall. The paywall's own X is the
+    // deliberate free-tier exit; an X on a card form reads as "cancel this".
+    jumpToStep(STEPS.PAYWALL);
   };
 
   // Show success screen - "Welcome to Trackabite Pro"
@@ -655,7 +658,9 @@ const PaymentScreen = ({ data, updateData, jumpToStep, onBack }) => {
     return (
       <PaymentSuccessAnimation
         status="success"
-        onComplete={() => jumpToStep(13)}
+        // Was jumpToStep(13), which is the paywall — a successful trial
+        // dropped the user back onto the upsell instead of the signup form.
+        onComplete={() => jumpToStep(STEPS.CREATE_ACCOUNT)}
       />
     );
   }
@@ -732,7 +737,7 @@ const PaymentScreen = ({ data, updateData, jumpToStep, onBack }) => {
   // Show error state
   if (paymentStatus === 'error' && !clientSecret) {
     return (
-      <div className="onboarding-screen">
+      <div className="ob-root onboarding-screen">
         <div className="onboarding-screen__content">
           <div style={{
             display: 'flex',
@@ -777,7 +782,7 @@ const PaymentScreen = ({ data, updateData, jumpToStep, onBack }) => {
   // Render payment form when ready
   if (clientSecret) {
     return (
-      <div className="onboarding-screen">
+      <div className="ob-root onboarding-screen">
         <div className="onboarding-screen__content">
           <Elements
             key={clientSecret}
@@ -787,7 +792,7 @@ const PaymentScreen = ({ data, updateData, jumpToStep, onBack }) => {
               appearance: {
                 theme: 'stripe',
                 variables: {
-                  colorPrimary: '#4fcf61',
+                  colorPrimary: '#4c6400',
                   borderRadius: '8px'
                 }
               }

@@ -1,0 +1,26 @@
+.ob-feature {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ob-s-5);
+  padding-top: var(--ob-s-2);
+}
+
+.ob-feature__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.ob-feature__desc {
+  margin: 0;
+  max-width: 34ch;
+}
+
+@media (max-height: 700px) {
+  .ob-feature { gap: var(--ob-s-3); }
+}
