@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/context/AuthContext';
 import { usePushNotificationSetup } from '../../../hooks/usePushNotificationSetup';
-import { safeJSONStringify } from '../../../utils/jsonSanitizer';
+import { safeJSONStringify, safeJSONParse } from '../../../utils/jsonSanitizer';
 import {
   trackOnboardingStepCompleted,
   trackOnboardingCompleted,
@@ -21,6 +21,10 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api
 // How long we are willing to wait for the push subscription before letting
 // the user through. See the note in completeOnboarding.
 const PUSH_SUBSCRIBE_TIMEOUT_MS = 8000;
+
+// A saved draft older than this is dropped. Matches the 24h expiry of the
+// backend onboarding session a Stripe attempt is tied to.
+const DRAFT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 /*
  * Defaults match the app's DEFAULT_ONBOARDING_DATA: budget pre-set to 100,
@@ -84,31 +88,75 @@ const STEP_EVENT_DATA = {
   }),
 };
 
+/*
+ * "None" is a UI choice, not a value. The backend's recipe prompt treats
+ * anything in these arrays as a real allergen or restriction, so an empty
+ * array is how "none" has to be sent.
+ */
+const withoutNone = (ids = []) => ids.filter((id) => id !== NONE_ID);
+
+/*
+ * Restores a draft after a refresh, like the app's AsyncStorage draft.
+ * Returns null when there is nothing usable, which means a clean start.
+ *
+ * Never resumes into the Stripe step: re-entering a live intent is how
+ * duplicate subscriptions get created, so that lands on the paywall instead.
+ */
+const loadDraft = () => {
+  try {
+    const saved = safeJSONParse(localStorage.getItem(STORAGE_KEYS.DATA));
+    const step = parseInt(localStorage.getItem(STORAGE_KEYS.STEP), 10);
+
+    const isFresh = saved?.savedAt && Date.now() - saved.savedAt < DRAFT_MAX_AGE_MS;
+    if (!isFresh || !(step > STEPS.WELCOME && step <= TOTAL_STEPS)) return null;
+
+    const { savedAt, ...data } = saved;
+    return {
+      step: step === STEPS.PAYMENT ? STEPS.PAYWALL : step,
+      data: {
+        ...DEFAULT_ONBOARDING_DATA,
+        ...data,
+        accountData: { ...DEFAULT_ONBOARDING_DATA.accountData, ...data.accountData },
+      },
+    };
+  } catch (e) {
+    return null;
+  }
+};
+
 const useOnboarding = () => {
   const navigate = useNavigate();
   const { signUp } = useAuth();
   const { setupPushNotifications } = usePushNotificationSetup();
 
-  const [currentStep, setCurrentStep] = useState(1);
-  const [onboardingData, setOnboardingData] = useState(DEFAULT_ONBOARDING_DATA);
+  const [draft] = useState(loadDraft);
+  const [currentStep, setCurrentStep] = useState(draft?.step ?? STEPS.WELCOME);
+  const [onboardingData, setOnboardingData] = useState(
+    draft?.data ?? DEFAULT_ONBOARDING_DATA
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const totalSteps = TOTAL_STEPS;
 
-  // Always start fresh. Note this means a mid-flow refresh restarts at step 1;
-  // that is pre-existing behaviour, now spread over 19 steps instead of 14.
+  // With no draft to resume, clear whatever an older attempt left behind —
+  // including its Stripe session, which a resumed draft has to keep.
   useEffect(() => {
+    if (draft) return;
     localStorage.removeItem(STORAGE_KEYS.DATA);
     localStorage.removeItem(STORAGE_KEYS.STEP);
     localStorage.removeItem(STORAGE_KEYS.SESSION_ID);
-    setCurrentStep(1);
-    setOnboardingData(DEFAULT_ONBOARDING_DATA);
-  }, []);
+  }, [draft]);
 
   const saveToLocalStorage = useCallback((data, step) => {
     try {
-      localStorage.setItem(STORAGE_KEYS.DATA, safeJSONStringify(data));
+      // The password stays in memory only; it is never written to storage.
+      const persisted = {
+        ...data,
+        accountData: { ...data.accountData, password: '' },
+        savedAt: Date.now(),
+      };
+      localStorage.setItem(STORAGE_KEYS.DATA, safeJSONStringify(persisted));
       localStorage.setItem(STORAGE_KEYS.STEP, step.toString());
     } catch (e) {
       console.error('Failed to save onboarding data:', e);
@@ -145,10 +193,6 @@ const useOnboarding = () => {
     }
   }, [currentStep, onboardingData, saveToLocalStorage]);
 
-  const skipStep = useCallback(() => {
-    goToNextStep();
-  }, [goToNextStep]);
-
   const jumpToStep = useCallback(
     (step) => {
       if (step >= 1 && step <= totalSteps) {
@@ -158,28 +202,6 @@ const useOnboarding = () => {
     },
     [totalSteps, onboardingData, saveToLocalStorage]
   );
-
-  const saveProgress = async () => {
-    try {
-      const token = localStorage.getItem('fridgy_token');
-      if (!token) return;
-
-      const response = await fetch(`${API_BASE_URL}/onboarding/save-progress`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: safeJSONStringify({ step: currentStep, data: onboardingData }),
-      });
-
-      if (!response.ok) {
-        console.error('Failed to save onboarding progress');
-      }
-    } catch (err) {
-      console.error('Error saving progress:', err);
-    }
-  };
 
   /*
    * Registers the push subscription the user opted into back at step 15,
@@ -229,15 +251,15 @@ const useOnboarding = () => {
       if (user) {
         const token = localStorage.getItem('fridgy_token');
 
-        await fetch(`${API_BASE_URL}/user-preferences`, {
+        const preferencesResponse = await fetch(`${API_BASE_URL}/user-preferences`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
           body: safeJSONStringify({
-            dietary_restrictions: preferences.dietaryRestrictions,
-            allergies: preferences.allergies,
+            dietary_restrictions: withoutNone(preferences.dietaryRestrictions),
+            allergies: withoutNone(preferences.allergies),
             custom_allergies: preferences.customAllergies,
             cooking_time_preference: preferences.cookingTimePreference,
             cuisine_cooking_time: {
@@ -246,6 +268,10 @@ const useOnboarding = () => {
             onboarding_source: 'onboarding_flow',
           }),
         });
+
+        if (!preferencesResponse.ok) {
+          console.error('Failed to save dietary preferences, but account was created');
+        }
 
         const onboardingResponse = await fetch(`${API_BASE_URL}/onboarding/complete`, {
           method: 'POST',
@@ -301,7 +327,7 @@ const useOnboarding = () => {
 
         await registerDeferredPush(token);
 
-        navigate(paymentCompleted ? '/home?welcome=trial' : '/home');
+        navigate('/home');
       }
     } catch (err) {
       console.error('Onboarding completion error:', err);
@@ -309,25 +335,6 @@ const useOnboarding = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const exitOnboarding = () => {
-    const confirmExit = window.confirm(
-      'Are you sure you want to exit? Your progress will be saved.'
-    );
-
-    if (confirmExit) {
-      saveProgress();
-      navigate('/');
-    }
-  };
-
-  const clearOnboardingData = () => {
-    localStorage.removeItem(STORAGE_KEYS.DATA);
-    localStorage.removeItem(STORAGE_KEYS.STEP);
-    localStorage.removeItem(STORAGE_KEYS.SESSION_ID);
-    setOnboardingData(DEFAULT_ONBOARDING_DATA);
-    setCurrentStep(1);
   };
 
   return {
@@ -339,11 +346,7 @@ const useOnboarding = () => {
     updateData,
     goToNextStep,
     goToPreviousStep,
-    skipStep,
-    saveProgress,
     completeOnboarding,
-    exitOnboarding,
-    clearOnboardingData,
     setError,
     jumpToStep,
   };
