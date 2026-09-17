@@ -648,6 +648,21 @@
   box-shadow: 0 8px 30px rgba(197, 254, 1, 0.4);
 }
 
+/* The quiet alternative under the hero CTA, for anyone not on an iPhone. */
+.landing-page-v4__web-link {
+  margin-top: -8px; /* tucks it under the button inside the 20px column gap */
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--accent-dark-olive);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.landing-page-v4__web-link:hover {
+  color: var(--text-primary, #2e2f2b);
+}
+
 .landing-page-v4__feature-callout {
   max-width: 280px;
   text-align: left;

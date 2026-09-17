@@ -478,10 +478,6 @@ const NewLandingPage3 = () => {
     });
   }, { dependencies: [loading] });
 
-  const handleGetStarted = () => {
-    navigate('/onboarding');
-  };
-
   // Show loading state while checking authentication
   if (loading) {
     return (
@@ -594,6 +590,9 @@ const NewLandingPage3 = () => {
           <a href="https://apps.apple.com/us/app/trackabite-meal-planner/id6759185932" target="_blank" rel="noopener noreferrer" className="landing-page-v4__cta-btn">
             START FREE ON IOS
           </a>
+          <Link to="/onboarding" className="landing-page-v4__web-link">
+            Or get started on the web
+          </Link>
         </div>
 
         {/* Phones Row - Tagline on left, Phones in center */}
