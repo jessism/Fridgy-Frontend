@@ -3,8 +3,9 @@ import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-
 import { loadStripe } from '@stripe/stripe-js';
 import { PaymentSuccessAnimation } from '../../../../components/PaymentSuccessAnimation';
 import { usePrice } from '../../../../contexts/PriceContext';
+import { Check, X } from 'lucide-react';
+import { OnboardingLayout, OnboardingButton } from '../shared';
 import { STEPS } from '../../constants/onboardingConstants';
-import '../../styles/onboarding-theme.css';
 import './PaymentScreen.css';
 
 // Initialize Stripe outside component
@@ -150,259 +151,120 @@ const PaymentForm = ({
   };
 
   return (
-    <div className="ob-root onboarding-screen onboarding-screen--payment">
-      <div className="onboarding-screen__content" style={{ position: 'relative', paddingTop: '0' }}>
-        <button
-          onClick={onBack}
-          type="button"
-          style={{
-            position: 'fixed',
-            top: '10px',
-            right: '10px',
-            background: 'transparent',
-            border: 'none',
-            fontSize: '20px',
-            cursor: 'pointer',
-            padding: '6px',
-            color: '#666',
-            width: '32px',
-            height: '32px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}
-        >
-          ✕
-        </button>
+    <OnboardingLayout showClose onClose={onBack} className="ob-pay">
+      <h1 className="ob-h1 ob-pay__title">{'Start Your\n7-Day Free Trial'}</h1>
 
-        <h2 style={{
-          fontSize: '1.5rem',
-          fontWeight: '700',
-          color: '#1a1a1a',
-          marginBottom: '24px',
-          marginTop: '30px',
-          textAlign: 'center',
-          lineHeight: '1.3'
-        }}>
-          Start Your<br />7-Day Free Trial
-        </h2>
+      <div className="ob-pay__card">
+        <PaymentElement options={{ layout: 'tabs' }} />
 
-        <div style={{
-          maxWidth: '400px',
-          margin: '0 auto',
-          padding: '20px',
-          background: 'white',
-          borderRadius: '12px',
-          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
-        }}>
-          <PaymentElement
-            options={{
-              layout: 'tabs'
-            }}
-          />
-
-          {/* Promo Code Field - Collapsible */}
-          <div style={{ marginTop: '16px' }}>
-            {!showPromoInput && !promoCode ? (
-              <button
-                type="button"
-                onClick={() => setShowPromoInput(true)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#4fcf61',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  padding: 0,
-                  textDecoration: 'none'
-                }}
-              >
-                Have a promo code?
-              </button>
-            ) : (
-              <>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '8px',
-                  color: '#374151'
-                }}>
-                  Promo code (optional)
-                </label>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <input
-                    type="text"
-                    value={promoCodeInput}
-                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                    placeholder="Enter promo code"
-                    disabled={!!promoCode || promoValidating}
-                    style={{
-                      flex: 1,
-                      padding: '11px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      background: promoCode ? '#f9fafb' : 'white',
-                      cursor: promoCode ? 'not-allowed' : 'text',
-                      color: '#1a1a1a'
-                    }}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        if (!promoCode && promoCodeInput) {
-                          validatePromoCode(promoCodeInput);
-                        }
+        {/* Promo code — collapsed until asked for */}
+        <div className="ob-pay__promo">
+          {!showPromoInput && !promoCode ? (
+            <button
+              type="button"
+              className="ob-pay__promo-link"
+              onClick={() => setShowPromoInput(true)}
+            >
+              Have a promo code?
+            </button>
+          ) : (
+            <>
+              <label className="ob-pay__promo-label" htmlFor="ob-pay-promo">
+                Promo code (optional)
+              </label>
+              <div className="ob-pay__promo-row">
+                <input
+                  id="ob-pay-promo"
+                  type="text"
+                  className="ob-pay__promo-input"
+                  value={promoCodeInput}
+                  onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                  placeholder="Enter promo code"
+                  disabled={!!promoCode || promoValidating}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (!promoCode && promoCodeInput) {
+                        validatePromoCode(promoCodeInput);
                       }
-                    }}
-                  />
-                  {!promoCode && (
-                    <button
-                      type="button"
-                      onClick={() => validatePromoCode(promoCodeInput)}
-                      disabled={promoValidating || !promoCodeInput}
-                      style={{
-                        padding: '10px 16px',
-                        background: '#4fcf61',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        cursor: promoValidating || !promoCodeInput ? 'not-allowed' : 'pointer',
-                        opacity: promoValidating || !promoCodeInput ? 0.5 : 1,
-                        whiteSpace: 'nowrap'
-                      }}
-                    >
-                      {promoValidating ? 'Checking...' : 'Apply'}
-                    </button>
-                  )}
+                    }
+                  }}
+                />
+                {!promoCode && (
+                  <button
+                    type="button"
+                    className="ob-pay__promo-apply"
+                    onClick={() => validatePromoCode(promoCodeInput)}
+                    disabled={promoValidating || !promoCodeInput}
+                  >
+                    {promoValidating ? 'Checking...' : 'Apply'}
+                  </button>
+                )}
+              </div>
+
+              {promoCode && (
+                <div className="ob-pay__promo-applied">
+                  <span className="ob-pay__promo-applied-text">
+                    <span className="ob-pay__check" aria-hidden="true">
+                      <Check size={12} strokeWidth={3} />
+                    </span>
+                    Promo code "{promoCode}" applied!
+                  </span>
+                  <button
+                    type="button"
+                    className="ob-pay__promo-remove"
+                    onClick={onRemovePromo}
+                    aria-label="Remove promo code"
+                  >
+                    <X size={16} />
+                  </button>
                 </div>
+              )}
 
-                {/* Success Message */}
-                {promoCode && (
-                  <div style={{
-                    background: '#ECFDF5',
-                    border: '1px solid #10B981',
-                    borderRadius: '6px',
-                    padding: '10px 12px',
-                    marginTop: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '8px'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-                        <circle cx="10" cy="10" r="10" fill="#10B981"/>
-                        <path d="M6 10L8.5 12.5L14 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      <span style={{ color: '#047857', fontSize: '13px', fontWeight: '500' }}>
-                        Promo code "{promoCode}" applied!
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={onRemovePromo}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#6B7280',
-                        fontSize: '18px',
-                        cursor: 'pointer',
-                        padding: '0 4px',
-                        lineHeight: 1
-                      }}
-                      title="Remove promo code"
-                    >
-                      ×
-                    </button>
-                  </div>
-                )}
-
-                {/* Error Message */}
-                {promoError && !promoCode && (
-                  <div style={{
-                    color: '#DC2626',
-                    fontSize: '13px',
-                    marginTop: '8px'
-                  }}>
-                    {promoError}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
+              {promoError && !promoCode && (
+                <p className="ob-pay__promo-error">{promoError}</p>
+              )}
+            </>
+          )}
         </div>
+      </div>
 
-        {errorMessage && (
-          <div style={{
-            maxWidth: '400px',
-            margin: '16px auto',
-            padding: '12px',
-            background: '#fee',
-            color: '#c00',
-            borderRadius: '8px',
-            fontSize: '14px',
-            textAlign: 'center'
-          }}>
-            {errorMessage}
-          </div>
-        )}
+      {errorMessage && (
+        <p className="ob-pay__error" role="alert">
+          {errorMessage}
+        </p>
+      )}
 
-        <div style={{
-          textAlign: 'center',
-          marginTop: '24px',
-          marginBottom: '16px'
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            color: '#4fcf61',
-            fontSize: '14px',
-            fontWeight: '600'
-          }}>
-            <span style={{ fontSize: '18px' }}>✓</span>
-            No payment due now
-          </div>
-        </div>
+      <div className="ob-footer">
+        <p className="ob-pay__reassure">
+          <span className="ob-pay__check" aria-hidden="true">
+            <Check size={12} strokeWidth={3} />
+          </span>
+          No payment due now
+        </p>
 
-        <div className="onboarding-screen__actions" style={{ marginBottom: '0' }}>
-          <button
-            onClick={handleSubmit}
-            className="onboarding-btn onboarding-btn--primary onboarding-btn--large"
-            disabled={isSubmitting || !stripe || !elements || promoError}
-          >
-            {isSubmitting ? 'Processing...' : 'Start Free Trial'}
-          </button>
-        </div>
+        <OnboardingButton
+          onClick={handleSubmit}
+          disabled={isSubmitting || !stripe || !elements || Boolean(promoError)}
+        >
+          {isSubmitting ? 'Processing...' : 'Start Free Trial'}
+        </OnboardingButton>
 
-        <p style={{
-          fontSize: '12px',
-          color: '#999',
-          textAlign: 'center',
-          maxWidth: '400px',
-          margin: '8px auto 0',
-          lineHeight: '1.5'
-        }}>
+        <p className="ob-footnote ob-pay__fineprint">
           {promoDiscount
             ? promoDiscount
             : `${formattedWithInterval} after trial ends. Your trial starts immediately and you can cancel anytime during the 7-day trial period.`
           }
         </p>
       </div>
-    </div>
+    </OnboardingLayout>
   );
 };
 
 /**
  * Main PaymentScreen Component for Onboarding
  */
-const PaymentScreen = ({ data, updateData, jumpToStep, onBack }) => {
+const PaymentScreen = ({ updateData, jumpToStep, onBack }) => {
   const [clientSecret, setClientSecret] = useState(null);
   const [subscriptionId, setSubscriptionId] = useState(null);
   const [requiresSetup, setRequiresSetup] = useState(false);
@@ -647,10 +509,10 @@ const PaymentScreen = ({ data, updateData, jumpToStep, onBack }) => {
     setPaymentStatus('pending');
   };
 
-  const handleBack = () => {
-    // Back out of the card form to the paywall. The paywall's own X is the
-    // deliberate free-tier exit; an X on a card form reads as "cancel this".
-    jumpToStep(STEPS.PAYWALL);
+  const handleRetry = () => {
+    setErrorMessage('');
+    setPaymentStatus('loading');
+    createSubscriptionIntent();
   };
 
   // Show success screen - "Welcome to Trackabite Pro"
@@ -668,157 +530,75 @@ const PaymentScreen = ({ data, updateData, jumpToStep, onBack }) => {
   // Show loading state
   if (paymentStatus === 'loading') {
     return (
-      <div style={{
-        background: 'linear-gradient(135deg, #4fcf61 0%, #3ab54a 100%)',
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'column',
-        gap: '24px'
-      }}>
-        <div style={{
-          fontSize: '48px',
-          fontWeight: '700',
-          color: 'white',
-          textAlign: 'center'
-        }}>
-          Trackabite
+      <OnboardingLayout showClose onClose={onBack}>
+        <div className="ob-body-center" role="status">
+          <span className="ob-pay__spinner" aria-hidden="true" />
+          <p className="ob-sub">Preparing your trial...</p>
         </div>
-
-        <div style={{
-          display: 'flex',
-          gap: '8px'
-        }}>
-          <div style={{
-            width: '12px',
-            height: '12px',
-            borderRadius: '50%',
-            background: 'white',
-            animation: 'bounce 1.4s infinite ease-in-out',
-            animationDelay: '0s'
-          }} />
-          <div style={{
-            width: '12px',
-            height: '12px',
-            borderRadius: '50%',
-            background: 'white',
-            animation: 'bounce 1.4s infinite ease-in-out',
-            animationDelay: '0.2s'
-          }} />
-          <div style={{
-            width: '12px',
-            height: '12px',
-            borderRadius: '50%',
-            background: 'white',
-            animation: 'bounce 1.4s infinite ease-in-out',
-            animationDelay: '0.4s'
-          }} />
-        </div>
-
-        <p style={{
-          fontSize: '16px',
-          color: 'rgba(255, 255, 255, 0.9)',
-          fontWeight: '500'
-        }}>
-          Preparing your trial...
-        </p>
-
-        <style>{`
-          @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
-            40% { transform: scale(1); opacity: 1; }
-          }
-        `}</style>
-      </div>
+      </OnboardingLayout>
     );
   }
 
   // Show error state
   if (paymentStatus === 'error' && !clientSecret) {
     return (
-      <div className="ob-root onboarding-screen">
-        <div className="onboarding-screen__content">
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '400px'
-          }}>
-            <div style={{
-              fontSize: '48px',
-              marginBottom: '24px'
-            }}>
-              ⚠️
-            </div>
-            <h2 style={{
-              fontSize: '20px',
-              fontWeight: '600',
-              color: '#c00',
-              marginBottom: '8px'
-            }}>
-              Unable to load payment form
-            </h2>
-            <p style={{
-              fontSize: '14px',
-              color: '#666',
-              marginBottom: '24px'
-            }}>
-              {errorMessage || 'Please try again later'}
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="onboarding-btn onboarding-btn--secondary"
-            >
-              Retry
-            </button>
-          </div>
+      <OnboardingLayout showClose onClose={onBack}>
+        <div className="ob-body-center">
+          <h1 className="ob-h1">Unable to load payment form</h1>
+          <p className="ob-sub">{errorMessage || 'Please try again later'}</p>
         </div>
-      </div>
+        <div className="ob-footer">
+          <OnboardingButton variant="secondary" onClick={handleRetry}>
+            Retry
+          </OnboardingButton>
+        </div>
+      </OnboardingLayout>
     );
   }
 
   // Render payment form when ready
   if (clientSecret) {
     return (
-      <div className="ob-root onboarding-screen">
-        <div className="onboarding-screen__content">
-          <Elements
-            key={clientSecret}
-            stripe={stripePromise}
-            options={{
-              clientSecret: clientSecret,
-              appearance: {
-                theme: 'stripe',
-                variables: {
-                  colorPrimary: '#4c6400',
-                  borderRadius: '8px'
-                }
-              }
-            }}
-          >
-            <PaymentForm
-              subscriptionId={subscriptionId}
-              requiresSetup={requiresSetup}
-              promoCode={appliedPromoCode}
-              promoDiscount={promoDiscount}
-              promoCodeInput={promoCode}
-              promoError={promoError}
-              promoValidating={promoValidating}
-              showPromoInput={showPromoInput}
-              setPromoCode={setPromoCode}
-              setShowPromoInput={setShowPromoInput}
-              validatePromoCode={validatePromoCode}
-              onRemovePromo={handleRemovePromo}
-              onSuccess={handleSuccess}
-              onError={handleError}
-              onPending={handlePending}
-              onBack={handleBack}
-            />
-          </Elements>
-        </div>
-      </div>
+      <Elements
+        key={clientSecret}
+        stripe={stripePromise}
+        options={{
+          clientSecret: clientSecret,
+          // Stripe renders in an iframe, so it has to be handed Manrope itself.
+          fonts: [
+            { cssSrc: 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap' }
+          ],
+          appearance: {
+            theme: 'stripe',
+            variables: {
+              colorPrimary: '#4c6400',
+              colorText: '#2e2f2b',
+              colorDanger: '#ef4444',
+              fontFamily: "'Manrope', system-ui, sans-serif",
+              borderRadius: '12px'
+            }
+          }
+        }}
+      >
+        <PaymentForm
+          subscriptionId={subscriptionId}
+          requiresSetup={requiresSetup}
+          promoCode={appliedPromoCode}
+          promoDiscount={promoDiscount}
+          promoCodeInput={promoCode}
+          promoError={promoError}
+          promoValidating={promoValidating}
+          showPromoInput={showPromoInput}
+          setPromoCode={setPromoCode}
+          setShowPromoInput={setShowPromoInput}
+          validatePromoCode={validatePromoCode}
+          onRemovePromo={handleRemovePromo}
+          onSuccess={handleSuccess}
+          onError={handleError}
+          onPending={handlePending}
+          onBack={onBack}
+        />
+      </Elements>
     );
   }
 

@@ -1,80 +1,174 @@
 /*
- * Chrome for the Stripe step. The Stripe logic in PaymentScreen.js is left
- * alone; this only repaints the wrapper/button classes it already uses so
- * the card form matches the rest of the flow, and lets the old 754-line
- * ScreenStyles.css be deleted.
+ * Chrome for the Stripe step. The screen sits in OnboardingLayout like every
+ * other step; this only styles what goes around Stripe's own iframe. The
+ * iframe itself is themed through the `appearance` option in PaymentScreen.js.
  */
 
-.onboarding-screen {
-  min-height: 100vh;
-  min-height: 100dvh;
-  background: var(--ob-page-bg);
+.ob-pay__title {
+  text-align: center;
+  padding-top: var(--ob-s-2);
+  padding-bottom: var(--ob-s-4);
+}
+
+.ob-pay__card {
+  padding: var(--ob-s-3);
+  background: var(--ob-surface);
+  border: 1px solid var(--ob-border);
+  border-radius: var(--ob-r-xl);
+}
+
+/* ---- Promo code ------------------------------------------------------- */
+
+.ob-pay__promo { margin-top: var(--ob-s-3); }
+
+.ob-pay__promo-link {
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: var(--ob-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ob-accent-deep);
+  cursor: pointer;
+}
+
+.ob-pay__promo-label {
+  display: block;
+  margin-bottom: var(--ob-s-2);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ob-text);
+}
+
+.ob-pay__promo-row {
+  display: flex;
+  gap: var(--ob-s-2);
+}
+
+.ob-pay__promo-input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px var(--ob-s-3);
+  border: 1px solid var(--ob-border);
+  border-radius: var(--ob-r-lg);
+  background: var(--ob-bg-2);
   color: var(--ob-text);
   font-family: var(--ob-font-body);
-  display: flex;
-  justify-content: center;
+  font-size: 16px; /* 16px keeps iOS Safari from zooming on focus */
 }
 
-.onboarding-screen__content {
-  width: 100%;
-  max-width: 480px;
-  display: flex;
-  flex-direction: column;
-  padding: var(--ob-s-4);
-  padding-bottom: max(var(--ob-s-4), env(safe-area-inset-bottom));
+.ob-pay__promo-input::placeholder { color: var(--ob-text-muted); }
+
+.ob-pay__promo-input:focus {
+  outline: none;
+  border-color: var(--ob-accent-deep);
 }
 
-.onboarding-screen__actions {
-  margin-top: auto;
-  padding-top: var(--ob-s-4);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
+.ob-pay__promo-input:disabled { cursor: not-allowed; }
 
-.onboarding-btn {
-  width: 100%;
-  min-height: 56px;
-  padding: var(--ob-s-4);
-  border-radius: var(--ob-r-full);
+.ob-pay__promo-apply {
+  padding: 0 var(--ob-s-3);
   border: none;
+  border-radius: var(--ob-r-full);
+  background: var(--ob-accent);
+  color: var(--ob-on-accent);
   font-family: var(--ob-font-body);
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0.3px;
-  line-height: 1;
+  white-space: nowrap;
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
-.onboarding-btn:disabled {
-  opacity: 0.7;
+.ob-pay__promo-apply:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-.onboarding-btn:not(:disabled):active {
-  opacity: 0.95;
-  transform: scale(0.98);
+.ob-pay__promo-applied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ob-s-2);
+  margin-top: var(--ob-s-2);
+  padding: 10px 12px;
+  border-radius: var(--ob-r-lg);
+  background: var(--ob-accent-soft);
 }
 
-.onboarding-btn--primary {
+.ob-pay__promo-applied-text {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ob-s-2);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ob-accent-deep);
+}
+
+.ob-pay__promo-remove {
+  display: inline-flex;
+  padding: 4px;
+  border: none;
+  background: none;
+  color: var(--ob-text-muted);
+  cursor: pointer;
+}
+
+.ob-pay__promo-error {
+  margin: var(--ob-s-2) 0 0;
+  font-size: 13px;
+  color: var(--ob-error);
+}
+
+/* ---- Below the card --------------------------------------------------- */
+
+.ob-pay__error {
+  margin: var(--ob-s-3) 0 0;
+  font-size: 14px;
+  text-align: center;
+  color: var(--ob-error);
+}
+
+/* The same accent checkmark circle the push-notification step uses. */
+.ob-pay__check {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
   background: var(--ob-accent);
   color: var(--ob-on-accent);
-  box-shadow: var(--ob-shadow-accent);
 }
 
-.onboarding-btn--secondary {
-  background: var(--ob-bg);
+.ob-pay__reassure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ob-s-2);
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--ob-text);
-  border: 2px solid var(--ob-border);
 }
 
-/* --large is a no-op now: every CTA is already full width and 56px tall. */
-.onboarding-btn--large { font-size: 16px; }
+.ob-pay__fineprint {
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+}
+
+/* ---- Loading ---------------------------------------------------------- */
+
+.ob-pay__spinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 4px solid var(--ob-bg-2);
+  border-top-color: var(--ob-accent-deep);
+  animation: obSpin 0.7s linear infinite; /* keyframes: OnboardingButton.css */
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .onboarding-btn { transition: none; }
+  .ob-pay__spinner { animation-duration: 1.6s; }
 }
