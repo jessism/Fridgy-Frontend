@@ -1,0 +1,164 @@
+/*
+ * Ported from the app's ProUpgradeCelebrationModal styles: 70% black
+ * backdrop, 24px-radius card capped at 400px, 200px mascot circle with the
+ * clip zoomed to 300px, 32px title, 17px message, pill button.
+ */
+
+/* Doubled with .ob-root so these win over its page-shell rules (which live
+   in OnboardingLayout.css) whatever order the two files are bundled in. */
+.ob-root.ob-celebrate {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--ob-s-4);
+  background: rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  animation: obCelebrateFade 0.3s ease-out both;
+}
+
+.ob-celebrate__card {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  max-height: 100%;
+  overflow-y: auto;
+  padding: var(--ob-s-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: var(--ob-surface);
+  border-radius: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  /* Stands in for the app's spring (tension 50, friction 7): a small overshoot. */
+  animation: obCelebratePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.ob-celebrate__mascot {
+  flex: 0 0 auto;
+  width: min(200px, 50vw);
+  aspect-ratio: 1;
+  margin-bottom: var(--ob-s-4);
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The clip is 16:9, so it is cover-cropped to fill the circle; "contain"
+   (what the app uses) leaves flat letterbox edges inside it. */
+.ob-celebrate__video {
+  width: 100%;
+  height: 100%;
+}
+
+.ob-celebrate__title {
+  margin: 0 0 12px;
+  font-family: var(--ob-font-body);
+  font-size: 32px;
+  line-height: 38px;
+  font-weight: 700;
+  letter-spacing: normal;
+  color: var(--ob-text);
+  text-wrap: balance;
+}
+
+.ob-celebrate__message {
+  margin: 0 0 var(--ob-s-5);
+  font-family: var(--ob-font-body);
+  font-size: 17px;
+  line-height: 24px;
+  color: var(--ob-text-2);
+}
+
+.ob-celebrate__button {
+  min-width: 200px;
+  padding: 16px 48px;
+  border: none;
+  border-radius: 30px;
+  background: var(--ob-primary);
+  color: var(--ob-text-inverse);
+  font-family: var(--ob-font-body);
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.ob-celebrate__button:active {
+  opacity: 0.8;
+  transform: scale(0.98);
+}
+
+.ob-celebrate__button:focus-visible {
+  outline: 2px solid var(--ob-accent-deep);
+  outline-offset: 3px;
+}
+
+.ob-celebrate__terms {
+  margin: var(--ob-s-3) 0 0;
+  font-family: var(--ob-font-body);
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--ob-text-muted);
+}
+
+/* ---- Confetti --------------------------------------------------------- */
+
+.ob-celebrate__confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ob-celebrate__piece {
+  position: absolute;
+  top: -20px;
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
+  opacity: 0;
+  animation-name: obConfettiFall;
+  animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation-fill-mode: forwards;
+}
+
+@keyframes obConfettiFall {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  80% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--ob-confetti-drift), 105vh, 0) rotate(var(--ob-confetti-spin));
+  }
+}
+
+@keyframes obCelebrateFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes obCelebratePop {
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-height: 640px) {
+  .ob-celebrate__card { padding: var(--ob-s-4); }
+  .ob-celebrate__mascot { width: min(140px, 38vw); margin-bottom: var(--ob-s-3); }
+  .ob-celebrate__title { font-size: 26px; line-height: 32px; }
+  .ob-celebrate__message { margin-bottom: var(--ob-s-4); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ob-root.ob-celebrate,
+  .ob-celebrate__card { animation: none; }
+  .ob-celebrate__confetti { display: none; }
+}

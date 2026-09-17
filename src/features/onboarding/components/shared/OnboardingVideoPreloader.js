@@ -6,7 +6,7 @@ import { PRELOAD_VIDEOS } from '../../constants/onboardingConstants';
  * stall on a cold fetch; mounting hidden preloading elements a few steps
  * earlier means they are warm by the time the user arrives.
  */
-const OnboardingVideoPreloader = ({ active }) => {
+const OnboardingVideoPreloader = ({ active, videos = PRELOAD_VIDEOS }) => {
   if (!active) return null;
 
   return (
@@ -20,7 +20,7 @@ const OnboardingVideoPreloader = ({ active }) => {
       }}
       aria-hidden="true"
     >
-      {PRELOAD_VIDEOS.map((src) => (
+      {videos.map((src) => (
         <video key={src} src={src} preload="auto" muted playsInline />
       ))}
     </div>

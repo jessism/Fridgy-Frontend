@@ -269,6 +269,7 @@ export const VIDEOS = {
   reaffirm: `${VIDEO_BASE}/trackie-reaffirm.mp4`,
   sorting: `${VIDEO_BASE}/trackie-sorting.mp4`,
   notify: `${VIDEO_BASE}/trackie-notify.mp4`,
+  bigWin: `${VIDEO_BASE}/trackie-big-win.mp4`,
 };
 
 /* The four feature clips are 1-3.4MB each and load mid-funnel; the

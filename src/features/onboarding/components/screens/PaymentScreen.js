@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { PaymentSuccessAnimation } from '../../../../components/PaymentSuccessAnimation';
 import { usePrice } from '../../../../contexts/PriceContext';
 import { Check, X } from 'lucide-react';
-import { OnboardingLayout, OnboardingButton } from '../shared';
-import { STEPS } from '../../constants/onboardingConstants';
+import { OnboardingLayout, OnboardingButton, OnboardingVideoPreloader } from '../shared';
+import { STEPS, VIDEOS } from '../../constants/onboardingConstants';
+import TrialCelebration from './TrialCelebration';
 import './PaymentScreen.css';
 
 // Initialize Stripe outside component
@@ -152,6 +152,9 @@ const PaymentForm = ({
 
   return (
     <OnboardingLayout showClose onClose={onBack} className="ob-pay">
+      {/* Warm the 1.5MB celebration clip while the card details are typed. */}
+      <OnboardingVideoPreloader active videos={[VIDEOS.bigWin]} />
+
       <h1 className="ob-h1 ob-pay__title">{'Start Your\n7-Day Free Trial'}</h1>
 
       <div className="ob-pay__card">
@@ -518,11 +521,10 @@ const PaymentScreen = ({ updateData, jumpToStep, onBack }) => {
   // Show success screen - "Welcome to Trackabite Pro"
   if (showSuccess) {
     return (
-      <PaymentSuccessAnimation
-        status="success"
+      <TrialCelebration
         // Was jumpToStep(13), which is the paywall — a successful trial
         // dropped the user back onto the upsell instead of the signup form.
-        onComplete={() => jumpToStep(STEPS.CREATE_ACCOUNT)}
+        onContinue={() => jumpToStep(STEPS.CREATE_ACCOUNT)}
       />
     );
   }
