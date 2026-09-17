@@ -479,7 +479,6 @@ const NewLandingPage3 = () => {
   }, { dependencies: [loading] });
 
   const handleGetStarted = () => {
-    console.log('[Landing3] Navigating to onboarding');
     navigate('/onboarding');
   };
 

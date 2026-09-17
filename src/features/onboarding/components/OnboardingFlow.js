@@ -1,4 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../../auth/context/AuthContext';
 import useOnboarding from '../hooks/useOnboarding';
 import { STEPS, getProgress } from '../constants/onboardingConstants';
 import { trackOnboardingStepViewed } from '../../../utils/onboardingTracking';
@@ -37,6 +39,15 @@ const OnboardingFlow = () => {
     jumpToStep,
   } = useOnboarding();
 
+  // Someone who arrives already signed in has no business in the signup
+  // funnel. Decided once, as soon as auth resolves: the flow signs the user
+  // in itself on its last step, and that must not bounce them mid-completion.
+  const { user, loading: authLoading } = useAuth();
+  const signedInOnArrival = useRef(null);
+  if (signedInOnArrival.current === null && !authLoading) {
+    signedInOnArrival.current = Boolean(user);
+  }
+
   // Tracked once, here. Screens used to each fire their own with a hardcoded
   // number, which is how the reported step numbers drifted from the flow.
   useEffect(() => {
@@ -57,7 +68,7 @@ const OnboardingFlow = () => {
       case STEPS.WELCOME:
         return <WelcomeScreen onNext={goToNextStep} />;
       case STEPS.GOAL:
-        return <GoalSelectionScreen {...stepProps} showBack={false} />;
+        return <GoalSelectionScreen {...stepProps} />;
       case STEPS.GOAL_CONFIRM:
         return <GoalConfirmationScreen {...stepProps} jumpToStep={jumpToStep} />;
       case STEPS.HOUSEHOLD:
@@ -87,13 +98,15 @@ const OnboardingFlow = () => {
       case STEPS.READY_ROUTINE:
         return <ReadyRoutineScreen {...stepProps} />;
       case STEPS.PAYWALL:
-        return <PaywallScreen data={onboardingData} jumpToStep={jumpToStep} />;
+        return <PaywallScreen jumpToStep={jumpToStep} />;
       case STEPS.PAYMENT:
         return (
           <PaymentScreen
-            data={onboardingData}
             updateData={updateData}
             jumpToStep={jumpToStep}
+            // Back out of the card form to the paywall. The paywall's own X
+            // is the deliberate free-tier exit; an X on a card form reads as
+            // "cancel this".
             onBack={() => jumpToStep(STEPS.PAYWALL)}
           />
         );
@@ -115,6 +128,10 @@ const OnboardingFlow = () => {
         return null;
     }
   };
+
+  if (signedInOnArrival.current) {
+    return <Navigate to="/home" replace />;
+  }
 
   return (
     <div className="onboarding-flow">

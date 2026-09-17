@@ -2,8 +2,8 @@ import React from 'react';
 import { OnboardingLayout, OnboardingButton, OptionCard, OptionGrid } from '../shared';
 import { GOAL_OPTIONS } from '../../constants/onboardingConstants';
 
-const GoalSelectionScreen = ({ data, updateData, onNext, onBack, progress, showBack = true }) => (
-  <OnboardingLayout showBack={showBack} onBack={onBack} progress={progress}>
+const GoalSelectionScreen = ({ data, updateData, onNext, onBack, progress }) => (
+  <OnboardingLayout showBack onBack={onBack} progress={progress}>
     <div className="ob-header-block">
       <h1 className="ob-h1--display">What's your main goal?</h1>
       <p className="ob-sub">This helps us personalize your experience</p>
