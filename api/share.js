@@ -110,6 +110,10 @@ async function fetchRecipe(slug) {
 // attribute order preserved — both forms match. HTML comments are stripped by
 // the build, so placeholder tokens were not an option.
 const TITLE_RE = /<title>[^<]*<\/title>/i;
+// When a platform won't use og:image it falls back to the page icon, which
+// site-wide is the 3D app icon. Share pages point it at the flat Fridgy mascot.
+const TOUCH_ICON_RE = /<link\s+rel="apple-touch-icon"\s+href="[^"]*"\s*\/?>/i;
+const SHARE_ICON_TAG = '<link rel="apple-touch-icon" href="/share-icon.png"/>';
 const DESC_RE = /<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i;
 
 // helmet-async reconciles head tags carrying data-rh: it keeps the ones equal
@@ -123,6 +127,7 @@ function metaTag(attrs) {
 function injectHead(shell, { title, description, metas, links, scripts }) {
   let html = shell;
   html = html.replace(TITLE_RE, `<title>${escAttr(title)}</title>`);
+  html = html.replace(TOUCH_ICON_RE, SHARE_ICON_TAG);
   if (DESC_RE.test(html)) {
     html = html.replace(DESC_RE, metaTag({ name: 'description', content: description }));
   } else {
@@ -152,6 +157,15 @@ module.exports = async (req, res) => {
   }
 
   const noindex = [{ name: 'robots', content: 'noindex' }];
+  // Pages with no recipe to show still get a preview image: the Fridgy card
+  // rather than nothing, which platforms fill with the app icon.
+  const fallbackImage = [
+    { property: 'og:image', content: `${SITE_ORIGIN}/share-fallback.png` },
+    { property: 'og:image:width', content: '1200' },
+    { property: 'og:image:height', content: '630' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:image', content: `${SITE_ORIGIN}/share-fallback.png` },
+  ];
   const result = SLUG_RE.test(slug) ? await fetchRecipe(slug) : { status: 404, recipe: null };
 
   if (result.status === 'error') {
@@ -162,7 +176,7 @@ module.exports = async (req, res) => {
     return res.end(injectHead(shell, {
       title: 'Trackabite',
       description: 'A recipe shared from Trackabite.',
-      metas: noindex,
+      metas: [...noindex, ...fallbackImage],
       links: [],
       scripts: [],
     }));
@@ -174,7 +188,7 @@ module.exports = async (req, res) => {
     return res.end(injectHead(shell, {
       title: result.status === 410 ? 'This recipe is no longer shared | Trackabite' : 'Recipe not found | Trackabite',
       description: 'Trackabite recipe link.',
-      metas: noindex,
+      metas: [...noindex, ...fallbackImage],
       links: [],
       scripts: [bootstrapTag({ slug, status: result.status })],
     }));
