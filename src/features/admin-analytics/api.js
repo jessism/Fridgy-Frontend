@@ -82,6 +82,8 @@ export const batchWarmupDone = (batchId) => infl(`/batches/${encodeURIComponent(
 export const influencerDmSent = (id) => infl(`/${encodeURIComponent(id)}/dm-sent`, { method: 'POST', body: {} });
 export const updateInfluencerPost = (id, postId, payload) =>
   infl(`/${encodeURIComponent(id)}/posts/${encodeURIComponent(postId)}`, { method: 'POST', body: payload });
+export const sendInfluencerEmail = (touchId) => infl(`/touches/${encodeURIComponent(touchId)}/send`, { method: 'POST', body: {} });
+export const sendAllInfluencerEmails = () => infl('/emails/send-all', { method: 'POST', body: {} });
 export const retryInfluencerTouch = (touchId) => infl(`/touches/${encodeURIComponent(touchId)}/retry`, { method: 'POST', body: {} });
 export const runInfluencerJob = (job) => infl(`/jobs/${encodeURIComponent(job)}`, { method: 'POST', body: {} });
 

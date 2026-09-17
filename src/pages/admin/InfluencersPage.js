@@ -3,7 +3,8 @@ import { Megaphone, Users, Send, MessageCircle } from 'lucide-react';
 import {
   fetchInfluencerToday, fetchInfluencers, fetchInfluencer, updateInfluencer,
   influencerWarmupDone, batchWarmupDone, influencerDmSent, updateInfluencerPost,
-  retryInfluencerTouch, runInfluencerJob, formatDate, formatDateTime,
+  retryInfluencerTouch, sendInfluencerEmail, sendAllInfluencerEmails,
+  runInfluencerJob, formatDate, formatDateTime,
 } from '../../features/admin-analytics/api';
 import { AdminPageHeader, AdminCard, DataTable, Badge, EmptyState, ErrorState, Skeleton, StatTile } from './ui';
 import './InfluencersPage.css';
@@ -151,10 +152,11 @@ const WarmupCard = ({ inf, onDone, onTick, onTickAll, busy }) => {
 
 /* ---------- Today: DM tasks ---------- */
 
-const DmTask = ({ touch, onSent, busy }) => {
+const DmTask = ({ touch, onSent, busy, emailPending }) => {
   const inf = touch.influencers;
   const emailNote = !inf.email ? 'no email on file, DM only'
-    : inf.email_error ? `email failed: ${inf.email_error}` : 'email sent ✓';
+    : emailPending ? 'email drafted below, not sent yet'
+      : inf.email_error ? `email failed: ${inf.email_error}` : 'email sent ✓';
   return (
     <div className="io-dm">
       <div className="io-creator__head">
@@ -169,6 +171,49 @@ const DmTask = ({ touch, onSent, busy }) => {
         </div>
       </div>
       <div className="io-dm__body">{touch.body}</div>
+    </div>
+  );
+};
+
+/* ---------- Today: emails waiting to be sent ---------- */
+
+/**
+ * First contact is drafted when warm-up finishes and sits here until Jessie
+ * presses Send: the exact message, headers included, goes out from the
+ * jessie@ mailbox without opening Gmail. Follow-ups (touch 2+) are sent by the
+ * evening cron instead, and only appear here if one failed.
+ */
+const EmailTask = ({ touch, cfg, busy, onSend, onOpen }) => {
+  const inf = touch.influencers;
+  return (
+    <div className="io-email">
+      <div className="io-creator__head">
+        <div>
+          <HandleLink inf={inf} />
+          <span className="io-creator__meta">
+            touch #{touch.step}{touch.error ? '' : ' · drafted, not sent yet'}
+          </span>
+        </div>
+        <div className="io-actions">
+          <button type="button" className="ad-btn io-btn--sm" onClick={() => onOpen(inf.id)}>Edit</button>
+          <button
+            type="button"
+            className="ad-btn ad-btn--primary io-btn--sm"
+            disabled={busy || !cfg.emailEnabled}
+            title={cfg.emailEnabled ? undefined : 'Creator email is off on the server'}
+            onClick={() => onSend(touch)}
+          >
+            {touch.error ? 'Retry send' : 'Send email'}
+          </button>
+        </div>
+      </div>
+      {touch.error && <div className="io-error">{touch.error}</div>}
+      <dl className="io-headers">
+        <dt>From</dt><dd>{cfg.fromName} &lt;{cfg.fromEmail || 'not configured'}&gt;</dd>
+        <dt>To</dt><dd>{inf.email}</dd>
+        <dt>Subject</dt><dd>{touch.subject || <span className="io-error">no subject drafted</span>}</dd>
+      </dl>
+      <div className="io-dm__body">{touch.body || '(no body drafted — Edit the creator, then retry)'}</div>
     </div>
   );
 };
@@ -398,6 +443,8 @@ const InfluencersPage = () => {
   const batch = today?.batch;
   const approvedInBatch = (batch?.creators || []).length;
   const dmTasks = today?.dmTasks || [];
+  const emailTasks = today?.emailTasks || [];
+  const pendingEmailFor = new Set(emailTasks.map((t) => t.influencers.id));
   const cfg = today?.config || {};
   const pending = counts.pending_approval || 0;
 
@@ -550,18 +597,30 @@ const InfluencersPage = () => {
             {dmTasks.length > 0 && (
               <div className="io-section">
                 <h3 className="io-section__title">DMs to send ({dmTasks.length})</h3>
-                {dmTasks.map((t) => <DmTask key={t.id} touch={t} busy={busy} onSent={(id) => run(() => influencerDmSent(id))} />)}
+                {dmTasks.map((t) => (
+                  <DmTask key={t.id} touch={t} busy={busy}
+                    emailPending={pendingEmailFor.has(t.influencers.id)}
+                    onSent={(id) => run(() => influencerDmSent(id))} />
+                ))}
               </div>
             )}
 
-            {(today.failedEmails || []).length > 0 && (
+            {emailTasks.length > 0 && (
               <div className="io-section">
-                <h3 className="io-section__title">Failed emails ({today.failedEmails.length})</h3>
-                {today.failedEmails.map((t) => (
-                  <div key={t.id} className="io-dm">
-                    @{t.influencers.handle} · touch #{t.step} · <span className="io-error">{t.error}</span>
-                    {' '}<button type="button" className="ad-btn io-btn--sm" disabled={busy} onClick={() => run(() => retryInfluencerTouch(t.id))}>Retry</button>
-                  </div>
+                <h3 className="io-section__title">
+                  Emails to send ({emailTasks.length})
+                  {emailTasks.length > 1 && (
+                    <button type="button" className="ad-btn ad-btn--primary io-btn--sm" disabled={busy || !cfg.emailEnabled}
+                      onClick={() => run(async () => { const out = await sendAllInfluencerEmails(); setJobMsg(`Sent ${out.sent} email(s)${out.failed.length ? `, ${out.failed.length} failed` : ''}`); })}>
+                      Send all {emailTasks.length}
+                    </button>
+                  )}
+                </h3>
+                <p className="io-note">Read them, then send. They go out from the jessie@ mailbox — you don&apos;t need to open Gmail.</p>
+                {emailTasks.map((t) => (
+                  <EmailTask key={t.id} touch={t} cfg={cfg} busy={busy}
+                    onSend={(touch) => run(() => sendInfluencerEmail(touch.id))}
+                    onOpen={(id) => setSelected(id)} />
                 ))}
               </div>
             )}
