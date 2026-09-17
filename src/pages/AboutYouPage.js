@@ -14,7 +14,7 @@ const AboutYouPage = () => {
     getFormattedGoal,
     getFormattedBudget,
     getFormattedHouseholdSize,
-    updateOnboardingField,
+    saveOnboardingData,
     saving
   } = useUserOnboarding();
 
@@ -72,12 +72,15 @@ const AboutYouPage = () => {
         await updateProfile(profileUpdates);
       }
 
-      // Save onboarding fields that changed
-      for (const [key, value] of Object.entries(editData)) {
-        if (key === 'firstName' || key === 'email') continue; // Already handled above
-        if (onboardingData[key] !== value) {
-          await updateOnboardingField(key, value);
-        }
+      // Save the preference edits in one request. Saving them field by field
+      // rebuilt each request from the same stale data, so every change but
+      // the last was overwritten.
+      const { firstName, email, ...preferenceEdits } = editData;
+      const hasChanges = Object.entries(preferenceEdits).some(
+        ([key, value]) => onboardingData[key] !== value
+      );
+      if (hasChanges) {
+        await saveOnboardingData({ ...onboardingData, ...preferenceEdits });
       }
       setIsEditing(false);
       setEditData({});
@@ -201,7 +204,7 @@ const AboutYouPage = () => {
               <p>Loading your preferences...</p>
             </div>
           </div>
-        ) : hasOnboardingData ? (
+        ) : hasOnboardingData || isEditing ? (
           <div className="about-you__card">
             <div className="about-you__card-header">
               <h2 className="about-you__section-title">Your Preferences</h2>
@@ -302,13 +305,15 @@ const AboutYouPage = () => {
             <div className="about-you__card-content">
               <div className="about-you__empty-state">
                 <p className="about-you__empty-text">
-                  Complete your onboarding to see your preferences here.
+                  Add your preferences to see them here.
                 </p>
+                {/* /onboarding is the signup funnel and ends in account
+                    creation, so a signed-in user fills these in here. */}
                 <button
                   className="about-you__onboarding-button"
-                  onClick={() => navigate('/onboarding')}
+                  onClick={handleEditProfile}
                 >
-                  Complete Onboarding
+                  Add Preferences
                 </button>
               </div>
             </div>
