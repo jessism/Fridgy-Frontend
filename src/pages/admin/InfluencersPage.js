@@ -29,6 +29,7 @@ const FUNNEL = ['pending_approval', 'warmup_needed', 'dm_needed', 'contacted', '
 const SMALL = ['hold', 'rejected', 'no_response', 'declined', 'opted_out', 'bounced'];
 
 const dmLink = (inf) => (inf.platform === 'instagram' ? `https://ig.me/m/${inf.handle}` : inf.profile_url);
+const stepLabel = (step) => (step === 1 ? 'first contact' : `follow-up ${step - 1}`);
 const money = (n) => (n == null ? '—' : `$${n}`);
 
 async function copyText(text) {
@@ -162,7 +163,7 @@ const DmTask = ({ touch, onSent, busy, emailPending }) => {
       <div className="io-creator__head">
         <div>
           <HandleLink inf={inf} />
-          <span className="io-creator__meta">touch #{touch.step} · {emailNote}</span>
+          <span className="io-creator__meta">{stepLabel(touch.step)} · {emailNote}</span>
         </div>
         <div className="io-actions">
           <a className="ad-btn io-btn--sm" href={dmLink(inf)} target="_blank" rel="noreferrer">Open DM</a>
@@ -191,7 +192,7 @@ const EmailTask = ({ touch, cfg, busy, onSend, onOpen }) => {
         <div>
           <HandleLink inf={inf} />
           <span className="io-creator__meta">
-            touch #{touch.step}{touch.error ? '' : ' · drafted, not sent yet'}
+            {stepLabel(touch.step)}{touch.error ? '' : ' · drafted, not sent yet'}
           </span>
         </div>
         <div className="io-actions">
@@ -522,7 +523,7 @@ const InfluencersPage = () => {
     <div className="aa">
       <AdminPageHeader
         title="Influencer Outreach"
-        description="Two sessions a week. Each session: finish warming up the last batch (Done warming up sends the emails, then send the DMs), then approve the next 10 and start liking and commenting. Follow-ups email themselves; DM follow-ups appear here when due."
+        description="Two sessions a week. Each session: finish warming up the last batch, then send its DMs and emails, then approve the next 10 and start liking and commenting. Nothing is sent without you: follow-ups are drafted when they fall due and wait here to be read, edited and sent."
         actions={(
           <div className="io-tools">
             <button type="button" className="ad-btn io-btn--sm" disabled={busy} onClick={() => runJob('followups')}>Run follow-ups now</button>
@@ -616,7 +617,7 @@ const InfluencersPage = () => {
                     </button>
                   )}
                 </h3>
-                <p className="io-note">Read them, then send. They go out from the jessie@ mailbox — you don&apos;t need to open Gmail.</p>
+                <p className="io-note">Read them, edit if needed, then send. They go out from the jessie@ mailbox — you don&apos;t need to open Gmail.</p>
                 {emailTasks.map((t) => (
                   <EmailTask key={t.id} touch={t} cfg={cfg} busy={busy}
                     onSend={(touch) => run(() => sendInfluencerEmail(touch.id))}
