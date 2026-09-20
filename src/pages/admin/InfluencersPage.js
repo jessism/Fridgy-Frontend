@@ -166,10 +166,11 @@ const DmTask = ({ touch, onSent, onRemove, busy, emailPending }) => {
           <HandleLink inf={inf} />
           <span className="io-creator__meta">{stepLabel(touch.step)} · {emailNote}</span>
         </div>
+        {/* Remove sits at the far left, away from the primary action. */}
         <div className="io-actions">
+          <button type="button" className="ad-btn io-btn--sm io-btn--danger" disabled={busy} onClick={() => onRemove(inf)}>Remove</button>
           <a className="ad-btn io-btn--sm" href={dmLink(inf)} target="_blank" rel="noreferrer">Open DM</a>
           <CopyButton text={touch.body || ''} label="Copy DM" />
-          <button type="button" className="ad-btn io-btn--sm io-btn--danger" disabled={busy} onClick={() => onRemove(inf)}>Remove</button>
           <button type="button" className="ad-btn ad-btn--primary io-btn--sm" disabled={busy} onClick={() => onSent(inf.id)}>DM sent</button>
         </div>
       </div>
@@ -198,8 +199,8 @@ const EmailTask = ({ touch, cfg, busy, onSend, onOpen, onRemove }) => {
           </span>
         </div>
         <div className="io-actions">
-          <button type="button" className="ad-btn io-btn--sm" onClick={() => onOpen(inf.id)}>Edit</button>
           <button type="button" className="ad-btn io-btn--sm io-btn--danger" disabled={busy} onClick={() => onRemove(inf)}>Remove</button>
+          <button type="button" className="ad-btn io-btn--sm" onClick={() => onOpen(inf.id)}>Edit</button>
           <button
             type="button"
             className="ad-btn ad-btn--primary io-btn--sm"
@@ -235,7 +236,7 @@ const REASON_FLOWS = {
     title: (h) => `Reject @${h}`,
     intro: 'Why isn’t this a fit? Gemini reads recent reasons when scoring the next batch, so similar creators stop showing up.',
     placeholder: 'e.g. dietitian clinic account, not a home cook',
-    confirm: 'Reject with reason',
+    confirm: (h) => `Reject @${h}`,
     skip: 'Reject without reason',
     chips: [
       'Not food or cooking content', 'Business or restaurant account', 'Wrong audience',
@@ -246,7 +247,7 @@ const REASON_FLOWS = {
     title: (h) => `Remove @${h} from the pipeline`,
     intro: 'Stops every queued DM, email and follow-up for this creator. The note is kept on the record and in the sheet, and is not used for scoring.',
     placeholder: 'e.g. Instagram account got deleted',
-    confirm: 'Remove with reason',
+    confirm: (h) => `Remove @${h}`,
     skip: 'Remove without reason',
     chips: [
       'Instagram account got deleted', 'Account went private', 'Handle changed',
@@ -282,7 +283,7 @@ const ReasonModal = ({ creator, flow, onCancel, onConfirm, busy }) => {
           <button type="button" className="ad-btn" disabled={busy} onClick={onCancel}>Cancel</button>
           <div className="io-actions">
             <button type="button" className="ad-btn" disabled={busy} onClick={() => onConfirm('')}>{f.skip}</button>
-            <button type="button" className="ad-btn ad-btn--primary" disabled={busy || !reason.trim()} onClick={() => onConfirm(reason.trim())}>{f.confirm}</button>
+            <button type="button" className="ad-btn ad-btn--primary" disabled={busy || !reason.trim()} onClick={() => onConfirm(reason.trim())}>{f.confirm(creator.handle)}</button>
           </div>
         </div>
       </div>
@@ -387,7 +388,9 @@ const DetailModal = ({ id, onClose, onChanged, onRequestReason }) => {
                 {['dm_needed', 'followup_needed'].includes(inf.status) && <button type="button" className="ad-btn ad-btn--primary" disabled={saving} onClick={() => act(() => influencerDmSent(id))}>DM sent</button>}
                 {['dm_needed', 'contacted', 'followup_needed'].includes(inf.status) && <button type="button" className="ad-btn" disabled={saving} onClick={() => setStatus('replied', { reply_channel: 'dm' })}>Mark replied</button>}
                 {inf.status === 'replied' && <><button type="button" className="ad-btn ad-btn--primary" disabled={saving} onClick={() => setStatus('signed')}>Signed</button><button type="button" className="ad-btn" disabled={saving} onClick={() => setStatus('declined')}>Declined</button></>}
-                {['rejected', 'hold', 'no_response', 'declined'].includes(inf.status) && <button type="button" className="ad-btn" disabled={saving} onClick={() => setStatus('pending_approval')}>Back to pending</button>}
+                {/* Restore reads the touch history back; 'back to pending' would throw away a contacted creator's state. */}
+                {['removed', 'rejected'].includes(inf.status) && <button type="button" className="ad-btn ad-btn--primary" disabled={saving} onClick={() => setStatus('restore')}>Restore to pipeline</button>}
+                {['hold', 'no_response', 'declined'].includes(inf.status) && <button type="button" className="ad-btn" disabled={saving} onClick={() => setStatus('pending_approval')}>Back to pending</button>}
               </div>
               <button type="button" className="ad-btn ad-btn--primary" disabled={saving} onClick={save}>{saving ? 'Saving…' : 'Save edits'}</button>
             </div>
@@ -447,6 +450,7 @@ const InfluencersPage = () => {
   const [selected, setSelected] = useState(null);
   const [reasonFor, setReasonFor] = useState(null); // { creator, flow: 'rejected' | 'removed' }
   const [showWarmup, setShowWarmup] = useState(false);
+  const [undo, setUndo] = useState(null); // { creator, flow } after a reject/remove
   const [jobMsg, setJobMsg] = useState(null);
 
   const loadToday = useCallback(() => fetchInfluencerToday().then(setToday).catch((e) => setError(e.message)), []);
@@ -507,6 +511,7 @@ const InfluencersPage = () => {
             <button type="button" className="ad-btn io-btn--sm io-btn--danger" disabled={busy} onClick={() => setReasonFor({ creator: r, flow: 'rejected' })}>Reject</button>
           </>}
           {['dm_needed', 'contacted', 'followup_needed'].includes(r.status) && <button type="button" className="ad-btn io-btn--sm" disabled={busy} onClick={() => run(() => updateInfluencer(r.id, { status: 'replied', reply_channel: 'dm' }))}>Mark replied</button>}
+          {['removed', 'rejected'].includes(r.status) && <button type="button" className="ad-btn io-btn--sm" disabled={busy} onClick={() => restore(r)}>Restore</button>}
         </div>
       ),
     },
@@ -533,11 +538,19 @@ const InfluencersPage = () => {
     posts.filter((p) => !p.liked_at).map((p) => updateInfluencerPost(inf.id, p.id, { liked: true, commented: true })),
   ));
 
+  const restore = (creator) => run(async () => {
+    await updateInfluencer(creator.id, { status: 'restore' });
+    setUndo(null);
+  });
+
   // The flow key doubles as the status to set.
   const confirmReason = (reason) => run(async () => {
-    await updateInfluencer(reasonFor.creator.id, { status: reasonFor.flow, rejection_reason: reason });
+    const { creator, flow } = reasonFor;
+    await updateInfluencer(creator.id, { status: flow, rejection_reason: reason });
     setReasonFor(null);
     setSelected(null);
+    // One click back, because the cards of two creators sit next to each other.
+    setUndo({ creator, flow });
   });
 
   return (
@@ -558,6 +571,15 @@ const InfluencersPage = () => {
 
       {error && <ErrorState onRetry={reload}>{error}</ErrorState>}
       {jobMsg && <div className="io-warn">{jobMsg}</div>}
+      {undo && (
+        <div className="io-warn io-undo">
+          <span>@{undo.creator.handle} was {undo.flow === 'removed' ? 'removed from the pipeline' : 'rejected'}.</span>
+          <span className="io-actions">
+            <button type="button" className="ad-btn io-btn--sm" disabled={busy} onClick={() => restore(undo.creator)}>Undo</button>
+            <button type="button" className="ad-btn io-btn--sm" onClick={() => setUndo(null)}>Dismiss</button>
+          </span>
+        </div>
+      )}
       {today && !cfg.emailEnabled && (
         <div className="io-warn">
           Creator email is {cfg.emailConfigured ? 'configured but disabled (OUTREACH_EMAIL_ENABLED is not "true")' : 'not configured (GMAIL_SENDER / GMAIL_APP_PASSWORD missing on the server)'}. “Done warming up” will still move creators to DM needed; the email touch is recorded as failed and can be retried once email is on.

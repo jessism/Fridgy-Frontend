@@ -16,6 +16,7 @@
 .io-section__title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ad-ink-2); margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
 .io-note { font-size: 0.85rem; color: var(--ad-ink-2); margin: 0 0 8px; }
 .io-warn { background: var(--ad-warn-bg); color: var(--ad-warn-ink); border-radius: var(--ad-radius-ctl); padding: 8px 12px; font-size: 0.85rem; margin-bottom: 10px; }
+.io-undo { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 
 .io-creator { border: 1px solid var(--ad-border); border-radius: var(--ad-radius-card); padding: 12px 14px; margin-bottom: 10px; background: var(--ad-canvas); }
 .io-creator__head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
