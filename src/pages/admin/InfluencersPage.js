@@ -19,14 +19,15 @@ const STATUS_LABEL = {
   pending_approval: 'Pending', warmup_needed: 'Warm-up needed', dm_needed: 'DM needed', contacted: 'Contacted',
   followup_needed: 'Follow-up needed', replied: 'Replied', signed: 'Signed', declined: 'Declined',
   no_response: 'No response', rejected: 'Rejected', hold: 'On hold', opted_out: 'Opted out', bounced: 'Bounced',
+  removed: 'Removed',
 };
 const TONE = {
   pending_approval: 'info', warmup_needed: 'warn', dm_needed: 'warn', contacted: 'warn', followup_needed: 'warn',
   replied: 'good', signed: 'good', declined: 'muted', no_response: 'muted', rejected: 'muted', hold: 'muted',
-  opted_out: 'bad', bounced: 'bad',
+  opted_out: 'bad', bounced: 'bad', removed: 'muted',
 };
 const FUNNEL = ['pending_approval', 'warmup_needed', 'dm_needed', 'contacted', 'followup_needed', 'replied', 'signed'];
-const SMALL = ['hold', 'rejected', 'no_response', 'declined', 'opted_out', 'bounced'];
+const SMALL = ['hold', 'rejected', 'no_response', 'declined', 'opted_out', 'bounced', 'removed'];
 
 const dmLink = (inf) => (inf.platform === 'instagram' ? `https://ig.me/m/${inf.handle}` : inf.profile_url);
 const stepLabel = (step) => (step === 1 ? 'first contact' : `follow-up ${step - 1}`);
@@ -153,7 +154,7 @@ const WarmupCard = ({ inf, onDone, onTick, onTickAll, busy }) => {
 
 /* ---------- Today: DM tasks ---------- */
 
-const DmTask = ({ touch, onSent, busy, emailPending }) => {
+const DmTask = ({ touch, onSent, onRemove, busy, emailPending }) => {
   const inf = touch.influencers;
   const emailNote = !inf.email ? 'no email on file, DM only'
     : emailPending ? 'email drafted below, not sent yet'
@@ -168,6 +169,7 @@ const DmTask = ({ touch, onSent, busy, emailPending }) => {
         <div className="io-actions">
           <a className="ad-btn io-btn--sm" href={dmLink(inf)} target="_blank" rel="noreferrer">Open DM</a>
           <CopyButton text={touch.body || ''} label="Copy DM" />
+          <button type="button" className="ad-btn io-btn--sm io-btn--danger" disabled={busy} onClick={() => onRemove(inf)}>Remove</button>
           <button type="button" className="ad-btn ad-btn--primary io-btn--sm" disabled={busy} onClick={() => onSent(inf.id)}>DM sent</button>
         </div>
       </div>
@@ -184,7 +186,7 @@ const DmTask = ({ touch, onSent, busy, emailPending }) => {
  * jessie@ mailbox without opening Gmail. Follow-ups (touch 2+) are sent by the
  * evening cron instead, and only appear here if one failed.
  */
-const EmailTask = ({ touch, cfg, busy, onSend, onOpen }) => {
+const EmailTask = ({ touch, cfg, busy, onSend, onOpen, onRemove }) => {
   const inf = touch.influencers;
   return (
     <div className="io-email">
@@ -197,6 +199,7 @@ const EmailTask = ({ touch, cfg, busy, onSend, onOpen }) => {
         </div>
         <div className="io-actions">
           <button type="button" className="ad-btn io-btn--sm" onClick={() => onOpen(inf.id)}>Edit</button>
+          <button type="button" className="ad-btn io-btn--sm io-btn--danger" disabled={busy} onClick={() => onRemove(inf)}>Remove</button>
           <button
             type="button"
             className="ad-btn ad-btn--primary io-btn--sm"
@@ -219,35 +222,51 @@ const EmailTask = ({ touch, cfg, busy, onSend, onOpen }) => {
   );
 };
 
-/* ---------- Reject with a reason ---------- */
-
-const REJECT_CHIPS = [
-  'Not food or cooking content',
-  'Business or restaurant account',
-  'Wrong audience',
-  'Too sponsored / promotional',
-  'Promotes a competing app',
-  'Low-quality content',
-  'Inactive',
-];
+/* ---------- Reject / remove with a reason ---------- */
 
 /**
- * The reason is not bookkeeping: discovery feeds recent reasons back into the
- * scoring prompt, so writing one here stops the same type of creator appearing
- * next run. Skipping is still one click, so a fast pass through the list is
- * never blocked.
+ * Rejecting is a judgement about fit and its reason is fed back into scoring,
+ * so similar creators stop appearing. Removing is not: the account is gone or
+ * they asked to be dropped, and nothing should be inferred from it. Same box,
+ * different copy and chips. Skipping the reason stays one click either way.
  */
-const RejectModal = ({ creator, onCancel, onReject, busy }) => {
+const REASON_FLOWS = {
+  rejected: {
+    title: (h) => `Reject @${h}`,
+    intro: 'Why isn’t this a fit? Gemini reads recent reasons when scoring the next batch, so similar creators stop showing up.',
+    placeholder: 'e.g. dietitian clinic account, not a home cook',
+    confirm: 'Reject with reason',
+    skip: 'Reject without reason',
+    chips: [
+      'Not food or cooking content', 'Business or restaurant account', 'Wrong audience',
+      'Too sponsored / promotional', 'Promotes a competing app', 'Low-quality content', 'Inactive',
+    ],
+  },
+  removed: {
+    title: (h) => `Remove @${h} from the pipeline`,
+    intro: 'Stops every queued DM, email and follow-up for this creator. The note is kept on the record and in the sheet, and is not used for scoring.',
+    placeholder: 'e.g. Instagram account got deleted',
+    confirm: 'Remove with reason',
+    skip: 'Remove without reason',
+    chips: [
+      'Instagram account got deleted', 'Account went private', 'Handle changed',
+      'Asked to be removed', 'Duplicate of another creator', 'Already working with a competitor',
+    ],
+  },
+};
+
+const ReasonModal = ({ creator, flow, onCancel, onConfirm, busy }) => {
   const [reason, setReason] = useState('');
+  const f = REASON_FLOWS[flow];
   const addChip = (chip) => setReason((r) => (r.trim() ? `${r.trim()}; ${chip.toLowerCase()}` : chip));
 
   return (
-    <div className="ad-modal-scrim" role="dialog" aria-modal="true" aria-label="Reject creator">
+    <div className="ad-modal-scrim" role="dialog" aria-modal="true" aria-label={f.title(creator.handle)}>
       <div className="ad-modal">
-        <h2 className="ad-modal__title">Reject @{creator.handle}</h2>
-        <p className="io-note">Why isn&apos;t this a fit? Gemini reads recent reasons when scoring the next batch, so similar creators stop showing up.</p>
+        <h2 className="ad-modal__title">{f.title(creator.handle)}</h2>
+        <p className="io-note">{f.intro}</p>
         <div className="io-chips">
-          {REJECT_CHIPS.map((c) => (
+          {f.chips.map((c) => (
             <button type="button" key={c} className="io-chip io-chip--small" onClick={() => addChip(c)}>{c}</button>
           ))}
         </div>
@@ -256,14 +275,14 @@ const RejectModal = ({ creator, onCancel, onReject, busy }) => {
           style={{ minHeight: 90 }}
           value={reason}
           autoFocus
-          placeholder="e.g. dietitian clinic account, not a home cook"
+          placeholder={f.placeholder}
           onChange={(e) => setReason(e.target.value)}
         />
         <div className="ad-modal__actions" style={{ justifyContent: 'space-between' }}>
           <button type="button" className="ad-btn" disabled={busy} onClick={onCancel}>Cancel</button>
           <div className="io-actions">
-            <button type="button" className="ad-btn" disabled={busy} onClick={() => onReject('')}>Reject without reason</button>
-            <button type="button" className="ad-btn ad-btn--primary" disabled={busy || !reason.trim()} onClick={() => onReject(reason.trim())}>Reject with reason</button>
+            <button type="button" className="ad-btn" disabled={busy} onClick={() => onConfirm('')}>{f.skip}</button>
+            <button type="button" className="ad-btn ad-btn--primary" disabled={busy || !reason.trim()} onClick={() => onConfirm(reason.trim())}>{f.confirm}</button>
           </div>
         </div>
       </div>
@@ -273,7 +292,7 @@ const RejectModal = ({ creator, onCancel, onReject, busy }) => {
 
 /* ---------- Creator detail modal ---------- */
 
-const DetailModal = ({ id, onClose, onChanged, onRequestReject }) => {
+const DetailModal = ({ id, onClose, onChanged, onRequestReason }) => {
   const [inf, setInf] = useState(null);
   const [error, setError] = useState(null);
   const [form, setForm] = useState(null);
@@ -362,7 +381,8 @@ const DetailModal = ({ id, onClose, onChanged, onRequestReject }) => {
               <div className="io-tools">
                 {['pending_approval', 'hold'].includes(inf.status) && <button type="button" className="ad-btn ad-btn--primary" disabled={saving} onClick={() => setStatus('warmup_needed')}>Approve → warm-up</button>}
                 {inf.status === 'pending_approval' && <button type="button" className="ad-btn" disabled={saving} onClick={() => setStatus('hold')}>Hold</button>}
-                {['pending_approval', 'hold', 'warmup_needed'].includes(inf.status) && <button type="button" className="ad-btn io-btn--danger" disabled={saving} onClick={() => onRequestReject(inf)}>Reject</button>}
+                {['pending_approval', 'hold', 'warmup_needed'].includes(inf.status) && <button type="button" className="ad-btn io-btn--danger" disabled={saving} onClick={() => onRequestReason(inf, 'rejected')}>Reject</button>}
+                {!['removed', 'rejected'].includes(inf.status) && <button type="button" className="ad-btn io-btn--danger" disabled={saving} onClick={() => onRequestReason(inf, 'removed')}>Remove from pipeline</button>}
                 {inf.status === 'warmup_needed' && <button type="button" className="ad-btn ad-btn--primary" disabled={saving} onClick={() => act(() => influencerWarmupDone(id))}>Done warming up</button>}
                 {['dm_needed', 'followup_needed'].includes(inf.status) && <button type="button" className="ad-btn ad-btn--primary" disabled={saving} onClick={() => act(() => influencerDmSent(id))}>DM sent</button>}
                 {['dm_needed', 'contacted', 'followup_needed'].includes(inf.status) && <button type="button" className="ad-btn" disabled={saving} onClick={() => setStatus('replied', { reply_channel: 'dm' })}>Mark replied</button>}
@@ -425,7 +445,7 @@ const InfluencersPage = () => {
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
   const [selected, setSelected] = useState(null);
-  const [rejecting, setRejecting] = useState(null);
+  const [reasonFor, setReasonFor] = useState(null); // { creator, flow: 'rejected' | 'removed' }
   const [showWarmup, setShowWarmup] = useState(false);
   const [jobMsg, setJobMsg] = useState(null);
 
@@ -484,7 +504,7 @@ const InfluencersPage = () => {
           {r.status === 'pending_approval' && <>
             <button type="button" className="ad-btn ad-btn--primary io-btn--sm" disabled={busy} onClick={() => run(() => updateInfluencer(r.id, { status: 'warmup_needed' }))}>Approve</button>
             <button type="button" className="ad-btn io-btn--sm" disabled={busy} onClick={() => run(() => updateInfluencer(r.id, { status: 'hold' }))}>Hold</button>
-            <button type="button" className="ad-btn io-btn--sm io-btn--danger" disabled={busy} onClick={() => setRejecting(r)}>Reject</button>
+            <button type="button" className="ad-btn io-btn--sm io-btn--danger" disabled={busy} onClick={() => setReasonFor({ creator: r, flow: 'rejected' })}>Reject</button>
           </>}
           {['dm_needed', 'contacted', 'followup_needed'].includes(r.status) && <button type="button" className="ad-btn io-btn--sm" disabled={busy} onClick={() => run(() => updateInfluencer(r.id, { status: 'replied', reply_channel: 'dm' }))}>Mark replied</button>}
         </div>
@@ -492,8 +512,8 @@ const InfluencersPage = () => {
     },
   ];
 
-  // The reason column only earns its width on the rejected list.
-  if (filter === 'rejected') {
+  // The reason column only earns its width where a reason exists.
+  if (filter === 'rejected' || filter === 'removed') {
     columns.splice(columns.length - 1, 0, {
       key: 'rejection_reason',
       header: 'Reason',
@@ -513,9 +533,10 @@ const InfluencersPage = () => {
     posts.filter((p) => !p.liked_at).map((p) => updateInfluencerPost(inf.id, p.id, { liked: true, commented: true })),
   ));
 
-  const confirmReject = (reason) => run(async () => {
-    await updateInfluencer(rejecting.id, { status: 'rejected', rejection_reason: reason });
-    setRejecting(null);
+  // The flow key doubles as the status to set.
+  const confirmReason = (reason) => run(async () => {
+    await updateInfluencer(reasonFor.creator.id, { status: reasonFor.flow, rejection_reason: reason });
+    setReasonFor(null);
     setSelected(null);
   });
 
@@ -526,6 +547,7 @@ const InfluencersPage = () => {
         description="Two sessions a week. Each session: finish warming up the last batch, then send its DMs and emails, then approve the next 10 and start liking and commenting. Nothing is sent without you: follow-ups are drafted when they fall due and wait here to be read, edited and sent."
         actions={(
           <div className="io-tools">
+            {cfg.sheetUrl && <a className="ad-btn io-btn--sm" href={cfg.sheetUrl} target="_blank" rel="noreferrer">Open sheet ↗</a>}
             <button type="button" className="ad-btn io-btn--sm" disabled={busy} onClick={() => runJob('followups')}>Run follow-ups now</button>
             <button type="button" className="ad-btn io-btn--sm" disabled={busy} onClick={() => runJob('scan')}>Scan inbox</button>
             <button type="button" className="ad-btn io-btn--sm" disabled={busy} onClick={() => runJob('digest')}>Send digest</button>
@@ -601,7 +623,8 @@ const InfluencersPage = () => {
                 {dmTasks.map((t) => (
                   <DmTask key={t.id} touch={t} busy={busy}
                     emailPending={pendingEmailFor.has(t.influencers.id)}
-                    onSent={(id) => run(() => influencerDmSent(id))} />
+                    onSent={(id) => run(() => influencerDmSent(id))}
+                    onRemove={(creator) => setReasonFor({ creator, flow: 'removed' })} />
                 ))}
               </div>
             )}
@@ -621,7 +644,8 @@ const InfluencersPage = () => {
                 {emailTasks.map((t) => (
                   <EmailTask key={t.id} touch={t} cfg={cfg} busy={busy}
                     onSend={(touch) => run(() => sendInfluencerEmail(touch.id))}
-                    onOpen={(id) => setSelected(id)} />
+                    onOpen={(id) => setSelected(id)}
+                    onRemove={(creator) => setReasonFor({ creator, flow: 'removed' })} />
                 ))}
               </div>
             )}
@@ -653,8 +677,14 @@ const InfluencersPage = () => {
         {rows && rows.length > 0 && <DataTable columns={columns} rows={rows} onRowClick={(r) => setSelected(r.id)} />}
       </AdminCard>
 
-      {selected && <DetailModal id={selected} onClose={() => setSelected(null)} onChanged={reload} onRequestReject={setRejecting} />}
-      {rejecting && <RejectModal creator={rejecting} busy={busy} onCancel={() => setRejecting(null)} onReject={confirmReject} />}
+      {selected && (
+        <DetailModal id={selected} onClose={() => setSelected(null)} onChanged={reload}
+          onRequestReason={(creator, flow) => setReasonFor({ creator, flow })} />
+      )}
+      {reasonFor && (
+        <ReasonModal creator={reasonFor.creator} flow={reasonFor.flow} busy={busy}
+          onCancel={() => setReasonFor(null)} onConfirm={confirmReason} />
+      )}
     </div>
   );
 };
