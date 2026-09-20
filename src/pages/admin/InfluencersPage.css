@@ -45,6 +45,8 @@
 .io-headers { display: grid; grid-template-columns: 70px 1fr; gap: 2px 10px; margin: 6px 0 0; font-size: 0.82rem; }
 .io-headers dt { color: var(--ad-ink-3); }
 .io-headers dd { margin: 0; word-break: break-word; }
+.io-email__subject { width: 100%; min-width: 0; font-size: 16px; }
+.io-email__body { width: 100%; min-height: 220px; margin-top: 8px; font-size: 14px; line-height: 1.5; }
 .io-dm__body { white-space: pre-wrap; background: var(--ad-surface); border: 1px solid var(--ad-border); border-radius: var(--ad-radius-ctl); padding: 8px 10px; font-size: 0.85rem; margin: 6px 0; max-height: 220px; overflow: auto; }
 .io-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .io-btn--sm { padding: 5px 10px; font-size: 0.8rem; }

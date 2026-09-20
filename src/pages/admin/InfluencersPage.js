@@ -3,7 +3,7 @@ import { Megaphone, Users, Send, MessageCircle } from 'lucide-react';
 import {
   fetchInfluencerToday, fetchInfluencers, fetchInfluencer, updateInfluencer,
   influencerWarmupDone, batchWarmupDone, influencerDmSent, updateInfluencerPost,
-  retryInfluencerTouch, sendInfluencerEmail, sendAllInfluencerEmails,
+  retryInfluencerTouch, sendInfluencerEmail, sendAllInfluencerEmails, updateInfluencerTouch,
   runInfluencerJob, formatDate, formatDateTime,
 } from '../../features/admin-analytics/api';
 import { AdminPageHeader, AdminCard, DataTable, Badge, EmptyState, ErrorState, Skeleton, StatTile } from './ui';
@@ -187,25 +187,45 @@ const DmTask = ({ touch, onSent, onRemove, busy, emailPending }) => {
  * jessie@ mailbox without opening Gmail. Follow-ups (touch 2+) are sent by the
  * evening cron instead, and only appear here if one failed.
  */
-const EmailTask = ({ touch, cfg, busy, onSend, onOpen, onRemove }) => {
+const EmailTask = ({ touch, cfg, busy, onSend, onSave, onOpen, onRemove }) => {
   const inf = touch.influencers;
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState({ subject: touch.subject || '', body: touch.body || '' });
+
+  // Reload replaces the touch object; drop any unsaved local edits with it.
+  useEffect(() => {
+    setDraft({ subject: touch.subject || '', body: touch.body || '' });
+  }, [touch.subject, touch.body]);
+
+  const dirty = draft.subject !== (touch.subject || '') || draft.body !== (touch.body || '');
+
   return (
     <div className="io-email">
       <div className="io-creator__head">
         <div>
           <HandleLink inf={inf} />
           <span className="io-creator__meta">
-            {stepLabel(touch.step)}{touch.error ? '' : ' · drafted, not sent yet'}
+            {stepLabel(touch.step)}
+            {touch.error ? '' : ' · drafted, not sent yet'}
+            {touch.edited ? ' · edited' : ''}
           </span>
         </div>
         <div className="io-actions">
           <button type="button" className="ad-btn io-btn--sm io-btn--danger" disabled={busy} onClick={() => onRemove(inf)}>Remove</button>
-          <button type="button" className="ad-btn io-btn--sm" onClick={() => onOpen(inf.id)}>Edit</button>
+          <button type="button" className="ad-btn io-btn--sm" onClick={() => onOpen(inf.id)}>Open creator</button>
+          {editing ? (
+            <>
+              <button type="button" className="ad-btn io-btn--sm" disabled={busy} onClick={() => { setDraft({ subject: touch.subject || '', body: touch.body || '' }); setEditing(false); }}>Cancel</button>
+              <button type="button" className="ad-btn io-btn--sm" disabled={busy || !dirty} onClick={async () => { await onSave(touch, draft); setEditing(false); }}>Save</button>
+            </>
+          ) : (
+            <button type="button" className="ad-btn io-btn--sm" disabled={busy} onClick={() => setEditing(true)}>Edit</button>
+          )}
           <button
             type="button"
             className="ad-btn ad-btn--primary io-btn--sm"
-            disabled={busy || !cfg.emailEnabled}
-            title={cfg.emailEnabled ? undefined : 'Creator email is off on the server'}
+            disabled={busy || !cfg.emailEnabled || editing}
+            title={cfg.emailEnabled ? (editing ? 'Save or cancel your edit first' : undefined) : 'Creator email is off on the server'}
             onClick={() => onSend(touch)}
           >
             {touch.error ? 'Retry send' : 'Send email'}
@@ -216,9 +236,16 @@ const EmailTask = ({ touch, cfg, busy, onSend, onOpen, onRemove }) => {
       <dl className="io-headers">
         <dt>From</dt><dd>{cfg.fromName} &lt;{cfg.fromEmail || 'not configured'}&gt;</dd>
         <dt>To</dt><dd>{inf.email}</dd>
-        <dt>Subject</dt><dd>{touch.subject || <span className="io-error">no subject drafted</span>}</dd>
+        <dt>Subject</dt>
+        <dd>
+          {editing
+            ? <input className="ad-input io-email__subject" value={draft.subject} onChange={(e) => setDraft({ ...draft, subject: e.target.value })} />
+            : (touch.subject || <span className="io-error">no subject drafted</span>)}
+        </dd>
       </dl>
-      <div className="io-dm__body">{touch.body || '(no body drafted — Edit the creator, then retry)'}</div>
+      {editing
+        ? <textarea className="io-textarea io-email__body" value={draft.body} onChange={(e) => setDraft({ ...draft, body: e.target.value })} />
+        : <div className="io-dm__body">{touch.body || '(nothing drafted — Edit to write it)'}</div>}
     </div>
   );
 };
@@ -666,6 +693,7 @@ const InfluencersPage = () => {
                 {emailTasks.map((t) => (
                   <EmailTask key={t.id} touch={t} cfg={cfg} busy={busy}
                     onSend={(touch) => run(() => sendInfluencerEmail(touch.id))}
+                    onSave={(touch, next) => run(() => updateInfluencerTouch(touch.id, next))}
                     onOpen={(id) => setSelected(id)}
                     onRemove={(creator) => setReasonFor({ creator, flow: 'removed' })} />
                 ))}
