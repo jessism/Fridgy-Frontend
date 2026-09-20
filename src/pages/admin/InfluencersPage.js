@@ -225,7 +225,7 @@ const EmailTask = ({ touch, cfg, busy, onSend, onSave, onOpen, onRemove }) => {
             type="button"
             className="ad-btn ad-btn--primary io-btn--sm"
             disabled={busy || !cfg.emailEnabled || editing}
-            title={cfg.emailEnabled ? (editing ? 'Save or cancel your edit first' : undefined) : 'Creator email is off on the server'}
+            title={cfg.emailEnabled ? (editing ? 'Save or cancel your edit first' : undefined) : (cfg.emailReason || 'Creator email is off on the server')}
             onClick={() => onSend(touch)}
           >
             {touch.error ? 'Retry send' : 'Send email'}
@@ -609,7 +609,8 @@ const InfluencersPage = () => {
       )}
       {today && !cfg.emailEnabled && (
         <div className="io-warn">
-          Creator email is {cfg.emailConfigured ? 'configured but disabled (OUTREACH_EMAIL_ENABLED is not "true")' : 'not configured (GMAIL_SENDER / GMAIL_APP_PASSWORD missing on the server)'}. “Done warming up” will still move creators to DM needed; the email touch is recorded as failed and can be retried once email is on.
+          <strong>Sending is off:</strong> {cfg.emailReason || 'the server has not been configured for outreach email'}.
+          {' '}Drafts keep queueing safely and nothing is lost — set it in Railway, wait for the redeploy, then reload this page.
         </div>
       )}
 
