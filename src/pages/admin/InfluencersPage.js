@@ -560,6 +560,18 @@ const InfluencersPage = () => {
     },
   ];
 
+  // On the contacted list the status column is really "how did we reach them",
+  // so name it that and pair it with when that first message went out.
+  if (filter === 'contacted') {
+    const statusIndex = columns.findIndex((c) => c.key === 'status');
+    columns[statusIndex] = { ...columns[statusIndex], header: 'First contact method' };
+    columns.splice(statusIndex + 1, 0, {
+      key: 'firstContactAt',
+      header: 'First contact date',
+      render: (r) => formatDate(r.firstContactAt || r.contacted_at),
+    });
+  }
+
   // The reason column only earns its width where a reason exists.
   if (filter === 'rejected' || filter === 'removed') {
     columns.splice(columns.length - 1, 0, {
