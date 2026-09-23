@@ -26,6 +26,19 @@ const TONE = {
   replied: 'good', signed: 'good', declined: 'muted', no_response: 'muted', rejected: 'muted', hold: 'muted',
   opted_out: 'bad', bounced: 'bad', removed: 'muted',
 };
+/**
+ * "Contacted" is the one passive state — it hides whether the creator got a DM,
+ * an email or both. Every other status names something still owed (DM needed) or
+ * an outcome that matters more than the channel (Replied), so only this one is
+ * rewritten. The funnel chip keeps the generic word: it counts a mixed group.
+ */
+const CHANNEL_LABEL = { dm: 'DMed', email: 'Emailed' };
+const statusLabel = (row) => {
+  if (row.status !== 'contacted') return STATUS_LABEL[row.status];
+  const sent = (row.channelsSent || []).map((c) => CHANNEL_LABEL[c]).filter(Boolean);
+  return sent.length ? sent.join(' + ') : STATUS_LABEL.contacted;
+};
+
 const FUNNEL = ['pending_approval', 'warmup_needed', 'dm_needed', 'contacted', 'followup_needed', 'replied', 'signed'];
 const SMALL = ['hold', 'rejected', 'no_response', 'declined', 'opted_out', 'bounced', 'removed'];
 
@@ -345,6 +358,9 @@ const DetailModal = ({ id, onClose, onChanged, onRequestReason }) => {
 
   const fb = inf?.fee_breakdown || {};
   const touches = inf?.influencer_touches || [];
+  // The detail endpoint returns the touches themselves, so derive the same
+  // channel summary the list rows get from the API.
+  const channelsSent = [...new Set(touches.filter((t) => t.sent_at).map((t) => t.channel))].sort();
   const timeline = inf ? [
     { label: 'Discovered', at: inf.discovered_at },
     { label: 'Approved', at: inf.approved_at },
@@ -362,7 +378,7 @@ const DetailModal = ({ id, onClose, onChanged, onRequestReason }) => {
           <>
             <div className="ad-card__head">
               <h2 className="ad-modal__title" style={{ margin: 0 }}>
-                <HandleLink inf={inf} /> <Badge tone={TONE[inf.status]}>{STATUS_LABEL[inf.status]}</Badge>
+                <HandleLink inf={inf} /> <Badge tone={TONE[inf.status]}>{statusLabel({ ...inf, channelsSent })}</Badge>
               </h2>
               <button type="button" className="ad-btn io-btn--sm" onClick={onClose}>Close</button>
             </div>
@@ -526,7 +542,7 @@ const InfluencersPage = () => {
     { key: 'score', header: 'Score', align: 'num' },
     { key: 'fee', header: 'Fee', align: 'num', render: (r) => (r.agreed_fee != null ? `$${r.agreed_fee} (agreed)` : money(r.recommended_fee)) },
     { key: 'platforms', header: 'Platforms', render: (r) => <PlatformLinks inf={r} /> },
-    { key: 'status', header: 'Status', render: (r) => <Badge tone={TONE[r.status]}>{STATUS_LABEL[r.status]}</Badge> },
+    { key: 'status', header: 'Status', render: (r) => <Badge tone={TONE[r.status]}>{statusLabel(r)}</Badge> },
     { key: 'next', header: 'Next', render: (r) => (r.next_touch_at ? formatDate(r.next_touch_at) : r.replied_at ? `replied ${formatDate(r.replied_at)}` : formatDate(r.discovered_at)) },
     {
       key: 'actions', header: '',
