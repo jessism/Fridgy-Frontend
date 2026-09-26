@@ -109,11 +109,10 @@ const postLabel = (p, n) => {
  */
 const isEngaged = (p) => Boolean(p.liked_at);
 
-const WarmupCard = ({ inf, onDone, onTick, onTickAll, busy }) => {
+const WarmupCard = ({ inf, onDone, onTick, onReject, busy }) => {
   const posts = [...(inf.influencer_posts || [])]
     .sort((a, b) => (b.posted_at || '').localeCompare(a.posted_at || ''))
     .map((p, i) => ({ ...p, n: i + 1 }));
-  const allEngaged = posts.length > 0 && posts.every(isEngaged);
 
   const columns = [
     { key: 'n', header: '#' },
@@ -148,13 +147,10 @@ const WarmupCard = ({ inf, onDone, onTick, onTickAll, busy }) => {
           <span className="io-creator__meta">{inf.followers?.toLocaleString()} followers · score {inf.score} · {money(inf.recommended_fee)}</span>
           {(inf.other_platforms || []).length > 0 && <> <PlatformLinks inf={inf} /></>}
         </div>
+        {/* A creator can be dropped at any stage, including after a closer look
+            during warm-up; the reason still feeds the next run's scoring. */}
         <div className="io-actions">
-          <a className="ad-btn io-btn--sm" href={inf.profile_url} target="_blank" rel="noreferrer">Open profile (follow)</a>
-          {posts.length > 0 && (
-            <button type="button" className="ad-btn io-btn--sm" disabled={busy || allEngaged} onClick={() => onTickAll(inf, posts)}>
-              {allEngaged ? 'All engaged' : 'Mark all engaged'}
-            </button>
-          )}
+          <button type="button" className="ad-btn io-btn--sm io-btn--danger" disabled={busy} onClick={() => onReject(inf)}>Reject</button>
           <button type="button" className="ad-btn ad-btn--primary io-btn--sm" disabled={busy} onClick={() => onDone(inf)}>Done warming up</button>
         </div>
       </div>
@@ -589,10 +585,6 @@ const InfluencersPage = () => {
       .then(loadToday)
       .catch((e) => setError(e.message));
 
-  const tickAllPosts = (inf, posts) => run(() => Promise.all(
-    posts.filter((p) => !p.liked_at).map((p) => updateInfluencerPost(inf.id, p.id, { liked: true, commented: true })),
-  ));
-
   const restore = (creator) => run(async () => {
     await updateInfluencer(creator.id, { status: 'restore' });
     setUndo(null);
@@ -690,7 +682,7 @@ const InfluencersPage = () => {
                   <WarmupCard key={c.id} inf={c} busy={busy}
                     onDone={(inf) => run(() => influencerWarmupDone(inf.id))}
                     onTick={tickPost}
-                    onTickAll={tickAllPosts} />
+                    onReject={(creator) => setReasonFor({ creator, flow: 'rejected' })} />
                 ))}
               </div>
             ))}
