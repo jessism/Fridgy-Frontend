@@ -15,6 +15,25 @@
 .io-section { margin-top: 16px; }
 .io-section__title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ad-ink-2); margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
 .io-note { font-size: 0.85rem; color: var(--ad-ink-2); margin: 0 0 8px; }
+
+/* Today's categories collapse; the headings alone read as the night's work. */
+.io-section__toggle {
+  border: 0; background: none; padding: 0; cursor: pointer; font: inherit; color: inherit;
+  text-transform: inherit; letter-spacing: inherit; display: inline-flex; align-items: center; gap: 8px;
+}
+.io-section__caret { color: var(--ad-ink-3); font-size: 0.7rem; width: 10px; }
+.io-section__count {
+  background: var(--ad-surface); border: 1px solid var(--ad-border); border-radius: 999px;
+  padding: 1px 8px; color: var(--ad-ink); font-variant-numeric: tabular-nums;
+}
+.io-section__suffix { color: var(--ad-ink-3); font-weight: 600; text-transform: none; letter-spacing: 0; }
+.io-section--empty { opacity: 0.55; }
+.io-section--empty .io-section__title { margin-bottom: 0; }
+.io-group + .io-group { margin-top: 14px; }
+.io-subhead {
+  font-size: 0.78rem; font-weight: 700; color: var(--ad-ink-3); margin: 0 0 8px;
+  display: flex; align-items: center; gap: 8px;
+}
 .io-warn { background: var(--ad-warn-bg); color: var(--ad-warn-ink); border-radius: var(--ad-radius-ctl); padding: 8px 12px; font-size: 0.85rem; margin-bottom: 10px; }
 .io-undo { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 

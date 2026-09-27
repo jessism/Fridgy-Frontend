@@ -39,6 +39,12 @@ const statusLabel = (row) => {
   return sent.length ? sent.join(' + ') : STATUS_LABEL.contacted;
 };
 
+/**
+ * 'today' is a view, not a status: it collects tonight's work from every stage.
+ * It carries no count badge because each thing inside it is already counted by
+ * one of the status chips — a number here would count the same creator twice.
+ */
+const TODAY = 'today';
 const FUNNEL = ['pending_approval', 'warmup_needed', 'dm_needed', 'contacted', 'followup_needed', 'replied', 'signed'];
 const SMALL = ['hold', 'rejected', 'no_response', 'declined', 'opted_out', 'bounced', 'removed'];
 
@@ -93,6 +99,42 @@ const PlatformLinks = ({ inf }) => (
     })}
   </span>
 );
+
+/* ---------- Today: one collapsible category of tonight's work ---------- */
+
+/**
+ * Categories collapse because a single night can hold fourteen full-height
+ * warm-up cards, which used to bury everything under them. Collapsed, the
+ * headings alone read as the whole night's work — so an empty category still
+ * shows, as a dim one-liner rather than a disclosure with nothing behind it.
+ */
+const Section = ({ title, count, suffix, note, action, open, onToggle, children }) => {
+  if (!count) {
+    return (
+      <div className="io-section io-section--empty">
+        <h3 className="io-section__title">{title} <span className="io-section__count">0</span></h3>
+      </div>
+    );
+  }
+  return (
+    <div className="io-section">
+      <h3 className="io-section__title">
+        <button type="button" className="io-section__toggle" aria-expanded={open} onClick={onToggle}>
+          <span className="io-section__caret" aria-hidden="true">{open ? '▾' : '▸'}</span>
+          {title} <span className="io-section__count">{count}</span>
+          {suffix && <span className="io-section__suffix">{suffix}</span>}
+        </button>
+        {open && action}
+      </h3>
+      {open && (
+        <>
+          {note && <p className="io-note">{note}</p>}
+          {children}
+        </>
+      )}
+    </div>
+  );
+};
 
 /* ---------- Today: warm-up cards ---------- */
 
@@ -484,17 +526,20 @@ const DetailModal = ({ id, onClose, onChanged, onRequestReason }) => {
 const InfluencersPage = () => {
   const [today, setToday] = useState(null);
   const [rows, setRows] = useState(null);
-  const [filter, setFilter] = useState('pending_approval');
+  const [filter, setFilter] = useState(TODAY);
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
   const [selected, setSelected] = useState(null);
   const [reasonFor, setReasonFor] = useState(null); // { creator, flow: 'rejected' | 'removed' }
-  const [showWarmup, setShowWarmup] = useState(false);
+  const [openSections, setOpenSections] = useState(null); // null = nothing toggled yet, use the default
   const [undo, setUndo] = useState(null); // { creator, flow } after a reject/remove
   const [jobMsg, setJobMsg] = useState(null);
 
+  // On Today the list is the review queue, so one fetch serves both views.
+  const rowStatus = filter === TODAY ? 'pending_approval' : filter;
+
   const loadToday = useCallback(() => fetchInfluencerToday().then(setToday).catch((e) => setError(e.message)), []);
-  const loadRows = useCallback(() => fetchInfluencers(filter).then(setRows).catch((e) => setError(e.message)), [filter]);
+  const loadRows = useCallback(() => fetchInfluencers(rowStatus).then(setRows).catch((e) => setError(e.message)), [rowStatus]);
   const reload = useCallback(() => { setError(null); loadToday(); loadRows(); }, [loadToday, loadRows]);
 
   useEffect(() => { reload(); }, [reload]);
@@ -505,26 +550,61 @@ const InfluencersPage = () => {
   };
 
   const counts = today?.counts || {};
-  const batch = today?.batch;
-  const approvedInBatch = (batch?.creators || []).length;
   const dmTasks = today?.dmTasks || [];
   const emailTasks = today?.emailTasks || [];
   const pendingEmailFor = new Set(emailTasks.map((t) => t.influencers.id));
   const cfg = today?.config || {};
   const pending = counts.pending_approval || 0;
+  const dueNotDrafted = today?.dueNotDrafted || [];
+  const replies = today?.replies || [];
 
   // One warm-up group per open batch. More than one appears when a batch from an
-  // earlier session is still being warmed up.
+  // earlier session is still being warmed up. Nothing is gated behind the review
+  // queue any more — the categories collapse instead, so warm-up no longer
+  // crowds a review, and this count can always equal the "Warm-up needed" chip.
   const warmupGroups = (today?.batches || [])
     .map((b) => ({ ...b, warmups: (b.creators || []).filter((c) => c.status === 'warmup_needed') }))
     .filter((g) => g.warmups.length > 0);
+  const warmupCount = warmupGroups.reduce((n, g) => n + g.warmups.length, 0);
 
-  // Tonight's batch stays shut until the whole review queue is triaged, so
-  // approving doesn't drop warm-up work in front of you mid-review. Batches from
-  // an earlier session were already reviewed, so they are never gated.
-  const gatedGroups = warmupGroups.filter((g) => g.opened_today && pending > 0 && !showWarmup);
-  const visibleGroups = warmupGroups.filter((g) => !gatedGroups.includes(g));
-  const gatedCount = gatedGroups.reduce((n, g) => n + g.warmups.length, 0);
+  // A follow-up isn't its own kind of work — it's an email or a DM at step 2 or
+  // later — so it is named inside those two queues rather than counted again in
+  // a category of its own, which would show the same creator twice.
+  const followupSuffix = (tasks) => {
+    const n = tasks.filter((t) => t.step > 1).length;
+    return n ? `${n} follow-up${n > 1 ? 's' : ''}` : null;
+  };
+  const byStep = (tasks, render) => {
+    const first = tasks.filter((t) => t.step === 1);
+    const later = tasks.filter((t) => t.step > 1);
+    if (!first.length || !later.length) return tasks.map(render);
+    return (
+      <>
+        <p className="io-subhead">First contact ({first.length})</p>
+        {first.map(render)}
+        <p className="io-subhead">Follow-up ({later.length})</p>
+        {later.map(render)}
+      </>
+    );
+  };
+
+  const SECTIONS = [
+    ['review', pending], ['warmup', warmupCount], ['dms', dmTasks.length],
+    ['emails', emailTasks.length], ['replies', replies.length], ['due', dueNotDrafted.length],
+  ];
+  // Open the first category with work in it; everything else starts shut.
+  const firstWithWork = (SECTIONS.find(([, n]) => n > 0) || [])[0];
+  const isOpen = (key) => (openSections ? openSections.has(key) : key === firstWithWork);
+  const toggleSection = (key) => setOpenSections((prev) => {
+    const next = new Set(prev ?? (firstWithWork ? [firstWithWork] : []));
+    if (next.has(key)) next.delete(key); else next.add(key);
+    return next;
+  });
+
+  // The night in one line. Deliberately names no batch: tonight's batch and the
+  // batch still being warmed up are often different numbers, and showing both
+  // on one card read as the same creator being in two places at once.
+  const nightSummary = `${pending} to review · ${warmupCount} warming up · ${dmTasks.length + emailTasks.length} to send`;
 
   const inProgress = ['warmup_needed', 'dm_needed', 'contacted', 'followup_needed'].reduce((n, s) => n + (counts[s] || 0), 0);
   const replyRate = useMemo(() => {
@@ -605,7 +685,7 @@ const InfluencersPage = () => {
     <div className="aa">
       <AdminPageHeader
         title="Influencer Outreach"
-        description="Two sessions a week. Each session: finish warming up the last batch, then send its DMs and emails, then approve the next 10 and start liking and commenting. Nothing is sent without you: follow-ups are drafted when they fall due and wait here to be read, edited and sent."
+        description={`Two sessions a week. Each session: finish warming up the last batch, then send its DMs and emails, then approve the next ${cfg.batchSize || 20} and start liking and commenting. Nothing is sent without you: follow-ups are drafted when they fall due and wait here to be read, edited and sent.`}
         actions={(
           <div className="io-tools">
             {cfg.sheetUrl && <a className="ad-btn io-btn--sm" href={cfg.sheetUrl} target="_blank" rel="noreferrer">Open sheet ↗</a>}
@@ -643,6 +723,7 @@ const InfluencersPage = () => {
       </div>
 
       <div className="io-funnel" role="tablist" aria-label="Pipeline stages">
+        <button type="button" className={`io-chip${filter === TODAY ? ' is-active' : ''}`} onClick={() => setFilter(TODAY)}>Today</button>
         {FUNNEL.map((s) => (
           <button type="button" key={s} className={`io-chip${filter === s ? ' is-active' : ''}`} onClick={() => setFilter(s)}>{STATUS_LABEL[s]} <strong>{counts[s] || 0}</strong></button>
         ))}
@@ -652,103 +733,98 @@ const InfluencersPage = () => {
         <button type="button" className={`io-chip io-chip--small${filter === '' ? ' is-active' : ''}`} onClick={() => setFilter('')}>All</button>
       </div>
 
-      <AdminCard title="Today" className="io-today" sub={batch ? `batch #${batch.id} · opened ${formatDate(batch.opened_at)} · ${approvedInBatch}/${cfg.batchSize || 10} approved` : 'no open batch'}>
-        {!today && <Skeleton />}
-        {today && (
-          <>
-            {pending > 0 && (
-              <div className="io-section">
-                <h3 className="io-section__title">Review ({pending} left)</h3>
-                <p className="io-note">
-                  Approve, hold or reject all {pending} before tonight&apos;s warm-up opens
-                  {approvedInBatch > 0 ? ` — ${approvedInBatch} approved so far` : ''}.
-                </p>
-                <div className="io-actions">
-                  {filter !== 'pending_approval' && <button type="button" className="ad-btn ad-btn--primary io-btn--sm" onClick={() => setFilter('pending_approval')}>Review them</button>}
-                  {gatedCount > 0 && <button type="button" className="ad-btn io-btn--sm" onClick={() => setShowWarmup(true)}>Show warm-up anyway ({gatedCount})</button>}
-                </div>
-              </div>
-            )}
+      {filter === TODAY && (
+        <AdminCard title="Today" className="io-today" sub={today ? nightSummary : undefined}>
+          {!today && <Skeleton />}
+          {today && (
+            <>
+              <Section title="Review" count={pending} open={isOpen('review')} onToggle={() => toggleSection('review')}
+                note="Approve, hold or reject each one. Approving starts their warm-up.">
+                {!rows ? <Skeleton /> : <DataTable columns={columns} rows={rows} onRowClick={(r) => setSelected(r.id)} />}
+              </Section>
 
-            {visibleGroups.map((g, i) => (
-              <div className="io-section" key={g.id}>
-                <h3 className="io-section__title">
-                  {g.opened_today
-                    ? `Warm-up · approved tonight (${g.warmups.length})`
-                    : `Warm-up · batch #${g.id} from ${formatDate(g.opened_at)} (${g.warmups.length})`}
-                  <button type="button" className="ad-btn ad-btn--primary io-btn--sm" disabled={busy} onClick={() => run(() => batchWarmupDone(g.id))}>Done warming up for all {g.warmups.length}</button>
-                </h3>
-                {i === 0 && <p className="io-note">Follow, like the {cfg.warmupLikes} posts, comment on {cfg.warmupComments} across the two sessions. “Done warming up” sends the email and queues the DM.</p>}
-                {g.warmups.map((c) => (
-                  <WarmupCard key={c.id} inf={c} busy={busy}
-                    onDone={(inf) => run(() => influencerWarmupDone(inf.id))}
-                    onTick={tickPost}
-                    onReject={(creator) => setReasonFor({ creator, flow: 'rejected' })}
-                    onHold={(creator) => run(() => updateInfluencer(creator.id, { status: 'hold' }))} />
+              <Section title="Warm up" count={warmupCount} open={isOpen('warmup')} onToggle={() => toggleSection('warmup')}
+                note={`Follow, like the ${cfg.warmupLikes} posts, comment on ${cfg.warmupComments} across the two sessions. “Done warming up” sends the email and queues the DM.`}>
+                {warmupGroups.map((g) => (
+                  <div className="io-group" key={g.id}>
+                    <p className="io-subhead">
+                      {g.opened_today ? `Approved tonight (${g.warmups.length})` : `Batch #${g.id} from ${formatDate(g.opened_at)} (${g.warmups.length})`}
+                      <button type="button" className="ad-btn ad-btn--primary io-btn--sm" disabled={busy} onClick={() => run(() => batchWarmupDone(g.id))}>Done warming up for all {g.warmups.length}</button>
+                    </p>
+                    {g.warmups.map((c) => (
+                      <WarmupCard key={c.id} inf={c} busy={busy}
+                        onDone={(inf) => run(() => influencerWarmupDone(inf.id))}
+                        onTick={tickPost}
+                        onReject={(creator) => setReasonFor({ creator, flow: 'rejected' })}
+                        onHold={(creator) => run(() => updateInfluencer(creator.id, { status: 'hold' }))} />
+                    ))}
+                  </div>
                 ))}
-              </div>
-            ))}
+              </Section>
 
-            {dmTasks.length > 0 && (
-              <div className="io-section">
-                <h3 className="io-section__title">DMs to send ({dmTasks.length})</h3>
-                {dmTasks.map((t) => (
+              <Section title="Send DMs" count={dmTasks.length} suffix={followupSuffix(dmTasks)} open={isOpen('dms')} onToggle={() => toggleSection('dms')}>
+                {byStep(dmTasks, (t) => (
                   <DmTask key={t.id} touch={t} busy={busy}
                     emailPending={pendingEmailFor.has(t.influencers.id)}
                     onSent={(id) => run(() => influencerDmSent(id))}
                     onRemove={(creator) => setReasonFor({ creator, flow: 'removed' })} />
                 ))}
-              </div>
-            )}
+              </Section>
 
-            {emailTasks.length > 0 && (
-              <div className="io-section">
-                <h3 className="io-section__title">
-                  Emails to send ({emailTasks.length})
-                  {emailTasks.length > 1 && (
-                    <button type="button" className="ad-btn ad-btn--primary io-btn--sm" disabled={busy || !cfg.emailEnabled}
-                      onClick={() => run(async () => { const out = await sendAllInfluencerEmails(); setJobMsg(`Sent ${out.sent} email(s)${out.failed.length ? `, ${out.failed.length} failed` : ''}`); })}>
-                      Send all {emailTasks.length}
-                    </button>
-                  )}
-                </h3>
-                <p className="io-note">Read them, edit if needed, then send. They go out from the jessie@ mailbox — you don&apos;t need to open Gmail.</p>
-                {emailTasks.map((t) => (
+              <Section title="Send emails" count={emailTasks.length} suffix={followupSuffix(emailTasks)} open={isOpen('emails')} onToggle={() => toggleSection('emails')}
+                note="Read them, edit if needed, then send. They go out from the jessie@ mailbox — you don’t need to open Gmail."
+                action={emailTasks.length > 1 && (
+                  <button type="button" className="ad-btn ad-btn--primary io-btn--sm" disabled={busy || !cfg.emailEnabled}
+                    onClick={() => run(async () => { const out = await sendAllInfluencerEmails(); setJobMsg(`Sent ${out.sent} email(s)${out.failed.length ? `, ${out.failed.length} failed` : ''}`); })}>
+                    Send all {emailTasks.length}
+                  </button>
+                )}>
+                {byStep(emailTasks, (t) => (
                   <EmailTask key={t.id} touch={t} cfg={cfg} busy={busy}
                     onSend={(touch) => run(() => sendInfluencerEmail(touch.id))}
                     onSave={(touch, next) => run(() => updateInfluencerTouch(touch.id, next))}
                     onOpen={(id) => setSelected(id)}
                     onRemove={(creator) => setReasonFor({ creator, flow: 'removed' })} />
                 ))}
-              </div>
-            )}
+              </Section>
 
-            {(today.replies || []).length > 0 && (
-              <div className="io-section">
-                <h3 className="io-section__title">Replied this week ({today.replies.length})</h3>
-                {today.replies.map((r) => (
+              <Section title="Replies to answer" count={replies.length} open={isOpen('replies')} onToggle={() => toggleSection('replies')}
+                note="Replied in the last 7 days.">
+                {replies.map((r) => (
                   <div key={r.id} className="io-dm">
                     <HandleLink inf={r} /> <span className="ad-muted">{r.reply_channel} · {formatDateTime(r.replied_at)}</span>
                     {' '}<button type="button" className="ad-btn io-btn--sm" onClick={() => setSelected(r.id)}>Open</button>
                   </div>
                 ))}
-              </div>
-            )}
+              </Section>
 
-            {pending === 0 && warmupGroups.length === 0 && dmTasks.length === 0 && (
-              <div className="io-section">
-                <p className="io-note">Nothing to do tonight. The next discovery run will refill the review queue.</p>
-              </div>
-            )}
-          </>
-        )}
-      </AdminCard>
+              {/* Only ever appears when the nightly job has not run: everyone due
+                  should already have a draft waiting in one of the queues above. */}
+              {dueNotDrafted.length > 0 && (
+                <Section title="Due, but nothing drafted" count={dueNotDrafted.length} open={isOpen('due')} onToggle={() => toggleSection('due')}
+                  note="Their follow-up fell due and no draft was written — the nightly job has not run. “Run follow-ups now” at the top of the page drafts them."
+                  action={<button type="button" className="ad-btn ad-btn--primary io-btn--sm" disabled={busy} onClick={() => runJob('followups')}>Run follow-ups now</button>}>
+                  {dueNotDrafted.map((r) => (
+                    <div key={r.id} className="io-dm">
+                      <HandleLink inf={r} /> <span className="ad-muted">due {formatDate(r.next_touch_at)} · {r.touches_sent || 0} sent</span>
+                    </div>
+                  ))}
+                </Section>
+              )}
 
-      <AdminCard title={filter ? STATUS_LABEL[filter] : 'All creators'} sub={rows ? rows.length : undefined}>
-        {!rows && !error && <Skeleton />}
-        {rows && rows.length === 0 && <EmptyState>Nothing here.</EmptyState>}
-        {rows && rows.length > 0 && <DataTable columns={columns} rows={rows} onRowClick={(r) => setSelected(r.id)} />}
-      </AdminCard>
+              {!firstWithWork && <p className="io-note">Nothing to do tonight. The next discovery run will refill the review queue.</p>}
+            </>
+          )}
+        </AdminCard>
+      )}
+
+      {filter !== TODAY && (
+        <AdminCard title={filter ? STATUS_LABEL[filter] : 'All creators'} sub={rows ? rows.length : undefined}>
+          {!rows && !error && <Skeleton />}
+          {rows && rows.length === 0 && <EmptyState>Nothing here.</EmptyState>}
+          {rows && rows.length > 0 && <DataTable columns={columns} rows={rows} onRowClick={(r) => setSelected(r.id)} />}
+        </AdminCard>
+      )}
 
       {selected && (
         <DetailModal id={selected} onClose={() => setSelected(null)} onChanged={reload}
