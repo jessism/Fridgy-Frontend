@@ -109,7 +109,7 @@ const postLabel = (p, n) => {
  */
 const isEngaged = (p) => Boolean(p.liked_at);
 
-const WarmupCard = ({ inf, onDone, onTick, onReject, busy }) => {
+const WarmupCard = ({ inf, onDone, onTick, onReject, onHold, busy }) => {
   const posts = [...(inf.influencer_posts || [])]
     .sort((a, b) => (b.posted_at || '').localeCompare(a.posted_at || ''))
     .map((p, i) => ({ ...p, n: i + 1 }));
@@ -151,6 +151,7 @@ const WarmupCard = ({ inf, onDone, onTick, onReject, busy }) => {
             during warm-up; the reason still feeds the next run's scoring. */}
         <div className="io-actions">
           <button type="button" className="ad-btn io-btn--sm io-btn--danger" disabled={busy} onClick={() => onReject(inf)}>Reject</button>
+          <button type="button" className="ad-btn io-btn--sm" disabled={busy} title="Park them — approve later to put them back in a batch" onClick={() => onHold(inf)}>Hold</button>
           <button type="button" className="ad-btn ad-btn--primary io-btn--sm" disabled={busy} onClick={() => onDone(inf)}>Done warming up</button>
         </div>
       </div>
@@ -682,7 +683,8 @@ const InfluencersPage = () => {
                   <WarmupCard key={c.id} inf={c} busy={busy}
                     onDone={(inf) => run(() => influencerWarmupDone(inf.id))}
                     onTick={tickPost}
-                    onReject={(creator) => setReasonFor({ creator, flow: 'rejected' })} />
+                    onReject={(creator) => setReasonFor({ creator, flow: 'rejected' })}
+                    onHold={(creator) => run(() => updateInfluencer(creator.id, { status: 'hold' }))} />
                 ))}
               </div>
             ))}
