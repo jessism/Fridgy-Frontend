@@ -48,7 +48,6 @@ const TODAY = 'today';
 const FUNNEL = ['pending_approval', 'warmup_needed', 'dm_needed', 'contacted', 'followup_needed', 'replied', 'signed'];
 const SMALL = ['hold', 'rejected', 'no_response', 'declined', 'opted_out', 'bounced', 'removed'];
 
-const dmLink = (inf) => (inf.platform === 'instagram' ? `https://ig.me/m/${inf.handle}` : inf.profile_url);
 const stepLabel = (step) => (step === 1 ? 'first contact' : `follow-up ${step - 1}`);
 const money = (n) => (n == null ? '—' : `$${n}`);
 
@@ -206,7 +205,7 @@ const WarmupCard = ({ inf, onDone, onTick, onReject, onHold, busy }) => {
 
 /* ---------- Today: DM tasks ---------- */
 
-const DmTask = ({ touch, onSent, onRemove, busy, emailPending }) => {
+const DmTask = ({ touch, onSent, onRemove, onHold, busy, emailPending }) => {
   const inf = touch.influencers;
   const emailNote = !inf.email ? 'no email on file, DM only'
     : emailPending ? 'email drafted below, not sent yet'
@@ -218,10 +217,11 @@ const DmTask = ({ touch, onSent, onRemove, busy, emailPending }) => {
           <HandleLink inf={inf} />
           <span className="io-creator__meta">{stepLabel(touch.step)} · {emailNote}</span>
         </div>
-        {/* Remove sits at the far left, away from the primary action. */}
+        {/* Remove sits at the far left, away from the primary action. The handle
+            above already opens the profile, so there is no separate link here. */}
         <div className="io-actions">
           <button type="button" className="ad-btn io-btn--sm io-btn--danger" disabled={busy} onClick={() => onRemove(inf)}>Remove</button>
-          <a className="ad-btn io-btn--sm" href={dmLink(inf)} target="_blank" rel="noreferrer">Open DM</a>
+          <button type="button" className="ad-btn io-btn--sm" disabled={busy} title="Park them — their DM and email stay drafted and come back when you approve them again" onClick={() => onHold(inf)}>Hold</button>
           <CopyButton text={touch.body || ''} label="Copy DM" />
           <button type="button" className="ad-btn ad-btn--primary io-btn--sm" disabled={busy} onClick={() => onSent(inf.id)}>DM sent</button>
         </div>
@@ -767,6 +767,7 @@ const InfluencersPage = () => {
                   <DmTask key={t.id} touch={t} busy={busy}
                     emailPending={pendingEmailFor.has(t.influencers.id)}
                     onSent={(id) => run(() => influencerDmSent(id))}
+                    onHold={(creator) => run(() => updateInfluencer(creator.id, { status: 'hold' }))}
                     onRemove={(creator) => setReasonFor({ creator, flow: 'removed' })} />
                 ))}
               </Section>
