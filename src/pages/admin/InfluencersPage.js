@@ -17,13 +17,13 @@ import './InfluencersPage.css';
 
 const STATUS_LABEL = {
   pending_approval: 'Pending', warmup_needed: 'Warm-up needed', dm_needed: 'DM needed', contacted: 'Contacted',
-  followup_needed: 'Follow-up needed', replied: 'Replied', signed: 'Signed', declined: 'Declined',
+  followup_needed: 'Follow-up needed', replied: 'Replied', brief_sent: 'Brief sent', signed: 'Signed', declined: 'Declined',
   no_response: 'No response', rejected: 'Rejected', hold: 'On hold', opted_out: 'Opted out', bounced: 'Bounced',
   removed: 'Removed',
 };
 const TONE = {
   pending_approval: 'info', warmup_needed: 'warn', dm_needed: 'warn', contacted: 'warn', followup_needed: 'warn',
-  replied: 'good', signed: 'good', declined: 'muted', no_response: 'muted', rejected: 'muted', hold: 'muted',
+  replied: 'good', brief_sent: 'good', signed: 'good', declined: 'muted', no_response: 'muted', rejected: 'muted', hold: 'muted',
   opted_out: 'bad', bounced: 'bad', removed: 'muted',
 };
 /**
@@ -45,7 +45,7 @@ const statusLabel = (row) => {
  * one of the status chips — a number here would count the same creator twice.
  */
 const TODAY = 'today';
-const FUNNEL = ['pending_approval', 'warmup_needed', 'dm_needed', 'contacted', 'followup_needed', 'replied', 'signed'];
+const FUNNEL = ['pending_approval', 'warmup_needed', 'dm_needed', 'contacted', 'followup_needed', 'replied', 'brief_sent', 'signed'];
 const SMALL = ['hold', 'rejected', 'no_response', 'declined', 'opted_out', 'bounced', 'removed'];
 
 const stepLabel = (step) => (step === 1 ? 'first contact' : `follow-up ${step - 1}`);
@@ -406,7 +406,8 @@ const DetailModal = ({ id, onClose, onChanged, onRequestReason }) => {
     { label: 'Warm-up done', at: inf.warmup_done_at },
     ...touches.map((t) => ({ label: `${t.channel === 'email' ? 'Email' : 'DM'} #${t.step}${t.error ? ' (failed)' : ''}`, at: t.sent_at, error: t.error, touch: t })),
     { label: 'Replied', at: inf.replied_at },
-    inf.next_touch_at && !['replied', 'signed', 'declined', 'no_response', 'rejected', 'opted_out', 'bounced'].includes(inf.status)
+    { label: 'Brief sent', at: inf.brief_sent_at },
+    inf.next_touch_at && !['replied', 'brief_sent', 'signed', 'declined', 'no_response', 'rejected', 'opted_out', 'bounced'].includes(inf.status)
       ? { label: 'Next follow-up', at: inf.next_touch_at, future: true } : null,
   ].filter(Boolean) : [];
 
@@ -469,7 +470,8 @@ const DetailModal = ({ id, onClose, onChanged, onRequestReason }) => {
                 {inf.status === 'warmup_needed' && <button type="button" className="ad-btn ad-btn--primary" disabled={saving} onClick={() => act(() => influencerWarmupDone(id))}>Done warming up</button>}
                 {['dm_needed', 'followup_needed'].includes(inf.status) && <button type="button" className="ad-btn ad-btn--primary" disabled={saving} onClick={() => act(() => influencerDmSent(id))}>DM sent</button>}
                 {['dm_needed', 'contacted', 'followup_needed'].includes(inf.status) && <button type="button" className="ad-btn" disabled={saving} onClick={() => setStatus('replied', { reply_channel: 'dm' })}>Mark replied</button>}
-                {inf.status === 'replied' && <><button type="button" className="ad-btn ad-btn--primary" disabled={saving} onClick={() => setStatus('signed')}>Signed</button><button type="button" className="ad-btn" disabled={saving} onClick={() => setStatus('declined')}>Declined</button></>}
+                {inf.status === 'replied' && <button type="button" className="ad-btn ad-btn--primary" disabled={saving} onClick={() => setStatus('brief_sent')}>Sent brief</button>}
+                {['replied', 'brief_sent'].includes(inf.status) && <><button type="button" className="ad-btn ad-btn--primary" disabled={saving} onClick={() => setStatus('signed')}>Signed</button><button type="button" className="ad-btn" disabled={saving} onClick={() => setStatus('declined')}>Declined</button></>}
                 {/* Restore reads the touch history back; 'back to pending' would throw away a contacted creator's state. */}
                 {['removed', 'rejected'].includes(inf.status) && <button type="button" className="ad-btn ad-btn--primary" disabled={saving} onClick={() => setStatus('restore')}>Restore to pipeline</button>}
                 {['hold', 'no_response', 'declined'].includes(inf.status) && <button type="button" className="ad-btn" disabled={saving} onClick={() => setStatus('pending_approval')}>Back to pending</button>}
@@ -608,8 +610,8 @@ const InfluencersPage = () => {
 
   const inProgress = ['warmup_needed', 'dm_needed', 'contacted', 'followup_needed'].reduce((n, s) => n + (counts[s] || 0), 0);
   const replyRate = useMemo(() => {
-    const contacted = ['contacted', 'followup_needed', 'replied', 'signed', 'declined', 'no_response', 'opted_out'].reduce((n, s) => n + (counts[s] || 0), 0);
-    const replied = (counts.replied || 0) + (counts.signed || 0) + (counts.declined || 0);
+    const contacted = ['contacted', 'followup_needed', 'replied', 'brief_sent', 'signed', 'declined', 'no_response', 'opted_out'].reduce((n, s) => n + (counts[s] || 0), 0);
+    const replied = (counts.replied || 0) + (counts.brief_sent || 0) + (counts.signed || 0) + (counts.declined || 0);
     return contacted ? `${Math.round((replied / contacted) * 100)}%` : '—';
   }, [counts]);
 
@@ -631,6 +633,8 @@ const InfluencersPage = () => {
             <button type="button" className="ad-btn io-btn--sm io-btn--danger" disabled={busy} onClick={() => setReasonFor({ creator: r, flow: 'rejected' })}>Reject</button>
           </>}
           {['dm_needed', 'contacted', 'followup_needed'].includes(r.status) && <button type="button" className="ad-btn io-btn--sm" disabled={busy} onClick={() => run(() => updateInfluencer(r.id, { status: 'replied', reply_channel: 'dm' }))}>Mark replied</button>}
+          {r.status === 'replied' && <button type="button" className="ad-btn ad-btn--primary io-btn--sm" disabled={busy} title="You've sent them the brief — moves them to Brief sent" onClick={() => run(() => updateInfluencer(r.id, { status: 'brief_sent' }))}>Sent brief</button>}
+          {r.status === 'brief_sent' && <button type="button" className="ad-btn io-btn--sm" disabled={busy} onClick={() => run(() => updateInfluencer(r.id, { status: 'signed' }))}>Mark signed</button>}
           {['removed', 'rejected'].includes(r.status) && <button type="button" className="ad-btn io-btn--sm" disabled={busy} onClick={() => restore(r)}>Restore</button>}
         </div>
       ),
@@ -789,12 +793,20 @@ const InfluencersPage = () => {
                 ))}
               </Section>
 
+              {/* Only creators still sitting at 'replied' appear here, so marking
+                  the brief sent clears them from the list — it stays a to-do. */}
               <Section title="Replies to answer" count={replies.length} open={isOpen('replies')} onToggle={() => toggleSection('replies')}
-                note="Replied in the last 7 days.">
+                note="They wrote back in the last 7 days. Send them the brief, then mark it here.">
                 {replies.map((r) => (
-                  <div key={r.id} className="io-dm">
-                    <HandleLink inf={r} /> <span className="ad-muted">{r.reply_channel} · {formatDateTime(r.replied_at)}</span>
-                    {' '}<button type="button" className="ad-btn io-btn--sm" onClick={() => setSelected(r.id)}>Open</button>
+                  <div key={r.id} className="io-dm io-creator__head">
+                    <div>
+                      <HandleLink inf={r} /> <span className="ad-muted">{r.reply_channel} · {formatDateTime(r.replied_at)}</span>
+                    </div>
+                    <div className="io-actions">
+                      <button type="button" className="ad-btn io-btn--sm" onClick={() => setSelected(r.id)}>Open</button>
+                      <button type="button" className="ad-btn ad-btn--primary io-btn--sm" disabled={busy}
+                        onClick={() => run(() => updateInfluencer(r.id, { status: 'brief_sent' }))}>Sent brief</button>
+                    </div>
                   </div>
                 ))}
               </Section>
