@@ -88,6 +88,23 @@ export const sendAllInfluencerEmails = () => infl('/emails/send-all', { method: 
 export const retryInfluencerTouch = (touchId) => infl(`/touches/${encodeURIComponent(touchId)}/retry`, { method: 'POST', body: {} });
 export const runInfluencerJob = (job) => infl(`/jobs/${encodeURIComponent(job)}`, { method: 'POST', body: {} });
 
+// --- reddit opportunities ---
+const reddit = (path = '', opts) => adminFetch(`/admin/reddit${path}`, opts);
+export const fetchRedditStats = () => reddit('/stats');
+export const fetchRedditOpportunities = ({ status, minScore } = {}) =>
+  reddit('/opportunities', { params: { status, min_score: minScore } });
+export const updateRedditOpportunity = (id, payload) =>
+  reddit(`/opportunities/${encodeURIComponent(id)}`, { method: 'PATCH', body: payload });
+export const draftRedditReply = (id) =>
+  reddit(`/opportunities/${encodeURIComponent(id)}/draft`, { method: 'POST', body: {} });
+export const fetchRedditTemplates = () => reddit('/templates');
+export const createRedditTemplate = (payload) => reddit('/templates', { method: 'POST', body: payload });
+export const updateRedditTemplate = (id, payload) =>
+  reddit(`/templates/${encodeURIComponent(id)}`, { method: 'PATCH', body: payload });
+export const deleteRedditTemplate = (id) =>
+  reddit(`/templates/${encodeURIComponent(id)}`, { method: 'DELETE' });
+export const runRedditJob = (job) => reddit(`/jobs/${encodeURIComponent(job)}`, { method: 'POST', body: {} });
+
 // Links to the PostHog dashboards that own behavioural analytics (DAU/MAU,
 // retention, feature trends, RevenueCat events). Fill in after creating them
 // in PostHog; until then they open the project home.

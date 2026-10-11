@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, NavLink, useLocation, matchPath } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Share2, Newspaper, Ticket, Megaphone,
-  MessageSquare, Activity, LogOut, ArrowLeft,
+  MessageSquare, Activity, LogOut, ArrowLeft, Radar,
 } from 'lucide-react';
 import { useAuth } from '../../features/auth/context/AuthContext';
 
@@ -23,6 +23,7 @@ export const NAV_GROUPS = [
     label: 'Marketing',
     items: [
       { to: '/admin/influencers', label: 'Influencer Outreach', icon: Megaphone },
+      { to: '/admin/reddit', label: 'Reddit Opportunities', icon: Radar },
       { to: '/admin/social', label: 'Social Media', icon: Share2 },
       { to: '/admin/blog', label: 'Blog', icon: Newspaper },
       { to: '/admin/promos', label: 'Promo Codes', icon: Ticket },
